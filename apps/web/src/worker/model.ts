@@ -202,13 +202,26 @@ export interface GeyserView {
   name: string
   x: number
   y: number
-  /** Grams per second while erupting. */
-  rate: number
-  eruptionSeconds: number
+  /** Kilograms emitted per cycle while active (`scaledRate`). */
+  massPerCycle: number
+  /** Seconds per eruption cycle, and the share of it spent erupting. */
   iterationSeconds: number
-  activeCycles: number
-  dormancyCycles: number
+  iterationPercent: number
+  /** Seconds per activity cycle, and the share of it spent active. */
+  yearSeconds: number
+  yearPercent: number
 }
+
+/**
+ * The game rolls these once when a geyser is created and saves the results; it does not
+ * recompute them from the rolls on load, so editing them is what changes the geyser.
+ */
+export type GeyserField =
+  | 'scaledRate'
+  | 'scaledIterationLength'
+  | 'scaledIterationPercent'
+  | 'scaledYearLength'
+  | 'scaledYearPercent'
 
 /** A portable copy of a duplicant's editable state (copy/paste and JSON export). */
 export interface DuplicantProfile {
@@ -249,6 +262,7 @@ export type Edit =
   | { type: 'setAccessory'; id: string; slot: AccessorySlot; number: string }
   | { type: 'applyProfile'; id: string; profile: DuplicantProfile; sections: ProfileSection[] }
   | { type: 'setGeyserName'; id: string; name: string }
+  | { type: 'setGeyserValue'; id: string; field: GeyserField; value: number }
   | { type: 'setItemMass'; ref: string; mass: number }
   | { type: 'setItemTemperature'; ref: string; kelvin: number }
   | { type: 'deleteObject'; id: string }
@@ -504,8 +518,6 @@ export function listGeysers(save: SaveGame): GeyserView[] {
   return objectsWith(save, 'Geyser').map(({ id, prefab, obj }) => {
     const config = data(obj, 'Geyser').configuration as Record<string, number>
     const name = behavior(obj, 'UserNameable')?.templateData?.savedName
-    const yearSeconds = config.scaledYearLength ?? 0
-    const yearPercent = config.scaledYearPercent ?? 0
     const type = findGeyser(prefab)
     return {
       id,
@@ -515,11 +527,11 @@ export function listGeysers(save: SaveGame): GeyserView[] {
       name: typeof name === 'string' ? name : (type?.name ?? prefab),
       x: Math.round(obj.position.x),
       y: Math.round(obj.position.y),
-      rate: config.scaledRate ?? 0,
-      eruptionSeconds: (config.scaledIterationLength ?? 0) * (config.scaledIterationPercent ?? 0),
+      massPerCycle: config.scaledRate ?? 0,
       iterationSeconds: config.scaledIterationLength ?? 0,
-      activeCycles: (yearSeconds * yearPercent) / SECONDS_PER_CYCLE,
-      dormancyCycles: (yearSeconds * (1 - yearPercent)) / SECONDS_PER_CYCLE,
+      iterationPercent: config.scaledIterationPercent ?? 0,
+      yearSeconds: config.scaledYearLength ?? 0,
+      yearPercent: config.scaledYearPercent ?? 0,
     }
   })
 }
@@ -555,6 +567,23 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       const nameable = behavior(objectById(save, edit.id), 'UserNameable')?.templateData
       if (!nameable) throw new Error('This geyser cannot be renamed')
       nameable.savedName = edit.name
+      return
+    }
+    case 'setGeyserValue': {
+      const config = data(objectById(save, edit.id), 'Geyser').configuration as
+        | Record<string, number>
+        | undefined
+      if (!config || !(edit.field in config)) throw new Error('This geyser has no such setting')
+      const percent = edit.field.endsWith('Percent')
+      const valid = percent
+        ? edit.value > 0 && edit.value <= 1
+        : edit.field === 'scaledRate'
+          ? edit.value >= 0
+          : edit.value >= 1
+      if (!Number.isFinite(edit.value) || !valid) {
+        throw new Error(percent ? 'Use a share between 1% and 100%' : 'Use a positive value')
+      }
+      config[edit.field] = edit.value
       return
     }
     case 'setItemMass':
