@@ -8,6 +8,13 @@ export interface GameEntry {
   desc?: string
 }
 
+export interface ElementEntry extends GameEntry {
+  /** SimHashes value as stored in PrimaryElement.ElementID. */
+  hash: number
+  state: string
+  dlcId?: string
+}
+
 export interface SkillGroupEntry extends GameEntry {
   /** Klei HashedString hash of the ID, as stored in MinionResume aptitudes. */
   hash: number
@@ -20,6 +27,7 @@ export const amounts: GameEntry[] = data.amounts
 export const effects: GameEntry[] = data.effects
 export const personalities: GameEntry[] = data.personalities
 export const geysers: GameEntry[] = data.geysers
+export const elements: ElementEntry[] = data.elements
 
 function index<T extends GameEntry>(list: T[]): (id: string) => T | undefined {
   const byUpper = new Map(list.map((e) => [e.id.toUpperCase(), e]))
@@ -36,6 +44,10 @@ export const findGeyser = (prefab: string) => index(geysers)(prefab.replace(/^Ge
 
 const groupsByHash = new Map(skillGroups.map((g) => [g.hash, g]))
 export const findSkillGroupByHash = (hash: number) => groupsByHash.get(hash)
+
+const elementsByHash = new Map(elements.map((e) => [e.hash, e]))
+export const findElementByHash = (hash: number) => elementsByHash.get(hash)
+export const findElement = index(elements)
 
 /** Klei's HashedString hash (SDBM over the lower-cased string). */
 export function hashString(value: string): number {

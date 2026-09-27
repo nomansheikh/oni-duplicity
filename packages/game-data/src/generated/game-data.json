@@ -2307,5 +2307,1289 @@
       "name": "Water Geyser",
       "desc": "A highly pressurized geyser that periodically erupts with hot Water."
     }
+  ],
+  "elements": [
+    {
+      "id": "Katairite",
+      "name": "Abyssalite",
+      "hash": 1071649902,
+      "state": "Solid"
+    },
+    {
+      "id": "Aerogel",
+      "name": "Aerogel",
+      "hash": -2070223827,
+      "state": "Solid"
+    },
+    {
+      "id": "Algae",
+      "name": "Algae",
+      "hash": -1870043872,
+      "state": "Solid"
+    },
+    {
+      "id": "Aluminum",
+      "name": "Aluminum",
+      "hash": 2108244480,
+      "state": "Solid"
+    },
+    {
+      "id": "AluminumGas",
+      "name": "Aluminum Gas",
+      "hash": 100766521,
+      "state": "Gas"
+    },
+    {
+      "id": "AluminumOre",
+      "name": "Aluminum Ore",
+      "hash": 167973730,
+      "state": "Solid"
+    },
+    {
+      "id": "Amber",
+      "name": "Amber",
+      "hash": -1130501789,
+      "state": "Solid"
+    },
+    {
+      "id": "Basalt",
+      "name": "Basalt",
+      "hash": 1347222069,
+      "state": "Solid"
+    },
+    {
+      "id": "RefinedLipid",
+      "name": "Biodiesel",
+      "hash": -1121662089,
+      "state": "Liquid"
+    },
+    {
+      "id": "Bitumen",
+      "name": "Bitumen",
+      "hash": 1433229102,
+      "state": "Solid"
+    },
+    {
+      "id": "BleachStone",
+      "name": "Bleach Stone",
+      "hash": -839728230,
+      "state": "Solid"
+    },
+    {
+      "id": "Milk",
+      "name": "Brackene",
+      "hash": 59201595,
+      "state": "Liquid"
+    },
+    {
+      "id": "MilkFat",
+      "name": "Brackwax",
+      "hash": -1792538178,
+      "state": "Solid"
+    },
+    {
+      "id": "Brick",
+      "name": "Brick",
+      "hash": -325269471,
+      "state": "Solid"
+    },
+    {
+      "id": "Brine",
+      "name": "Brine",
+      "hash": -324547888,
+      "state": "Liquid"
+    },
+    {
+      "id": "BrineIce",
+      "name": "Brine Ice",
+      "hash": -1561279013,
+      "state": "Solid"
+    },
+    {
+      "id": "Slabs",
+      "name": "Building Slab",
+      "hash": 1412740729,
+      "state": "Solid"
+    },
+    {
+      "id": "CarbonDioxide",
+      "name": "Carbon Dioxide",
+      "hash": 1960575215,
+      "state": "Gas"
+    },
+    {
+      "id": "CarbonFibre",
+      "name": "Carbon Fiber",
+      "hash": 118518245,
+      "state": "Solid"
+    },
+    {
+      "id": "CarbonGas",
+      "name": "Carbon Gas",
+      "hash": -314016756,
+      "state": "Gas"
+    },
+    {
+      "id": "Cement",
+      "name": "Cement",
+      "hash": 1627140480,
+      "state": "Solid"
+    },
+    {
+      "id": "CementMix",
+      "name": "Cement Mix",
+      "hash": 1668719292,
+      "state": "Solid"
+    },
+    {
+      "id": "Ceramic",
+      "name": "Ceramic",
+      "hash": -1467370314,
+      "state": "Solid"
+    },
+    {
+      "id": "ChlorineGas",
+      "name": "Chlorine Gas",
+      "hash": -1324664829,
+      "state": "Gas"
+    },
+    {
+      "id": "Cinnabar",
+      "name": "Cinnabar Ore",
+      "hash": 1875790680,
+      "state": "Solid"
+    },
+    {
+      "id": "Clay",
+      "name": "Clay",
+      "hash": 867327137,
+      "state": "Solid"
+    },
+    {
+      "id": "Carbon",
+      "name": "Coal",
+      "hash": 947100397,
+      "state": "Solid"
+    },
+    {
+      "id": "Cobalt",
+      "name": "Cobalt",
+      "hash": 108179667,
+      "state": "Solid"
+    },
+    {
+      "id": "CobaltGas",
+      "name": "Cobalt Gas",
+      "hash": -1429687642,
+      "state": "Gas"
+    },
+    {
+      "id": "Cobaltite",
+      "name": "Cobalt Ore",
+      "hash": -1411918265,
+      "state": "Solid"
+    },
+    {
+      "id": "COMPOSITION",
+      "name": "Composition",
+      "hash": -1021084918,
+      "state": "Vacuum"
+    },
+    {
+      "id": "Copper",
+      "name": "Copper",
+      "hash": -1725038055,
+      "state": "Solid"
+    },
+    {
+      "id": "CopperGas",
+      "name": "Copper Gas",
+      "hash": 1966552544,
+      "state": "Gas"
+    },
+    {
+      "id": "Cuprite",
+      "name": "Copper Ore",
+      "hash": -1736594426,
+      "state": "Solid"
+    },
+    {
+      "id": "Coquina",
+      "name": "Coquina",
+      "hash": -487705524,
+      "state": "Solid"
+    },
+    {
+      "id": "Corallium",
+      "name": "Corallium",
+      "hash": -1705953114,
+      "state": "Solid"
+    },
+    {
+      "id": "Corium",
+      "name": "Corium",
+      "hash": -220644613,
+      "state": "Solid",
+      "dlcId": "EXPANSION1_ID"
+    },
+    {
+      "id": "CrudeOil",
+      "name": "Crude Oil",
+      "hash": -1412059381,
+      "state": "Liquid"
+    },
+    {
+      "id": "CrushedIce",
+      "name": "Crushed Ice",
+      "hash": -2123557039,
+      "state": "Solid"
+    },
+    {
+      "id": "CrushedRock",
+      "name": "Crushed Rock",
+      "hash": -1714565729,
+      "state": "Solid"
+    },
+    {
+      "id": "DepletedUranium",
+      "name": "Depleted Uranium",
+      "hash": 1064294988,
+      "state": "Solid",
+      "dlcId": "EXPANSION1_ID"
+    },
+    {
+      "id": "Diamond",
+      "name": "Diamond",
+      "hash": -2079931820,
+      "state": "Solid"
+    },
+    {
+      "id": "Dirt",
+      "name": "Dirt",
+      "hash": 1624244999,
+      "state": "Solid"
+    },
+    {
+      "id": "Electrum",
+      "name": "Electrum",
+      "hash": 28407099,
+      "state": "Solid"
+    },
+    {
+      "id": "EnrichedUranium",
+      "name": "Enriched Uranium",
+      "hash": -348942381,
+      "state": "Solid",
+      "dlcId": "EXPANSION1_ID"
+    },
+    {
+      "id": "Ethanol",
+      "name": "Ethanol",
+      "hash": -87974045,
+      "state": "Liquid"
+    },
+    {
+      "id": "EthanolGas",
+      "name": "Ethanol Gas",
+      "hash": -756961258,
+      "state": "Gas"
+    },
+    {
+      "id": "Fertilizer",
+      "name": "Fertilizer",
+      "hash": -1396791454,
+      "state": "Solid"
+    },
+    {
+      "id": "Fossil",
+      "name": "Fossil",
+      "hash": 1757792140,
+      "state": "Solid"
+    },
+    {
+      "id": "MilkIce",
+      "name": "Frozen Brackene",
+      "hash": -1767622480,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidMucus",
+      "name": "Frozen Mucin",
+      "hash": -553490514,
+      "state": "Solid"
+    },
+    {
+      "id": "FishMilkIce",
+      "name": "Frozen Ovolene",
+      "hash": 1205622264,
+      "state": "Solid"
+    },
+    {
+      "id": "FrozenPhytoOil",
+      "name": "Frozen Phyto Oil",
+      "hash": -226111914,
+      "state": "Solid"
+    },
+    {
+      "id": "FrozenInk",
+      "name": "Frozen Squid Ink",
+      "hash": 641221190,
+      "state": "Solid"
+    },
+    {
+      "id": "Fullerene",
+      "name": "Fullerene",
+      "hash": 245514112,
+      "state": "Solid"
+    },
+    {
+      "id": "Galena",
+      "name": "Galena",
+      "hash": 2071292326,
+      "state": "Solid"
+    },
+    {
+      "id": "Creature",
+      "name": "Genetic Ooze",
+      "hash": 976099455,
+      "state": "Solid"
+    },
+    {
+      "id": "Glass",
+      "name": "Glass",
+      "hash": 623986332,
+      "state": "Solid"
+    },
+    {
+      "id": "Gold",
+      "name": "Gold",
+      "hash": -279785280,
+      "state": "Solid"
+    },
+    {
+      "id": "GoldAmalgam",
+      "name": "Gold Amalgam",
+      "hash": 361868060,
+      "state": "Solid"
+    },
+    {
+      "id": "GoldGas",
+      "name": "Gold Gas",
+      "hash": -805366663,
+      "state": "Gas"
+    },
+    {
+      "id": "Granite",
+      "name": "Granite",
+      "hash": -105943486,
+      "state": "Solid"
+    },
+    {
+      "id": "Graphite",
+      "name": "Graphite",
+      "hash": 878995724,
+      "state": "Solid"
+    },
+    {
+      "id": "PalmWood",
+      "name": "Gum Wood",
+      "hash": -1675462177,
+      "state": "Solid"
+    },
+    {
+      "id": "LiquidGunk",
+      "name": "Gunk",
+      "hash": -714505017,
+      "state": "Liquid"
+    },
+    {
+      "id": "LiquidHelium",
+      "name": "Helium",
+      "hash": -1934139602,
+      "state": "Liquid"
+    },
+    {
+      "id": "Helium",
+      "name": "Helium",
+      "hash": -1554872654,
+      "state": "Gas"
+    },
+    {
+      "id": "Hydrogen",
+      "name": "Hydrogen Gas",
+      "hash": -1046145888,
+      "state": "Gas"
+    },
+    {
+      "id": "Ice",
+      "name": "Ice",
+      "hash": 873952427,
+      "state": "Solid"
+    },
+    {
+      "id": "IgneousRock",
+      "name": "Igneous Rock",
+      "hash": -355957251,
+      "state": "Solid"
+    },
+    {
+      "id": "SuperInsulator",
+      "name": "Insulite",
+      "hash": -1713958528,
+      "state": "Solid"
+    },
+    {
+      "id": "Iridium",
+      "name": "Iridium",
+      "hash": -198894563,
+      "state": "Solid"
+    },
+    {
+      "id": "IridiumGas",
+      "name": "Iridium Gas",
+      "hash": 1859051228,
+      "state": "Gas"
+    },
+    {
+      "id": "Iron",
+      "name": "Iron",
+      "hash": 1306370440,
+      "state": "Solid"
+    },
+    {
+      "id": "IronGas",
+      "name": "Iron Gas",
+      "hash": 1541626289,
+      "state": "Gas"
+    },
+    {
+      "id": "IronOre",
+      "name": "Iron Ore",
+      "hash": 1608833498,
+      "state": "Solid"
+    },
+    {
+      "id": "Isoresin",
+      "name": "Isosap",
+      "hash": -2008682336,
+      "state": "Solid"
+    },
+    {
+      "id": "Latex",
+      "name": "Latex",
+      "hash": -2108601198,
+      "state": "Liquid"
+    },
+    {
+      "id": "Lead",
+      "name": "Lead",
+      "hash": -755153220,
+      "state": "Solid"
+    },
+    {
+      "id": "LeadGas",
+      "name": "Lead Gas",
+      "hash": 905042813,
+      "state": "Gas"
+    },
+    {
+      "id": "Lime",
+      "name": "Lime",
+      "hash": -721320011,
+      "state": "Solid"
+    },
+    {
+      "id": "MoltenCarbon",
+      "name": "Liquid Carbon",
+      "hash": 505665536,
+      "state": "Liquid"
+    },
+    {
+      "id": "LiquidCarbonDioxide",
+      "name": "Liquid Carbon Dioxide",
+      "hash": -1526513293,
+      "state": "Liquid"
+    },
+    {
+      "id": "Chlorine",
+      "name": "Liquid Chlorine",
+      "hash": -878033482,
+      "state": "Liquid"
+    },
+    {
+      "id": "LiquidHydrogen",
+      "name": "Liquid Hydrogen",
+      "hash": -751997156,
+      "state": "Liquid"
+    },
+    {
+      "id": "LiquidMethane",
+      "name": "Liquid Methane",
+      "hash": 371787440,
+      "state": "Liquid"
+    },
+    {
+      "id": "Naphtha",
+      "name": "Liquid Naphtha",
+      "hash": 1157157570,
+      "state": "Liquid"
+    },
+    {
+      "id": "NuclearWaste",
+      "name": "Liquid Nuclear Waste",
+      "hash": -232430636,
+      "state": "Liquid",
+      "dlcId": "EXPANSION1_ID"
+    },
+    {
+      "id": "LiquidOxygen",
+      "name": "Liquid Oxygen",
+      "hash": -1908044868,
+      "state": "Liquid"
+    },
+    {
+      "id": "LiquidPhosphorus",
+      "name": "Liquid Phosphorus",
+      "hash": 1323821489,
+      "state": "Liquid"
+    },
+    {
+      "id": "LiquidPropane",
+      "name": "Liquid Propane",
+      "hash": -645698215,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenSucrose",
+      "name": "Liquid Sucrose",
+      "hash": 1318135165,
+      "state": "Liquid"
+    },
+    {
+      "id": "LiquidSulfur",
+      "name": "Liquid Sulfur",
+      "hash": -1108652427,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenUranium",
+      "name": "Liquid Uranium",
+      "hash": 1937473860,
+      "state": "Liquid",
+      "dlcId": "EXPANSION1_ID"
+    },
+    {
+      "id": "MaficRock",
+      "name": "Mafic Rock",
+      "hash": 1282846257,
+      "state": "Solid"
+    },
+    {
+      "id": "Magma",
+      "name": "Magma",
+      "hash": -1075911705,
+      "state": "Liquid"
+    },
+    {
+      "id": "SolidMercury",
+      "name": "Mercury",
+      "hash": -537625624,
+      "state": "Solid"
+    },
+    {
+      "id": "Mercury",
+      "name": "Mercury",
+      "hash": 1732126099,
+      "state": "Liquid"
+    },
+    {
+      "id": "MercuryGas",
+      "name": "Mercury Gas",
+      "hash": -839856666,
+      "state": "Gas"
+    },
+    {
+      "id": "MoltenAluminum",
+      "name": "Molten Aluminum",
+      "hash": -1637472877,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenCobalt",
+      "name": "Molten Cobalt",
+      "hash": -333255194,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenCopper",
+      "name": "Molten Copper",
+      "hash": 2128494380,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenGlass",
+      "name": "Molten Glass",
+      "hash": -1312713527,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenGold",
+      "name": "Molten Gold",
+      "hash": -1083496621,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenIridium",
+      "name": "Molten Iridium",
+      "hash": -1214831670,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenIron",
+      "name": "Molten Iron",
+      "hash": 502659099,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenLead",
+      "name": "Molten Lead",
+      "hash": -1558864561,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenNickel",
+      "name": "Molten Nickel",
+      "hash": 2079148957,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenNiobium",
+      "name": "Molten Niobium",
+      "hash": 1499134368,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenSalt",
+      "name": "Molten Salt",
+      "hash": -422045879,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenSteel",
+      "name": "Molten Steel",
+      "hash": 1459013976,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenSyngas",
+      "name": "Molten Synthesis Gas",
+      "hash": 660593444,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenTungsten",
+      "name": "Molten Tungsten",
+      "hash": -509585641,
+      "state": "Liquid"
+    },
+    {
+      "id": "MoltenZinc",
+      "name": "Molten Zinc",
+      "hash": 813320439,
+      "state": "Liquid"
+    },
+    {
+      "id": "Mucus",
+      "name": "Mucin",
+      "hash": 1618409177,
+      "state": "Liquid"
+    },
+    {
+      "id": "Mud",
+      "name": "Mud",
+      "hash": 908179228,
+      "state": "Solid"
+    },
+    {
+      "id": "Methane",
+      "name": "Natural Gas",
+      "hash": -841236436,
+      "state": "Gas"
+    },
+    {
+      "id": "SugarWater",
+      "name": "Nectar",
+      "hash": 878488353,
+      "state": "Liquid"
+    },
+    {
+      "id": "Unobtanium",
+      "name": "Neutronium",
+      "hash": 1838482828,
+      "state": "Solid"
+    },
+    {
+      "id": "Nickel",
+      "name": "Nickel",
+      "hash": -1774383478,
+      "state": "Solid"
+    },
+    {
+      "id": "NickelGas",
+      "name": "Nickel Gas",
+      "hash": 1320373807,
+      "state": "Gas"
+    },
+    {
+      "id": "NickelOre",
+      "name": "Nickel Ore",
+      "hash": 1387581016,
+      "state": "Solid"
+    },
+    {
+      "id": "Niobium",
+      "name": "Niobium",
+      "hash": -1779895821,
+      "state": "Solid"
+    },
+    {
+      "id": "NiobiumGas",
+      "name": "Niobium Gas",
+      "hash": -1616033402,
+      "state": "Gas"
+    },
+    {
+      "id": "Fallout",
+      "name": "Nuclear Fallout",
+      "hash": 1000463219,
+      "state": "Gas",
+      "dlcId": "EXPANSION1_ID"
+    },
+    {
+      "id": "Obsidian",
+      "name": "Obsidian",
+      "hash": -474151749,
+      "state": "Solid"
+    },
+    {
+      "id": "FishMilk",
+      "name": "Ovolene",
+      "hash": 1646675187,
+      "state": "Liquid"
+    },
+    {
+      "id": "Oxygen",
+      "name": "Oxygen",
+      "hash": -1528777920,
+      "state": "Gas"
+    },
+    {
+      "id": "OxyRock",
+      "name": "Oxylite",
+      "hash": 1262005685,
+      "state": "Solid"
+    },
+    {
+      "id": "StableSnow",
+      "name": "Packed Snow",
+      "hash": 1542131326,
+      "state": "Solid"
+    },
+    {
+      "id": "Pearl",
+      "name": "Pearl",
+      "hash": 1120921638,
+      "state": "Solid"
+    },
+    {
+      "id": "Peat",
+      "name": "Peat",
+      "hash": -1927771704,
+      "state": "Solid"
+    },
+    {
+      "id": "Petroleum",
+      "name": "Petroleum",
+      "hash": -486269331,
+      "state": "Liquid"
+    },
+    {
+      "id": "PhosphateNodules",
+      "name": "Phosphate Nodules",
+      "hash": -1901832310,
+      "state": "Solid"
+    },
+    {
+      "id": "Phosphorite",
+      "name": "Phosphorite",
+      "hash": -877427037,
+      "state": "Solid"
+    },
+    {
+      "id": "PhosphorusGas",
+      "name": "Phosphorus Gas",
+      "hash": 1887387588,
+      "state": "Gas"
+    },
+    {
+      "id": "PhytoOil",
+      "name": "Phyto Oil",
+      "hash": -20315850,
+      "state": "Liquid"
+    },
+    {
+      "id": "Polypropylene",
+      "name": "Plastic",
+      "hash": -1142341158,
+      "state": "Solid"
+    },
+    {
+      "id": "HardPolypropylene",
+      "name": "Plastium",
+      "hash": 1220285359,
+      "state": "Solid"
+    },
+    {
+      "id": "FabricatedWood",
+      "name": "Plywood",
+      "hash": 663200452,
+      "state": "Solid"
+    },
+    {
+      "id": "MurkyBrine",
+      "name": "Polluted Brine",
+      "hash": -2044124200,
+      "state": "Liquid"
+    },
+    {
+      "id": "MurkyBrineIce",
+      "name": "Polluted Brine Ice",
+      "hash": 1291367123,
+      "state": "Solid"
+    },
+    {
+      "id": "ToxicSand",
+      "name": "Polluted Dirt",
+      "hash": 869554203,
+      "state": "Solid"
+    },
+    {
+      "id": "DirtyIce",
+      "name": "Polluted Ice",
+      "hash": 1664334585,
+      "state": "Solid"
+    },
+    {
+      "id": "ToxicMud",
+      "name": "Polluted Mud",
+      "hash": 900133477,
+      "state": "Solid"
+    },
+    {
+      "id": "ContaminatedOxygen",
+      "name": "Polluted Oxygen",
+      "hash": 721531317,
+      "state": "Gas"
+    },
+    {
+      "id": "DirtyWater",
+      "name": "Polluted Water",
+      "hash": 1832607973,
+      "state": "Liquid"
+    },
+    {
+      "id": "Propane",
+      "name": "Propane Gas",
+      "hash": -1858722091,
+      "state": "Gas"
+    },
+    {
+      "id": "FoolsGold",
+      "name": "Pyrite",
+      "hash": 2059777261,
+      "state": "Solid"
+    },
+    {
+      "id": "Radium",
+      "name": "Radium",
+      "hash": -47820500,
+      "state": "Solid",
+      "dlcId": "EXPANSION1_ID"
+    },
+    {
+      "id": "RefinedCarbon",
+      "name": "Refined Carbon",
+      "hash": -902240476,
+      "state": "Solid"
+    },
+    {
+      "id": "Phosphorus",
+      "name": "Refined Phosphorus",
+      "hash": -220394187,
+      "state": "Solid"
+    },
+    {
+      "id": "Regolith",
+      "name": "Regolith",
+      "hash": 1362238252,
+      "state": "Solid"
+    },
+    {
+      "id": "NaturalResin",
+      "name": "Resin",
+      "hash": 1244532348,
+      "state": "Liquid"
+    },
+    {
+      "id": "RockGas",
+      "name": "Rock Gas",
+      "hash": -432557516,
+      "state": "Gas"
+    },
+    {
+      "id": "Rubber",
+      "name": "Rubber",
+      "hash": -351425712,
+      "state": "Solid"
+    },
+    {
+      "id": "Rust",
+      "name": "Rust",
+      "hash": -233232444,
+      "state": "Solid"
+    },
+    {
+      "id": "Salt",
+      "name": "Salt",
+      "hash": 381665462,
+      "state": "Solid"
+    },
+    {
+      "id": "SaltGas",
+      "name": "Salt Gas",
+      "hash": -1946026749,
+      "state": "Gas"
+    },
+    {
+      "id": "SaltWater",
+      "name": "Salt Water",
+      "hash": 1911997537,
+      "state": "Liquid"
+    },
+    {
+      "id": "Sand",
+      "name": "Sand",
+      "hash": 381796644,
+      "state": "Solid"
+    },
+    {
+      "id": "SandCement",
+      "name": "Sand Cement",
+      "hash": -1038746460,
+      "state": "Solid"
+    },
+    {
+      "id": "SandStone",
+      "name": "Sandstone",
+      "hash": 493438017,
+      "state": "Solid"
+    },
+    {
+      "id": "Resin",
+      "name": "Sap",
+      "hash": -746800379,
+      "state": "Liquid"
+    },
+    {
+      "id": "SedimentaryRock",
+      "name": "Sedimentary Rock",
+      "hash": 183408504,
+      "state": "Solid"
+    },
+    {
+      "id": "Shale",
+      "name": "Shale",
+      "hash": -1708952091,
+      "state": "Solid"
+    },
+    {
+      "id": "SiltStone",
+      "name": "Siltstone",
+      "hash": -328791769,
+      "state": "Solid"
+    },
+    {
+      "id": "SlimeMold",
+      "name": "Slime",
+      "hash": -1153056158,
+      "state": "Solid"
+    },
+    {
+      "id": "Snow",
+      "name": "Snow",
+      "hash": 489261827,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidCarbonDioxide",
+      "name": "Solid Carbon Dioxide",
+      "hash": 83003332,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidChlorine",
+      "name": "Solid Chlorine",
+      "hash": -690060127,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidCrudeOil",
+      "name": "Solid Crude Oil",
+      "hash": -1224086026,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidEthanol",
+      "name": "Solid Ethanol",
+      "hash": 1937241528,
+      "state": "Solid"
+    },
+    {
+      "id": "Gunk",
+      "name": "Solid Gunk",
+      "hash": -230085045,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidHydrogen",
+      "name": "Solid Hydrogen",
+      "hash": -858172533,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidMethane",
+      "name": "Solid Methane",
+      "hash": 1183979137,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidNaphtha",
+      "name": "Solid Naphtha",
+      "hash": -1112594153,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidNuclearWaste",
+      "name": "Solid Nuclear Waste",
+      "hash": -497625153,
+      "state": "Solid",
+      "dlcId": "EXPANSION1_ID"
+    },
+    {
+      "id": "SolidOxygen",
+      "name": "Solid Oxygen",
+      "hash": 973502379,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidPetroleum",
+      "name": "Solid Petroleum",
+      "hash": -473261502,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidPropane",
+      "name": "Solid Propane",
+      "hash": 166493482,
+      "state": "Solid"
+    },
+    {
+      "id": "NaturalSolidResin",
+      "name": "Solid Resin",
+      "hash": 1254083875,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidResin",
+      "name": "Solid Sap",
+      "hash": 1376267226,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidSuperCoolant",
+      "name": "Solid Super Coolant",
+      "hash": -389019570,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidSyngas",
+      "name": "Solid Synthesis Gas",
+      "hash": -690658692,
+      "state": "Solid"
+    },
+    {
+      "id": "SolidViscoGel",
+      "name": "Solid Visco-Gel",
+      "hash": -1495120499,
+      "state": "Solid"
+    },
+    {
+      "id": "SourGas",
+      "name": "Sour Gas",
+      "hash": -927923200,
+      "state": "Gas"
+    },
+    {
+      "id": "Ink",
+      "name": "Squid Ink",
+      "hash": 874674022,
+      "state": "Liquid"
+    },
+    {
+      "id": "Steam",
+      "name": "Steam",
+      "hash": -899515856,
+      "state": "Gas"
+    },
+    {
+      "id": "Steel",
+      "name": "Steel",
+      "hash": -899253461,
+      "state": "Solid"
+    },
+    {
+      "id": "SteelGas",
+      "name": "Steel Gas",
+      "hash": -1406916018,
+      "state": "Gas"
+    },
+    {
+      "id": "Sucrose",
+      "name": "Sucrose",
+      "hash": -1960895024,
+      "state": "Solid"
+    },
+    {
+      "id": "Sulfur",
+      "name": "Sulfur",
+      "hash": -729385479,
+      "state": "Solid"
+    },
+    {
+      "id": "SulfurGas",
+      "name": "Sulfur Gas",
+      "hash": -2120504832,
+      "state": "Gas"
+    },
+    {
+      "id": "SuperCoolant",
+      "name": "Super Coolant",
+      "hash": -123825053,
+      "state": "Liquid"
+    },
+    {
+      "id": "SuperCoolantGas",
+      "name": "Super Coolant Gas",
+      "hash": -3376362,
+      "state": "Gas"
+    },
+    {
+      "id": "Syngas",
+      "name": "Synthesis Gas",
+      "hash": 1102028305,
+      "state": "Gas"
+    },
+    {
+      "id": "Tallow",
+      "name": "Tallow",
+      "hash": -1624652107,
+      "state": "Solid"
+    },
+    {
+      "id": "TempConductorSolid",
+      "name": "Thermium",
+      "hash": 1559722904,
+      "state": "Solid"
+    },
+    {
+      "id": "Tungsten",
+      "name": "Tungsten",
+      "hash": -1058835580,
+      "state": "Solid"
+    },
+    {
+      "id": "TungstenGas",
+      "name": "Tungsten Gas",
+      "hash": 431998133,
+      "state": "Gas"
+    },
+    {
+      "id": "UraniumOre",
+      "name": "Uranium Ore",
+      "hash": 134298891,
+      "state": "Solid",
+      "dlcId": "EXPANSION1_ID"
+    },
+    {
+      "id": "Vacuum",
+      "name": "Vacuum",
+      "hash": 758759285,
+      "state": "Vacuum"
+    },
+    {
+      "id": "ViscoGel",
+      "name": "Visco-Gel Fluid",
+      "hash": -1683093854,
+      "state": "Liquid"
+    },
+    {
+      "id": "Void",
+      "name": "Void",
+      "hash": -1456075980,
+      "state": "Vacuum"
+    },
+    {
+      "id": "Water",
+      "name": "Water",
+      "hash": 1836671383,
+      "state": "Liquid"
+    },
+    {
+      "id": "Wolframite",
+      "name": "Wolframite",
+      "hash": -1208854194,
+      "state": "Solid"
+    },
+    {
+      "id": "WoodLog",
+      "name": "Wood",
+      "hash": 16214647,
+      "state": "Solid"
+    },
+    {
+      "id": "Yellowcake",
+      "name": "Yellowcake",
+      "hash": -1624413844,
+      "state": "Solid",
+      "dlcId": "EXPANSION1_ID"
+    },
+    {
+      "id": "Zinc",
+      "name": "Zinc",
+      "hash": 1617031780,
+      "state": "Solid"
+    },
+    {
+      "id": "ZincGas",
+      "name": "Zinc Gas",
+      "hash": -1988727339,
+      "state": "Gas"
+    },
+    {
+      "id": "ZincOre",
+      "name": "Zinc Ore",
+      "hash": -1921520130,
+      "state": "Solid"
+    }
   ]
 }
