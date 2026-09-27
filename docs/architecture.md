@@ -89,17 +89,13 @@ No Klei art is extracted or committed.
 
 ```ts
 interface SaveService {
-  load(
-    buffer: ArrayBuffer,
-    fileName: string,
-    onProgress: (p: number) => void,
-  ): Promise<LoadSummary>;
-  query<Q extends Query>(query: Q): Promise<QueryResult<Q>>;
-  apply(command: Command): Promise<ApplyResult>; // { revision, changed }
-  undo(): Promise<ApplyResult>;
-  redo(): Promise<ApplyResult>;
-  diffSummary(): Promise<DiffSummary>;
-  save(): Promise<Uint8Array>; // transferred
+  load(buffer: ArrayBuffer, fileName: string, onProgress: (p: number) => void): Promise<LoadSummary>
+  query<Q extends Query>(query: Q): Promise<QueryResult<Q>>
+  apply(command: Command): Promise<ApplyResult> // { revision, changed }
+  undo(): Promise<ApplyResult>
+  redo(): Promise<ApplyResult>
+  diffSummary(): Promise<DiffSummary>
+  save(): Promise<Uint8Array> // transferred
 }
 ```
 
