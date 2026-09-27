@@ -15,6 +15,11 @@ export interface ElementEntry extends GameEntry {
   dlcId?: string
 }
 
+export interface CritterEntry extends GameEntry {
+  family: string
+  baby: boolean
+}
+
 export interface SkillGroupEntry extends GameEntry {
   /** Klei HashedString hash of the ID, as stored in MinionResume aptitudes. */
   hash: number
@@ -28,6 +33,7 @@ export const effects: GameEntry[] = data.effects
 export const personalities: GameEntry[] = data.personalities
 export const geysers: GameEntry[] = data.geysers
 export const elements: ElementEntry[] = data.elements
+export const critters: CritterEntry[] = data.critters
 
 function index<T extends GameEntry>(list: T[]): (id: string) => T | undefined {
   const byUpper = new Map(list.map((e) => [e.id.toUpperCase(), e]))
@@ -48,6 +54,8 @@ export const findSkillGroupByHash = (hash: number) => groupsByHash.get(hash)
 const elementsByHash = new Map(elements.map((e) => [e.hash, e]))
 export const findElementByHash = (hash: number) => elementsByHash.get(hash)
 export const findElement = index(elements)
+/** Critter by prefab name, e.g. `PacuTropicalBaby`. */
+export const findCritter = index(critters)
 
 /** Klei's HashedString hash (SDBM over the lower-cased string). */
 export function hashString(value: string): number {

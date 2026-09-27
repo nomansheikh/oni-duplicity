@@ -3591,5 +3591,1123 @@
       "hash": -1921520130,
       "state": "Solid"
     }
+  ],
+  "critters": [
+    {
+      "id": "LIGHTBUGBLACK",
+      "name": "Abyss Bug",
+      "family": "LIGHTBUG",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGBLACKBABY",
+      "name": "Abyss Nymph",
+      "family": "LIGHTBUG",
+      "baby": true
+    },
+    {
+      "id": "BLUEGRASS",
+      "name": "Alveo Vera",
+      "family": "BLUE_GRASS",
+      "baby": false
+    },
+    {
+      "id": "FORESTTREE",
+      "name": "Arbor Acorn",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "GREEDYGREEN",
+      "name": "Avari Vine",
+      "family": "GREEDYGREEN",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGBLUE",
+      "name": "Azure Bug",
+      "family": "LIGHTBUG",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGBLUEBABY",
+      "name": "Azure Nymph",
+      "family": "LIGHTBUG",
+      "baby": true
+    },
+    {
+      "id": "SWAMPLILY",
+      "name": "Balm Lily Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "ICEBELLYBABY",
+      "name": "Bammini",
+      "family": "ICEBELLY",
+      "baby": true
+    },
+    {
+      "id": "ICEBELLY",
+      "name": "Bammoth",
+      "family": "ICEBELLY",
+      "baby": false
+    },
+    {
+      "id": "PARROTFISH",
+      "name": "Beakon",
+      "family": "PARROTFISH",
+      "baby": false
+    },
+    {
+      "id": "PARROTFISHBABY",
+      "name": "Beakon Fry",
+      "family": "PARROTFISH",
+      "baby": true
+    },
+    {
+      "id": "BEE",
+      "name": "Beeta",
+      "family": "BEE",
+      "baby": false
+    },
+    {
+      "id": "BEEBABY",
+      "name": "Beetiny",
+      "family": "BEE",
+      "baby": true
+    },
+    {
+      "id": "CYLINDRICA",
+      "name": "Bliss Burst",
+      "family": "CYLINDRICA",
+      "baby": false
+    },
+    {
+      "id": "PUFFERFISH",
+      "name": "Blowter",
+      "family": "PUFFERFISH",
+      "baby": false
+    },
+    {
+      "id": "SQUIDBABY",
+      "name": "Blowter Fry",
+      "family": "PUFFERFISH",
+      "baby": true
+    },
+    {
+      "id": "PRICKLEGRASS",
+      "name": "Bluff Briar",
+      "family": "PRICKLEGRASS",
+      "baby": false
+    },
+    {
+      "id": "ALGAESTEGO",
+      "name": "Blum Lumb",
+      "family": "ALGAE_STEGO",
+      "baby": false
+    },
+    {
+      "id": "ALGAESTEGOBABY",
+      "name": "Blumblet",
+      "family": "ALGAE_STEGO",
+      "baby": true
+    },
+    {
+      "id": "SWAMPHARVESTPLANT",
+      "name": "Bog Bucket Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "SPACETREE",
+      "name": "Bonbon Tree Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "PRICKLEFLOWER",
+      "name": "Bristle Blossom",
+      "family": "PRICKLEFLOWER",
+      "baby": false
+    },
+    {
+      "id": "BULBPLANT",
+      "name": "Buddy Bud",
+      "family": "BULBPLANT",
+      "baby": false
+    },
+    {
+      "id": "BULBLOOM",
+      "name": "Bulbloom",
+      "family": "BULBLOOM",
+      "baby": false
+    },
+    {
+      "id": "BASICFORAGEPLANTPLANTED",
+      "name": "Buried Muckroot",
+      "family": "BASICFORAGEPLANTPLANTED",
+      "baby": false
+    },
+    {
+      "id": "GEYSERGENERICCHLORINEGAS",
+      "name": "Chlorine Geyser",
+      "family": "CHLORINEGEYSER",
+      "baby": false
+    },
+    {
+      "id": "CLAM",
+      "name": "Clampum",
+      "family": "CLAM",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGPINK",
+      "name": "Coral Bug",
+      "family": "LIGHTBUG",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGPINKBABY",
+      "name": "Coral Nymph",
+      "family": "LIGHTBUG",
+      "baby": true
+    },
+    {
+      "id": "CHAMELEON",
+      "name": "Dartle",
+      "family": "CHAMELEON",
+      "baby": false
+    },
+    {
+      "id": "CHAMELEONBABY",
+      "name": "Dartlet",
+      "family": "CHAMELEON",
+      "baby": true
+    },
+    {
+      "id": "SALTPLANT",
+      "name": "Dasha Saltvine",
+      "family": "SALTPLANT",
+      "baby": false
+    },
+    {
+      "id": "MOLEDELICACY",
+      "name": "Delecta Vole",
+      "family": "MOLE",
+      "baby": false
+    },
+    {
+      "id": "MOLEDELICACYBABY",
+      "name": "Delecta Vole Pup",
+      "family": "MOLE",
+      "baby": true
+    },
+    {
+      "id": "PUFTOXYLITE",
+      "name": "Dense Puft",
+      "family": "PUFT",
+      "baby": false
+    },
+    {
+      "id": "PUFTOXYLITEBABY",
+      "name": "Dense Puftlet",
+      "family": "PUFT",
+      "baby": true
+    },
+    {
+      "id": "DEWDRIPPERPLANT",
+      "name": "Dew Dripper",
+      "family": "DEWDRIPPERPLANT",
+      "baby": false
+    },
+    {
+      "id": "DRECKOBABY",
+      "name": "Drecklet",
+      "family": "DRECKO",
+      "baby": true
+    },
+    {
+      "id": "DRECKO",
+      "name": "Drecko",
+      "family": "DRECKO",
+      "baby": false
+    },
+    {
+      "id": "MUSHROOMPLANT",
+      "name": "Dusk Cap",
+      "family": "MUSHROOMPLANT",
+      "baby": false
+    },
+    {
+      "id": "SAPTREE",
+      "name": "Experiment 52B",
+      "family": "SAPTREE",
+      "baby": false
+    },
+    {
+      "id": "HEATBULB",
+      "name": "Fervine",
+      "family": "HEATBULB",
+      "baby": false
+    },
+    {
+      "id": "HEATBULBSEED",
+      "name": "Fervine Bulb",
+      "family": "HEATBULBSEED",
+      "baby": false
+    },
+    {
+      "id": "WOODDEER",
+      "name": "Flox",
+      "family": "WOODDEER",
+      "baby": false
+    },
+    {
+      "id": "WOODDEERBABY",
+      "name": "Flox Fawn",
+      "family": "WOODDEER",
+      "baby": true
+    },
+    {
+      "id": "OXYCORAL",
+      "name": "Flue Coral",
+      "family": "OXYCORAL",
+      "baby": false
+    },
+    {
+      "id": "GASGRASS",
+      "name": "Gas Grass",
+      "family": "GASGRASS",
+      "baby": false
+    },
+    {
+      "id": "MOO",
+      "name": "Gassy Moo",
+      "family": "MOO",
+      "baby": false
+    },
+    {
+      "id": "SNAILIRON",
+      "name": "Gildgo",
+      "family": "SNAIL",
+      "baby": false
+    },
+    {
+      "id": "SNAILIRONBABY",
+      "name": "Gildgo Baby",
+      "family": "SNAIL",
+      "baby": true
+    },
+    {
+      "id": "SQUID",
+      "name": "Glo Squid",
+      "family": "SQUID",
+      "baby": false
+    },
+    {
+      "id": "DRECKOPLASTICBABY",
+      "name": "Glossy Drecklet",
+      "family": "DRECKO",
+      "baby": true
+    },
+    {
+      "id": "DRECKOPLASTIC",
+      "name": "Glossy Drecko",
+      "family": "DRECKO",
+      "baby": false
+    },
+    {
+      "id": "MOSQUITO",
+      "name": "Gnit",
+      "family": "MOSQUITO",
+      "baby": false
+    },
+    {
+      "id": "MOSQUITOBABY",
+      "name": "Gnit Larva",
+      "family": "MOSQUITO",
+      "baby": true
+    },
+    {
+      "id": "WORMPLANT",
+      "name": "Grubfruit Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "DIVERGENTWORM",
+      "name": "Grubgrub",
+      "family": "DIVERGENT",
+      "baby": false
+    },
+    {
+      "id": "DIVERGENTWORMBABY",
+      "name": "Grubgrub Wormling",
+      "family": "DIVERGENT",
+      "baby": true
+    },
+    {
+      "id": "PACUCLEANER",
+      "name": "Gulp Fish",
+      "family": "PACU",
+      "baby": false
+    },
+    {
+      "id": "PACUCLEANERBABY",
+      "name": "Gulp Fry",
+      "family": "PACU",
+      "baby": true
+    },
+    {
+      "id": "DEWPALM",
+      "name": "Gum Palm",
+      "family": "DEWPALM",
+      "baby": false
+    },
+    {
+      "id": "DEWPALMSEED",
+      "name": "Gum Palm Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "HATCH",
+      "name": "Hatch",
+      "family": "HATCH",
+      "baby": false
+    },
+    {
+      "id": "HATCHBABY",
+      "name": "Hatchling",
+      "family": "HATCH",
+      "baby": true
+    },
+    {
+      "id": "FORESTFORAGEPLANTPLANTED",
+      "name": "Hexalent",
+      "family": "FORESTFORAGEPLANTPLANTED",
+      "baby": false
+    },
+    {
+      "id": "WATERCUPS",
+      "name": "Husha Cups Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "DIESELMOO",
+      "name": "Husky Moo",
+      "family": "DIESELMOO",
+      "baby": false
+    },
+    {
+      "id": "FILTERPLANT",
+      "name": "Hydrocactus",
+      "family": "FILTERPLANT",
+      "baby": false
+    },
+    {
+      "id": "ICEFLOWER",
+      "name": "Idylla Flower",
+      "family": "ICEFLOWER",
+      "baby": false
+    },
+    {
+      "id": "OILEATER",
+      "name": "Ink Bloom Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGRADIOACTIVE",
+      "name": "Ionizing Bug",
+      "family": "LIGHTBUG",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGRADIOACTIVEBABY",
+      "name": "Ionizing Nymph",
+      "family": "LIGHTBUG",
+      "baby": true
+    },
+    {
+      "id": "PREHISTORICPACU",
+      "name": "Jawbo",
+      "family": "PREHISTORICPACU",
+      "baby": false
+    },
+    {
+      "id": "PREHISTORICPACUBABY",
+      "name": "Jawbo Fry",
+      "family": "PREHISTORICPACU",
+      "baby": true
+    },
+    {
+      "id": "CACTUSPLANT",
+      "name": "Jumping Joya",
+      "family": "CACTUSPLANT",
+      "baby": false
+    },
+    {
+      "id": "SEAFAIRY",
+      "name": "Kelpole",
+      "family": "SEAFAIRY",
+      "baby": false
+    },
+    {
+      "id": "OILFLOATERDECORBABY",
+      "name": "Longhair Larva",
+      "family": "OILFLOATER",
+      "baby": true
+    },
+    {
+      "id": "OILFLOATERDECOR",
+      "name": "Longhair Slickster",
+      "family": "OILFLOATER",
+      "baby": false
+    },
+    {
+      "id": "STEGO",
+      "name": "Lumb",
+      "family": "STEGO",
+      "baby": false
+    },
+    {
+      "id": "STEGOBABY",
+      "name": "Lumblet",
+      "family": "STEGO",
+      "baby": true
+    },
+    {
+      "id": "PINKROCK",
+      "name": "Lumen Quartz",
+      "family": "PINKROCK",
+      "baby": false
+    },
+    {
+      "id": "FLYTRAPPLANT",
+      "name": "Lura Plant",
+      "family": "FLYTRAPPLANT",
+      "baby": false
+    },
+    {
+      "id": "WINECUPS",
+      "name": "Mallow Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "BASICSINGLEHARVESTPLANT",
+      "name": "Mealwood",
+      "family": "BASICSINGLEHARVESTPLANT",
+      "baby": false
+    },
+    {
+      "id": "DINOFERN",
+      "name": "Megafrond",
+      "family": "DINOFERN",
+      "baby": false
+    },
+    {
+      "id": "BUTTERFLY",
+      "name": "Mimika",
+      "family": "BUTTERFLY",
+      "baby": false
+    },
+    {
+      "id": "BUTTERFLYPLANT",
+      "name": "Mimika Bud",
+      "family": "BUTTERFLYPLANT",
+      "baby": false
+    },
+    {
+      "id": "BUTTERFLYPLANTSEED",
+      "name": "Mimillet",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "LEAFYPLANT",
+      "name": "Mirth Leaf",
+      "family": "LEAFYPLANT",
+      "baby": false
+    },
+    {
+      "id": "OILFLOATERHIGHTEMPBABY",
+      "name": "Molten Larva",
+      "family": "OILFLOATER",
+      "baby": true
+    },
+    {
+      "id": "OILFLOATERHIGHTEMP",
+      "name": "Molten Slickster",
+      "family": "OILFLOATER",
+      "baby": false
+    },
+    {
+      "id": "GLOM",
+      "name": "Morb",
+      "family": "GLOM",
+      "baby": false
+    },
+    {
+      "id": "MUSSELSPROUT",
+      "name": "Mussel Sprout",
+      "family": "MUSSELSPROUT",
+      "baby": false
+    },
+    {
+      "id": "MYSTERYEGG",
+      "name": "Mysterious Egg",
+      "family": "MYSTERYEGG",
+      "baby": false
+    },
+    {
+      "id": "GEYSERGENERICMETHANE",
+      "name": "Natural Gas Geyser",
+      "family": "METHANEGEYSER",
+      "baby": false
+    },
+    {
+      "id": "BEANPLANT",
+      "name": "Nosh Sprout",
+      "family": "BEAN_PLANT",
+      "baby": false
+    },
+    {
+      "id": "CRABWOOD",
+      "name": "Oakshell",
+      "family": "CRAB",
+      "baby": false
+    },
+    {
+      "id": "CRABWOODBABY",
+      "name": "Oakshell Spawn",
+      "family": "CRAB",
+      "baby": true
+    },
+    {
+      "id": "OILWELL",
+      "name": "Oil Reservoir",
+      "family": "OIL_WELL",
+      "baby": false
+    },
+    {
+      "id": "OILSPOUT",
+      "name": "Oil Spout",
+      "family": "OILSPOUT",
+      "baby": false
+    },
+    {
+      "id": "SEATURTLE",
+      "name": "Orehull",
+      "family": "SEATURTLE",
+      "baby": false
+    },
+    {
+      "id": "SEATURTLEBABY",
+      "name": "Orehull Spawn",
+      "family": "SEATURTLE",
+      "baby": true
+    },
+    {
+      "id": "VINEMOTHER",
+      "name": "Ovagro Node Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "OXYFERN",
+      "name": "Oxyfern",
+      "family": "OXYFERN",
+      "baby": false
+    },
+    {
+      "id": "PACU",
+      "name": "Pacu",
+      "family": "PACU",
+      "baby": false
+    },
+    {
+      "id": "PACUEGG",
+      "name": "Pacu Egg",
+      "family": "PACUEGG",
+      "baby": false
+    },
+    {
+      "id": "PACUBABY",
+      "name": "Pacu Fry",
+      "family": "PACU",
+      "baby": true
+    },
+    {
+      "id": "JUNGLEGASPLANT",
+      "name": "Palmera Tree",
+      "family": "JUNGLEGASPLANT",
+      "baby": false
+    },
+    {
+      "id": "FILAMENTPLANT",
+      "name": "Petta Pouf",
+      "family": "FILAMENTPLANT",
+      "baby": false
+    },
+    {
+      "id": "FILAMENTPLANTSEED",
+      "name": "Petta Pouf Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "HARDSKINBERRYPLANT",
+      "name": "Pikeapple Bush",
+      "family": "HARDSKINBERRYPLANT",
+      "baby": false
+    },
+    {
+      "id": "SPICEVINE",
+      "name": "Pincha Pepper Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "URCHINPLANT",
+      "name": "Pinpoket Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "URCHIN",
+      "name": "Pinpoki",
+      "family": "SEAURCHIN",
+      "baby": false
+    },
+    {
+      "id": "SQUIRREL",
+      "name": "Pip",
+      "family": "SQUIRREL",
+      "baby": false
+    },
+    {
+      "id": "SQUIRRELBABY",
+      "name": "Pipsqueak",
+      "family": "SQUIRREL",
+      "baby": true
+    },
+    {
+      "id": "STATERPILLAR",
+      "name": "Plug Slug",
+      "family": "STATERPILLAR",
+      "baby": false
+    },
+    {
+      "id": "STATERPILLARBABY",
+      "name": "Plug Sluglet",
+      "family": "STATERPILLAR",
+      "baby": true
+    },
+    {
+      "id": "CARROTPLANT",
+      "name": "Plume Squash Plant",
+      "family": "CARROTPLANT",
+      "baby": false
+    },
+    {
+      "id": "CRAB",
+      "name": "Pokeshell",
+      "family": "CRAB",
+      "baby": false
+    },
+    {
+      "id": "CRABBABY",
+      "name": "Pokeshell Spawn",
+      "family": "CRAB",
+      "baby": true
+    },
+    {
+      "id": "GEYSERS",
+      "name": "Propane Spout",
+      "family": "PROPANESPOUT",
+      "baby": false
+    },
+    {
+      "id": "PUFT",
+      "name": "Puft",
+      "family": "PUFT",
+      "baby": false
+    },
+    {
+      "id": "PUFTALPHA",
+      "name": "Puft Prince",
+      "family": "PUFT",
+      "baby": false
+    },
+    {
+      "id": "PUFTBABY",
+      "name": "Puftlet",
+      "family": "PUFT",
+      "baby": true
+    },
+    {
+      "id": "PUFTALPHABABY",
+      "name": "Puftlet Prince",
+      "family": "PUFT",
+      "baby": true
+    },
+    {
+      "id": "LIGHTBUGCRYSTAL",
+      "name": "Radiant Bug",
+      "family": "LIGHTBUG",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGCRYSTALBABY",
+      "name": "Radiant Nymph",
+      "family": "LIGHTBUG",
+      "baby": true
+    },
+    {
+      "id": "GOLDBELLYBABY",
+      "name": "Regal Bammini",
+      "family": "ICEBELLY",
+      "baby": true
+    },
+    {
+      "id": "GOLDBELLY",
+      "name": "Regal Bammoth",
+      "family": "ICEBELLY",
+      "baby": false
+    },
+    {
+      "id": "RAPTOR",
+      "name": "Rhex",
+      "family": "RAPTOR",
+      "baby": false
+    },
+    {
+      "id": "RAPTORBABY",
+      "name": "Rhex Baby",
+      "family": "RAPTOR",
+      "baby": true
+    },
+    {
+      "id": "GARDENDECORPLANT",
+      "name": "Ring Rosebush",
+      "family": "GARDENDECORPLANT",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGPURPLE",
+      "name": "Royal Bug",
+      "family": "LIGHTBUG",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGPURPLEBABY",
+      "name": "Royal Nymph",
+      "family": "LIGHTBUG",
+      "baby": true
+    },
+    {
+      "id": "HATCHVEGGIE",
+      "name": "Sage Hatch",
+      "family": "HATCH",
+      "baby": false
+    },
+    {
+      "id": "HATCHVEGGIEBABY",
+      "name": "Sage Hatchling",
+      "family": "HATCH",
+      "baby": true
+    },
+    {
+      "id": "CRABFRESHWATER",
+      "name": "Sanishell",
+      "family": "CRAB",
+      "baby": false
+    },
+    {
+      "id": "CRABFRESHWATERBABY",
+      "name": "Sanishell Spawn",
+      "family": "CRAB",
+      "baby": true
+    },
+    {
+      "id": "CRITTERTRAPPLANT",
+      "name": "Saturn Critter Trap",
+      "family": "CRITTERTRAPPLANT",
+      "baby": false
+    },
+    {
+      "id": "KELPPLANT",
+      "name": "Seakomb",
+      "family": "KELPPLANT",
+      "baby": false
+    },
+    {
+      "id": "SEAHORSE",
+      "name": "Seaquine",
+      "family": "SEAHORSE",
+      "baby": false
+    },
+    {
+      "id": "SEAHORSEBABY",
+      "name": "Seaquine Fry",
+      "family": "SEAHORSE",
+      "baby": true
+    },
+    {
+      "id": "GLASSDEER",
+      "name": "Shatter Flox",
+      "family": "GLASSDEER",
+      "baby": false
+    },
+    {
+      "id": "GLASSDEERBABY",
+      "name": "Shatter Flox Fawn",
+      "family": "GLASSDEER",
+      "baby": true
+    },
+    {
+      "id": "ICECAVESFORAGEPLANTPLANTED",
+      "name": "Sherberry Plant",
+      "family": "ICECAVESFORAGEPLANTPLANTED",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUG",
+      "name": "Shine Bug",
+      "family": "LIGHTBUG",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGBABY",
+      "name": "Shine Nymph",
+      "family": "LIGHTBUG",
+      "baby": true
+    },
+    {
+      "id": "SHOCKWORM",
+      "name": "Shockworm",
+      "family": "SHOCKWORM",
+      "baby": false
+    },
+    {
+      "id": "MOLE",
+      "name": "Shove Vole",
+      "family": "MOLE",
+      "baby": false
+    },
+    {
+      "id": "COLDWHEAT",
+      "name": "Sleet Wheat",
+      "family": "COLDWHEAT",
+      "baby": false
+    },
+    {
+      "id": "COLDWHEATSEED",
+      "name": "Sleet Wheat Grain",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "OILFLOATER",
+      "name": "Slickster",
+      "family": "OILFLOATER",
+      "baby": false
+    },
+    {
+      "id": "OILFLOATERBABY",
+      "name": "Slickster Larva",
+      "family": "OILFLOATER",
+      "baby": true
+    },
+    {
+      "id": "SNAIL",
+      "name": "Slogo",
+      "family": "SNAIL",
+      "baby": false
+    },
+    {
+      "id": "SNAILBABY",
+      "name": "Slogo Baby",
+      "family": "SNAIL",
+      "baby": true
+    },
+    {
+      "id": "HATCHMETAL",
+      "name": "Smooth Hatch",
+      "family": "HATCH",
+      "baby": false
+    },
+    {
+      "id": "HATCHMETALBABY",
+      "name": "Smooth Hatchling",
+      "family": "HATCH",
+      "baby": true
+    },
+    {
+      "id": "GARDENFORAGEPLANTPLANTED",
+      "name": "Snactus",
+      "family": "GARDENFORAGEPLANTPLANTED",
+      "baby": false
+    },
+    {
+      "id": "SALTYSTICKSPLANT",
+      "name": "Sodicane",
+      "family": "SALTYSTICKSPLANT",
+      "baby": false
+    },
+    {
+      "id": "SEALBABY",
+      "name": "Spigot Pup",
+      "family": "SEAL",
+      "baby": true
+    },
+    {
+      "id": "SEAL",
+      "name": "Spigot Seal",
+      "family": "SEAL",
+      "baby": false
+    },
+    {
+      "id": "EVILFLOWER",
+      "name": "Sporechid",
+      "family": "EVILFLOWER",
+      "baby": false
+    },
+    {
+      "id": "PUFTBLEACHSTONE",
+      "name": "Squeaky Puft",
+      "family": "PUFT",
+      "baby": false
+    },
+    {
+      "id": "PUFTBLEACHSTONEBABY",
+      "name": "Squeaky Puftlet",
+      "family": "PUFT",
+      "baby": true
+    },
+    {
+      "id": "PLANKTONCORAL",
+      "name": "Starnacle",
+      "family": "PLANKTONCORAL",
+      "baby": false
+    },
+    {
+      "id": "HATCHHARD",
+      "name": "Stone Hatch",
+      "family": "HATCH",
+      "baby": false
+    },
+    {
+      "id": "HATCHHARDBABY",
+      "name": "Stone Hatchling",
+      "family": "HATCH",
+      "baby": true
+    },
+    {
+      "id": "LIGHTBUGORANGE",
+      "name": "Sun Bug",
+      "family": "LIGHTBUG",
+      "baby": false
+    },
+    {
+      "id": "LIGHTBUGORANGEBABY",
+      "name": "Sun Nymph",
+      "family": "LIGHTBUG",
+      "baby": true
+    },
+    {
+      "id": "SWAMPFORAGEPLANTPLANTED",
+      "name": "Swamp Chard",
+      "family": "SWAMPFORAGEPLANTPLANTED",
+      "baby": false
+    },
+    {
+      "id": "GARDENFOODPLANT",
+      "name": "Sweatcorn Stalk",
+      "family": "GARDENFOODPLANT",
+      "baby": false
+    },
+    {
+      "id": "DIVERGENTBEETLE",
+      "name": "Sweetle",
+      "family": "DIVERGENT",
+      "baby": false
+    },
+    {
+      "id": "DIVERGENTBEETLEBABY",
+      "name": "Sweetle Larva",
+      "family": "DIVERGENT",
+      "baby": true
+    },
+    {
+      "id": "BASICFABRICPLANT",
+      "name": "Thimble Reed",
+      "family": "BASICFABRICMATERIALPLANT",
+      "baby": false
+    },
+    {
+      "id": "SEATREE",
+      "name": "Tower Kelp",
+      "family": "SEATREE",
+      "baby": false
+    },
+    {
+      "id": "SEAFAIRYPLANTSEED",
+      "name": "Tower Kelp Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "TOEPLANT",
+      "name": "Tranquil Toe Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "PACUTROPICALBABY",
+      "name": "Tropical Fry",
+      "family": "PACU",
+      "baby": true
+    },
+    {
+      "id": "PACUTROPICAL",
+      "name": "Tropical Pacu",
+      "family": "PACU",
+      "baby": false
+    },
+    {
+      "id": "TUBEWORM",
+      "name": "Tublia Seed",
+      "family": "SEEDS",
+      "baby": false
+    },
+    {
+      "id": "MOLEBABY",
+      "name": "Vole Pup",
+      "family": "MOLE",
+      "baby": true
+    },
+    {
+      "id": "SEALETTUCE",
+      "name": "Waterweed",
+      "family": "SEALETTUCE",
+      "baby": false
+    },
+    {
+      "id": "COLDBREATHER",
+      "name": "Wheezewort",
+      "family": "COLDBREATHER",
+      "baby": false
+    },
+    {
+      "id": "COLDBREATHERCLUSTER",
+      "name": "Wheezewort",
+      "family": "COLDBREATHERCLUSTER",
+      "baby": false
+    }
   ]
 }
