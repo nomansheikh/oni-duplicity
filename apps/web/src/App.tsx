@@ -66,6 +66,7 @@ const GeysersPage = lazy(() =>
 const MaterialsPage = lazy(() =>
   import('@/components/materials-page').then((m) => ({ default: m.MaterialsPage })),
 )
+const MapPage = lazy(() => import('@/components/map-page').then((m) => ({ default: m.MapPage })))
 const OverviewPage = lazy(() =>
   import('@/components/overview-page').then((m) => ({ default: m.OverviewPage })),
 )
@@ -93,6 +94,7 @@ const NO_EDITS: EditStatus = { edits: 0, canUndo: false, canRedo: false }
 
 const PAGE_TITLES: Record<Page, string> = {
   overview: 'Overview',
+  map: 'World map',
   duplicants: 'Duplicants',
   geysers: 'Geysers',
   materials: 'Materials',
@@ -416,6 +418,9 @@ export default function App() {
                 )}
                 {loaded && page === 'settings' && (
                   <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
+                )}
+                {loaded && page === 'map' && (
+                  <MapPage worlds={loaded.views.worlds} revision={revision} />
                 )}
                 {loaded && page === 'raw' && <RawPage revision={revision} onEdit={edit} />}
                 {loaded && page === 'materials' && (

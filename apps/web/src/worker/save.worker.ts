@@ -25,6 +25,7 @@ import {
   summarize,
   type Edit,
 } from './model.ts'
+import { worldMap } from './map.ts'
 
 /** Captures the state an edit can touch, so undo can put it back. */
 function snapshot(save: SaveGame, edit: Edit): () => void {
@@ -122,6 +123,10 @@ const api = {
   materialItems: (elementId: string) => listMaterialItems(current(), elementId),
   rawChildren: (path: RawPath, offset?: number, limit?: number) =>
     rawChildren(current(), path, offset, limit),
+  worldMap(worldId: string) {
+    const map = worldMap(current(), worldId)
+    return transfer(map, [map.cells.buffer, map.temperature.buffer, map.mass.buffer])
+  },
   status,
   apply(edit: Edit) {
     apply(edit)
