@@ -3,11 +3,11 @@ import { Download, Moon, Redo2, Sun, Undo2 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
 import { AppSidebar, type Page } from '@/components/app-sidebar'
+import { ChangesPopover } from '@/components/changes-popover'
 import { DlcBadges } from '@/components/dlc-badge'
 import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
 import { PreferencesDialog } from '@/components/preferences-dialog'
 import { SiteHeader } from '@/components/site-header'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
@@ -261,11 +261,7 @@ export default function App() {
   const actions = loaded ? (
     <>
       <DlcBadges ids={loaded.summary.dlcIds} className="hidden xl:flex" />
-      {editStatus.edits > 0 && (
-        <Badge variant="secondary" className="hidden sm:inline-flex">
-          {editStatus.edits} unsaved {editStatus.edits === 1 ? 'edit' : 'edits'}
-        </Badge>
-      )}
+      {editStatus.edits > 0 && <ChangesPopover count={editStatus.edits} revision={revision} />}
       <ButtonGroup>
         <Tooltip>
           <TooltipTrigger asChild>
