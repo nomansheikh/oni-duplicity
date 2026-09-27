@@ -1,26 +1,18 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Download, Moon, Redo2, Sun, Undo2 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
 import { AppSidebar, type Page } from '@/components/app-sidebar'
 import { DlcBadges } from '@/components/dlc-badge'
-import { CrittersPage } from '@/components/critters-page'
-import { DuplicantsPage } from '@/components/duplicants/DuplicantsPage'
-import { GeysersPage } from '@/components/geysers-page'
 import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
-import { MaterialsPage } from '@/components/materials-page'
-import { OverviewPage } from '@/components/overview-page'
 import { PreferencesDialog } from '@/components/preferences-dialog'
-import { RawPage } from '@/components/raw-page'
-import { ResearchPage } from '@/components/research-page'
-import { SettingsPage } from '@/components/settings-page'
-import { SpacePage } from '@/components/space-page'
 import { SiteHeader } from '@/components/site-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAllowUnverified } from '@/lib/preferences'
 import { downloadBytes, loadSave, saveClient } from '@/lib/save-client'
@@ -59,6 +51,42 @@ interface EditStatus {
   edits: number
   canUndo: boolean
   canRedo: boolean
+}
+
+// Pages load on first visit so opening the app only pulls in the shell.
+const CrittersPage = lazy(() =>
+  import('@/components/critters-page').then((m) => ({ default: m.CrittersPage })),
+)
+const DuplicantsPage = lazy(() =>
+  import('@/components/duplicants/DuplicantsPage').then((m) => ({ default: m.DuplicantsPage })),
+)
+const GeysersPage = lazy(() =>
+  import('@/components/geysers-page').then((m) => ({ default: m.GeysersPage })),
+)
+const MaterialsPage = lazy(() =>
+  import('@/components/materials-page').then((m) => ({ default: m.MaterialsPage })),
+)
+const OverviewPage = lazy(() =>
+  import('@/components/overview-page').then((m) => ({ default: m.OverviewPage })),
+)
+const RawPage = lazy(() => import('@/components/raw-page').then((m) => ({ default: m.RawPage })))
+const ResearchPage = lazy(() =>
+  import('@/components/research-page').then((m) => ({ default: m.ResearchPage })),
+)
+const SettingsPage = lazy(() =>
+  import('@/components/settings-page').then((m) => ({ default: m.SettingsPage })),
+)
+const SpacePage = lazy(() =>
+  import('@/components/space-page').then((m) => ({ default: m.SpacePage })),
+)
+
+function PageFallback() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <Skeleton className="h-40" />
+      <Skeleton className="h-40" />
+    </div>
+  )
 }
 
 const NO_EDITS: EditStatus = { edits: 0, canUndo: false, canRedo: false }
@@ -352,50 +380,52 @@ export default function App() {
                   )}
                 </div>
               )}
-              {loaded && page === 'overview' && (
-                <OverviewPage
-                  summary={loaded.summary}
-                  duplicants={loaded.views.duplicants}
-                  geysers={loaded.views.geysers}
-                  onEdit={edit}
-                />
-              )}
-              {loaded && page === 'duplicants' && (
-                <DuplicantsPage
-                  duplicants={loaded.views.duplicants}
-                  catalogs={loaded.catalogs}
-                  selectedId={selected?.id}
-                  onSelect={setSelectedDupe}
-                  onEdit={edit}
-                />
-              )}
-              {loaded && page === 'geysers' && (
-                <GeysersPage geysers={loaded.views.geysers} onEdit={edit} />
-              )}
-              {loaded && page === 'critters' && (
-                <CrittersPage critters={loaded.views.critters} onEdit={edit} />
-              )}
-              {loaded && page === 'research' && (
-                <ResearchPage techs={loaded.views.techs} onEdit={edit} />
-              )}
-              {loaded && page === 'space' && (
-                <SpacePage
-                  worlds={loaded.views.worlds}
-                  destinations={loaded.views.destinations}
-                  onEdit={edit}
-                />
-              )}
-              {loaded && page === 'settings' && (
-                <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
-              )}
-              {loaded && page === 'raw' && <RawPage revision={revision} onEdit={edit} />}
-              {loaded && page === 'materials' && (
-                <MaterialsPage
-                  materials={loaded.views.materials}
-                  revision={revision}
-                  onEdit={edit}
-                />
-              )}
+              <Suspense fallback={<PageFallback />}>
+                {loaded && page === 'overview' && (
+                  <OverviewPage
+                    summary={loaded.summary}
+                    duplicants={loaded.views.duplicants}
+                    geysers={loaded.views.geysers}
+                    onEdit={edit}
+                  />
+                )}
+                {loaded && page === 'duplicants' && (
+                  <DuplicantsPage
+                    duplicants={loaded.views.duplicants}
+                    catalogs={loaded.catalogs}
+                    selectedId={selected?.id}
+                    onSelect={setSelectedDupe}
+                    onEdit={edit}
+                  />
+                )}
+                {loaded && page === 'geysers' && (
+                  <GeysersPage geysers={loaded.views.geysers} onEdit={edit} />
+                )}
+                {loaded && page === 'critters' && (
+                  <CrittersPage critters={loaded.views.critters} onEdit={edit} />
+                )}
+                {loaded && page === 'research' && (
+                  <ResearchPage techs={loaded.views.techs} onEdit={edit} />
+                )}
+                {loaded && page === 'space' && (
+                  <SpacePage
+                    worlds={loaded.views.worlds}
+                    destinations={loaded.views.destinations}
+                    onEdit={edit}
+                  />
+                )}
+                {loaded && page === 'settings' && (
+                  <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
+                )}
+                {loaded && page === 'raw' && <RawPage revision={revision} onEdit={edit} />}
+                {loaded && page === 'materials' && (
+                  <MaterialsPage
+                    materials={loaded.views.materials}
+                    revision={revision}
+                    onEdit={edit}
+                  />
+                )}
+              </Suspense>
             </div>
           </div>
         </div>
