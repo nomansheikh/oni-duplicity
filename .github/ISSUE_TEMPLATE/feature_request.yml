@@ -1,0 +1,16 @@
+name: Feature request
+description: Something you'd like to edit or see.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What would you like to do?
+      description: The edit or view you want, and why.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: How the original Duplicity or another tool did it, screenshots, related saves.

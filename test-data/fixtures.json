@@ -30,6 +30,20 @@
       "license": "CC0-1.0"
     },
     {
+      "file": "beautiful-galaxy-build-744825.sav",
+      "sha256": "756d7a7c26014045f3c7c5985f7ca0c734095b426942ce875b8dd27d92f2d2a5",
+      "size": 2235521,
+      "tier": "small",
+      "committed": true,
+      "saveVersion": "7.38",
+      "dlcIds": ["EXPANSION1_ID", "DLC2_ID", "DLC3_ID", "DLC4_ID", "DLC5_ID"],
+      "cycles": 89,
+      "duplicants": 9,
+      "source": "Project owner (game build 744825)",
+      "upstream": null,
+      "license": "CC0-1.0"
+    },
+    {
       "file": "konove-save-game.sav",
       "sha256": "60a90a56e795b43f5ff1b93dadc7e357f58a8b1036191e8622f3fdd528e68bd0",
       "size": 2173022,

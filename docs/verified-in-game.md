@@ -1,6 +1,6 @@
 # Verified in game
 
-Edits confirmed by loading the edited save in the real game. Editors whose edits are not listed here show an "unverified" badge in the app.
+Edits confirmed by loading the edited save in the real game. Nothing is listed yet, so treat every edit as unverified and keep a backup.
 
 | Feature | Edit | Game version | DLCs | Date | Verified by |
 | ------- | ---- | ------------ | ---- | ---- | ----------- |

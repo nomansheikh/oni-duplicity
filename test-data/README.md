@@ -9,13 +9,14 @@ vp run fixtures               # everything (about 120 MB of downloads)
 vp run fixtures --tier small  # the set CI runs on pull requests (about 5 MB)
 ```
 
-Two saves are committed in `saves/`. The rest are downloaded from the [`fixtures-v1` release](https://github.com/nomansheikh/oni-duplicity/releases/tag/fixtures-v1) into `fetched/` (git-ignored) and checked against their SHA-256. A local file with the wrong checksum is downloaded again; a download with the wrong checksum is rejected. Committed saves are never downloaded or overwritten; a checksum mismatch there fails the command and the tests.
+Three saves are committed in `saves/`. The rest are downloaded from the [`fixtures-v1` release](https://github.com/nomansheikh/oni-duplicity/releases/tag/fixtures-v1) into `fetched/` (git-ignored) and checked against their SHA-256. A local file with the wrong checksum is downloaded again; a download with the wrong checksum is rejected. Committed saves are never downloaded or overwritten; a checksum mismatch there fails the command and the tests.
 
 ## Fixtures
 
 | File                                             | Tier  | Version | DLCs                                   | Cycles | Duplicants | License    |
 | ------------------------------------------------ | ----- | ------- | -------------------------------------- | ------ | ---------- | ---------- |
 | `saves/apple-park.sav`                           | small | 7.37    | EXPANSION1, DLC2, DLC3, DLC4, DLC5     | 0      | 3          | CC0-1.0    |
+| `saves/beautiful-galaxy-build-744825.sav`        | small | 7.38    | EXPANSION1, DLC2, DLC3, DLC4, DLC5     | 89     | 9          | CC0-1.0    |
 | `saves/beautiful-galaxy.sav`                     | small | 7.38    | EXPANSION1, DLC2, DLC3, DLC4, DLC5     | 88     | 9          | CC0-1.0    |
 | `fetched/konove-save-game.sav`                   | small | 7.36    | EXPANSION1, DLC2, DLC3, DLC4 (sandbox) | 67     | 8          | MIT        |
 | `fetched/mithro-01-early-game-cycle-010.sav`     | small | 7.34    | DLC2                                   | 10     | 5          | Apache-2.0 |
@@ -27,7 +28,7 @@ Two saves are committed in `saves/`. The rest are downloaded from the [`fixtures
 
 ## Sources and licenses
 
-- `apple-park.sav` and `beautiful-galaxy.sav`: contributed by the project owner under [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/).
+- `apple-park.sav`, `beautiful-galaxy.sav` and `beautiful-galaxy-build-744825.sav` (the same colony one cycle later, saved by game build 744825): contributed by the project owner under [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/).
 - `konove-save-game.sav`: from [konove/oni-save-parser](https://github.com/konove/oni-save-parser), originally from [RoboPhred/oni-duplicity](https://github.com/RoboPhred/oni-duplicity). MIT; see [`licenses/konove-oni-save-parser-LICENSE`](licenses/konove-oni-save-parser-LICENSE).
 - `mithro-*.sav`: from [mithro/python-oni-save-parser](https://github.com/mithro/python-oni-save-parser). Apache-2.0; see [`licenses/mithro-python-oni-save-parser-LICENSE`](licenses/mithro-python-oni-save-parser-LICENSE).
 

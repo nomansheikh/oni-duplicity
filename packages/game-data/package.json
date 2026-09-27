@@ -18,13 +18,14 @@
   ],
   "type": "module",
   "exports": {
-    ".": "./dist/index.mjs",
+    ".": "./src/index.ts",
     "./package.json": "./package.json"
   },
   "scripts": {
     "build": "vp pack",
     "dev": "vp pack --watch",
-    "test": "vp test"
+    "test": "vp test",
+    "extract-game-data": "node scripts/extract-game-data.ts"
   },
   "devDependencies": {
     "@types/node": "catalog:",
