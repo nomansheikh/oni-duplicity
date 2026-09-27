@@ -1,193 +1,309 @@
-import { useCallback, useEffect, useState } from "react";
-import { DropZone } from "./components/DropZone.tsx";
-import { Duplicants } from "./components/Duplicants.tsx";
-import { Geysers } from "./components/Geysers.tsx";
-import { Overview } from "./components/Overview.tsx";
-import { Badge, Button } from "./components/ui.tsx";
-import { DLC_NAMES } from "./lib/format.ts";
-import { downloadBytes, loadSave, saveClient } from "./lib/save-client.ts";
-import type { DuplicantView, Edit, GeyserView, Summary } from "./worker/model.ts";
-
-type Tab = "overview" | "duplicants" | "geysers";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { Download, Moon, Redo2, Sun, Undo2 } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { toast } from 'sonner'
+import { AppSidebar, type Page } from '@/components/app-sidebar'
+import { DuplicantsPage } from '@/components/duplicants/DuplicantsPage'
+import { GeysersPage } from '@/components/geysers-page'
+import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
+import { OverviewPage } from '@/components/overview-page'
+import { SiteHeader } from '@/components/site-header'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
+import { Kbd, KbdGroup } from '@/components/ui/kbd'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { downloadBytes, loadSave, saveClient } from '@/lib/save-client'
+import type { Catalogs, DuplicantView, Edit, GeyserView, Summary } from '@/worker/model'
 
 type State =
-  | { status: "idle" }
-  | { status: "loading"; fileName: string; progress: number }
-  | { status: "error"; message: string }
-  | { status: "loaded"; summary: Summary };
+  | { status: 'idle' }
+  | { status: 'loading'; fileName: string; progress: number }
+  | { status: 'error'; message: string }
+  | { status: 'loaded'; summary: Summary }
 
 interface Views {
-  duplicants: DuplicantView[];
-  knownTraits: string[];
-  geysers: GeyserView[];
+  duplicants: DuplicantView[]
+  geysers: GeyserView[]
+}
+
+interface EditStatus {
+  edits: number
+  canUndo: boolean
+  canRedo: boolean
+}
+
+const NO_EDITS: EditStatus = { edits: 0, canUndo: false, canRedo: false }
+
+const PAGE_TITLES: Record<Page, string> = {
+  overview: 'Overview',
+  duplicants: 'Duplicants',
+  geysers: 'Geysers',
 }
 
 export default function App() {
-  const [state, setState] = useState<State>({ status: "idle" });
-  const [tab, setTab] = useState<Tab>("overview");
-  const [views, setViews] = useState<Views | null>(null);
-  const [edits, setEdits] = useState(0);
-  const [saving, setSaving] = useState(false);
+  const [state, setState] = useState<State>({ status: 'idle' })
+  const [views, setViews] = useState<Views | null>(null)
+  const [catalogs, setCatalogs] = useState<Catalogs | null>(null)
+  const [editStatus, setEditStatus] = useState<EditStatus>(NO_EDITS)
+  const [page, setPage] = useState<Page>('overview')
+  const [selectedDupe, setSelectedDupe] = useState<string>()
+  const [saving, setSaving] = useState(false)
+  const fileInput = useRef<HTMLInputElement>(null)
+  const { resolvedTheme, setTheme } = useTheme()
 
   const refresh = useCallback(async () => {
-    const [summary, duplicants, knownTraits, geysers] = await Promise.all([
+    const [summary, duplicants, geysers] = await Promise.all([
       saveClient.summary(),
       saveClient.duplicants(),
-      saveClient.knownTraits(),
       saveClient.geysers(),
-    ]);
-    setState({ status: "loaded", summary });
-    setViews({ duplicants, knownTraits, geysers });
-  }, []);
+    ])
+    setState({ status: 'loaded', summary })
+    setViews({ duplicants, geysers })
+  }, [])
 
   const open = async (file: File) => {
-    setState({ status: "loading", fileName: file.name, progress: 0 });
-    setViews(null);
-    setEdits(0);
+    if (editStatus.edits > 0 && !confirm('Discard your unsaved changes?')) return
+    setState({ status: 'loading', fileName: file.name, progress: 0 })
+    setViews(null)
+    setEditStatus(NO_EDITS)
+    setSelectedDupe(undefined)
     try {
       await loadSave(file, (progress) =>
-        setState((s) => (s.status === "loading" ? { ...s, progress } : s)),
-      );
-      await refresh();
-      setTab("overview");
+        setState((s) => (s.status === 'loading' ? { ...s, progress } : s)),
+      )
+      setCatalogs(await saveClient.catalogs())
+      await refresh()
+      setPage('overview')
     } catch (error) {
-      setState({ status: "error", message: (error as Error).message });
+      setState({ status: 'error', message: (error as Error).message })
     }
-  };
+  }
 
-  const edit = async (change: Edit) => {
-    try {
-      setEdits(await saveClient.apply(change));
-      await refresh();
-    } catch (error) {
-      alert((error as Error).message);
-    }
-  };
+  const run = useCallback(
+    async (action: () => Promise<EditStatus>) => {
+      try {
+        setEditStatus(await action())
+        await refresh()
+      } catch (error) {
+        toast.error((error as Error).message)
+      }
+    },
+    [refresh],
+  )
+
+  const edit = (change: Edit) => run(() => saveClient.apply(change))
+  const undo = useCallback(() => run(() => saveClient.undo()), [run])
+  const redo = useCallback(() => run(() => saveClient.redo()), [run])
 
   const download = async () => {
-    if (state.status !== "loaded") return;
-    setSaving(true);
+    if (state.status !== 'loaded') return
+    setSaving(true)
     try {
-      const bytes = await saveClient.save();
-      downloadBytes(bytes, `${state.summary.baseName}.sav`);
+      downloadBytes(await saveClient.save(), `${state.summary.baseName}.sav`)
+      toast.success('Save downloaded', {
+        description: 'Back up your original before replacing it.',
+      })
+    } catch (error) {
+      toast.error((error as Error).message)
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   const close = async () => {
-    if (edits > 0 && !confirm("Discard your unsaved changes?")) return;
-    await saveClient.close();
-    setState({ status: "idle" });
-    setViews(null);
-    setEdits(0);
-  };
+    if (editStatus.edits > 0 && !confirm('Discard your unsaved changes?')) return
+    await saveClient.close()
+    setState({ status: 'idle' })
+    setViews(null)
+    setEditStatus(NO_EDITS)
+  }
 
   useEffect(() => {
-    if (edits === 0) return;
-    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [edits]);
+    if (state.status !== 'loaded') return
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z') return
+      if (e.target instanceof HTMLInputElement) return
+      e.preventDefault()
+      void (e.shiftKey ? redo() : undo())
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [state.status, undo, redo])
+
+  useEffect(() => {
+    if (editStatus.edits === 0) return
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault()
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [editStatus.edits])
+
+  const loaded =
+    state.status === 'loaded' && views && catalogs
+      ? { summary: state.summary, views, catalogs }
+      : null
+  const selected = views?.duplicants.find((d) => d.id === selectedDupe) ?? views?.duplicants[0]
+  const crumbs = loaded
+    ? [
+        loaded.summary.baseName,
+        PAGE_TITLES[page],
+        ...(page === 'duplicants' && selected ? [selected.name] : []),
+      ]
+    : ['Duplicity']
+
+  const themeToggle = (
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label="Toggle theme"
+      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+    >
+      {resolvedTheme === 'dark' ? <Sun /> : <Moon />}
+    </Button>
+  )
+
+  const actions = loaded ? (
+    <>
+      {editStatus.edits > 0 && (
+        <Badge variant="secondary" className="hidden sm:inline-flex">
+          {editStatus.edits} unsaved {editStatus.edits === 1 ? 'edit' : 'edits'}
+        </Badge>
+      )}
+      <ButtonGroup>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Undo"
+              onClick={undo}
+              disabled={!editStatus.canUndo}
+            >
+              <Undo2 />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            Undo{' '}
+            <KbdGroup>
+              <Kbd>⌘</Kbd>
+              <Kbd>Z</Kbd>
+            </KbdGroup>
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Redo"
+              onClick={redo}
+              disabled={!editStatus.canRedo}
+            >
+              <Redo2 />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            Redo{' '}
+            <KbdGroup>
+              <Kbd>⌘</Kbd>
+              <Kbd>⇧</Kbd>
+              <Kbd>Z</Kbd>
+            </KbdGroup>
+          </TooltipContent>
+        </Tooltip>
+      </ButtonGroup>
+      <Button onClick={download} disabled={saving}>
+        <Download />
+        <span className="hidden sm:inline">{saving ? 'Saving…' : 'Download save'}</span>
+      </Button>
+      {themeToggle}
+    </>
+  ) : (
+    themeToggle
+  )
 
   return (
-    <div className="mx-auto max-w-6xl space-y-4 p-6">
-      <header className="flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-bold">Duplicity</h1>
-        <span className="text-sm text-zinc-500">Oxygen Not Included save editor</span>
-        {state.status === "loaded" && (
-          <div className="ml-auto flex flex-wrap items-center gap-2">
-            <span className="text-sm text-zinc-300">{state.summary.fileName}</span>
-            <Badge>v{state.summary.version}</Badge>
-            {state.summary.isAutoSave && <Badge tone="amber">Autosave</Badge>}
-            {state.summary.dlcIds.map((id) => (
-              <Badge key={id} tone="sky">
-                {DLC_NAMES[id] ?? id}
-              </Badge>
-            ))}
-            {edits > 0 && <Badge tone="emerald">{edits} unsaved edit(s)</Badge>}
-            <Button variant="primary" onClick={download} disabled={saving}>
-              {saving ? "Saving…" : "Download save"}
-            </Button>
-            <Button variant="ghost" onClick={close}>
-              Close
-            </Button>
-          </div>
-        )}
-      </header>
-
-      {state.status === "idle" && <DropZone onFile={open} />}
-
-      {state.status === "loading" && (
-        <div className="space-y-2 rounded-lg border border-zinc-800 p-6">
-          <p className="text-sm">Reading {state.fileName}…</p>
-          <div className="h-2 overflow-hidden rounded bg-zinc-800">
-            <div
-              className="h-full bg-emerald-500 transition-all"
-              style={{ width: `${Math.round(state.progress * 100)}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {state.status === "error" && (
-        <div className="space-y-3">
-          <div className="rounded-lg border border-red-900 bg-red-950/40 p-4 text-sm">
-            <p className="font-medium text-red-300">This save could not be loaded.</p>
-            <details className="mt-2 text-red-200/80">
-              <summary className="cursor-pointer">Details</summary>
-              <pre className="mt-2 whitespace-pre-wrap">{state.message}</pre>
-            </details>
-          </div>
-          <DropZone onFile={open} />
-        </div>
-      )}
-
-      {state.status === "loaded" && views && (
-        <>
-          {(state.summary.unverified || state.summary.warnings.length > 0) && (
-            <div className="rounded-lg border border-amber-900 bg-amber-950/40 p-3 text-sm text-amber-200">
-              {state.summary.warnings.map((w) => (
-                <p key={w}>{w}</p>
-              ))}
-              {state.summary.unverified && <p>Editing may corrupt this save. Keep a backup.</p>}
+    <SidebarProvider
+      style={
+        {
+          '--sidebar-width': 'calc(var(--spacing) * 64)',
+          '--header-height': 'calc(var(--spacing) * 12)',
+        } as CSSProperties
+      }
+    >
+      <AppSidebar
+        variant="inset"
+        page={page}
+        onNavigate={setPage}
+        counts={
+          loaded
+            ? { duplicants: loaded.views.duplicants.length, geysers: loaded.views.geysers.length }
+            : {}
+        }
+        file={loaded ? { name: loaded.summary.fileName, version: loaded.summary.version } : null}
+        onOpen={() => fileInput.current?.click()}
+        onClose={close}
+      />
+      <SidebarInset>
+        <SiteHeader crumbs={crumbs} actions={actions} />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
+              {state.status === 'idle' && (
+                <OpenSave onFile={open} onPick={() => fileInput.current?.click()} />
+              )}
+              {state.status === 'loading' && (
+                <LoadingSave fileName={state.fileName} progress={state.progress} />
+              )}
+              {state.status === 'error' && (
+                <LoadError message={state.message} onPick={() => fileInput.current?.click()} />
+              )}
+              {loaded && (loaded.summary.unverified || loaded.summary.warnings.length > 0) && (
+                <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
+                  {loaded.summary.warnings.map((w) => (
+                    <p key={w}>{w}</p>
+                  ))}
+                  {loaded.summary.unverified && (
+                    <p>Editing may corrupt this save. Keep a backup.</p>
+                  )}
+                </div>
+              )}
+              {loaded && page === 'overview' && (
+                <OverviewPage
+                  summary={loaded.summary}
+                  duplicants={loaded.views.duplicants}
+                  geysers={loaded.views.geysers}
+                  onEdit={edit}
+                />
+              )}
+              {loaded && page === 'duplicants' && (
+                <DuplicantsPage
+                  duplicants={loaded.views.duplicants}
+                  catalogs={loaded.catalogs}
+                  selectedId={selected?.id}
+                  onSelect={setSelectedDupe}
+                  onEdit={edit}
+                />
+              )}
+              {loaded && page === 'geysers' && (
+                <GeysersPage geysers={loaded.views.geysers} onEdit={edit} />
+              )}
             </div>
-          )}
-          <p className="text-xs text-zinc-500">
-            Back up your save before replacing it with the downloaded file.
-          </p>
-          <nav className="flex gap-1 border-b border-zinc-800">
-            {(
-              [
-                ["overview", "Overview"],
-                ["duplicants", `Duplicants (${views.duplicants.length})`],
-                ["geysers", `Geysers (${views.geysers.length})`],
-              ] as [Tab, string][]
-            ).map(([id, label]) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`-mb-px border-b-2 px-3 py-2 text-sm ${
-                  tab === id
-                    ? "border-emerald-500 text-white"
-                    : "border-transparent text-zinc-400 hover:text-zinc-200"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </nav>
-          {tab === "overview" && <Overview summary={state.summary} onEdit={edit} />}
-          {tab === "duplicants" && (
-            <Duplicants
-              duplicants={views.duplicants}
-              knownTraits={views.knownTraits}
-              onEdit={edit}
-            />
-          )}
-          {tab === "geysers" && <Geysers geysers={views.geysers} onEdit={edit} />}
-        </>
-      )}
-    </div>
-  );
+          </div>
+        </div>
+      </SidebarInset>
+      <input
+        ref={fileInput}
+        type="file"
+        accept=".sav"
+        hidden
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) void open(file)
+          e.target.value = ''
+        }}
+      />
+    </SidebarProvider>
+  )
 }

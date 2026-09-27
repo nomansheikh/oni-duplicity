@@ -9,10 +9,23 @@
     "preview": "vp preview"
   },
   "dependencies": {
+    "@fontsource-variable/jetbrains-mono": "catalog:",
+    "@fontsource/barlow": "catalog:",
+    "@fontsource/chakra-petch": "catalog:",
+    "@oni-duplicity/game-data": "catalog:",
     "@oni-duplicity/save-parser": "catalog:",
+    "class-variance-authority": "catalog:",
+    "cmdk": "catalog:",
+    "cn": "catalog:",
     "comlink": "catalog:",
+    "lucide-react": "catalog:",
+    "next-themes": "catalog:",
+    "radix-ui": "catalog:",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "shadcn": "catalog:",
+    "sonner": "catalog:",
+    "tw-animate-css": "catalog:"
   },
   "devDependencies": {
     "@tailwindcss/vite": "catalog:",
