@@ -1,6 +1,7 @@
 import { Reader, Writer } from './binary.ts'
 import { readTemplateData, writeTemplateData, type TemplateMap } from './templates.ts'
-import type { TemplateData } from './types.ts'
+import { readGameObject, writeGameObject } from './game-objects.ts'
+import type { GameObject, TemplateData } from './types.ts'
 
 /** One entry of a Klei `Modifications` list, e.g. the "Stress" amount. */
 export interface ModifierInstance {
@@ -62,7 +63,34 @@ const modifiers: ExtraDataCodec = {
   },
 }
 
+/** An item held in a Storage: a prefab name plus a full game object. */
+export interface StoredItem extends GameObject {
+  name: string
+}
+
+const storage: ExtraDataCodec = {
+  read: (r, templates) => {
+    const count = r.i32()
+    if (count < 0 || count > r.remaining) r.fail(`Invalid stored item count ${count}`)
+    const items: StoredItem[] = []
+    for (let i = 0; i < count; i++) {
+      const name = r.name()
+      items.push({ name, ...readGameObject(r, templates, `Storage > ${name}`) })
+    }
+    return items
+  },
+  write: (w, templates, value) => {
+    const items = value as StoredItem[]
+    w.i32(items.length)
+    for (const item of items) {
+      w.string(item.name)
+      writeGameObject(w, templates, item)
+    }
+  },
+}
+
 const CODECS: Record<string, ExtraDataCodec> = {
+  Storage: storage,
   MinionModifiers: modifiers,
   'Klei.AI.Modifiers': modifiers,
 }

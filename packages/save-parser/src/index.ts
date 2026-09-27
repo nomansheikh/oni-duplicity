@@ -11,4 +11,4 @@ export {
   type ParseOptions,
 } from './save.ts'
 export * from './types.ts'
-export type { ModifierInstance, ModifiersExtraData } from './extra-data.ts'
+export type { ModifierInstance, ModifiersExtraData, StoredItem } from './extra-data.ts'
