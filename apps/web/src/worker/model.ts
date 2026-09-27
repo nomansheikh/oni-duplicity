@@ -264,6 +264,8 @@ export type Edit =
   | { type: 'setAccessory'; id: string; slot: AccessorySlot; number: string }
   | { type: 'applyProfile'; id: string; profile: DuplicantProfile; sections: ProfileSection[] }
   | { type: 'setDebugWasUsed'; used: boolean }
+  | { type: 'bulkDuplicants'; action: 'relieveStress' | 'fillNeeds' | 'masterSkills' }
+  | { type: 'bulkDuplicants'; action: 'setAttributes'; level: number }
   | { type: 'setGeyserName'; id: string; name: string }
   | { type: 'setGeyserValue'; id: string; field: GeyserField; value: number }
   | { type: 'setItemMass'; ref: string; mass: number }
@@ -284,6 +286,16 @@ export type Edit =
 // --- Helpers ---------------------------------------------------------------
 
 const SECONDS_PER_CYCLE = 600
+
+/** Full values for a standard duplicant; bladder and stress are best empty. */
+const FULL_NEEDS: Record<string, number> = {
+  HitPoints: 100,
+  Calories: 4_000_000,
+  Stamina: 100,
+  Breath: 100,
+  Bladder: 0,
+  Stress: 0,
+}
 const ACCESSORY_PREFIX = 'Root.Accessories.'
 
 function range(from: number, to: number): number[] {
@@ -577,6 +589,34 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       if (!('debugWasUsed' in save.gameData)) throw new Error('This save has no debug flag')
       save.gameData.debugWasUsed = edit.used
       return
+    case 'bulkDuplicants': {
+      const activeDlcs = new Set(dlcIds(save))
+      for (const { id, prefab, obj } of objectsWith(save, 'MinionIdentity')) {
+        const present = new Set(modifiers(obj)?.amounts.map((a) => a.name) ?? [])
+        const setAmount = (amountId: string, value: number) =>
+          present.has(amountId) && applyEdit(save, { type: 'setAmount', id, amountId, value })
+        if (edit.action === 'relieveStress') setAmount('Stress', 0)
+        if (edit.action === 'fillNeeds') {
+          for (const [amountId, value] of Object.entries(FULL_NEEDS)) setAmount(amountId, value)
+        }
+        if (edit.action === 'setAttributes') {
+          const levels = (behavior(obj, 'Klei.AI.AttributeLevels')?.templateData?.saveLoadLevels ??
+            []) as { attributeId: string }[]
+          for (const { attributeId } of levels) {
+            applyEdit(save, { type: 'setAttributeLevel', id, attributeId, level: edit.level })
+          }
+        }
+        if (edit.action === 'masterSkills') {
+          const model = (data(obj, 'MinionIdentity').model as { name?: string } | undefined)?.name
+          for (const skill of MinionSkills) {
+            if ((skill.model ?? 'Minion') !== (model ?? prefab)) continue
+            if (!skill.requiredDlcIds.every((d) => activeDlcs.has(d))) continue
+            applyEdit(save, { type: 'setSkillMastered', id, skillId: skill.id, mastered: true })
+          }
+        }
+      }
+      return
+    }
     case 'setGeyserValue': {
       const config = data(objectById(save, edit.id), 'Geyser').configuration as
         | Record<string, number>
@@ -876,6 +916,9 @@ export function itemByRef(save: SaveGame, ref: string): GameObject {
 
 /** The game objects an edit may change, for undo snapshots. */
 export function touchedBy(save: SaveGame, edit: Edit): GameObject[] {
+  if (edit.type === 'bulkDuplicants') {
+    return objectsWith(save, 'MinionIdentity').map(({ obj }) => obj)
+  }
   if ('id' in edit) return [objectById(save, edit.id)]
   if ('ref' in edit) return [objectById(save, edit.ref.split('/')[0]!)]
   if ('elementId' in edit)
