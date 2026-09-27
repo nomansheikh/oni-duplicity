@@ -11,6 +11,7 @@ import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
 import { MaterialsPage } from '@/components/materials-page'
 import { OverviewPage } from '@/components/overview-page'
 import { PreferencesDialog } from '@/components/preferences-dialog'
+import { RawPage } from '@/components/raw-page'
 import { ResearchPage } from '@/components/research-page'
 import { SettingsPage } from '@/components/settings-page'
 import { SpacePage } from '@/components/space-page'
@@ -71,6 +72,7 @@ const PAGE_TITLES: Record<Page, string> = {
   research: 'Research',
   space: 'Space',
   settings: 'Game settings',
+  raw: 'Raw data',
 }
 
 export default function App() {
@@ -386,6 +388,7 @@ export default function App() {
               {loaded && page === 'settings' && (
                 <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
               )}
+              {loaded && page === 'raw' && <RawPage revision={revision} onEdit={edit} />}
               {loaded && page === 'materials' && (
                 <MaterialsPage
                   materials={loaded.views.materials}

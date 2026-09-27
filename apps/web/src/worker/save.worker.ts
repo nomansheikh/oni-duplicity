@@ -16,6 +16,9 @@ import {
   listGameSettings,
   listTechs,
   listWorlds,
+  rawChildren,
+  rawGet,
+  type RawPath,
   listMaterialItems,
   listMaterials,
   touchedBy,
@@ -25,6 +28,22 @@ import {
 
 /** Captures the state an edit can touch, so undo can put it back. */
 function snapshot(save: SaveGame, edit: Edit): () => void {
+  // Raw edits restore just the value (or array) they touched; walking the tree is cheap.
+  if (edit.type === 'rawSet') {
+    const old = rawGet(save, edit.path)
+    const parent = rawGet(save, edit.path.slice(0, -1)) as Record<string | number, unknown>
+    const key = edit.path[edit.path.length - 1]!
+    return () => {
+      parent[key] = old
+    }
+  }
+  if (edit.type === 'rawRemove' || edit.type === 'rawDuplicate') {
+    const array = rawGet(save, edit.path.slice(0, -1)) as unknown[]
+    const copy = [...array]
+    return () => {
+      array.splice(0, array.length, ...copy)
+    }
+  }
   const gameInfo = cloneValue(save.header.gameInfo)
   const customGameSettings = cloneValue(save.gameData.customGameSettings)
   const behaviors = touchedBy(save, edit).flatMap((obj: GameObject) =>
@@ -99,6 +118,8 @@ const api = {
   worlds: () => listWorlds(current()),
   destinations: () => listDestinations(current()),
   materialItems: (elementId: string) => listMaterialItems(current(), elementId),
+  rawChildren: (path: RawPath, offset?: number, limit?: number) =>
+    rawChildren(current(), path, offset, limit),
   status,
   apply(edit: Edit) {
     apply(edit)

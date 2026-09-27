@@ -134,6 +134,34 @@ export interface DestinationView {
   resources: { name: string; amount: number }[]
 }
 
+export type RawKind =
+  | 'object'
+  | 'array'
+  | 'bytes'
+  | 'string'
+  | 'number'
+  | 'boolean'
+  | 'bigint'
+  | 'null'
+
+export type RawPath = (string | number)[]
+
+export interface RawEntry {
+  key: string | number
+  /** Friendlier label, e.g. a group's prefab or a behavior's name. */
+  label?: string
+  path: RawPath
+  kind: RawKind
+  /** Children count for objects, arrays and byte arrays. */
+  size?: number
+  value?: string | number | boolean | null
+}
+
+export interface RawChildren {
+  entries: RawEntry[]
+  total: number
+}
+
 export type AccessorySlot = 'hair' | 'headshape' | 'eyes' | 'mouth' | 'torso' | 'skin'
 
 export interface AccessorySlotView {
@@ -230,6 +258,9 @@ export type Edit =
   | { type: 'setGameSetting'; settingId: string; level: string }
   | { type: 'setAsteroidName'; id: string; name: string }
   | { type: 'setWorldDiscovered'; id: string; discovered: boolean }
+  | { type: 'rawSet'; path: RawPath; value: string | number | boolean | null }
+  | { type: 'rawRemove'; path: RawPath }
+  | { type: 'rawDuplicate'; path: RawPath }
   | { type: 'setMaterialTemperature'; elementId: string; kelvin: number }
   | { type: 'scaleMaterialMass'; elementId: string; factor: number }
 
@@ -553,6 +584,24 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
     case 'setGameSetting':
       setQualityLevel(save, edit.settingId, edit.level)
       return
+    case 'rawSet': {
+      const { parent, key } = rawParent(save, edit.path)
+      const current = parent[key as never] as unknown
+      parent[key as never] = coerce(current, edit.value) as never
+      return
+    }
+    case 'rawRemove': {
+      const { parent, key } = rawParent(save, edit.path)
+      if (!Array.isArray(parent)) throw new Error('Only array items can be removed')
+      parent.splice(Number(key), 1)
+      return
+    }
+    case 'rawDuplicate': {
+      const { parent, key } = rawParent(save, edit.path)
+      if (!Array.isArray(parent)) throw new Error('Only array items can be duplicated')
+      parent.splice(Number(key) + 1, 0, cloneValue(parent[Number(key)]))
+      return
+    }
     case 'setMaterialTemperature':
       for (const item of materialItems(save, edit.elementId))
         primary(item.obj)._Temperature = edit.kelvin
@@ -1030,4 +1079,94 @@ export function listDestinations(save: SaveGame): DestinationView[] {
       amount,
     })),
   }))
+}
+
+// --- Raw editor -------------------------------------------------------------------------
+
+function kindOf(value: unknown): RawKind {
+  if (value === null || value === undefined) return 'null'
+  if (value instanceof Uint8Array) return 'bytes'
+  if (Array.isArray(value)) return 'array'
+  if (typeof value === 'bigint') return 'bigint'
+  if (typeof value === 'object') return 'object'
+  return typeof value as 'string' | 'number' | 'boolean'
+}
+
+export function rawGet(save: SaveGame, path: RawPath): unknown {
+  let node: unknown = save
+  for (const key of path) {
+    if (node === null || typeof node !== 'object') throw new Error(`No value at ${path.join('.')}`)
+    node = (node as Record<string | number, unknown>)[key]
+  }
+  return node
+}
+
+function rawParent(
+  save: SaveGame,
+  path: RawPath,
+): { parent: Record<string | number, unknown>; key: string | number } {
+  if (path.length === 0) throw new Error('Cannot edit the root')
+  const parent = rawGet(save, path.slice(0, -1))
+  if (parent === null || typeof parent !== 'object')
+    throw new Error(`No value at ${path.join('.')}`)
+  return { parent: parent as Record<string | number, unknown>, key: path[path.length - 1]! }
+}
+
+/** Keep the stored type when a primitive is edited (bigints stay bigints, floats stay numbers). */
+function coerce(current: unknown, value: string | number | boolean | null): unknown {
+  switch (kindOf(current)) {
+    case 'bigint':
+      return BigInt(String(value))
+    case 'number': {
+      const n = Number(value)
+      if (!Number.isFinite(n)) throw new Error(`${String(value)} is not a number`)
+      return n
+    }
+    case 'boolean':
+      return value === true || value === 'true'
+    case 'string':
+    case 'null':
+      return value === null ? null : String(value)
+    default:
+      throw new Error('Only primitive values can be edited')
+  }
+}
+
+/** Groups and behaviors carry a `name`; show it next to the index. */
+function labelFor(value: unknown): string | undefined {
+  if (kindOf(value) !== 'object') return undefined
+  const name = (value as { name?: unknown }).name
+  return typeof name === 'string' ? name : undefined
+}
+
+const hex = (bytes: Uint8Array) =>
+  Array.from(bytes.subarray(0, 16), (b) => b.toString(16).padStart(2, '0')).join(' ') +
+  (bytes.length > 16 ? ' …' : '')
+
+export function rawChildren(save: SaveGame, path: RawPath, offset = 0, limit = 500): RawChildren {
+  const node = rawGet(save, path)
+  const pairs: [string | number, unknown][] =
+    node instanceof Uint8Array
+      ? []
+      : Array.isArray(node)
+        ? node.map((v, i) => [i, v])
+        : node && typeof node === 'object'
+          ? Object.entries(node)
+          : []
+  const entries = pairs.slice(offset, offset + limit).map(([key, value]): RawEntry => {
+    const kind = kindOf(value)
+    const entry: RawEntry = { key, path: [...path, key], kind }
+    const label = labelFor(value)
+    if (label) entry.label = label
+    if (kind === 'array') entry.size = (value as unknown[]).length
+    else if (kind === 'object') entry.size = Object.keys(value as object).length
+    else if (kind === 'bytes') {
+      entry.size = (value as Uint8Array).length
+      entry.value = hex(value as Uint8Array)
+    } else if (kind === 'bigint') entry.value = String(value)
+    else if (kind === 'null') entry.value = null
+    else entry.value = value as string | number | boolean
+    return entry
+  })
+  return { entries, total: pairs.length }
 }

@@ -12,6 +12,7 @@ import {
   Rocket,
   Save,
   Users,
+  Braces,
   X,
 } from 'lucide-react'
 import {
@@ -45,6 +46,7 @@ export type Page =
   | 'research'
   | 'space'
   | 'settings'
+  | 'raw'
 
 const PAGES: { id: Page; title: string; icon: ReactNode }[] = [
   { id: 'overview', title: 'Overview', icon: <LayoutDashboard /> },
@@ -55,6 +57,10 @@ const PAGES: { id: Page; title: string; icon: ReactNode }[] = [
   { id: 'research', title: 'Research', icon: <FlaskConical /> },
   { id: 'space', title: 'Space', icon: <Rocket /> },
   { id: 'settings', title: 'Game settings', icon: <Gauge /> },
+]
+
+const ADVANCED: { id: Page; title: string; icon: ReactNode }[] = [
+  { id: 'raw', title: 'Raw data', icon: <Braces /> },
 ]
 
 export interface OpenFile {
@@ -96,29 +102,8 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Colony</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {PAGES.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    isActive={file !== null && page === item.id}
-                    disabled={file === null}
-                    onClick={() => onNavigate(item.id)}
-                  >
-                    {item.icon}
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                  {counts[item.id] !== undefined && (
-                    <SidebarMenuBadge>{counts[item.id]}</SidebarMenuBadge>
-                  )}
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <NavGroup label="Colony" items={PAGES} {...{ page, onNavigate, counts, file }} />
+        <NavGroup label="Advanced" items={ADVANCED} {...{ page, onNavigate, counts, file }} />
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
@@ -165,5 +150,47 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
+  )
+}
+
+function NavGroup({
+  label,
+  items,
+  page,
+  onNavigate,
+  counts,
+  file,
+}: {
+  label: string
+  items: { id: Page; title: string; icon: ReactNode }[]
+  page: Page
+  onNavigate: (page: Page) => void
+  counts: Partial<Record<Page, number>>
+  file: OpenFile | null
+}) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.id}>
+              <SidebarMenuButton
+                tooltip={item.title}
+                isActive={file !== null && page === item.id}
+                disabled={file === null}
+                onClick={() => onNavigate(item.id)}
+              >
+                {item.icon}
+                <span>{item.title}</span>
+              </SidebarMenuButton>
+              {counts[item.id] !== undefined && (
+                <SidebarMenuBadge>{counts[item.id]}</SidebarMenuBadge>
+              )}
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
   )
 }

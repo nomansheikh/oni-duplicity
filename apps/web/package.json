@@ -14,6 +14,7 @@
     "@fontsource/chakra-petch": "catalog:",
     "@oni-duplicity/game-data": "catalog:",
     "@oni-duplicity/save-parser": "catalog:",
+    "@tanstack/react-virtual": "catalog:",
     "class-variance-authority": "catalog:",
     "cmdk": "catalog:",
     "cn": "catalog:",
