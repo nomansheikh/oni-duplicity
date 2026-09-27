@@ -24,95 +24,97 @@ export const TypeCode = {
   HashSet: 21,
   Queue: 22,
   Colour: 23,
-} as const;
+} as const
 
-export const TYPE_CODE_MASK = 0x3f;
-export const IS_VALUE_TYPE = 0x40;
-export const IS_GENERIC_TYPE = 0x80;
+export const TYPE_CODE_MASK = 0x3f
+export const IS_VALUE_TYPE = 0x40
+export const IS_GENERIC_TYPE = 0x80
 
 export interface TypeInfo {
   /** Raw type byte: code plus value-type/generic flags. */
-  info: number;
-  templateName?: string;
-  subTypes?: TypeInfo[];
+  info: number
+  templateName?: string
+  subTypes?: TypeInfo[]
 }
 
 export interface TemplateMember {
-  name: string;
-  type: TypeInfo;
+  name: string
+  type: TypeInfo
 }
 
 export interface Template {
-  name: string;
-  fields: TemplateMember[];
-  properties: TemplateMember[];
+  name: string
+  fields: TemplateMember[]
+  properties: TemplateMember[]
 }
 
-export type TemplateData = Record<string, unknown>;
+export type TemplateData = Record<string, unknown>
 
 export interface Vector3 {
-  x: number;
-  y: number;
-  z: number;
+  x: number
+  y: number
+  z: number
 }
 
 export interface Quaternion {
-  x: number;
-  y: number;
-  z: number;
-  w: number;
+  x: number
+  y: number
+  z: number
+  w: number
 }
 
 export interface Behavior {
-  name: string;
+  name: string
   /** Decoded fields, or null when the save has no template for this behavior. */
-  templateData: TemplateData | null;
-  /** Bytes after the template data (or all bytes when there is no template). */
-  extraRaw: Uint8Array;
+  templateData: TemplateData | null
+  /** Decoded data that follows the template data, for behaviors we understand (see extra-data.ts). */
+  extraData?: unknown
+  /** Bytes after the template and extra data (or all bytes when there is no template). */
+  extraRaw: Uint8Array
 }
 
 export interface GameObject {
-  position: Vector3;
-  rotation: Quaternion;
-  scale: Vector3;
-  folder: number;
-  behaviors: Behavior[];
+  position: Vector3
+  rotation: Quaternion
+  scale: Vector3
+  folder: number
+  behaviors: Behavior[]
 }
 
 export interface GameObjectGroup {
   /** Prefab name, e.g. `Minion` or `GeyserGeneric_steam`. */
-  name: string;
-  gameObjects: GameObject[];
+  name: string
+  gameObjects: GameObject[]
 }
 
 export interface SaveHeader {
-  buildVersion: number;
-  headerVersion: number;
-  isCompressed: boolean;
+  buildVersion: number
+  headerVersion: number
+  isCompressed: boolean
   /** Header JSON: baseName, numberOfCycles, dlcIds, saveMajorVersion, … */
   gameInfo: Record<string, unknown> & {
-    baseName: string;
-    numberOfCycles: number;
-    numberOfDuplicants: number;
-    isAutoSave: boolean;
-    saveMajorVersion: number;
-    saveMinorVersion: number;
-    sandboxEnabled?: boolean;
-    dlcId?: string | null;
-    dlcIds?: string[];
-    clusterId?: string;
-  };
+    baseName: string
+    numberOfCycles: number
+    numberOfDuplicants: number
+    isAutoSave: boolean
+    saveMajorVersion: number
+    saveMinorVersion: number
+    sandboxEnabled?: boolean
+    dlcId?: string | null
+    dlcIds?: string[]
+    clusterId?: string
+  }
 }
 
 export interface SaveGame {
-  header: SaveHeader;
-  templates: Template[];
-  world: TemplateData;
-  settings: TemplateData;
-  simData: Uint8Array;
-  version: { major: number; minor: number };
-  gameObjects: GameObjectGroup[];
-  gameData: TemplateData;
+  header: SaveHeader
+  templates: Template[]
+  world: TemplateData
+  settings: TemplateData
+  simData: Uint8Array
+  version: { major: number; minor: number }
+  gameObjects: GameObjectGroup[]
+  gameData: TemplateData
   /** Warnings collected while parsing, e.g. an unverified save version. */
-  warnings: string[];
+  warnings: string[]
 }

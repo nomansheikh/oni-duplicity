@@ -1,4 +1,4 @@
-export { ParseError } from "./binary.ts";
+export { ParseError } from './binary.ts'
 export {
   MAX_VERIFIED_MINOR,
   MIN_MINOR,
@@ -9,5 +9,6 @@ export {
   writeSave,
   writeSaveParts,
   type ParseOptions,
-} from "./save.ts";
-export * from "./types.ts";
+} from './save.ts'
+export * from './types.ts'
+export type { ModifierInstance, ModifiersExtraData } from './extra-data.ts'
