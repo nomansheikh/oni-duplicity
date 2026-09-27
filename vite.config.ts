@@ -28,5 +28,11 @@ export default defineConfig({
   },
   run: {
     cache: true,
+    tasks: {
+      fixtures: {
+        command: "node scripts/fetch-fixtures.ts",
+        cache: false,
+      },
+    },
   },
 });
