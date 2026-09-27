@@ -46,10 +46,6 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-body {
-  @apply bg-zinc-950 text-zinc-100 antialiased;
-}
-
 @theme inline {
   --font-heading: 'Chakra Petch', sans-serif;
   --font-sans: 'Barlow', sans-serif;
@@ -134,7 +130,7 @@ body {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
   button:not(:disabled),
   [role='button']:not(:disabled) {
