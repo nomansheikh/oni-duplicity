@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeEach, describe, expect, test, vi } from "vite-plus/test";
@@ -53,6 +53,16 @@ describe("ensureFixture", () => {
     const download = vi.fn(async () => bytes);
     await expect(ensureFixture(root, BASE_URL, fixture(), download)).resolves.toBe("downloaded");
     expect(await readFile(fixturePath(root, fixture()))).toEqual(Buffer.from(bytes));
+  });
+
+  test("removes a corrupt fetched file when the re-download fails", async () => {
+    await mkdir(join(root, FETCHED_DIR), { recursive: true });
+    await writeFile(fixturePath(root, fixture()), "truncated");
+    const download = vi.fn(async () => {
+      throw new Error("GET failed: 503 Service Unavailable");
+    });
+    await expect(ensureFixture(root, BASE_URL, fixture(), download)).rejects.toThrow(/503/);
+    await expect(stat(fixturePath(root, fixture()))).rejects.toThrow(/ENOENT/);
   });
 
   test("rejects a download whose checksum does not match and writes nothing", async () => {

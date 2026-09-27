@@ -1,4 +1,4 @@
-import { mkdir, rename, stat, writeFile } from "node:fs/promises";
+import { mkdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { sha256Bytes, sha256File } from "./checksum.ts";
 import type { Fixture } from "./manifest.ts";
@@ -38,6 +38,7 @@ export async function ensureFixture(
         `${fixture.file}: committed file does not match its manifest checksum (${actual})`,
       );
     }
+    await rm(path, { force: true });
   } else if (fixture.committed) {
     throw new Error(`${fixture.file}: committed fixture is missing from ${COMMITTED_DIR}`);
   }

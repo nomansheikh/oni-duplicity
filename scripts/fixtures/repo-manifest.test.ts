@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test } from "vite-plus/test";
@@ -21,3 +22,13 @@ test.each(manifest.fixtures.filter((fixture) => fixture.committed))(
     expect(await sha256File(fixturePath(root, fixture))).toBe(fixture.sha256);
   },
 );
+
+// Fetched fixtures are optional locally; any that are present must match, so tests never
+// run against a stale or truncated download.
+const fetched = manifest.fixtures.filter(
+  (fixture) => !fixture.committed && existsSync(fixturePath(root, fixture)),
+);
+
+test.each(fetched)("fetched $file matches its checksum", async (fixture) => {
+  expect(await sha256File(fixturePath(root, fixture))).toBe(fixture.sha256);
+});
