@@ -1,0 +1,34 @@
+{
+  "name": "@oni-duplicity/save-parser",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Reader and writer for Oxygen Not Included save files.",
+  "homepage": "https://github.com/nomansheikh/oni-duplicity/tree/main/packages/save-parser#readme",
+  "bugs": {
+    "url": "https://github.com/nomansheikh/oni-duplicity/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nomansheikh/oni-duplicity.git",
+    "directory": "packages/save-parser"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "@oni-duplicity/game-data",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generated Oxygen Not Included game data: IDs, names and DLC requirements.",
+  "homepage": "https://github.com/nomansheikh/oni-duplicity/tree/main/packages/game-data#readme",
+  "bugs": {
+    "url": "https://github.com/nomansheikh/oni-duplicity/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nomansheikh/oni-duplicity.git",
+    "directory": "packages/game-data"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}
