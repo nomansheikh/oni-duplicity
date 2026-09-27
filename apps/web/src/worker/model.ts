@@ -2,6 +2,7 @@ import {
   MinionSkills,
   effects as effectCatalog,
   findAmount,
+  findCritter,
   elements as elementCatalog,
   findAttribute,
   findElementByHash,
@@ -88,6 +89,17 @@ export interface MaterialItemView {
   y: number
   mass: number
   temperature: number
+}
+
+export interface CritterView {
+  id: string
+  prefab: string
+  name: string
+  family: string
+  baby: boolean
+  x: number
+  y: number
+  amounts: AmountView[]
 }
 
 export type AccessorySlot = 'hair' | 'headshape' | 'eyes' | 'mouth' | 'torso' | 'skin'
@@ -179,7 +191,8 @@ export type Edit =
   | { type: 'setGeyserName'; id: string; name: string }
   | { type: 'setItemMass'; ref: string; mass: number }
   | { type: 'setItemTemperature'; ref: string; kelvin: number }
-  | { type: 'deleteLoose'; ref: string }
+  | { type: 'deleteObject'; id: string }
+  | { type: 'cloneObject'; id: string }
   | { type: 'setMaterialTemperature'; elementId: string; kelvin: number }
   | { type: 'scaleMaterialMass'; elementId: string; factor: number }
 
@@ -280,7 +293,8 @@ function withName(entry: Named, name: unknown): Named {
 }
 
 function modifiers(obj: GameObject): ModifiersExtraData | undefined {
-  return behavior(obj, 'MinionModifiers')?.extraData as ModifiersExtraData | undefined
+  const b = behavior(obj, 'MinionModifiers') ?? behavior(obj, 'Klei.AI.Modifiers')
+  return b?.extraData as ModifiersExtraData | undefined
 }
 
 /** `Mining3` → `Mining`; the skill tree groups skills by this prefix. */
@@ -480,11 +494,16 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
     case 'setItemTemperature':
       primary(itemByRef(save, edit.ref))._Temperature = Math.max(0, edit.kelvin)
       return
-    case 'deleteLoose': {
-      const { group, index } = splitId(edit.ref)
-      const list = save.gameObjects.find((g) => g.name === group)?.gameObjects
-      if (!list?.[index]) throw new Error(`No object ${edit.ref}`)
+    case 'deleteObject': {
+      const { list, index } = locate(save, edit.id)
       list.splice(index, 1)
+      return
+    }
+    case 'cloneObject': {
+      const { list, index } = locate(save, edit.id)
+      const copy = cloneValue(list[index]!)
+      assignNewIds(save, copy)
+      list.splice(index + 1, 0, copy)
       return
     }
     case 'setMaterialTemperature':
@@ -774,6 +793,65 @@ export function listMaterialItems(save: SaveGame, elementId: string): MaterialIt
       y: Math.round(position.y),
       mass: Number(pe.Units) || 0,
       temperature: Number(pe._Temperature) || 0,
+    }
+  })
+}
+
+// --- Structural edits (clone / delete) and critters ----------------------------------
+
+/**
+ * Deep copy that keeps Uint8Array views small: a view copies only its own bytes, not the
+ * (possibly 400 MB) buffer it points into, unlike structuredClone.
+ */
+export function cloneValue<T>(value: T): T {
+  if (value instanceof Uint8Array) return value.slice() as T
+  if (Array.isArray(value)) return value.map(cloneValue) as T
+  if (value && typeof value === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value)) out[k] = cloneValue(v)
+    return out as T
+  }
+  return value
+}
+
+function locate(save: SaveGame, id: string): { list: GameObject[]; index: number } {
+  const { group, index } = splitId(id)
+  const list = save.gameObjects.find((g) => g.name === group)?.gameObjects
+  if (!list?.[index]) throw new Error(`No object ${id}`)
+  return { list, index }
+}
+
+/** Give an object (and anything it stores) fresh KPrefabID instance IDs from Game+Settings. */
+function assignNewIds(save: SaveGame, obj: GameObject): void {
+  const kpid = behavior(obj, 'KPrefabID')?.templateData
+  if (kpid) {
+    const next = Number(save.settings.nextUniqueID)
+    if (!Number.isFinite(next)) throw new Error('This save has no unique ID counter')
+    kpid.InstanceID = next
+    save.settings.nextUniqueID = next + 1
+  }
+  for (const b of obj.behaviors) {
+    if (b.name === 'Storage' && Array.isArray(b.extraData)) {
+      for (const item of b.extraData as StoredItem[]) assignNewIds(save, item)
+    }
+  }
+}
+
+export function listCritters(save: SaveGame): CritterView[] {
+  return objectsWith(save, 'CreatureBrain').map(({ id, prefab, obj }) => {
+    const entry = findCritter(prefab)
+    return {
+      id,
+      prefab,
+      name: entry?.name ?? humanize(prefab),
+      family: entry ? humanize(entry.family.toLowerCase()) : humanize(prefab),
+      baby: entry?.baby ?? prefab.endsWith('Baby'),
+      x: Math.round(obj.position.x),
+      y: Math.round(obj.position.y),
+      amounts: (modifiers(obj)?.amounts ?? []).map((a) => ({
+        ...named(a.name, findAmount(a.name)),
+        value: Number((a.value as { value: number }).value),
+      })),
     }
   })
 }

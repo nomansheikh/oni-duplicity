@@ -318,7 +318,7 @@ function MaterialSheet({
                             variant="ghost"
                             size="icon-sm"
                             aria-label="Delete debris"
-                            onClick={() => onEdit({ type: 'deleteLoose', ref: item.ref })}
+                            onClick={() => onEdit({ type: 'deleteObject', id: item.ref })}
                           >
                             <Trash2 />
                           </Button>

@@ -10,6 +10,8 @@ import {
   catalogs,
   listDuplicants,
   listGeysers,
+  cloneValue,
+  listCritters,
   listMaterialItems,
   listMaterials,
   touchedBy,
@@ -17,36 +19,20 @@ import {
   type Edit,
 } from './model.ts'
 
-/**
- * Deep copy for undo snapshots. Unlike structuredClone, a Uint8Array view copies only its own bytes,
- * not the (possibly 400 MB) buffer it points into.
- */
-function clone<T>(value: T): T {
-  if (value instanceof Uint8Array) return value.slice() as T
-  if (Array.isArray(value)) return value.map(clone) as T
-  if (value && typeof value === 'object') {
-    const out: Record<string, unknown> = {}
-    for (const [k, v] of Object.entries(value)) out[k] = clone(v)
-    return out as T
-  }
-  return value
-}
-
 /** Captures the state an edit can touch, so undo can put it back. */
 function snapshot(save: SaveGame, edit: Edit): () => void {
-  const gameInfo = clone(save.header.gameInfo)
+  const gameInfo = cloneValue(save.header.gameInfo)
   const behaviors = touchedBy(save, edit).flatMap((obj: GameObject) =>
     obj.behaviors.map((b) => ({
       b,
-      templateData: clone(b.templateData),
-      extraData: clone(b.extraData),
+      templateData: cloneValue(b.templateData),
+      extraData: cloneValue(b.extraData),
     })),
   )
-  // Deleting an object changes its group's list, not just its behaviors.
-  const groups =
-    edit.type === 'deleteLoose'
-      ? save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] }))
-      : []
+  // Cloning or deleting changes group lists and the unique ID counter, not just behaviors.
+  const structural = edit.type === 'deleteObject' || edit.type === 'cloneObject'
+  const groups = structural ? save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] })) : []
+  const settings = structural ? cloneValue(save.settings) : null
   return () => {
     save.header.gameInfo = gameInfo
     for (const s of behaviors) {
@@ -54,6 +40,7 @@ function snapshot(save: SaveGame, edit: Edit): () => void {
       if (s.extraData !== undefined) s.b.extraData = s.extraData
     }
     for (const { g, list } of groups) g.gameObjects = list
+    if (settings) save.settings = settings
   }
 }
 
@@ -100,6 +87,7 @@ const api = {
   catalogs: () => catalogs(),
   geysers: () => listGeysers(current()),
   materials: () => listMaterials(current()),
+  critters: () => listCritters(current()),
   materialItems: (elementId: string) => listMaterialItems(current(), elementId),
   status,
   apply(edit: Edit) {

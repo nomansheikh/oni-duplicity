@@ -293,6 +293,12 @@ const AMOUNT_FORMATS: Record<string, AmountFormat> = {
   BionicGunk: { max: 200, unit: 'kg', digits: 1 },
   BionicOxygenTank: { max: 200, unit: 'kg', digits: 1 },
   BionicInternalBattery: { max: 1000, unit: 'kJ', scale: 1 / 1000, digits: 1 },
+  Age: { max: 100, unit: 'cycles', digits: 1 },
+  Wildness: { max: 100, unit: '%' },
+  Fertility: { max: 100, unit: '%' },
+  Incubation: { max: 100, unit: '%' },
+  Viability: { max: 100, unit: '%' },
+  CritterTemperature: { max: 100, unit: '°C', offset: -273.15, digits: 1 },
 }
 
 const NEEDS = [
@@ -340,7 +346,7 @@ function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
   )
 }
 
-function AmountGroup({ amounts, edit }: { amounts: AmountView[]; edit: EditFn }) {
+export function AmountGroup({ amounts, edit }: { amounts: AmountView[]; edit: EditFn }) {
   return (
     <FieldGroup className="grid gap-x-8 gap-y-5 @3xl/main:grid-cols-2">
       {amounts.map((a) => (

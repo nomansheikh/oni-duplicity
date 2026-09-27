@@ -4,6 +4,7 @@ import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
 import { AppSidebar, type Page } from '@/components/app-sidebar'
 import { DlcBadges } from '@/components/dlc-badge'
+import { CrittersPage } from '@/components/critters-page'
 import { DuplicantsPage } from '@/components/duplicants/DuplicantsPage'
 import { GeysersPage } from '@/components/geysers-page'
 import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
@@ -19,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { downloadBytes, loadSave, saveClient } from '@/lib/save-client'
 import type {
   Catalogs,
+  CritterView,
   DuplicantView,
   Edit,
   GeyserView,
@@ -36,6 +38,7 @@ interface Views {
   duplicants: DuplicantView[]
   geysers: GeyserView[]
   materials: MaterialView[]
+  critters: CritterView[]
 }
 
 interface EditStatus {
@@ -51,6 +54,7 @@ const PAGE_TITLES: Record<Page, string> = {
   duplicants: 'Duplicants',
   geysers: 'Geysers',
   materials: 'Materials',
+  critters: 'Critters',
 }
 
 export default function App() {
@@ -66,14 +70,15 @@ export default function App() {
   const { resolvedTheme, setTheme } = useTheme()
 
   const refresh = useCallback(async () => {
-    const [summary, duplicants, geysers, materials] = await Promise.all([
+    const [summary, duplicants, geysers, materials, critters] = await Promise.all([
       saveClient.summary(),
       saveClient.duplicants(),
       saveClient.geysers(),
       saveClient.materials(),
+      saveClient.critters(),
     ])
     setState({ status: 'loaded', summary })
-    setViews({ duplicants, geysers, materials })
+    setViews({ duplicants, geysers, materials, critters })
     setRevision((r) => r + 1)
   }, [])
 
@@ -257,6 +262,7 @@ export default function App() {
                 duplicants: loaded.views.duplicants.length,
                 geysers: loaded.views.geysers.length,
                 materials: loaded.views.materials.length,
+                critters: loaded.views.critters.length,
               }
             : {}
         }
@@ -307,6 +313,9 @@ export default function App() {
               )}
               {loaded && page === 'geysers' && (
                 <GeysersPage geysers={loaded.views.geysers} onEdit={edit} />
+              )}
+              {loaded && page === 'critters' && (
+                <CrittersPage critters={loaded.views.critters} onEdit={edit} />
               )}
               {loaded && page === 'materials' && (
                 <MaterialsPage
