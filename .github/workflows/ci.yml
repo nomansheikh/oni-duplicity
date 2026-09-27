@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -20,6 +22,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
 
       - uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
         with:
@@ -27,6 +31,28 @@ jobs:
           cache: true
 
       - run: vp install
+
+      # PRs fetch the small tier unless they change the manifest; everything else fetches all.
+      - name: Choose fixture tier
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = pull_request ] && git diff --quiet HEAD^1 HEAD -- test-data/fixtures.json; then
+            tier=small
+          else
+            tier=all
+          fi
+          echo "Fixture tier: $tier"
+          echo "FIXTURE_TIER=$tier" >> "$GITHUB_ENV"
+
+      - name: Restore fetched fixtures
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: test-data/fetched
+          key: fixtures-${{ env.FIXTURE_TIER }}-${{ hashFiles('test-data/fixtures.json') }}
+          restore-keys: |
+            fixtures-all-${{ hashFiles('test-data/fixtures.json') }}
+
+      - name: Fetch and verify fixtures
+        run: vp run fixtures --tier "$FIXTURE_TIER"
 
       - run: vp check
 
