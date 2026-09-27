@@ -10,8 +10,9 @@ import {
   catalogs,
   listDuplicants,
   listGeysers,
-  objectById,
-  saveGameObject,
+  listMaterialItems,
+  listMaterials,
+  touchedBy,
   summarize,
   type Edit,
 } from './model.ts'
@@ -34,19 +35,25 @@ function clone<T>(value: T): T {
 /** Captures the state an edit can touch, so undo can put it back. */
 function snapshot(save: SaveGame, edit: Edit): () => void {
   const gameInfo = clone(save.header.gameInfo)
-  const target: GameObject | undefined =
-    'id' in edit ? objectById(save, edit.id) : saveGameObject(save)
-  const behaviors = (target?.behaviors ?? []).map((b) => ({
-    b,
-    templateData: clone(b.templateData),
-    extraData: clone(b.extraData),
-  }))
+  const behaviors = touchedBy(save, edit).flatMap((obj: GameObject) =>
+    obj.behaviors.map((b) => ({
+      b,
+      templateData: clone(b.templateData),
+      extraData: clone(b.extraData),
+    })),
+  )
+  // Deleting an object changes its group's list, not just its behaviors.
+  const groups =
+    edit.type === 'deleteLoose'
+      ? save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] }))
+      : []
   return () => {
     save.header.gameInfo = gameInfo
     for (const s of behaviors) {
       s.b.templateData = s.templateData
       if (s.extraData !== undefined) s.b.extraData = s.extraData
     }
+    for (const { g, list } of groups) g.gameObjects = list
   }
 }
 
@@ -92,6 +99,8 @@ const api = {
   duplicants: () => listDuplicants(current()),
   catalogs: () => catalogs(),
   geysers: () => listGeysers(current()),
+  materials: () => listMaterials(current()),
+  materialItems: (elementId: string) => listMaterialItems(current(), elementId),
   status,
   apply(edit: Edit) {
     apply(edit)

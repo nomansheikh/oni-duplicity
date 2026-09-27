@@ -35,17 +35,17 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
-export type Page = 'overview' | 'duplicants' | 'geysers'
+export type Page = 'overview' | 'duplicants' | 'geysers' | 'materials'
 
 const PAGES: { id: Page; title: string; icon: ReactNode }[] = [
   { id: 'overview', title: 'Overview', icon: <LayoutDashboard /> },
   { id: 'duplicants', title: 'Duplicants', icon: <Users /> },
   { id: 'geysers', title: 'Geysers', icon: <Droplets /> },
+  { id: 'materials', title: 'Materials', icon: <Package /> },
 ]
 
 const SOON: { title: string; icon: ReactNode }[] = [
   { title: 'Critters', icon: <Rabbit /> },
-  { title: 'Materials', icon: <Package /> },
   { title: 'Research', icon: <FlaskConical /> },
   { title: 'Space', icon: <Rocket /> },
 ]

@@ -7,6 +7,7 @@ import { DlcBadges } from '@/components/dlc-badge'
 import { DuplicantsPage } from '@/components/duplicants/DuplicantsPage'
 import { GeysersPage } from '@/components/geysers-page'
 import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
+import { MaterialsPage } from '@/components/materials-page'
 import { OverviewPage } from '@/components/overview-page'
 import { SiteHeader } from '@/components/site-header'
 import { Badge } from '@/components/ui/badge'
@@ -16,7 +17,14 @@ import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { downloadBytes, loadSave, saveClient } from '@/lib/save-client'
-import type { Catalogs, DuplicantView, Edit, GeyserView, Summary } from '@/worker/model'
+import type {
+  Catalogs,
+  DuplicantView,
+  Edit,
+  GeyserView,
+  MaterialView,
+  Summary,
+} from '@/worker/model'
 
 type State =
   | { status: 'idle' }
@@ -27,6 +35,7 @@ type State =
 interface Views {
   duplicants: DuplicantView[]
   geysers: GeyserView[]
+  materials: MaterialView[]
 }
 
 interface EditStatus {
@@ -41,6 +50,7 @@ const PAGE_TITLES: Record<Page, string> = {
   overview: 'Overview',
   duplicants: 'Duplicants',
   geysers: 'Geysers',
+  materials: 'Materials',
 }
 
 export default function App() {
@@ -51,17 +61,20 @@ export default function App() {
   const [page, setPage] = useState<Page>('overview')
   const [selectedDupe, setSelectedDupe] = useState<string>()
   const [saving, setSaving] = useState(false)
+  const [revision, setRevision] = useState(0)
   const fileInput = useRef<HTMLInputElement>(null)
   const { resolvedTheme, setTheme } = useTheme()
 
   const refresh = useCallback(async () => {
-    const [summary, duplicants, geysers] = await Promise.all([
+    const [summary, duplicants, geysers, materials] = await Promise.all([
       saveClient.summary(),
       saveClient.duplicants(),
       saveClient.geysers(),
+      saveClient.materials(),
     ])
     setState({ status: 'loaded', summary })
-    setViews({ duplicants, geysers })
+    setViews({ duplicants, geysers, materials })
+    setRevision((r) => r + 1)
   }, [])
 
   const open = async (file: File) => {
@@ -240,7 +253,11 @@ export default function App() {
         onNavigate={setPage}
         counts={
           loaded
-            ? { duplicants: loaded.views.duplicants.length, geysers: loaded.views.geysers.length }
+            ? {
+                duplicants: loaded.views.duplicants.length,
+                geysers: loaded.views.geysers.length,
+                materials: loaded.views.materials.length,
+              }
             : {}
         }
         file={loaded ? { name: loaded.summary.fileName, version: loaded.summary.version } : null}
@@ -290,6 +307,13 @@ export default function App() {
               )}
               {loaded && page === 'geysers' && (
                 <GeysersPage geysers={loaded.views.geysers} onEdit={edit} />
+              )}
+              {loaded && page === 'materials' && (
+                <MaterialsPage
+                  materials={loaded.views.materials}
+                  revision={revision}
+                  onEdit={edit}
+                />
               )}
             </div>
           </div>

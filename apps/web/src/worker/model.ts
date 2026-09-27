@@ -2,7 +2,9 @@ import {
   MinionSkills,
   effects as effectCatalog,
   findAmount,
+  elements as elementCatalog,
   findAttribute,
+  findElementByHash,
   findEffect,
   findGeyser,
   findPersonality,
@@ -17,6 +19,7 @@ import {
   type GameObject,
   type ModifiersExtraData,
   type SaveGame,
+  type StoredItem,
   type TemplateData,
 } from '@oni-duplicity/save-parser'
 
@@ -63,6 +66,28 @@ export interface AmountView extends Named {
 
 export interface EffectView extends Named {
   cyclesRemaining: number
+}
+
+export interface MaterialView {
+  id: string
+  name: string
+  state: string
+  looseMass: number
+  storedMass: number
+  looseCount: number
+  storedCount: number
+  /** Mass-weighted average temperature in Kelvin. */
+  temperature: number
+}
+
+export interface MaterialItemView {
+  ref: string
+  where: string
+  loose: boolean
+  x: number
+  y: number
+  mass: number
+  temperature: number
 }
 
 export type AccessorySlot = 'hair' | 'headshape' | 'eyes' | 'mouth' | 'torso' | 'skin'
@@ -152,6 +177,11 @@ export type Edit =
   | { type: 'setAccessory'; id: string; slot: AccessorySlot; number: string }
   | { type: 'applyProfile'; id: string; profile: DuplicantProfile; sections: ProfileSection[] }
   | { type: 'setGeyserName'; id: string; name: string }
+  | { type: 'setItemMass'; ref: string; mass: number }
+  | { type: 'setItemTemperature'; ref: string; kelvin: number }
+  | { type: 'deleteLoose'; ref: string }
+  | { type: 'setMaterialTemperature'; elementId: string; kelvin: number }
+  | { type: 'scaleMaterialMass'; elementId: string; factor: number }
 
 // --- Helpers ---------------------------------------------------------------
 
@@ -444,6 +474,29 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       nameable.savedName = edit.name
       return
     }
+    case 'setItemMass':
+      primary(itemByRef(save, edit.ref)).Units = Math.max(0, edit.mass)
+      return
+    case 'setItemTemperature':
+      primary(itemByRef(save, edit.ref))._Temperature = Math.max(0, edit.kelvin)
+      return
+    case 'deleteLoose': {
+      const { group, index } = splitId(edit.ref)
+      const list = save.gameObjects.find((g) => g.name === group)?.gameObjects
+      if (!list?.[index]) throw new Error(`No object ${edit.ref}`)
+      list.splice(index, 1)
+      return
+    }
+    case 'setMaterialTemperature':
+      for (const item of materialItems(save, edit.elementId))
+        primary(item.obj)._Temperature = edit.kelvin
+      return
+    case 'scaleMaterialMass':
+      for (const item of materialItems(save, edit.elementId)) {
+        const pe = primary(item.obj)
+        pe.Units = Math.max(0, Number(pe.Units) * edit.factor)
+      }
+      return
     default:
       applyObjectEdit(objectById(save, edit.id), edit)
   }
@@ -592,4 +645,135 @@ function applyProfile(
         applyObjectEdit(obj, { type: 'setAccessory', id: '', slot: slot as AccessorySlot, number })
     }
   }
+}
+
+// --- Materials -------------------------------------------------------------------
+
+const ELEMENT_IDS = new Set(elementCatalog.map((e) => e.id))
+
+function splitId(id: string): { group: string; index: number } {
+  const split = id.lastIndexOf(':')
+  return { group: id.slice(0, split), index: Number(id.slice(split + 1)) }
+}
+
+function primary(obj: GameObject): TemplateData {
+  return data(obj, 'PrimaryElement')
+}
+
+interface MaterialItem {
+  ref: string
+  obj: GameObject
+  owner: GameObject
+  where: string
+  loose: boolean
+}
+
+/** Loose chunks (groups named after an element) and items held in storages. */
+function allMaterialItems(save: SaveGame): MaterialItem[] {
+  const items: MaterialItem[] = []
+  for (const group of save.gameObjects) {
+    const loose = ELEMENT_IDS.has(group.name)
+    group.gameObjects.forEach((obj, index) => {
+      const id = `${group.name}:${index}`
+      if (loose && behavior(obj, 'PrimaryElement')?.templateData) {
+        items.push({ ref: id, obj, owner: obj, where: 'Loose', loose: true })
+      }
+      obj.behaviors.forEach((b, bIndex) => {
+        if (b.name !== 'Storage' || !Array.isArray(b.extraData)) return
+        ;(b.extraData as StoredItem[]).forEach((item, iIndex) => {
+          if (ELEMENT_IDS.has(item.name) && behavior(item, 'PrimaryElement')?.templateData) {
+            items.push({
+              ref: `${id}/${bIndex}/${iIndex}`,
+              obj: item,
+              owner: obj,
+              where: humanize(group.name),
+              loose: false,
+            })
+          }
+        })
+      })
+    })
+  }
+  return items
+}
+
+function elementOf(obj: GameObject): string | undefined {
+  const hash = Number(behavior(obj, 'PrimaryElement')?.templateData?.ElementID)
+  return findElementByHash(hash)?.id
+}
+
+function materialItems(save: SaveGame, elementId: string): MaterialItem[] {
+  return allMaterialItems(save).filter((item) => elementOf(item.obj) === elementId)
+}
+
+export function itemByRef(save: SaveGame, ref: string): GameObject {
+  const [ownerId, bIndex, iIndex] = ref.split('/')
+  const owner = objectById(save, ownerId!)
+  if (bIndex === undefined) return owner
+  const stored = owner.behaviors[Number(bIndex)]?.extraData as StoredItem[] | undefined
+  const item = stored?.[Number(iIndex)]
+  if (!item) throw new Error(`No stored item ${ref}`)
+  return item
+}
+
+/** The game objects an edit may change, for undo snapshots. */
+export function touchedBy(save: SaveGame, edit: Edit): GameObject[] {
+  if ('id' in edit) return [objectById(save, edit.id)]
+  if ('ref' in edit) return [objectById(save, edit.ref.split('/')[0]!)]
+  if ('elementId' in edit)
+    return [...new Set(materialItems(save, edit.elementId).map((i) => i.owner))]
+  const saveGame = saveGameObject(save)
+  return saveGame ? [saveGame] : []
+}
+
+export function listMaterials(save: SaveGame): MaterialView[] {
+  const totals = new Map<string, MaterialView & { heat: number }>()
+  for (const item of allMaterialItems(save)) {
+    const pe = primary(item.obj)
+    const element = findElementByHash(Number(pe.ElementID))
+    if (!element) continue
+    const mass = Number(pe.Units) || 0
+    const entry = totals.get(element.id) ?? {
+      id: element.id,
+      name: element.name,
+      state: element.state,
+      looseMass: 0,
+      storedMass: 0,
+      looseCount: 0,
+      storedCount: 0,
+      temperature: 0,
+      heat: 0,
+    }
+    if (item.loose) {
+      entry.looseMass += mass
+      entry.looseCount++
+    } else {
+      entry.storedMass += mass
+      entry.storedCount++
+    }
+    entry.heat += mass * (Number(pe._Temperature) || 0)
+    totals.set(element.id, entry)
+  }
+  return [...totals.values()]
+    .map(({ heat, ...m }) => ({
+      ...m,
+      temperature: heat / Math.max(m.looseMass + m.storedMass, 1e-9),
+    }))
+    .sort((a, b) => b.looseMass + b.storedMass - (a.looseMass + a.storedMass))
+}
+
+export function listMaterialItems(save: SaveGame, elementId: string): MaterialItemView[] {
+  return materialItems(save, elementId).map((item) => {
+    const pe = primary(item.obj)
+    const position = item.loose ? item.obj.position : item.owner.position
+    return {
+      ref: item.ref,
+      where: item.where,
+      loose: item.loose,
+      x: Math.round(position.x),
+      y: Math.round(position.y),
+      mass: Number(pe.Units) || 0,
+      temperature: Number(pe._Temperature) || 0,
+    }
+  })
 }

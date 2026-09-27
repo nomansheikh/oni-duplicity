@@ -30,3 +30,12 @@ export function toProfile(dupe: DuplicantView): DuplicantProfile {
     appearance: Object.fromEntries(dupe.appearance.map((a) => [a.slot, a.current])),
   }
 }
+
+/** 1234 kg → "1.2 t", 12.5 kg → "12.5 kg", 0.2 kg → "200 g". */
+export function fmtMass(kg: number): string {
+  if (kg >= 1000) return `${fmt(kg / 1000, 1)} t`
+  if (kg >= 1) return `${fmt(kg, 1)} kg`
+  return `${fmt(kg * 1000, 0)} g`
+}
+
+export const toCelsius = (kelvin: number) => kelvin - 273.15
