@@ -10,6 +10,7 @@ import { GeysersPage } from '@/components/geysers-page'
 import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
 import { MaterialsPage } from '@/components/materials-page'
 import { OverviewPage } from '@/components/overview-page'
+import { PreferencesDialog } from '@/components/preferences-dialog'
 import { ResearchPage } from '@/components/research-page'
 import { SettingsPage } from '@/components/settings-page'
 import { SpacePage } from '@/components/space-page'
@@ -20,6 +21,7 @@ import { ButtonGroup } from '@/components/ui/button-group'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useAllowUnverified } from '@/lib/preferences'
 import { downloadBytes, loadSave, saveClient } from '@/lib/save-client'
 import type {
   Catalogs,
@@ -81,6 +83,7 @@ export default function App() {
   const [saving, setSaving] = useState(false)
   const [revision, setRevision] = useState(0)
   const fileInput = useRef<HTMLInputElement>(null)
+  const [allowUnverified, setAllowUnverified] = useAllowUnverified()
   const { resolvedTheme, setTheme } = useTheme()
 
   const refresh = useCallback(async () => {
@@ -209,15 +212,19 @@ export default function App() {
     : ['Duplicity']
 
   const themeToggle = (
-    <Button
-      variant="ghost"
-      size="icon"
-      aria-label="Toggle theme"
-      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-    >
-      {resolvedTheme === 'dark' ? <Sun /> : <Moon />}
-    </Button>
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="Toggle theme"
+        onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+      >
+        {resolvedTheme === 'dark' ? <Sun /> : <Moon />}
+      </Button>
+      <PreferencesDialog allowUnverified={allowUnverified} onAllowUnverified={setAllowUnverified} />
+    </>
   )
+  const saveLocked = loaded?.summary.unverified === true && !allowUnverified
 
   const actions = loaded ? (
     <>
@@ -270,10 +277,21 @@ export default function App() {
           </TooltipContent>
         </Tooltip>
       </ButtonGroup>
-      <Button onClick={download} disabled={saving}>
-        <Download />
-        <span className="hidden sm:inline">{saving ? 'Saving…' : 'Download save'}</span>
-      </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span>
+            <Button onClick={download} disabled={saving || saveLocked}>
+              <Download />
+              <span className="hidden sm:inline">{saving ? 'Saving…' : 'Download save'}</span>
+            </Button>
+          </span>
+        </TooltipTrigger>
+        {saveLocked && (
+          <TooltipContent>
+            This save version is unverified. Allow it in Preferences to download.
+          </TooltipContent>
+        )}
+      </Tooltip>
       {themeToggle}
     </>
   ) : (
