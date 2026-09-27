@@ -192,6 +192,9 @@ catalogs:
     '@types/node':
       specifier: ^24
       version: 24.19.0
+    fflate:
+      specifier: ^0.8.3
+      version: 0.8.3
     typescript:
       specifier: ^7.0.2
       version: 7.0.2
@@ -260,6 +263,10 @@ importers:
         version: 1.0.0-rc.1(@types/node@24.19.0)(@vitest/ui@5.0.1)(jiti@2.7.0)(typescript@7.0.2)(yaml@2.9.1)
 
   packages/save-parser:
+    dependencies:
+      fflate:
+        specifier: 'catalog:'
+        version: 0.8.3
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
