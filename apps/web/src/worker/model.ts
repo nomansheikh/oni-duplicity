@@ -3,6 +3,9 @@ import {
   effects as effectCatalog,
   findAmount,
   findCritter,
+  findGameSetting,
+  findTech,
+  techs as techCatalog,
   elements as elementCatalog,
   findAttribute,
   findElementByHash,
@@ -102,6 +105,35 @@ export interface CritterView {
   amounts: AmountView[]
 }
 
+export interface TechView extends Named {
+  complete: boolean
+}
+
+export interface GameSettingView extends Named {
+  current: string
+  levels: Named[]
+  /** False when the stored value isn't a level we know, so we don't risk writing a bad ID. */
+  editable: boolean
+}
+
+export interface WorldView {
+  id: string
+  name: string
+  worldType: string
+  width: number
+  height: number
+  discovered: boolean
+  startWorld: boolean
+  visited: boolean
+}
+
+export interface DestinationView {
+  id: number
+  type: string
+  distance: number
+  resources: { name: string; amount: number }[]
+}
+
 export type AccessorySlot = 'hair' | 'headshape' | 'eyes' | 'mouth' | 'torso' | 'skin'
 
 export interface AccessorySlotView {
@@ -193,6 +225,11 @@ export type Edit =
   | { type: 'setItemTemperature'; ref: string; kelvin: number }
   | { type: 'deleteObject'; id: string }
   | { type: 'cloneObject'; id: string }
+  | { type: 'setTechResearched'; techId: string; complete: boolean }
+  | { type: 'researchAll' }
+  | { type: 'setGameSetting'; settingId: string; level: string }
+  | { type: 'setAsteroidName'; id: string; name: string }
+  | { type: 'setWorldDiscovered'; id: string; discovered: boolean }
   | { type: 'setMaterialTemperature'; elementId: string; kelvin: number }
   | { type: 'scaleMaterialMass'; elementId: string; factor: number }
 
@@ -480,6 +517,7 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       const obj = saveGameObject(save)
       const saveGame = obj ? behavior(obj, 'SaveGame')?.templateData : undefined
       if (saveGame) saveGame.sandboxEnabled = edit.enabled
+      setQualityLevel(save, 'SandboxMode', edit.enabled ? 'Enabled' : 'Disabled')
       return
     }
     case 'setGeyserName': {
@@ -506,6 +544,15 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       list.splice(index + 1, 0, copy)
       return
     }
+    case 'setTechResearched':
+      setTech(save, edit.techId, edit.complete)
+      return
+    case 'researchAll':
+      for (const tech of techCatalog) setTech(save, tech.id, true)
+      return
+    case 'setGameSetting':
+      setQualityLevel(save, edit.settingId, edit.level)
+      return
     case 'setMaterialTemperature':
       for (const item of materialItems(save, edit.elementId))
         primary(item.obj)._Temperature = edit.kelvin
@@ -612,6 +659,12 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
       }
       return
     }
+    case 'setAsteroidName':
+      data(obj, 'AsteroidGridEntity').m_name = edit.name
+      return
+    case 'setWorldDiscovered':
+      data(obj, 'WorldContainer').isDiscovered = edit.discovered
+      return
     case 'applyProfile':
       applyProfile(obj, edit.profile, new Set(edit.sections))
       return
@@ -854,4 +907,127 @@ export function listCritters(save: SaveGame): CritterView[] {
       })),
     }
   })
+}
+
+// --- Research, game settings and space -----------------------------------------------
+
+interface SavedTech {
+  techId: string
+  complete: boolean
+  [key: string]: unknown
+}
+
+function researchData(save: SaveGame): { techs: SavedTech[] } | undefined {
+  const obj = saveGameObject(save)
+  const research = obj ? behavior(obj, 'Research')?.templateData : undefined
+  return research?.saveData as { techs: SavedTech[] } | undefined
+}
+
+function setTech(save: SaveGame, techId: string, complete: boolean): void {
+  const saveData = researchData(save)
+  if (!saveData) throw new Error('This save has no research data')
+  saveData.techs ??= []
+  const existing = saveData.techs.find((t) => t.techId === techId)
+  if (existing) {
+    existing.complete = complete
+    return
+  }
+  if (!complete) return
+  // Copy the shape of an existing entry (inventory IDs differ between base game and DLC).
+  const template = saveData.techs[0]
+  const inventoryIDs = (template?.inventoryIDs as string[] | undefined) ?? [
+    'basic',
+    'advanced',
+    'space',
+  ]
+  saveData.techs.push({
+    techId,
+    complete: true,
+    inventoryIDs: [...inventoryIDs],
+    inventoryValues: inventoryIDs.map(() => 0),
+    ...(template && 'unlockedPOIIDs' in template ? { unlockedPOIIDs: [] } : {}),
+  })
+}
+
+export function listTechs(save: SaveGame): TechView[] {
+  const saved = new Map((researchData(save)?.techs ?? []).map((t) => [t.techId, t.complete]))
+  const ids = new Set([...techCatalog.map((t) => t.id), ...saved.keys()])
+  return [...ids]
+    .map((id) => ({ ...named(id, findTech(id)), complete: saved.get(id) === true }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+function qualityLevels(save: SaveGame): [string, string][] {
+  const settings = save.gameData.customGameSettings as {
+    CurrentQualityLevelsBySetting?: [string, string][]
+  }
+  return settings?.CurrentQualityLevelsBySetting ?? []
+}
+
+function setQualityLevel(save: SaveGame, settingId: string, level: string): void {
+  const entry = qualityLevels(save).find(([id]) => id === settingId)
+  if (entry) entry[1] = level
+}
+
+/** Settings stored in the save that describe the world rather than difficulty. */
+const WORLD_SETTINGS = new Set(['ClusterLayout', 'WorldgenSeed'])
+
+export function listGameSettings(save: SaveGame): GameSettingView[] {
+  return qualityLevels(save)
+    .filter(([id]) => !WORLD_SETTINGS.has(id))
+    .map(([id, current]) => {
+      const entry = findGameSetting(id)
+      const levels = (entry?.levels ?? []).filter((l) => /^[A-Z][A-Za-z0-9]*$/.test(l.id))
+      return {
+        id,
+        name: entry?.name ?? humanize(id),
+        ...(entry?.desc ? { desc: entry.desc } : {}),
+        current,
+        levels: levels.map((l) => ({
+          id: l.id,
+          name: l.name,
+          ...(l.desc ? { desc: l.desc } : {}),
+        })),
+        editable: levels.some((l) => l.id === current),
+      }
+    })
+}
+
+export function listWorlds(save: SaveGame): WorldView[] {
+  return objectsWith(save, 'WorldContainer').map(({ id, obj }) => {
+    const world = data(obj, 'WorldContainer')
+    const asteroid = behavior(obj, 'AsteroidGridEntity')?.templateData
+    const size = world.worldSize as { x: number; y: number }
+    const worldName = typeof world.worldName === 'string' ? world.worldName : ''
+    return {
+      id,
+      name: typeof asteroid?.m_name === 'string' ? asteroid.m_name : worldName,
+      worldType: humanize(worldName.replace(/^.*\//, '')),
+      width: size.x,
+      height: size.y,
+      discovered: world.isDiscovered === true,
+      startWorld: world.isStartWorld === true,
+      visited: world.isDupeVisited === true,
+    }
+  })
+}
+
+export function listDestinations(save: SaveGame): DestinationView[] {
+  const obj = saveGameObject(save)
+  const manager = obj ? behavior(obj, 'SpacecraftManager')?.templateData : undefined
+  const destinations = (manager?.destinations ?? []) as {
+    id: number
+    type: string
+    distance: number
+    recoverableElements?: [number, number][]
+  }[]
+  return destinations.map((d) => ({
+    id: d.id,
+    type: humanize(d.type),
+    distance: d.distance,
+    resources: (d.recoverableElements ?? []).map(([hash, amount]) => ({
+      name: findElementByHash(hash)?.name ?? String(hash),
+      amount,
+    })),
+  }))
 }

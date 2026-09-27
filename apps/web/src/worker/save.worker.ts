@@ -12,6 +12,10 @@ import {
   listGeysers,
   cloneValue,
   listCritters,
+  listDestinations,
+  listGameSettings,
+  listTechs,
+  listWorlds,
   listMaterialItems,
   listMaterials,
   touchedBy,
@@ -22,6 +26,7 @@ import {
 /** Captures the state an edit can touch, so undo can put it back. */
 function snapshot(save: SaveGame, edit: Edit): () => void {
   const gameInfo = cloneValue(save.header.gameInfo)
+  const customGameSettings = cloneValue(save.gameData.customGameSettings)
   const behaviors = touchedBy(save, edit).flatMap((obj: GameObject) =>
     obj.behaviors.map((b) => ({
       b,
@@ -35,6 +40,7 @@ function snapshot(save: SaveGame, edit: Edit): () => void {
   const settings = structural ? cloneValue(save.settings) : null
   return () => {
     save.header.gameInfo = gameInfo
+    save.gameData.customGameSettings = customGameSettings
     for (const s of behaviors) {
       s.b.templateData = s.templateData
       if (s.extraData !== undefined) s.b.extraData = s.extraData
@@ -88,6 +94,10 @@ const api = {
   geysers: () => listGeysers(current()),
   materials: () => listMaterials(current()),
   critters: () => listCritters(current()),
+  techs: () => listTechs(current()),
+  gameSettings: () => listGameSettings(current()),
+  worlds: () => listWorlds(current()),
+  destinations: () => listDestinations(current()),
   materialItems: (elementId: string) => listMaterialItems(current(), elementId),
   status,
   apply(edit: Edit) {

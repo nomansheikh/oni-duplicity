@@ -10,6 +10,9 @@ import { GeysersPage } from '@/components/geysers-page'
 import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
 import { MaterialsPage } from '@/components/materials-page'
 import { OverviewPage } from '@/components/overview-page'
+import { ResearchPage } from '@/components/research-page'
+import { SettingsPage } from '@/components/settings-page'
+import { SpacePage } from '@/components/space-page'
 import { SiteHeader } from '@/components/site-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -21,6 +24,10 @@ import { downloadBytes, loadSave, saveClient } from '@/lib/save-client'
 import type {
   Catalogs,
   CritterView,
+  DestinationView,
+  GameSettingView,
+  TechView,
+  WorldView,
   DuplicantView,
   Edit,
   GeyserView,
@@ -39,6 +46,10 @@ interface Views {
   geysers: GeyserView[]
   materials: MaterialView[]
   critters: CritterView[]
+  techs: TechView[]
+  gameSettings: GameSettingView[]
+  worlds: WorldView[]
+  destinations: DestinationView[]
 }
 
 interface EditStatus {
@@ -55,6 +66,9 @@ const PAGE_TITLES: Record<Page, string> = {
   geysers: 'Geysers',
   materials: 'Materials',
   critters: 'Critters',
+  research: 'Research',
+  space: 'Space',
+  settings: 'Game settings',
 }
 
 export default function App() {
@@ -70,15 +84,38 @@ export default function App() {
   const { resolvedTheme, setTheme } = useTheme()
 
   const refresh = useCallback(async () => {
-    const [summary, duplicants, geysers, materials, critters] = await Promise.all([
+    const [
+      summary,
+      duplicants,
+      geysers,
+      materials,
+      critters,
+      techs,
+      gameSettings,
+      worlds,
+      destinations,
+    ] = await Promise.all([
       saveClient.summary(),
       saveClient.duplicants(),
       saveClient.geysers(),
       saveClient.materials(),
       saveClient.critters(),
+      saveClient.techs(),
+      saveClient.gameSettings(),
+      saveClient.worlds(),
+      saveClient.destinations(),
     ])
     setState({ status: 'loaded', summary })
-    setViews({ duplicants, geysers, materials, critters })
+    setViews({
+      duplicants,
+      geysers,
+      materials,
+      critters,
+      techs,
+      gameSettings,
+      worlds,
+      destinations,
+    })
     setRevision((r) => r + 1)
   }, [])
 
@@ -263,6 +300,7 @@ export default function App() {
                 geysers: loaded.views.geysers.length,
                 materials: loaded.views.materials.length,
                 critters: loaded.views.critters.length,
+                space: loaded.views.worlds.length,
               }
             : {}
         }
@@ -316,6 +354,19 @@ export default function App() {
               )}
               {loaded && page === 'critters' && (
                 <CrittersPage critters={loaded.views.critters} onEdit={edit} />
+              )}
+              {loaded && page === 'research' && (
+                <ResearchPage techs={loaded.views.techs} onEdit={edit} />
+              )}
+              {loaded && page === 'space' && (
+                <SpacePage
+                  worlds={loaded.views.worlds}
+                  destinations={loaded.views.destinations}
+                  onEdit={edit}
+                />
+              )}
+              {loaded && page === 'settings' && (
+                <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
               )}
               {loaded && page === 'materials' && (
                 <MaterialsPage

@@ -3,6 +3,7 @@ import {
   EllipsisVertical,
   Droplets,
   FlaskConical,
+  Gauge,
   FolderOpen,
   LayoutDashboard,
   Orbit,
@@ -35,7 +36,15 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
-export type Page = 'overview' | 'duplicants' | 'critters' | 'geysers' | 'materials'
+export type Page =
+  | 'overview'
+  | 'duplicants'
+  | 'critters'
+  | 'geysers'
+  | 'materials'
+  | 'research'
+  | 'space'
+  | 'settings'
 
 const PAGES: { id: Page; title: string; icon: ReactNode }[] = [
   { id: 'overview', title: 'Overview', icon: <LayoutDashboard /> },
@@ -43,11 +52,9 @@ const PAGES: { id: Page; title: string; icon: ReactNode }[] = [
   { id: 'critters', title: 'Critters', icon: <Rabbit /> },
   { id: 'geysers', title: 'Geysers', icon: <Droplets /> },
   { id: 'materials', title: 'Materials', icon: <Package /> },
-]
-
-const SOON: { title: string; icon: ReactNode }[] = [
-  { title: 'Research', icon: <FlaskConical /> },
-  { title: 'Space', icon: <Rocket /> },
+  { id: 'research', title: 'Research', icon: <FlaskConical /> },
+  { id: 'space', title: 'Space', icon: <Rocket /> },
+  { id: 'settings', title: 'Game settings', icon: <Gauge /> },
 ]
 
 export interface OpenFile {
@@ -107,21 +114,6 @@ export function AppSidebar({
                   {counts[item.id] !== undefined && (
                     <SidebarMenuBadge>{counts[item.id]}</SidebarMenuBadge>
                   )}
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Coming soon</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {SOON.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton disabled tooltip={`${item.title} (coming soon)`}>
-                    {item.icon}
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
