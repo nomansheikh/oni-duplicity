@@ -1,11 +1,3 @@
-export const DLC_NAMES: Record<string, string> = {
-  EXPANSION1_ID: 'Spaced Out',
-  DLC2_ID: 'Frosty Planet',
-  DLC3_ID: 'Bionic Booster',
-  DLC4_ID: 'Prehistoric Planet',
-  DLC5_ID: 'DLC5',
-}
-
 export const fmt = (n: number, digits = 1) =>
   n.toLocaleString(undefined, { maximumFractionDigits: digits })
 

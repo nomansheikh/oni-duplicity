@@ -3,6 +3,7 @@ import { Download, Moon, Redo2, Sun, Undo2 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
 import { AppSidebar, type Page } from '@/components/app-sidebar'
+import { DlcBadges } from '@/components/dlc-badge'
 import { DuplicantsPage } from '@/components/duplicants/DuplicantsPage'
 import { GeysersPage } from '@/components/geysers-page'
 import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
@@ -165,6 +166,7 @@ export default function App() {
 
   const actions = loaded ? (
     <>
+      <DlcBadges ids={loaded.summary.dlcIds} className="hidden xl:flex" />
       {editStatus.edits > 0 && (
         <Badge variant="secondary" className="hidden sm:inline-flex">
           {editStatus.edits} unsaved {editStatus.edits === 1 ? 'edit' : 'edits'}

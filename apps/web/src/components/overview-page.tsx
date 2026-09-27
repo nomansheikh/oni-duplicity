@@ -19,9 +19,10 @@ import {
 } from '@/components/ui/field'
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '@/components/ui/item'
 import { Switch } from '@/components/ui/switch'
-import { DLC_NAMES, fmt } from '@/lib/format'
+import { fmt } from '@/lib/format'
 import type { DuplicantView, Edit, GeyserView, Summary } from '@/worker/model'
 import { CommitInput } from './common'
+import { DlcBadges } from './dlc-badge'
 
 function StatCard({
   label,
@@ -177,14 +178,7 @@ export function OverviewPage({
               <Item variant="outline" size="sm">
                 <ItemContent>
                   <ItemTitle>Content</ItemTitle>
-                  <div className="flex flex-wrap gap-1">
-                    {summary.dlcIds.length === 0 && <Badge variant="secondary">Base game</Badge>}
-                    {summary.dlcIds.map((id) => (
-                      <Badge key={id} variant="secondary">
-                        {DLC_NAMES[id] ?? id}
-                      </Badge>
-                    ))}
-                  </div>
+                  <DlcBadges ids={summary.dlcIds} />
                 </ItemContent>
               </Item>
             </ItemGroup>
