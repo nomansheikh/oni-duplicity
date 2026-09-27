@@ -4,7 +4,15 @@ A browser-based save editor for [Oxygen Not Included](https://www.klei.com/games
 
 It is a from-scratch successor to [RoboPhred/oni-duplicity](https://github.com/RoboPhred/oni-duplicity), which is no longer maintained.
 
-> **Status:** early development. Nothing is usable yet.
+> **Status:** early development. Back up your save before replacing it with an edited one.
+
+## Features
+
+- Load any save from 7.31 to 7.38, base game or any DLC. Newer saves load with a warning.
+- **Overview:** colony name, sandbox mode, cycles, cluster, DLCs.
+- **Duplicants** (including bionic): name, traits, attribute levels, mastered skills.
+- **Geysers, vents and volcanoes:** output, eruption and dormancy stats; rename.
+- Download the edited save. Unchanged data is written back byte for byte.
 
 ## Privacy
 
