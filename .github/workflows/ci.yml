@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -18,6 +20,8 @@ jobs:
     name: ci
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      FIXTURE_TIER: ${{ github.event_name == 'pull_request' && 'small' || 'all' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -27,6 +31,17 @@ jobs:
           cache: true
 
       - run: vp install
+
+      - name: Restore fetched fixtures
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: test-data/fetched
+          key: fixtures-${{ env.FIXTURE_TIER }}-${{ hashFiles('test-data/fixtures.json') }}
+          restore-keys: |
+            fixtures-all-${{ hashFiles('test-data/fixtures.json') }}
+
+      - name: Fetch and verify fixtures
+        run: vp run fixtures --tier "$FIXTURE_TIER"
 
       - run: vp check
 

@@ -154,7 +154,7 @@ Playwright uses the installed Chrome locally (`channel: "chrome"`) and installs 
 ## CI, fixtures and releases
 
 - **CI** (`voidzero-dev/setup-vp`, pinned to an exact release): `vp install`, `vp check`, `vp test`, `vp build`, `vp pack` on every push and PR.
-- **Fixtures:** the owner's two saves are committed. The konove save and the six mithro saves (about 120 MB) are mirrored to a `fixtures` GitHub release with their license and NOTICE files and SHA-256 checksums; `vp run fixtures` downloads and verifies them, and CI caches them by manifest hash. PRs run the small set (owner saves, konove, mithro 01 and 02); `main` and a nightly job run all of them.
+- **Fixtures:** the owner's two saves are committed in `test-data/saves/`. The konove save and the six mithro saves (about 120 MB) are mirrored to the `fixtures-v1` prerelease with their licenses; `test-data/fixtures.json` pins every file by SHA-256. `vp run fixtures [--tier small|all]` downloads into the git-ignored `test-data/fetched/` and verifies checksums; CI caches that folder by manifest hash. PRs run the small tier (owner saves, konove, mithro 01 and 02); pushes to `main` and a nightly job run all of them.
 - **Bench gate:** a CI job benchmarks `main` and the PR head back to back on the same runner and fails on a slowdown over 30%.
 - **Repository rules:** `main` requires a PR and green CI (admin bypass allowed); squash merge only; a CI check requires a conventional PR title (`feat`, `fix`, …).
 - **Dependabot** for npm and GitHub Actions.
