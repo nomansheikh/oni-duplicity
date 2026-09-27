@@ -10,21 +10,23 @@ It is a from-scratch successor to [RoboPhred/oni-duplicity](https://github.com/R
 
 ## Features
 
-- **Overview:** colony name, sandbox mode, cycles, stress, cluster and DLCs.
+- **Overview:** colony name, sandbox mode, the debug flag that blocks achievements, cycles, stress, cluster and DLCs.
 - **Duplicants** (including bionic), each with a portrait:
   - name, gender and appearance (hair, head, eyes and more) with a live preview;
   - traits, interests, attribute levels, skills and experience;
   - health and needs (stress, calories, bladder, stamina, bionic power and oil, and more);
   - effects, with their remaining cycles;
-  - copy a whole profile to another duplicant, or export it to a file and import it into another save.
+  - copy a whole profile to another duplicant, or export it to a file and import it into another save;
+  - for everyone at once: relieve stress, heal and fill needs, master every skill, set every attribute.
 - **Critters:** tame or make wild, set age, fertility and calories, clone or delete.
-- **Geysers, vents and volcanoes:** output, eruption and dormancy stats; rename.
+- **Geysers, vents and volcanoes:** rename, and change output, eruption and activity timing with the resulting rates shown live.
 - **Materials:** totals per element across debris and storage; set every temperature, multiply every mass, edit or delete single items.
 - **Research:** mark techs as researched, or research everything.
 - **Space:** rename asteroids and mark them discovered; list starmap destinations.
 - **Game settings:** difficulty and custom game settings.
+- **World map:** every asteroid drawn cell by cell, by element, temperature or mass, with duplicants, geysers and critters marked. Read-only.
 - **Raw data:** browse and edit any value in the save, for everything the editors above don't cover.
-- Undo and redo for every edit (<kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Z</kbd>).
+- Undo and redo for every edit (<kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Z</kbd>), and a list of unsaved changes to review before downloading.
 - Download the edited save. Data you didn't touch is written back byte for byte.
 
 ## Supported saves

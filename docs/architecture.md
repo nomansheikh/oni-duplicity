@@ -60,6 +60,8 @@ readSaveParts / parseBody / writeBody                          // lower-level pi
 MIN_MINOR, MAX_VERIFIED_MINOR, ParseError
 ```
 
+**Sim grid.** `readSimGrid(save.simData)` decodes the cell grid: a `SIMSAVE\0` header with version (14 or 15), width and height, 9 bytes not decoded yet, then 16 bytes per cell (element SimHash, temperature in K, mass in kg, 4 bytes not decoded yet). The grid has a one-cell border, so game cell (x, y) is grid cell (x + 1, y + 1); duplicant positions confirm it. Disease and later sections are not read. The grid is only read, never written, so the round trip is unaffected.
+
 **Version policy.** Major 7, minors 31–38 are supported. A newer minor parses with a warning in `save.warnings` (with `strictVersion` it throws). An older minor throws a `ParseError` telling the user to re-save in the current game. 7.33 saves store the header DLC as `dlcId` (a string); 7.34+ store a `dlcIds` array.
 
 ## `packages/game-data`
@@ -91,6 +93,10 @@ save(): Uint8Array
 **Edits and undo.** An edit is a plain `{ type, ...fields }` object (`setDuplicantName`, `addTrait`, `setItemMass`, `rawSet`, …) applied by `applyEdit` in `worker/model.ts`. Before applying, the worker snapshots what that edit can touch (the target's behaviors, the header, custom game settings, and for clone or delete the group lists and ID counter; raw edits snapshot only the value or array they change). Undo restores the snapshot; redo re-applies the edit.
 
 **Data flow.** After every edit, undo or redo, the app refetches its view models from the worker and bumps a `revision` that open panels use to reload. Only the page state (current page, selection, preferences) lives on the main thread.
+
+**World map.** The worker decodes the sim grid once per save, crops one asteroid using its `WorldContainer` offset and size, and transfers element indices, temperatures and masses; the page colors them on a canvas, so switching between element, temperature and mass views needs no worker call.
+
+**Unsaved changes.** The worker describes each edit in plain words as it is applied (before a delete removes the name it needs) and keeps the label with its undo entry; the header lists them.
 
 **Game data** is imported only by the worker. View models arrive with names resolved, so game data stays out of the main bundle. Pages are lazy-loaded.
 
@@ -128,9 +134,9 @@ save(): Uint8Array
 
 1. **Toolchain:** CI, repository rules, fixtures, Dependabot. Done.
 2. **Parser and game data.** Done.
-3. **Editor:** app shell, overview, duplicants (including bionic and portraits), critters, geysers, materials, research, space, game settings, raw editor, preferences. Done; not yet verified in game.
+3. **Editor:** app shell, overview, duplicants (including bionic, portraits and colony-wide actions), critters, geysers (including output and timing), materials, research, space, game settings, world map, raw editor, preferences. Done; not yet verified in game.
 4. **v0.1:** in-game verification of the main edits, then the first release.
-5. **Later:** geyser type and output editing (needs per-type ranges), more languages, map view, duplicant cloning.
+5. **Later:** changing a geyser's type, more languages, editing tiles on the map, duplicant cloning.
 
 ## Deviations from the original plan
 

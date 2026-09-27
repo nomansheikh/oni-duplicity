@@ -6,6 +6,7 @@ import {
   Gauge,
   FolderOpen,
   LayoutDashboard,
+  Map as MapIcon,
   Orbit,
   Package,
   Rabbit,
@@ -39,6 +40,7 @@ import {
 
 export type Page =
   | 'overview'
+  | 'map'
   | 'duplicants'
   | 'critters'
   | 'geysers'
@@ -50,6 +52,7 @@ export type Page =
 
 const PAGES: { id: Page; title: string; icon: ReactNode }[] = [
   { id: 'overview', title: 'Overview', icon: <LayoutDashboard /> },
+  { id: 'map', title: 'World map', icon: <MapIcon /> },
   { id: 'duplicants', title: 'Duplicants', icon: <Users /> },
   { id: 'critters', title: 'Critters', icon: <Rabbit /> },
   { id: 'geysers', title: 'Geysers', icon: <Droplets /> },

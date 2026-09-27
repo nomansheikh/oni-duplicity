@@ -25,6 +25,8 @@ import {
   summarize,
   type Edit,
 } from './model.ts'
+import { describeEdit } from './describe.ts'
+import { worldMap } from './map.ts'
 
 /** Captures the state an edit can touch, so undo can put it back. */
 function snapshot(save: SaveGame, edit: Edit): () => void {
@@ -46,6 +48,7 @@ function snapshot(save: SaveGame, edit: Edit): () => void {
   }
   const gameInfo = cloneValue(save.header.gameInfo)
   const customGameSettings = cloneValue(save.gameData.customGameSettings)
+  const debugWasUsed = save.gameData.debugWasUsed
   const behaviors = touchedBy(save, edit).flatMap((obj: GameObject) =>
     obj.behaviors.map((b) => ({
       b,
@@ -60,6 +63,7 @@ function snapshot(save: SaveGame, edit: Edit): () => void {
   return () => {
     save.header.gameInfo = gameInfo
     save.gameData.customGameSettings = customGameSettings
+    save.gameData.debugWasUsed = debugWasUsed
     for (const s of behaviors) {
       s.b.templateData = s.templateData
       if (s.extraData !== undefined) s.b.extraData = s.extraData
@@ -71,7 +75,7 @@ function snapshot(save: SaveGame, edit: Edit): () => void {
 
 let save: SaveGame | null = null
 let fileName = ''
-let undoStack: { edit: Edit; restore: () => void }[] = []
+let undoStack: { edit: Edit; restore: () => void; label: string }[] = []
 let redoStack: Edit[] = []
 
 function current(): SaveGame {
@@ -85,9 +89,11 @@ function status() {
 
 function apply(edit: Edit) {
   const s = current()
+  // Describe first: a delete can remove the name the label needs.
+  const label = describeEdit(s, edit)
   const restore = snapshot(s, edit)
   applyEdit(s, edit)
-  undoStack.push({ edit, restore })
+  undoStack.push({ edit, restore, label })
 }
 
 const api = {
@@ -120,6 +126,12 @@ const api = {
   materialItems: (elementId: string) => listMaterialItems(current(), elementId),
   rawChildren: (path: RawPath, offset?: number, limit?: number) =>
     rawChildren(current(), path, offset, limit),
+  worldMap(worldId: string) {
+    const map = worldMap(current(), worldId)
+    return transfer(map, [map.cells.buffer, map.temperature.buffer, map.mass.buffer])
+  },
+  /** Unsaved edits, oldest first. */
+  history: () => undoStack.map((e) => e.label),
   status,
   apply(edit: Edit) {
     apply(edit)
