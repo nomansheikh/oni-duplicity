@@ -21,6 +21,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import type { Named } from '@/worker/model'
+import { Portrait } from './portrait/Portrait'
+import { canDrawPortrait, type PortraitParts } from './portrait/sprites'
 
 /** Text input that commits on blur or Enter instead of on every keystroke. */
 export function CommitInput({
@@ -162,16 +164,31 @@ const AVATAR_COLORS = [
   'bg-chart-5 text-white',
 ]
 
-export function DuplicantAvatar({ name, className }: { name: string; className?: string }) {
+export function DuplicantAvatar({
+  name,
+  parts,
+  size = 36,
+  className,
+}: {
+  name: string
+  parts?: PortraitParts
+  size?: number
+  className?: string
+}) {
   let hash = 0
   for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i)
+  const drawable = parts && canDrawPortrait(parts)
   return (
-    <Avatar className={className}>
-      <AvatarFallback
-        className={cn('font-heading font-semibold', AVATAR_COLORS[hash % AVATAR_COLORS.length])}
-      >
-        {name.slice(0, 2).toUpperCase()}
-      </AvatarFallback>
+    <Avatar className={cn('bg-muted', className)} style={{ width: size, height: size }}>
+      {drawable ? (
+        <Portrait parts={parts} size={size} />
+      ) : (
+        <AvatarFallback
+          className={cn('font-heading font-semibold', AVATAR_COLORS[hash % AVATAR_COLORS.length])}
+        >
+          {name.slice(0, 2).toUpperCase()}
+        </AvatarFallback>
+      )}
     </Avatar>
   )
 }

@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { fmt, humanize } from '@/lib/format'
+import { fmt, humanize, portraitParts } from '@/lib/format'
 import type { Catalogs, DuplicantEdit, DuplicantView, Edit } from '@/worker/model'
 import { CommitInput, DuplicantAvatar } from '../common'
 import {
@@ -75,7 +75,12 @@ export function DuplicantEditor({
     <div className="flex min-w-0 flex-col gap-4 md:gap-6">
       <Card>
         <CardHeader className="flex items-center gap-4">
-          <DuplicantAvatar name={dupe.name} className="size-14 text-lg" />
+          <DuplicantAvatar
+            name={dupe.name}
+            parts={portraitParts(dupe.appearance)}
+            size={64}
+            className="text-lg"
+          />
           <div className="min-w-0 space-y-1">
             <CardTitle className="text-2xl">{dupe.name}</CardTitle>
             <CardDescription className="line-clamp-2">

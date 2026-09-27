@@ -37,9 +37,9 @@ import {
 } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-import { humanize } from '@/lib/format'
+import { humanize, portraitParts } from '@/lib/format'
 import type { AmountView, DuplicantEdit, DuplicantView, Named } from '@/worker/model'
-import { Hint, NumberField, SearchPicker } from '../common'
+import { DuplicantAvatar, Hint, NumberField, SearchPicker } from '../common'
 
 type EditFn = (change: DuplicantEdit) => void
 
@@ -458,33 +458,39 @@ export function AppearanceTab({ dupe, edit }: { dupe: DuplicantView; edit: EditF
           description="This duplicant has no editable appearance."
         />
       ) : (
-        <FieldGroup className="grid gap-4 @2xl/main:grid-cols-2 @5xl/main:grid-cols-3">
-          {dupe.appearance.map((slot) => {
-            const id = `${dupe.id}-${slot.slot}`
-            return (
-              <Field key={slot.slot}>
-                <FieldLabel htmlFor={id}>{slot.label}</FieldLabel>
-                <Select
-                  value={slot.current}
-                  onValueChange={(number) =>
-                    edit({ type: 'setAccessory', slot: slot.slot, number })
-                  }
-                >
-                  <SelectTrigger id={id} className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {slot.options.map((n) => (
-                      <SelectItem key={n} value={n}>
-                        Style {Number(n)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )
-          })}
-        </FieldGroup>
+        <div className="flex flex-col gap-6 @3xl/main:flex-row">
+          <div className="flex shrink-0 flex-col items-center gap-2">
+            <DuplicantAvatar name={dupe.name} parts={portraitParts(dupe.appearance)} size={160} />
+            <span className="text-xs text-muted-foreground">Live preview</span>
+          </div>
+          <FieldGroup className="grid flex-1 gap-4 @2xl/main:grid-cols-2">
+            {dupe.appearance.map((slot) => {
+              const id = `${dupe.id}-${slot.slot}`
+              return (
+                <Field key={slot.slot}>
+                  <FieldLabel htmlFor={id}>{slot.label}</FieldLabel>
+                  <Select
+                    value={slot.current}
+                    onValueChange={(number) =>
+                      edit({ type: 'setAccessory', slot: slot.slot, number })
+                    }
+                  >
+                    <SelectTrigger id={id} className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {slot.options.map((n) => (
+                        <SelectItem key={n} value={n}>
+                          Style {Number(n)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )
+            })}
+          </FieldGroup>
+        </div>
       )}
     </Panel>
   )

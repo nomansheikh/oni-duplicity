@@ -8,3 +8,9 @@ export function humanize(id: string): string {
     .replace(/([a-z])([A-Z0-9])/g, '$1 $2')
     .replace(/\b\w/g, (c) => c.toUpperCase())
 }
+
+/** Portrait layers from a duplicant's appearance slots. */
+export function portraitParts(appearance: { slot: string; current: string }[]) {
+  const get = (slot: string) => appearance.find((a) => a.slot === slot)?.current
+  return { hair: get('hair'), headshape: get('headshape'), eyes: get('eyes') }
+}

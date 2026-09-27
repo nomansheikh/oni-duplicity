@@ -15,6 +15,7 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useState } from 'react'
 import type { Catalogs, DuplicantView, Edit } from '@/worker/model'
+import { portraitParts } from '@/lib/format'
 import { DuplicantAvatar } from '../common'
 import { DuplicantEditor } from './DuplicantEditor'
 
@@ -66,7 +67,11 @@ export function DuplicantsPage({
                 >
                   <button type="button" onClick={() => onSelect(d.id)} className="text-left">
                     <ItemMedia>
-                      <DuplicantAvatar name={d.name} className="size-9" />
+                      <DuplicantAvatar
+                        name={d.name}
+                        parts={portraitParts(d.appearance)}
+                        size={36}
+                      />
                     </ItemMedia>
                     <ItemContent className="gap-1.5">
                       <ItemTitle>{d.name}</ItemTitle>
