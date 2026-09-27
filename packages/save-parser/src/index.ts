@@ -7,6 +7,7 @@ export {
   readSaveParts,
   writeBody,
   writeSave,
+  writeSaveParts,
   type ParseOptions,
 } from "./save.ts";
 export * from "./types.ts";

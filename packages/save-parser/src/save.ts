@@ -267,11 +267,19 @@ export function parseSave(input: ArrayBuffer | Uint8Array, options: ParseOptions
   return { header, templates, ...parsed, warnings };
 }
 
-export function writeSave(save: SaveGame): Uint8Array {
+/** Header plus templates, and the uncompressed body, for callers that compress themselves. */
+export function writeSaveParts(save: SaveGame): { head: Uint8Array; body: Uint8Array } {
   const w = new Writer(1 << 16);
   writeHeader(w, save.header);
   writeTemplates(w, save.templates);
-  const body = writeBody(save);
-  w.bytes(save.header.isCompressed ? zlibSync(body, { level: 1 }) : body);
-  return w.finish();
+  return { head: w.finish(), body: writeBody(save) };
+}
+
+export function writeSave(save: SaveGame): Uint8Array {
+  const { head, body } = writeSaveParts(save);
+  const payload = save.header.isCompressed ? zlibSync(body, { level: 1 }) : body;
+  const out = new Uint8Array(head.length + payload.length);
+  out.set(head);
+  out.set(payload, head.length);
+  return out;
 }
