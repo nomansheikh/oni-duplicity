@@ -14,7 +14,7 @@ import {
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useState } from 'react'
-import type { Catalogs, DuplicantView, Edit } from '@/worker/model'
+import type { Catalogs, DuplicantProfile, DuplicantView, Edit } from '@/worker/model'
 import { portraitParts } from '@/lib/format'
 import { DuplicantAvatar } from '../common'
 import { DuplicantEditor } from './DuplicantEditor'
@@ -33,6 +33,7 @@ export function DuplicantsPage({
   onEdit: (edit: Edit) => void
 }) {
   const [query, setQuery] = useState('')
+  const [clipboard, setClipboard] = useState<DuplicantProfile | null>(null)
   const selected = duplicants.find((d) => d.id === selectedId) ?? duplicants[0]
   const visible = duplicants.filter((d) => d.name.toLowerCase().includes(query.toLowerCase()))
   const stressOf = (d: DuplicantView) => d.amounts.find((a) => a.id === 'Stress')?.value ?? 0
@@ -93,7 +94,14 @@ export function DuplicantsPage({
         </CardContent>
       </Card>
       {selected ? (
-        <DuplicantEditor key={selected.id} dupe={selected} catalogs={catalogs} onEdit={onEdit} />
+        <DuplicantEditor
+          key={selected.id}
+          dupe={selected}
+          catalogs={catalogs}
+          clipboard={clipboard}
+          onCopy={setClipboard}
+          onEdit={onEdit}
+        />
       ) : (
         <Card>
           <CardHeader>

@@ -18,7 +18,8 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fmt, humanize, portraitParts } from '@/lib/format'
-import type { Catalogs, DuplicantEdit, DuplicantView, Edit } from '@/worker/model'
+import type { Catalogs, DuplicantEdit, DuplicantProfile, DuplicantView, Edit } from '@/worker/model'
+import { ProfileActions } from './ProfileActions'
 import { CommitInput, DuplicantAvatar } from '../common'
 import {
   AppearanceTab,
@@ -61,10 +62,14 @@ function Meter({
 export function DuplicantEditor({
   dupe,
   catalogs,
+  clipboard,
+  onCopy,
   onEdit,
 }: {
   dupe: DuplicantView
   catalogs: Catalogs
+  clipboard: DuplicantProfile | null
+  onCopy: (profile: DuplicantProfile) => void
   onEdit: (edit: Edit) => void
 }) {
   const edit = (change: DuplicantEdit) => onEdit({ ...change, id: dupe.id } as Edit)
@@ -88,11 +93,17 @@ export function DuplicantEditor({
               {dupe.personality.desc && ` · ${dupe.personality.desc}`}
             </CardDescription>
           </div>
-          <CardAction className="flex gap-1">
+          <CardAction className="flex items-center gap-1">
             {dupe.isBionic && <Badge>Bionic</Badge>}
             {dupe.hat && (
               <Badge variant="outline">{humanize(dupe.hat.replace(/^hat_role_/, ''))} hat</Badge>
             )}
+            <ProfileActions
+              dupe={dupe}
+              clipboard={clipboard}
+              onCopy={onCopy}
+              onApply={(profile, sections) => edit({ type: 'applyProfile', profile, sections })}
+            />
           </CardAction>
         </CardHeader>
         <CardContent className="space-y-6">

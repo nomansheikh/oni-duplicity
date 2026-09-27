@@ -113,6 +113,27 @@ export interface GeyserView {
   dormancyCycles: number
 }
 
+/** A portable copy of a duplicant's editable state (copy/paste and JSON export). */
+export interface DuplicantProfile {
+  format: 'duplicity-duplicant@1'
+  name: string
+  gender: string
+  traits: string[]
+  interests: string[]
+  attributes: Record<string, number>
+  skills: string[]
+  experience: number
+  appearance: Partial<Record<AccessorySlot, string>>
+}
+
+export type ProfileSection =
+  | 'name'
+  | 'traits'
+  | 'interests'
+  | 'attributes'
+  | 'skills'
+  | 'appearance'
+
 export type Edit =
   | { type: 'setColonyName'; name: string }
   | { type: 'setSandbox'; enabled: boolean }
@@ -129,6 +150,7 @@ export type Edit =
   | { type: 'setEffectCycles'; id: string; effectId: string; cycles: number }
   | { type: 'removeEffect'; id: string; effectId: string }
   | { type: 'setAccessory'; id: string; slot: AccessorySlot; number: string }
+  | { type: 'applyProfile'; id: string; profile: DuplicantProfile; sections: ProfileSection[] }
   | { type: 'setGeyserName'; id: string; name: string }
 
 // --- Helpers ---------------------------------------------------------------
@@ -518,6 +540,9 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
       }
       return
     }
+    case 'applyProfile':
+      applyProfile(obj, edit.profile, new Set(edit.sections))
+      return
     default:
       throw new Error(`Unhandled edit ${edit.type}`)
   }
@@ -527,3 +552,44 @@ type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K>
 
 /** An edit to one duplicant, without its `id` (the editor adds it). */
 export type DuplicantEdit = DistributiveOmit<Extract<Edit, { id: string }>, 'id'>
+
+function applyProfile(
+  obj: GameObject,
+  profile: DuplicantProfile,
+  sections: Set<ProfileSection>,
+): void {
+  if (profile.format !== 'duplicity-duplicant@1')
+    throw new Error('Not a Duplicity duplicant profile')
+  const identity = data(obj, 'MinionIdentity')
+  if (sections.has('name')) {
+    identity.name = profile.name
+    identity.gender = profile.gender
+    identity.genderStringKey = profile.gender
+  }
+  if (sections.has('traits')) data(obj, 'Klei.AI.Traits').TraitIds = [...profile.traits]
+  const resume = behavior(obj, 'MinionResume')?.templateData
+  if (sections.has('interests') && resume) {
+    const hashes = skillGroups.filter((g) => profile.interests.includes(g.id)).map((g) => g.hash)
+    resume.AptitudeBySkillGroup = hashes.map((hash) => [{ hash }, 1])
+  }
+  if (sections.has('attributes')) {
+    const levels = (data(obj, 'Klei.AI.AttributeLevels').saveLoadLevels ?? []) as {
+      attributeId: string
+      level: number
+    }[]
+    for (const entry of levels) {
+      const level = profile.attributes[entry.attributeId]
+      if (typeof level === 'number') entry.level = Math.max(0, Math.round(level))
+    }
+  }
+  if (sections.has('skills') && resume) {
+    resume.MasteryBySkillID = profile.skills.map((id) => [id, true])
+    resume.totalExperienceGained = Math.max(0, profile.experience)
+  }
+  if (sections.has('appearance')) {
+    for (const [slot, number] of Object.entries(profile.appearance)) {
+      if (number)
+        applyObjectEdit(obj, { type: 'setAccessory', id: '', slot: slot as AccessorySlot, number })
+    }
+  }
+}
