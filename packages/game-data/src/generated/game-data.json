@@ -4709,5 +4709,1003 @@
       "family": "COLDBREATHERCLUSTER",
       "baby": false
     }
+  ],
+  "techs": [
+    {
+      "id": "LogicCircuits",
+      "name": "Advanced Automation",
+      "desc": "The only limit to colony automation is my own imagination."
+    },
+    {
+      "id": "PrecisionPlumbing",
+      "name": "Advanced Caffeination",
+      "desc": "Let Duplicants relax after a long day of subterranean digging with a shot of warm beanjuice."
+    },
+    {
+      "id": "SpaceCombustion",
+      "name": "Advanced Combustion",
+      "desc": "Sweet advancements in rocket engines."
+    },
+    {
+      "id": "SpaceGas",
+      "name": "Advanced Gas Flow",
+      "desc": "Gas engines and transportation for rockets."
+    },
+    {
+      "id": "AdvancedPowerRegulation",
+      "name": "Advanced Power Regulation",
+      "desc": "Circuit components required for large scale Power management."
+    },
+    {
+      "id": "AdvancedResearch",
+      "name": "Advanced Research",
+      "desc": "The tools my colony needs to conduct more advanced, in-depth research."
+    },
+    {
+      "id": "AdvancedResourceExtraction",
+      "name": "Advanced Resource Extraction",
+      "desc": "Bring back souvieners from the stars."
+    },
+    {
+      "id": "AdvancedSanitation",
+      "name": "Advanced Sanitation",
+      "desc": "Clean up dirty Duplicants."
+    },
+    {
+      "id": "Agriculture",
+      "name": "Agriculture",
+      "desc": "Master the agricultural art of crop raising."
+    },
+    {
+      "id": "ImprovedOxygen",
+      "name": "Air Systems",
+      "desc": "Maintain clean, breathable air in the colony."
+    },
+    {
+      "id": "AnimalControl",
+      "name": "Animal Control",
+      "desc": "Useful techniques to manage critter populations in the colony."
+    },
+    {
+      "id": "ArtificialFriends",
+      "name": "Artificial Friends",
+      "desc": "Sweeping advances in companion technology."
+    },
+    {
+      "id": "Artistry",
+      "name": "Artistic Expression",
+      "desc": "Majorly improve Decor by giving Duplicants the tools of artistic and emotional expression."
+    },
+    {
+      "id": "FarmingTech",
+      "name": "Basic Farming",
+      "desc": "Learn the introductory principles of Plant domestication."
+    },
+    {
+      "id": "Bioengineering",
+      "name": "Bioengineering",
+      "desc": "Mutation station."
+    },
+    {
+      "id": "DairyOperation",
+      "name": "Brackene Flow",
+      "desc": "Advanced production, processing and distribution of this fluid resource."
+    },
+    {
+      "id": "BasicRefinement",
+      "name": "Brute-Force Refinement",
+      "desc": "Low-tech refinement methods for producing clay and renewable sources of sand."
+    },
+    {
+      "id": "Catalytics",
+      "name": "Catalytics",
+      "desc": "Advanced gas manipulation using unique catalysts."
+    },
+    {
+      "id": "SkyDetectors",
+      "name": "Celestial Detection",
+      "desc": "Turn Duplicants' eyes to the skies and discover what undiscovered wonders await out there."
+    },
+    {
+      "id": "DupeTrafficControl",
+      "name": "Computing",
+      "desc": "Virtually extend the boundaries of Duplicant imagination."
+    },
+    {
+      "id": "CrashPlan",
+      "name": "Crash Plan",
+      "desc": "What goes up, must come down."
+    },
+    {
+      "id": "AnimalComfort",
+      "name": "Creature Comforts",
+      "desc": "Strategies for maximizing critters' quality of life."
+    },
+    {
+      "id": "EnginesIII",
+      "name": "Cryofuel Combustion",
+      "desc": "With this technology, the sky is your oyster. Go exploring!"
+    },
+    {
+      "id": "CryoFuelPropulsion",
+      "name": "Cryofuel Propulsion",
+      "desc": "A semi-powerful engine to propel you further into the galaxy."
+    },
+    {
+      "id": "DataScience",
+      "name": "Data Science",
+      "desc": "The science of making the data work for my Duplicants, instead of the other way around."
+    },
+    {
+      "id": "DataScienceBaseGame",
+      "name": "Data Science",
+      "desc": "The science of making the data work for my Duplicants, instead of the other way around."
+    },
+    {
+      "id": "DirectedAirStreams",
+      "name": "Decontamination",
+      "desc": "Instruments to help reduce Germ spread within the base."
+    },
+    {
+      "id": "Distillation",
+      "name": "Distillation",
+      "desc": "Distill difficult mixtures down to their most useful parts."
+    },
+    {
+      "id": "DurableLifeSupport",
+      "name": "Durable Life Support",
+      "desc": "Improved devices for extended missions into space."
+    },
+    {
+      "id": "Jobs",
+      "name": "Employment",
+      "desc": "Exchange the skill points earned by Duplicants for new traits and abilities."
+    },
+    {
+      "id": "AdvancedDistillation",
+      "name": "Emulsification",
+      "desc": "Specialized production of Liquid compounds."
+    },
+    {
+      "id": "EnvironmentalAppreciation",
+      "name": "Environmental Appreciation",
+      "desc": "Improve Morale by lazing around in Light with a high Lux value."
+    },
+    {
+      "id": "AdvancedFiltration",
+      "name": "Filtration",
+      "desc": "Basic technologies for filtering Liquids and Gases."
+    },
+    {
+      "id": "FineArt",
+      "name": "Fine Art",
+      "desc": "Broader options for artistic Decor improvements."
+    },
+    {
+      "id": "FlowRedirection",
+      "name": "Flow Redirection",
+      "desc": "Liquid management for Morale and industry."
+    },
+    {
+      "id": "FoodRepurposing",
+      "name": "Food Repurposing",
+      "desc": "Blend that leftover Food into a Morale-boosting slurry."
+    },
+    {
+      "id": "ImprovedCombustion",
+      "name": "Fossil Fuels",
+      "desc": "Burn dirty fuels for exceptional Power production."
+    },
+    {
+      "id": "GasDistribution",
+      "name": "Gas Distribution",
+      "desc": "Design building hookups to get Gas resources circulating properly."
+    },
+    {
+      "id": "GenericSensors",
+      "name": "Generic Sensors",
+      "desc": "Drive automation in a variety of new, inventive ways."
+    },
+    {
+      "id": "GlassFurnishings",
+      "name": "Glass Blowing",
+      "desc": "The decorative benefits of glass are both apparent and transparent."
+    },
+    {
+      "id": "FinerDining",
+      "name": "Gourmet Meal Preparation",
+      "desc": "Raise colony Morale by cooking the most delicious, high-quality Foods."
+    },
+    {
+      "id": "Suits",
+      "name": "Hazard Protection",
+      "desc": "Vital gear for surviving in extreme conditions and environments."
+    },
+    {
+      "id": "RefractiveDecor",
+      "name": "High Culture",
+      "desc": "New methods for working with extremely high quality art materials."
+    },
+    {
+      "id": "HighVelocityDestruction",
+      "name": "High Velocity Destruction",
+      "desc": "Mine the skies."
+    },
+    {
+      "id": "HighVelocityTransport",
+      "name": "High Velocity Transport",
+      "desc": "Hurl things through space."
+    },
+    {
+      "id": "Luxury",
+      "name": "Home Luxuries",
+      "desc": "Luxury amenities for advanced Stress reduction."
+    },
+    {
+      "id": "HVAC",
+      "name": "HVAC",
+      "desc": "Regulate Temperature in the colony for Plant cultivation and Duplicant comfort."
+    },
+    {
+      "id": "EnginesII",
+      "name": "Hydrocarbon Combustion",
+      "desc": "Delve deeper into the vastness of space than ever before."
+    },
+    {
+      "id": "HydrocarbonPropulsion",
+      "name": "Hydrocarbon Propulsion",
+      "desc": "Low-range rocket engines with lots of smoke."
+    },
+    {
+      "id": "BetterHydroCarbonPropulsion",
+      "name": "Improved Hydrocarbon Propulsion",
+      "desc": "Mid-range rocket engines with lots of smoke."
+    },
+    {
+      "id": "ImprovedLiquidPiping",
+      "name": "Improved Plumbing",
+      "desc": "Liquid infrastructure capable of withstanding more intense conditions, such as Heat and pressure."
+    },
+    {
+      "id": "ImprovedGasPiping",
+      "name": "Improved Ventilation",
+      "desc": "Gas infrastructure capable of withstanding more intense conditions, such as Heat and pressure."
+    },
+    {
+      "id": "Insulation",
+      "name": "Insulation",
+      "desc": "Improve Heat distribution within the colony and guard buildings from extreme temperatures."
+    },
+    {
+      "id": "InteriorDecor",
+      "name": "Interior Decor",
+      "desc": "Decor boosting items to counteract the gloom of underground living."
+    },
+    {
+      "id": "Combustion",
+      "name": "Internal Combustion",
+      "desc": "Fuel-powered generators for crude yet powerful Power production."
+    },
+    {
+      "id": "BasicRocketry",
+      "name": "Introductory Rocketry",
+      "desc": "Everything required for launching the colony's very first space program."
+    },
+    {
+      "id": "CargoII",
+      "name": "Liquid and Gas Cargo",
+      "desc": "Extract precious liquids and gases from the far reaches of space, and return with them to the colony."
+    },
+    {
+      "id": "LiquidDistribution",
+      "name": "Liquid Distribution",
+      "desc": "Advanced fittings ensure that Liquid resources get where they need to go."
+    },
+    {
+      "id": "LiquidTemperature",
+      "name": "Liquid Tuning",
+      "desc": "Easily manipulate Liquid Heat with these temperature regulating technologies."
+    },
+    {
+      "id": "LiquidFiltering",
+      "name": "Liquid-Based Refinement Processes",
+      "desc": "Use pumped Liquids to filter out unwanted elements."
+    },
+    {
+      "id": "PrettyGoodConductors",
+      "name": "Low-Resistance Conductors",
+      "desc": "Pure-core wires that can handle more Electrical current without overloading."
+    },
+    {
+      "id": "NuclearResearch",
+      "name": "Materials Science Research",
+      "desc": "Harness sub-atomic particles to study the properties of matter."
+    },
+    {
+      "id": "FineDining",
+      "name": "Meal Preparation",
+      "desc": "Prepare more nutritious Food and store it longer before spoiling."
+    },
+    {
+      "id": "MedicineII",
+      "name": "Medical Equipment",
+      "desc": "The basic necessities doctors need to facilitate patient care."
+    },
+    {
+      "id": "MedicineIV",
+      "name": "Micro-Targeted Medicine",
+      "desc": "State of the art equipment to conquer the most stubborn of illnesses."
+    },
+    {
+      "id": "Missiles",
+      "name": "Missiles",
+      "desc": "Craft explosives and fire them into outer space."
+    },
+    {
+      "id": "Monuments",
+      "name": "Monuments",
+      "desc": "Monumental art projects."
+    },
+    {
+      "id": "AdvancedNuclearResearch",
+      "name": "More Materials Science Research",
+      "desc": "Harness sub-atomic particles to study the properties of matter even more."
+    },
+    {
+      "id": "Multiplexing",
+      "name": "Multiplexing",
+      "desc": "More choices for Automation signal distribution."
+    },
+    {
+      "id": "Screens",
+      "name": "New Media",
+      "desc": "High tech displays with lots of pretty colors."
+    },
+    {
+      "id": "NotificationSystems",
+      "name": "Notification Systems",
+      "desc": "Get all the news you need to know about your complex colony."
+    },
+    {
+      "id": "ParallelAutomation",
+      "name": "Parallel Automation",
+      "desc": "Multi-wire automation at a fraction of the space."
+    },
+    {
+      "id": "MedicineIII",
+      "name": "Pathogen Diagnostics",
+      "desc": "Stop Germs at the source using special medical automation technology."
+    },
+    {
+      "id": "Jetpacks",
+      "name": "Personal Flight",
+      "desc": "Give Duplicants the gift of a walk-free commute."
+    },
+    {
+      "id": "MedicineI",
+      "name": "Pharmacology",
+      "desc": "Compound natural cures to fight the most common Sicknesses that plague Duplicants."
+    },
+    {
+      "id": "Plastics",
+      "name": "Plastic Manufacturing",
+      "desc": "Stable, lightweight, durable. Plastics are useful for a wide array of applications."
+    },
+    {
+      "id": "LiquidPiping",
+      "name": "Plumbing",
+      "desc": "Rudimentary technologies for installing Liquid infrastructure."
+    },
+    {
+      "id": "PortableGasses",
+      "name": "Portable Gases",
+      "desc": "Unlock technologies to easily move gases around your colony."
+    },
+    {
+      "id": "AMPLIFIERS",
+      "name": "Power Amplifiers",
+      "desc": "Further increased efficacy of Power management to prevent those wasted joules."
+    },
+    {
+      "id": "PowerRegulation",
+      "name": "Power Regulation",
+      "desc": "Prevent wasted Power with improved electrical tools."
+    },
+    {
+      "id": "PressureManagement",
+      "name": "Pressure Management",
+      "desc": "Unlock technologies to manage colony pressure and atmosphere."
+    },
+    {
+      "id": "HighPressureForging",
+      "name": "Pressurized Forging",
+      "desc": "High pressure diamond forging."
+    },
+    {
+      "id": "NuclearStorage",
+      "name": "Radbolt Containment",
+      "desc": "Build a quality cache of radbolts."
+    },
+    {
+      "id": "NuclearPropulsion",
+      "name": "Radbolt Propulsion",
+      "desc": "Radical technology to get you to the stars."
+    },
+    {
+      "id": "RadiationProtection",
+      "name": "Radiation Protection",
+      "desc": "Shield Duplicants from dangerous amounts of radiation."
+    },
+    {
+      "id": "NuclearRefinement",
+      "name": "Radiation Refinement",
+      "desc": "Refine uranium and generate radiation."
+    },
+    {
+      "id": "Ranching",
+      "name": "Ranching",
+      "desc": "Tame and care for wild critters."
+    },
+    {
+      "id": "RefinedObjects",
+      "name": "Refined Renovations",
+      "desc": "Improve base infrastructure with new objects crafted from Refined Metals."
+    },
+    {
+      "id": "RenaissanceArt",
+      "name": "Renaissance Art",
+      "desc": "The kind of art that culture legacies are made of."
+    },
+    {
+      "id": "RenewableEnergy",
+      "name": "Renewable Energy",
+      "desc": "Clean, sustainable Power production that produces little to no waste."
+    },
+    {
+      "id": "RoboticTools",
+      "name": "Robotic Tools",
+      "desc": "The goal of every great civilization is to one day make itself obsolete."
+    },
+    {
+      "id": "SanitationSciences",
+      "name": "Sanitation",
+      "desc": "Make daily ablutions less of a hassle."
+    },
+    {
+      "id": "AdvancedScanners",
+      "name": "Sensitive Microimaging",
+      "desc": "Computerized systems do the looking, so Duplicants don't have to."
+    },
+    {
+      "id": "LogicControl",
+      "name": "Smart Home",
+      "desc": "Switches that grant full control of building operations within the colony."
+    },
+    {
+      "id": "SmartStorage",
+      "name": "Smart Storage",
+      "desc": "Completely automate the storage of solid resources."
+    },
+    {
+      "id": "Smelting",
+      "name": "Smelting",
+      "desc": "High temperatures facilitate the production of purer, special use metal resources."
+    },
+    {
+      "id": "CargoI",
+      "name": "Solid Cargo",
+      "desc": "Make extra use of journeys into space by mining and storing useful resources."
+    },
+    {
+      "id": "SolidSpace",
+      "name": "Solid Control",
+      "desc": "Transport and sort Solid resources."
+    },
+    {
+      "id": "SOLIDDISTRIBUTION",
+      "name": "Solid Distribution",
+      "desc": "Internal rocket hookups for Solid resources."
+    },
+    {
+      "id": "EnginesI",
+      "name": "Solid Fuel Combustion",
+      "desc": "Rockets that fly further, longer."
+    },
+    {
+      "id": "SolidManagement",
+      "name": "Solid Management",
+      "desc": "Make solid decisions in Solid sorting."
+    },
+    {
+      "id": "SolidTransport",
+      "name": "Solid Transport",
+      "desc": "Free Duplicants from the drudgery of day-to-day material deliveries with new methods of automation."
+    },
+    {
+      "id": "Acoustics",
+      "name": "Sound Amplifiers",
+      "desc": "Precise control of the audio spectrum allows Duplicants to get funky."
+    },
+    {
+      "id": "SpacePower",
+      "name": "Space Power",
+      "desc": "It's like power... in space!"
+    },
+    {
+      "id": "SpaceProgram",
+      "name": "Space Program",
+      "desc": "The first steps in getting a Duplicant to space."
+    },
+    {
+      "id": "HighTempForging",
+      "name": "Superheated Forging",
+      "desc": "Craft entirely new materials by harnessing the most extreme temperatures."
+    },
+    {
+      "id": "TemperatureModulation",
+      "name": "Temperature Modulation",
+      "desc": "Precise Temperature altering technologies to keep my colony at the perfect Kelvin."
+    },
+    {
+      "id": "Clothing",
+      "name": "Textile Production",
+      "desc": "Bring Duplicants the Morale boosting benefits of soft, cushy fabrics."
+    },
+    {
+      "id": "TravelTubes",
+      "name": "Transit Tubes",
+      "desc": "A wholly futuristic way to move Duplicants around the base."
+    },
+    {
+      "id": "CargoIII",
+      "name": "Unique Cargo",
+      "desc": "Allow Duplicants to take their friends to see the stars... or simply bring souvenirs back from their travels."
+    },
+    {
+      "id": "ValveMiniaturization",
+      "name": "Valve Miniaturization",
+      "desc": "Smaller, more efficient pumps for those low-throughput situations."
+    },
+    {
+      "id": "GasPiping",
+      "name": "Ventilation",
+      "desc": "Rudimentary technologies for installing Gas infrastructure."
+    }
+  ],
+  "gameSettings": [
+    {
+      "id": "BionicWattage",
+      "name": "Bionic Wattage",
+      "desc": "Adjusts Bionic Duplicants' baseline power consumption",
+      "levels": [
+        {
+          "id": "Default",
+          "name": "Default",
+          "desc": "Default wattage"
+        },
+        {
+          "id": "Easy",
+          "name": "Energy Efficient",
+          "desc": "These Duplicants consume less power than usual"
+        },
+        {
+          "id": "Hard",
+          "name": "Power Hungry",
+          "desc": "These Duplicants have an increased appetite for power"
+        },
+        {
+          "id": "VeryEasy",
+          "name": "Analog",
+          "desc": "These Bionic Duplicants run on old-school enthusiasm, and barely consume power at all"
+        },
+        {
+          "id": "VeryHard",
+          "name": "Energy Vampire",
+          "desc": "These Bionic Duplicants drain batteries like it's their only job"
+        }
+      ]
+    },
+    {
+      "id": "CalorieBurn",
+      "name": "Hunger",
+      "desc": "Affects how quickly Duplicants burn calories and become hungry",
+      "levels": [
+        {
+          "id": "Default",
+          "name": "Default",
+          "desc": "Default calorie burn rate"
+        },
+        {
+          "id": "Disabled",
+          "name": "Tummyless",
+          "desc": "These Duplicants were printed without tummies and need no food at all"
+        },
+        {
+          "id": "Easy",
+          "name": "Fasting",
+          "desc": "Duplicants burn calories slowly and get by with fewer meals"
+        },
+        {
+          "id": "Hard",
+          "name": "Rumbly Tummies",
+          "desc": "Duplicants burn calories quickly and require more feeding than usual"
+        },
+        {
+          "id": "VeryHard",
+          "name": "Ravenous",
+          "desc": "Your Duplicants are on a see-food diet... They see food and they eat it"
+        }
+      ]
+    },
+    {
+      "id": "CarePackages",
+      "name": "Care Packages",
+      "desc": "Affects what resources can be printed from the Printing Pod",
+      "levels": [
+        {
+          "id": "DUPLICANTS_ONLY",
+          "name": "Duplicants Only",
+          "desc": "Unchecked: The Printing Pod will only offer Duplicant blueprints"
+        },
+        {
+          "id": "Normal",
+          "name": "All",
+          "desc": "Checked: The Printing Pod will offer both Duplicant blueprints and care packages (Default)"
+        }
+      ]
+    },
+    {
+      "id": "DemoliorDifficulty",
+      "name": "Demolior Impact",
+      "desc": "Adjusts how soon the Demolior asteroid collides with The Prehistoric Planet Pack asteroid",
+      "levels": [
+        {
+          "id": "Default",
+          "name": "Default",
+          "desc": "Demolior impacts in 200 cycles"
+        },
+        {
+          "id": "Easy",
+          "name": "Slightly Delayed",
+          "desc": "Demolior impacts later than usual\n\n300 cycles until collision"
+        },
+        {
+          "id": "Hard",
+          "name": "Early Arrival",
+          "desc": "Demolior impacts sooner than usual\n\n150 cycles until collision"
+        },
+        {
+          "id": "Off",
+          "name": "Disabled",
+          "desc": "Demolior does not exist in this universe and the achievement cannot be earned"
+        },
+        {
+          "id": "VeryEasy",
+          "name": "Far-Off Forecast",
+          "desc": "Duplicants could probably build a whole new asteroid by the time Demolior impacts this one\n\n500 cycles until collision"
+        },
+        {
+          "id": "VeryHard",
+          "name": "Imminent Extinction",
+          "desc": "It'll all be over soon\n\nOnly 100 cycles until collision"
+        }
+      ]
+    },
+    {
+      "id": "Durability",
+      "name": "Durability",
+      "desc": "Affects how quickly equippable suits wear out",
+      "levels": [
+        {
+          "id": "Default",
+          "name": "Default",
+          "desc": "Default suit durability"
+        },
+        {
+          "id": "Flimsy",
+          "name": "Flimsy",
+          "desc": "Suits wear out faster than usual"
+        },
+        {
+          "id": "Indestructible",
+          "name": "Indestructible",
+          "desc": "Duplicants have perfected clothes manufacturing and are able to make suits that last forever"
+        },
+        {
+          "id": "Reinforced",
+          "name": "Reinforced",
+          "desc": "Suits are more durable than usual"
+        },
+        {
+          "id": "Threadbare",
+          "name": "Threadbare",
+          "desc": "These Duplicants are no tailors - suits wear out much faster than usual"
+        }
+      ]
+    },
+    {
+      "id": "Expansion1Active",
+      "name": "Spaced Out! Content Enabled",
+      "desc": "If checked, content from the Spaced Out! Expansion will be available",
+      "levels": [
+        {
+          "id": "Disabled",
+          "name": "Disabled",
+          "desc": "Unchecked: Spaced Out! Content is turned off (Default)"
+        },
+        {
+          "id": "Enabled",
+          "name": "Enabled",
+          "desc": "Checked: Spaced Out! Content is turned on"
+        }
+      ]
+    },
+    {
+      "id": "FastWorkersMode",
+      "name": "Fast Workers Mode",
+      "desc": "Duplicants will finish most work immediately and require little sleep",
+      "levels": [
+        {
+          "id": "Disabled",
+          "name": "Disabled",
+          "desc": "Unchecked: Fast Workers Mode is turned off (Default)"
+        },
+        {
+          "id": "Enabled",
+          "name": "Enabled",
+          "desc": "Checked: Fast Workers Mode is turned on"
+        }
+      ]
+    },
+    {
+      "id": "ImmuneSystem",
+      "name": "Disease",
+      "desc": "Affects Duplicants' chances of contracting a disease after germ exposure",
+      "levels": [
+        {
+          "id": "Compromised",
+          "name": "Outbreak Prone",
+          "desc": "The whole colony will be ravaged by plague if a Duplicant so much as sneezes funny"
+        },
+        {
+          "id": "Default",
+          "name": "Default",
+          "desc": "Default disease chance"
+        },
+        {
+          "id": "Invincible",
+          "name": "Total Immunity",
+          "desc": "Like diplomatic immunity, but without the diplomacy. These Duplicants will never get sick"
+        },
+        {
+          "id": "Strong",
+          "name": "Germ Resistant",
+          "desc": "These Duplicants have a decreased chance of contracting diseases from germ exposure"
+        },
+        {
+          "id": "Weak",
+          "name": "Germ Susceptible",
+          "desc": "These Duplicants have an increased chance of contracting diseases from germ exposure"
+        }
+      ]
+    },
+    {
+      "id": "MeteorShowers",
+      "name": "Meteor Showers",
+      "desc": "Adjusts the intensity of incoming space rocks",
+      "levels": [
+        {
+          "id": "ClearSkies",
+          "name": "Clear Skies",
+          "desc": "No meteor damage, no worries"
+        },
+        {
+          "id": "Default",
+          "name": "Default",
+          "desc": "Default meteor shower frequency and intensity"
+        },
+        {
+          "id": "Doomed",
+          "name": "Doomsday",
+          "desc": "An onslaught of apocalyptic hailstorms that feels almost personal"
+        },
+        {
+          "id": "Infrequent",
+          "name": "Spring Showers",
+          "desc": "Meteor showers are less frequent and less intense than usual"
+        },
+        {
+          "id": "Intense",
+          "name": "Cosmic Storm",
+          "desc": "Meteor showers are more frequent and more intense than usual"
+        }
+      ]
+    },
+    {
+      "id": "Morale",
+      "name": "Morale",
+      "desc": "Adjusts the minimum morale Duplicants must maintain to avoid gaining stress",
+      "levels": [
+        {
+          "id": "Default",
+          "name": "Default",
+          "desc": "Default morale needs"
+        },
+        {
+          "id": "Disabled",
+          "name": "Totally Blasé",
+          "desc": "These Duplicants have zero standards and will never gain stress, regardless of their morale"
+        },
+        {
+          "id": "Easy",
+          "name": "Chill",
+          "desc": "Duplicants require lower morale than usual to fend off stress"
+        },
+        {
+          "id": "Hard",
+          "name": "A Bit Persnickety",
+          "desc": "Duplicants require higher morale than usual to fend off stress"
+        },
+        {
+          "id": "VeryHard",
+          "name": "Draconian",
+          "desc": "The finest of the finest can barely keep up with these Duplicants' stringent demands"
+        }
+      ]
+    },
+    {
+      "id": "Radiation",
+      "name": "Radiation",
+      "desc": "Affects how susceptible Duplicants are to radiation sickness",
+      "levels": [
+        {
+          "id": "Default",
+          "name": "Default",
+          "desc": "Default radiation settings"
+        },
+        {
+          "id": "Easier",
+          "name": "Healthy Glow",
+          "desc": "Duplicants are more resistant to radiation exposure than usual"
+        },
+        {
+          "id": "Easiest",
+          "name": "Nuke-Proof",
+          "desc": "Duplicants could bathe in radioactive waste and not even notice"
+        },
+        {
+          "id": "Harder",
+          "name": "Toxic Positivity",
+          "desc": "Duplicants are more sensitive to radiation exposure than usual"
+        },
+        {
+          "id": "Hardest",
+          "name": "Critical Mass",
+          "desc": "Duplicants feel ill at the merest mention of radiation...and may never truly recover"
+        }
+      ]
+    },
+    {
+      "id": "SandboxMode",
+      "name": "Sandbox Mode",
+      "desc": "Manipulate and customize the simulation with tools that ignore regular game constraints",
+      "levels": [
+        {
+          "id": "Disabled",
+          "name": "Disabled",
+          "desc": "Unchecked: Sandbox Mode is turned off (Default)"
+        },
+        {
+          "id": "Enabled",
+          "name": "Enabled",
+          "desc": "Checked: Sandbox Mode is turned on"
+        }
+      ]
+    },
+    {
+      "id": "SaveToCloud",
+      "name": "Save To Cloud",
+      "desc": "This colony will be created in the cloud saves folder, and synced by the game platform.",
+      "levels": [
+        {
+          "id": "Disabled",
+          "name": "Disabled",
+          "desc": "Unchecked: This colony will be a local save"
+        },
+        {
+          "id": "Enabled",
+          "name": "Enabled",
+          "desc": "Checked: This colony will be a cloud save (Default)"
+        }
+      ]
+    },
+    {
+      "id": "STORY_TRAIT_COUNT",
+      "name": "Story Traits",
+      "desc": "Determines the number of story traits spawned",
+      "levels": [
+        {
+          "id": "Few",
+          "name": "Stingy",
+          "desc": "Not zero, but not a lot"
+        },
+        {
+          "id": "Lots",
+          "name": "Oodles",
+          "desc": "Plenty of story traits to go around"
+        },
+        {
+          "id": "None",
+          "name": "Zilch",
+          "desc": "Zero story traits. Zip. Nada. None"
+        }
+      ]
+    },
+    {
+      "id": "Stress",
+      "name": "Stress",
+      "desc": "Affects how quickly Duplicant stress rises",
+      "levels": [
+        {
+          "id": "Default",
+          "name": "Default",
+          "desc": "Default stress change rate"
+        },
+        {
+          "id": "Doomed",
+          "name": "Frankly Depressing",
+          "desc": "These Duplicants were never taught coping mechanisms... they're devastated by stress as a result"
+        },
+        {
+          "id": "Indomitable",
+          "name": "Cloud Nine",
+          "desc": "A strong emotional support system makes these Duplicants impervious to all stress"
+        },
+        {
+          "id": "Optimistic",
+          "name": "Chipper",
+          "desc": "Duplicants gain stress slower than usual"
+        },
+        {
+          "id": "Pessimistic",
+          "name": "Glum",
+          "desc": "Duplicants gain stress more quickly than usual"
+        }
+      ]
+    },
+    {
+      "id": "StressBreaks",
+      "name": "Stress Reactions",
+      "desc": "Determines whether Duplicants wreak havoc on the colony when they reach maximum stress",
+      "levels": [
+        {
+          "id": "Default",
+          "name": "Enabled",
+          "desc": "Checked: Duplicants will wreak havoc when they reach 100% stress (Default)"
+        },
+        {
+          "id": "Disabled",
+          "name": "Disabled",
+          "desc": "Unchecked: Duplicants will not wreak havoc at maximum stress"
+        }
+      ]
+    },
+    {
+      "id": "Teleporters",
+      "name": "Teleporters",
+      "desc": "Determines whether teleporters will be spawned during Worldgen",
+      "levels": [
+        {
+          "id": "Disabled",
+          "name": "Disabled",
+          "desc": "Unchecked: No Teleporters will spawn during Worldgen"
+        },
+        {
+          "id": "Enabled",
+          "name": "Enabled",
+          "desc": "Checked: Teleporters will spawn during Worldgen (Default)"
+        }
+      ]
+    }
   ]
 }

@@ -20,6 +20,10 @@ export interface CritterEntry extends GameEntry {
   baby: boolean
 }
 
+export interface SettingEntry extends GameEntry {
+  levels: GameEntry[]
+}
+
 export interface SkillGroupEntry extends GameEntry {
   /** Klei HashedString hash of the ID, as stored in MinionResume aptitudes. */
   hash: number
@@ -34,6 +38,8 @@ export const personalities: GameEntry[] = data.personalities
 export const geysers: GameEntry[] = data.geysers
 export const elements: ElementEntry[] = data.elements
 export const critters: CritterEntry[] = data.critters
+export const techs: GameEntry[] = data.techs
+export const gameSettings: SettingEntry[] = data.gameSettings
 
 function index<T extends GameEntry>(list: T[]): (id: string) => T | undefined {
   const byUpper = new Map(list.map((e) => [e.id.toUpperCase(), e]))
@@ -56,6 +62,12 @@ export const findElementByHash = (hash: number) => elementsByHash.get(hash)
 export const findElement = index(elements)
 /** Critter by prefab name, e.g. `PacuTropicalBaby`. */
 export const findCritter = index(critters)
+export const findTech = index(techs)
+/** Setting by stored ID, ignoring case and underscores. */
+export function findGameSetting(id: string): SettingEntry | undefined {
+  const wanted = id.toUpperCase().replace(/_/g, '')
+  return gameSettings.find((s) => s.id.toUpperCase().replace(/_/g, '') === wanted)
+}
 
 /** Klei's HashedString hash (SDBM over the lower-cased string). */
 export function hashString(value: string): number {
