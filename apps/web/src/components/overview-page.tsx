@@ -143,6 +143,29 @@ export function OverviewPage({
                   onCheckedChange={(enabled) => onEdit({ type: 'setSandbox', enabled })}
                 />
               </Field>
+              <Field orientation="horizontal">
+                <FieldContent>
+                  <FieldLabel htmlFor="debug-used">Debug mode was used</FieldLabel>
+                  <FieldDescription>
+                    The game sets this for good once debug tools are used. Achievements need it off,
+                    and sandbox mode off too.{' '}
+                    {summary.debugWasUsed || summary.sandbox ? (
+                      <Badge variant="outline" className="border-chart-3/50 text-chart-3">
+                        Achievements blocked
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-primary/50 text-primary">
+                        Achievements on
+                      </Badge>
+                    )}
+                  </FieldDescription>
+                </FieldContent>
+                <Switch
+                  id="debug-used"
+                  checked={summary.debugWasUsed}
+                  onCheckedChange={(used) => onEdit({ type: 'setDebugWasUsed', used })}
+                />
+              </Field>
             </FieldGroup>
           </CardContent>
         </Card>

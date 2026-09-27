@@ -46,6 +46,7 @@ function snapshot(save: SaveGame, edit: Edit): () => void {
   }
   const gameInfo = cloneValue(save.header.gameInfo)
   const customGameSettings = cloneValue(save.gameData.customGameSettings)
+  const debugWasUsed = save.gameData.debugWasUsed
   const behaviors = touchedBy(save, edit).flatMap((obj: GameObject) =>
     obj.behaviors.map((b) => ({
       b,
@@ -60,6 +61,7 @@ function snapshot(save: SaveGame, edit: Edit): () => void {
   return () => {
     save.header.gameInfo = gameInfo
     save.gameData.customGameSettings = customGameSettings
+    save.gameData.debugWasUsed = debugWasUsed
     for (const s of behaviors) {
       s.b.templateData = s.templateData
       if (s.extraData !== undefined) s.b.extraData = s.extraData

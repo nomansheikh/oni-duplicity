@@ -46,6 +46,8 @@ export interface Summary {
   clusterId: string
   isAutoSave: boolean
   sandbox: boolean
+  /** Set for good once debug tools are used; blocks achievements. */
+  debugWasUsed: boolean
   unverified: boolean
   warnings: string[]
 }
@@ -261,6 +263,7 @@ export type Edit =
   | { type: 'removeEffect'; id: string; effectId: string }
   | { type: 'setAccessory'; id: string; slot: AccessorySlot; number: string }
   | { type: 'applyProfile'; id: string; profile: DuplicantProfile; sections: ProfileSection[] }
+  | { type: 'setDebugWasUsed'; used: boolean }
   | { type: 'setGeyserName'; id: string; name: string }
   | { type: 'setGeyserValue'; id: string; field: GeyserField; value: number }
   | { type: 'setItemMass'; ref: string; mass: number }
@@ -403,6 +406,7 @@ export function summarize(save: SaveGame, fileName: string): Summary {
     clusterId: info.clusterId ?? '',
     isAutoSave: info.isAutoSave,
     sandbox: Boolean(sandbox ?? info.sandboxEnabled),
+    debugWasUsed: save.gameData.debugWasUsed === true,
     unverified: info.saveMinorVersion > MAX_VERIFIED_MINOR,
     warnings: save.warnings,
   }
@@ -569,6 +573,10 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       nameable.savedName = edit.name
       return
     }
+    case 'setDebugWasUsed':
+      if (!('debugWasUsed' in save.gameData)) throw new Error('This save has no debug flag')
+      save.gameData.debugWasUsed = edit.used
+      return
     case 'setGeyserValue': {
       const config = data(objectById(save, edit.id), 'Geyser').configuration as
         | Record<string, number>
