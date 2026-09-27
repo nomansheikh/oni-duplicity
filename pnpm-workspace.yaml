@@ -48,4 +48,5 @@ peerDependencyRules:
   allowedVersions:
     vite: '*'
 allowBuilds:
-  jss: set this to true or false
+  # Its postinstall only prints a donation message.
+  jss: false
