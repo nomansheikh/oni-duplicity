@@ -46,7 +46,7 @@ import { TraitCategoryBadge, TraitPicker } from './TraitPicker'
 
 type EditFn = (change: DuplicantEdit) => void
 
-function Panel({
+export function Panel({
   title,
   description,
   action,
@@ -69,7 +69,7 @@ function Panel({
   )
 }
 
-function Nothing({ title, description }: { title: string; description: string }) {
+export function Nothing({ title, description }: { title: string; description: string }) {
   return (
     <Empty className="border border-dashed">
       <EmptyHeader>
