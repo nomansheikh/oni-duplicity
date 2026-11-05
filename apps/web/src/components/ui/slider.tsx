@@ -12,16 +12,22 @@ function Slider({
   max = 100,
   ...props
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
+  // A controlled slider that only saves on commit still has to follow the pointer while
+  // dragging, so hold the in-progress value locally until the new value comes back.
+  const [draft, setDraft] = React.useState<number[] | undefined>(undefined)
+  const valueKey = value?.join(',')
+  React.useEffect(() => setDraft(undefined), [valueKey])
+  const shown = draft ?? value
   const _values = React.useMemo(
-    () => (Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min, max]),
-    [value, defaultValue, min, max],
+    () => (Array.isArray(shown) ? shown : Array.isArray(defaultValue) ? defaultValue : [min, max]),
+    [shown, defaultValue, min, max],
   )
 
   return (
     <SliderPrimitive.Root
       data-slot="slider"
       defaultValue={defaultValue}
-      value={value}
+      value={shown}
       min={min}
       max={max}
       className={cn(
@@ -29,6 +35,16 @@ function Slider({
         className,
       )}
       {...props}
+      onValueChange={(next) => {
+        if (value) setDraft(next)
+        props.onValueChange?.(next)
+      }}
+      onValueCommit={(next) => {
+        props.onValueCommit?.(next)
+        // Normally the new value arrives and clears the draft; if the edit is rejected or
+        // clamped to the old value, fall back to the real value shortly after.
+        if (value) setTimeout(() => setDraft(undefined), 1000)
+      }}
     >
       <SliderPrimitive.Track
         data-slot="slider-track"
