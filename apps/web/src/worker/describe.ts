@@ -102,6 +102,8 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       const value = range ? Math.min(range.max, Math.max(range.min, edit.value)) : edit.value
       return `${who}${GEYSER_FIELDS[edit.field]} to ${round(value)}`
     }
+    case 'setGeyserType':
+      return `${who}change type to ${findGeyser(edit.typeId)?.name ?? humanize(edit.typeId)}`
     case 'setItemMass':
       return `Set an item's mass to ${round(edit.mass)} kg`
     case 'setItemTemperature':
@@ -110,6 +112,8 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       return `${who}delete`
     case 'cloneObject':
       return `${who}clone`
+    case 'deleteDebris':
+      return `Delete ${edit.ids.length} loose ${edit.ids.length === 1 ? 'item' : 'items'}`
     case 'setTechResearched':
       return `${edit.complete ? 'Research' : 'Unresearch'} ${findTech(edit.techId)?.name ?? edit.techId}`
     case 'researchAll':
@@ -124,6 +128,8 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       return `Raw: remove ${edit.path.join('.')}`
     case 'rawDuplicate':
       return `Raw: duplicate ${edit.path.join('.')}`
+    case 'rawAdd':
+      return `Raw: add an item to ${edit.path.join('.')}`
     case 'setMaterialTemperature':
       return `${findElement(edit.elementId)?.name ?? edit.elementId}: every temperature to ${round(edit.kelvin - 273.15)} °C`
     case 'scaleMaterialMass':
@@ -172,7 +178,10 @@ export function editTarget(edit: Edit): ChangeTarget {
     case 'rawSet':
     case 'rawRemove':
     case 'rawDuplicate':
+    case 'rawAdd':
       return { category: 'raw', key: edit.path.join('.') }
+    case 'deleteDebris':
+      return { category: 'item', key: `debris:${edit.ids.join(',')}` }
     case 'deleteObject':
     case 'cloneObject':
       return targetOfObject(edit.id)

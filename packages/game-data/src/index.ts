@@ -5,10 +5,28 @@ export {
   geyserTypes,
   resample,
   unresample,
+  type GeyserShape,
   type GeyserTypeEntry,
   type Range,
 } from './geyser-types.ts'
+export { stories, storyQuests, type StoryEntry, type StoryQuestEntry } from './stories.ts'
 import { geyserTypes } from './geyser-types.ts'
+import { extraTraits, traitIdFixes } from './trait-info.ts'
+
+export {
+  extraTraits,
+  findTraitInfo,
+  inertTraitIds,
+  traitCategoryLabels,
+  traitConflicts,
+  traitInfo,
+  traitUnavailable,
+  type DuplicantModel,
+  type TraitCategory,
+  type TraitConflict,
+  type TraitInfo,
+  type TraitUnavailable,
+} from './trait-info.ts'
 
 export interface GameEntry {
   id: string
@@ -37,7 +55,11 @@ export interface SkillGroupEntry extends GameEntry {
   hash: number
 }
 
-export const traits: GameEntry[] = data.traits
+/** The extracted traits with wrong IDs fixed and the traits the extractor misses added. */
+export const traits: GameEntry[] = [
+  ...data.traits.map((t) => ({ ...t, id: traitIdFixes[t.id] ?? t.id })),
+  ...extraTraits.filter((e) => !data.traits.some((t) => t.id === e.id)),
+]
 export const attributes: GameEntry[] = data.attributes
 export const skillGroups: SkillGroupEntry[] = data.skillGroups
 export const amounts: GameEntry[] = data.amounts

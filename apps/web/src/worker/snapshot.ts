@@ -12,8 +12,11 @@ export function snapshot(save: SaveGame, edit: Edit): () => void {
       parent[key] = old
     }
   }
-  if (edit.type === 'rawRemove' || edit.type === 'rawDuplicate') {
-    const array = rawGet(save, edit.path.slice(0, -1)) as unknown[]
+  if (edit.type === 'rawRemove' || edit.type === 'rawDuplicate' || edit.type === 'rawAdd') {
+    const array = rawGet(
+      save,
+      edit.type === 'rawAdd' ? edit.path : edit.path.slice(0, -1),
+    ) as unknown[]
     const copy = [...array]
     return () => {
       array.splice(0, array.length, ...copy)
@@ -31,10 +34,23 @@ export function snapshot(save: SaveGame, edit: Edit): () => void {
     })),
   )
   // Cloning or deleting changes group lists and the unique ID counter, not just behaviors.
-  const structural = edit.type === 'deleteObject' || edit.type === 'cloneObject'
+  const structural =
+    edit.type === 'deleteObject' || edit.type === 'deleteDebris' || edit.type === 'cloneObject'
   const groups = structural ? save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] })) : []
   const settings = structural ? cloneValue(save.settings) : null
+  // Changing a geyser's type moves it between groups, and may add or drop a group.
+  const layout =
+    edit.type === 'setGeyserType'
+      ? {
+          all: [...save.gameObjects],
+          lists: save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] })),
+        }
+      : null
   return () => {
+    if (layout) {
+      for (const { g, list } of layout.lists) g.gameObjects = list
+      save.gameObjects.splice(0, save.gameObjects.length, ...layout.all)
+    }
     save.header.gameInfo = gameInfo
     save.gameData.customGameSettings = customGameSettings
     // Put the key back only if the save had it, so writing stays identical.
