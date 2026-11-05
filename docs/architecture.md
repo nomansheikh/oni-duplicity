@@ -126,11 +126,21 @@ save(): Uint8Array
 
 ## Performance
 
-`vp run bench` (`scripts/bench.ts`) parses and writes the 40 MB and 13 MB saves, each in its own Node process: one warm-up, then the median of five iterations of four phases (read + inflate, parse body, write body, deflate at level 1). It also reports peak RSS. On an Apple M2 Max (Node 26) the 40 MB save takes about 1.5 s to read and inflate, 1.6 s to parse, 2.8 s to write and 4.0 s to deflate with `fflate`, and peaks at about 4.1 GB RSS (947 MB of live heap after parse). The 13 MB save peaks at about 1.3 GB. Memory is dominated by the 451 MB decompressed body, the copy the writer builds and the decoded object graph.
+`vp run bench` (`scripts/bench.ts`) parses and writes the 40 MB and 13 MB saves, each in its own Node process: one warm-up, then the median of five iterations of four phases (read + inflate, parse body, write body, deflate at level 1). It also reports peak RSS, read before the calibration buffers are allocated.
 
-The gate fails a phase whose time, divided by a calibration workload timed in the same process, grows more than 30% over its baseline. Baselines live in `test-data/bench-baseline.json` per `<platform>-<arch>` (calibration ratios do not transfer between machines). A phase that looks regressed is re-measured once and fails only if it regresses again. With no baseline for the current platform, the bench prints a warning and the JSON to add, and exits 0; the Linux baseline is committed from the first run on `main`. CI runs it with `--require` only when the full fixture tier is present. After an intended change, run `vp run bench --update` on a quiet machine and commit the new baseline.
+| 40 MB save (median) | Apple M2 Max, Node 26 | GitHub runner (4-core EPYC), Node 24 |
+| ------------------- | --------------------- | ------------------------------------ |
+| read + inflate      | 1.6 s                 | 1.7 s                                |
+| parse body          | 1.6 s                 | 3.3 s                                |
+| write body          | 2.7 s                 | 6.6 s                                |
+| deflate (`fflate`)  | 4.0 s                 | 5.8 s                                |
+| peak RSS            | 3.3 to 4.1 GB         | 2.6 GB                               |
 
-**Targets not met.** Parsing the 40 MB save (1.6 s) meets the 5 s target. Saving does not: writing the body takes 2.8 s and `fflate` deflate another 4.0 s, about 6.9 s in all. The browser uses native `CompressionStream`, which `progress.md` measured at about 7 s for this save. Whether the target covers compression is an open question ([open-questions.md](open-questions.md) #15).
+The 13 MB save peaks at about 1.0 to 1.5 GB on the Mac and 0.9 GB on the runner. Memory is dominated by the 451 MB decompressed body, the copy the writer builds and the decoded object graph (947 MB of live heap after parse). Peak RSS on macOS varies by about 20% between runs with GC timing.
+
+The gate fails a phase whose time, divided by a calibration workload timed in the same process, grows more than 30% over its baseline. The calibration streams a 256 MB buffer and allocates many small objects, so it tracks memory speed the way the parser does, and a sample is taken after every pass. Baselines live in `test-data/bench-baseline.json` per `<platform>-<arch>` (ratios do not transfer between machines): `darwin-arm64` is the median of 5 local runs, `linux-x64` the median of 3 runs of the CI runner. Run-to-run spread of the normalized phase times was at most ±5.7% locally and ±5.3% on three runners (two CPU models), so the 30% threshold leaves wide headroom and raw times were not needed. A phase that looks regressed is re-measured once and fails only if it regresses again. A stale file size, a zero or missing baseline time, a worker that times out (10 minutes) or is killed, or a missing baseline for the platform under `--require` are errors, not passes. CI runs `vp run bench --require` on pushes to `main`, nightly, on manifest changes, and on PRs that touch the parser or the bench, which add about 2.7 minutes. To record a baseline for a new runner, dispatch the CI workflow with `bench_baseline` set and commit the uploaded artifact. After an intended change, run `vp run bench --update` on a quiet machine and commit the new baseline.
+
+**Targets not met.** Parsing the 40 MB save meets the 5 s target on the Mac (1.6 s) and on the CI runner (3.3 s). Saving does not: on the Mac, writing the body takes 2.7 s and `fflate` deflate another 4.0 s, about 6.7 s in all; on the runner, 6.6 s and 5.8 s, about 12 s. The browser uses native `CompressionStream`, which `progress.md` measured at about 7 s for this save. Whether the target covers compression is an open question ([open-questions.md](open-questions.md) #15).
 
 ## Delivery
 
@@ -148,4 +158,4 @@ The gate fails a phase whose time, divided by a calibration workload timed in th
 - **No typed behaviors.** Template data is decoded generically; only the extra data the editors need has codecs.
 - **Portraits are shown**, using react-oni-duplicant's sprites instead of committing any art.
 - **Newer minor versions open editable**, but downloading them needs the "allow unverified versions" preference.
-- **The bench gate is calibrated, not absolute.** It compares each phase against a per-platform committed baseline, scaled by a fixed CPU workload timed in the same run. It cannot catch a slowdown that also slows the calibration, and the save-time target (6.9 s) is not met. See Performance.
+- **The bench gate is calibrated, not absolute.** It compares each phase against a per-platform committed baseline, scaled by a fixed memory-bound workload timed in the same run. It cannot catch a slowdown that also slows the calibration, and the save-time target is not met. See Performance.
