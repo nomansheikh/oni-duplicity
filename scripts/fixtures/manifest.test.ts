@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vite-plus/test'
-import { parseManifest, selectFixtures, type Fixture } from './manifest.ts'
+import { parseManifest, selectFiles, selectFixtures, type Fixture } from './manifest.ts'
 
 const fixture = (overrides: Partial<Fixture> = {}): Fixture => ({
   file: 'example.sav',
@@ -61,5 +61,19 @@ describe('selectFixtures', () => {
 
   test('all selects every fixture', () => {
     expect(selectFixtures(all, 'all').map((f) => f.file)).toEqual(['a.sav', 'b.sav'])
+  })
+})
+
+describe('selectFiles', () => {
+  const all = parseManifest(
+    manifest([fixture({ file: 'a.sav', tier: 'small' }), fixture({ file: 'b.sav', tier: 'full' })]),
+  )
+
+  test('selects the named fixtures whatever their tier', () => {
+    expect(selectFiles(all, ['b.sav']).map((f) => f.file)).toEqual(['b.sav'])
+  })
+
+  test('rejects names that are not in the manifest', () => {
+    expect(() => selectFiles(all, ['c.sav'])).toThrow(/c\.sav.*Valid names: a\.sav, b\.sav/)
   })
 })

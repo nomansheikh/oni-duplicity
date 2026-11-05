@@ -285,13 +285,15 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
               <ScrollArea className="h-[calc(100svh-30rem)] min-h-48 border border-ink bg-legend">
                 <div className="flex flex-col p-1">
                   {legend.map((e) => (
-                    <button
+                    <Button
                       key={e.index}
-                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      aria-pressed={highlight === e.index}
                       onClick={() => setHighlight((h) => (h === e.index ? null : e.index))}
                       className={cn(
-                        'flex items-center gap-2 border border-transparent px-2 py-1.5 text-left type-small hover:bg-white/10',
-                        highlight === e.index && 'border-warn bg-white/10',
+                        'w-full justify-start gap-2 border border-transparent type-small normal-case',
+                        highlight === e.index && 'border-warn',
                       )}
                     >
                       <span
@@ -302,11 +304,11 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
                           ),
                         }}
                       />
-                      <span className="min-w-0 flex-1 truncate">{e.name}</span>
+                      <span className="min-w-0 flex-1 truncate text-left">{e.name}</span>
                       <span className="type-caption text-muted-foreground tabular-nums">
                         {fmt((e.cells / totalCells) * 100, 1)}%
                       </span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </ScrollArea>

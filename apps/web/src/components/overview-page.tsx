@@ -10,7 +10,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '@/components/ui/item'
-import { Progress } from '@/components/ui/progress'
+import { meterTone, Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { averagePerCycle } from '@/lib/geyser'
 import { fmt } from '@/lib/format'
@@ -51,6 +51,12 @@ function StatCard({
   )
 }
 
+const STRESS_TEXT = {
+  good: 'Colony is calm',
+  warn: 'Keep an eye on morale',
+  bad: 'Colony is struggling',
+} as const
+
 function average(values: number[]): number {
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0
 }
@@ -68,6 +74,7 @@ export function OverviewPage({
 }) {
   const amount = (d: DuplicantView, id: string) => d.amounts.find((a) => a.id === id)?.value
   const stress = average(duplicants.map((d) => amount(d, 'Stress') ?? 0))
+  const stressTone = meterTone('stress', stress)
   const bionic = duplicants.filter((d) => d.isBionic).length
   const outputKgPerCycle = geysers.reduce((sum, g) => sum + averagePerCycle(g), 0)
 
@@ -96,17 +103,11 @@ export function OverviewPage({
             <Progress
               variant="blocks"
               value={stress}
-              tone={stress <= 40 ? 'good' : stress <= 70 ? 'warn' : 'bad'}
+              tone={stressTone}
               aria-label="Average stress"
             />
           }
-          footer={
-            stress > 60
-              ? 'Colony is struggling'
-              : stress > 30
-                ? 'Keep an eye on morale'
-                : 'Colony is calm'
-          }
+          footer={STRESS_TEXT[stressTone]}
           detail="Across all duplicants"
         />
         <StatCard

@@ -16,13 +16,20 @@ import {
   summarize,
   type Edit,
 } from './model.ts'
-import { describeEdit } from './describe.ts'
+import { describeEdit, editTarget } from './describe.ts'
 import { worldMap } from './map.ts'
+import type { ChangeCategory, HistoryEntry } from '../lib/changes.ts'
 import { applyWithRestore } from './snapshot.ts'
 
 let save: SaveGame | null = null
 let fileName = ''
-let undoStack: { edit: Edit; restore: () => void; label: string }[] = []
+let undoStack: {
+  edit: Edit
+  restore: () => void
+  label: string
+  category: ChangeCategory
+  key: string
+}[] = []
 let redoStack: Edit[] = []
 
 function current(): SaveGame {
@@ -39,7 +46,7 @@ function apply(edit: Edit) {
   // Describe first: a delete can remove the name the label needs.
   const label = describeEdit(s, edit)
   const restore = applyWithRestore(s, edit)
-  undoStack.push({ edit, restore, label })
+  undoStack.push({ edit, restore, label, ...editTarget(edit) })
 }
 
 const api = {
@@ -76,8 +83,9 @@ const api = {
     const map = worldMap(current(), worldId)
     return transfer(map, [map.cells.buffer, map.temperature.buffer, map.mass.buffer])
   },
-  /** Unsaved edits, oldest first. */
-  history: () => undoStack.map((e) => e.label),
+  /** Unsaved edits, oldest first, each with the object it changed. */
+  history: (): HistoryEntry[] =>
+    undoStack.map(({ label, category, key }) => ({ label, category, key })),
   status,
   apply(edit: Edit) {
     apply(edit)

@@ -72,8 +72,9 @@ export function ResearchPage({
             <ToggleGroupItem value="done">Researched</ToggleGroupItem>
             <ToggleGroupItem value="todo">Not yet</ToggleGroupItem>
           </ToggleGroup>
-          <InputGroup className="w-64">
+          <InputGroup className="h-[2.1rem] w-64 rounded-none border-ink bg-inset">
             <InputGroupInput
+              className="h-full border-0! bg-transparent! shadow-none!"
               placeholder="Search techs"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -83,14 +84,16 @@ export function ResearchPage({
             </InputGroupAddon>
           </InputGroup>
         </div>
-        <div className="grid gap-px border border-ink bg-ink @2xl/main:grid-cols-2 @5xl/main:grid-cols-3">
+        <div className="grid gap-2 @2xl/main:grid-cols-2 @5xl/main:grid-cols-3">
           {visible.map((tech) => (
             <FieldLabel key={tech.id} htmlFor={`tech-${tech.id}`}>
-              <Field orientation="horizontal" className="h-full bg-well">
+              <Field orientation="horizontal" className="h-full border border-ink bg-well">
                 <FieldContent>
                   <FieldTitle>{tech.name}</FieldTitle>
                   {tech.desc && (
-                    <FieldDescription className="line-clamp-2">{tech.desc}</FieldDescription>
+                    <FieldDescription className="line-clamp-2 normal-case">
+                      {tech.desc}
+                    </FieldDescription>
                   )}
                 </FieldContent>
                 <Switch
