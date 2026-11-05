@@ -42,3 +42,13 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Checked by hand in Chrome: edit → download → reload for duplicants, critters (clone, tame), materials, research, game settings, asteroids and raw edits; undo and redo after each.
 - A production build served from `/oni-duplicity/` loads saves and portraits. Lazy-loading the pages cut the main chunk from 688 kB to 399 kB (122 kB gzipped).
 - Nothing is verified in the game yet.
+
+## Parser fuzz tests — 2026-11-05
+
+- `packages/save-parser/tests/fuzz` mutates `apple-park.sav` with a seeded PRNG and requires every case to end in a `ParseError`, or in a parse that writes back without a non-`ParseError` exception. Anything else (`TypeError`, `RangeError`, a raw zlib error, a hang, out of memory) counts as a bug.
+- Seven regions: whole-file truncation, header flips, template flips, compressed-body flips, and, on the decompressed body, truncation, flips in the world and settings data, and flips in the game objects and game data. Body flips mostly avoid opaque payloads such as sim data.
+- Cases run in `node:worker_threads` workers with a 5 s deadline; a hung worker is terminated, and a timeout, crash or out-of-memory counts as a failure. Failures are grouped by error and print the seed and mutation, and `FUZZ_ONLY` replays one case.
+- The default run is about 500 cases in roughly 6 s. At `FUZZ_SCALE=20` (10,000 cases, about 2 minutes) no case failed.
+- Fault injection: removing the bounds check in `Reader` produced grouped `RangeError` failures, and an infinite loop in the header reader produced a `timeout` failure, so the harness does detect bugs. Both changes were reverted.
+- Gaps: one fixture, and no well-formed but hostile inputs such as huge valid counts or lengths.
+- Next: the differential test against oni-save-parser.
