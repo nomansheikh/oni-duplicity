@@ -15,8 +15,13 @@ function Slider({
   // A controlled slider that only saves on commit still has to follow the pointer while
   // dragging, so hold the in-progress value locally until the new value comes back.
   const [draft, setDraft] = React.useState<number[] | undefined>(undefined)
+  const dragging = React.useRef(false)
+  const fallback = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const valueKey = value?.join(',')
-  React.useEffect(() => setDraft(undefined), [valueKey])
+  React.useEffect(() => {
+    if (!dragging.current) setDraft(undefined)
+  }, [valueKey])
+  React.useEffect(() => () => clearTimeout(fallback.current), [])
   const shown = draft ?? value
   const _values = React.useMemo(
     () => (Array.isArray(shown) ? shown : Array.isArray(defaultValue) ? defaultValue : [min, max]),
@@ -36,14 +41,19 @@ function Slider({
       )}
       {...props}
       onValueChange={(next) => {
-        if (value) setDraft(next)
+        if (value) {
+          dragging.current = true
+          clearTimeout(fallback.current)
+          setDraft(next)
+        }
         props.onValueChange?.(next)
       }}
       onValueCommit={(next) => {
+        dragging.current = false
         props.onValueCommit?.(next)
         // Normally the new value arrives and clears the draft; if the edit is rejected or
         // clamped to the old value, fall back to the real value shortly after.
-        if (value) setTimeout(() => setDraft(undefined), 1000)
+        if (value) fallback.current = setTimeout(() => setDraft(undefined), 1000)
       }}
     >
       <SliderPrimitive.Track
