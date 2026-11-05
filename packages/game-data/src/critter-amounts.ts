@@ -58,7 +58,9 @@ export const critterAmountNames: Readonly<Record<string, { name: string; desc?: 
 }
 
 /**
- * Limits by adult prefab; a baby uses its adult's entry. Each line names the config it came
+ * Limits by adult prefab. A baby uses its adult's entry: every `Baby*Config` builds its prefab
+ * with the adult's `Create<Adult>(id, ..., is_baby: true)`, which adds the same base trait, and
+ * `EntityTemplates.ExtendEntityToBeingABaby` changes no amount's maximum. Each line names the config it came
  * from. Stomach sizes are the tuning's calories per cycle times the cycles to starve, rounded
  * the way the game's float arithmetic rounds.
  */

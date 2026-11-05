@@ -129,3 +129,59 @@ test('undoing a clamped critter amount edit gives back the same bytes', () => {
     expect(sameBytes(body(save), before), `${prefab} ${amountId} undone`).toBe(true)
   }
 }, 120_000)
+
+test('a critter whose DLC the save lacks is read only and the edit changes nothing', () => {
+  const save = parseSave(readFileSync(galaxy))
+  const info = save.header.gameInfo as { dlcIds: string[] }
+  info.dlcIds = info.dlcIds.filter((id) => id !== 'DLC5_ID')
+  const turtle = find(save, 'SeaTurtle')
+  for (const a of turtle.amounts) {
+    expect(a.max, a.id).toBeUndefined()
+    expect(a.readOnlyReason, a.id).toMatch(/DLC/)
+  }
+  const before = body(save)
+  const gameInfo = JSON.stringify(save.header.gameInfo)
+  expect(() =>
+    applyWithRestore(save, {
+      type: 'setAmount',
+      id: turtle.id,
+      amountId: 'ScaleGrowth',
+      value: 10,
+    }),
+  ).toThrow(/read only/)
+  expect(sameBytes(body(save), before)).toBe(true)
+  expect(JSON.stringify(save.header.gameInfo)).toBe(gameInfo)
+})
+
+// Robots are critters to the editor; the sweep bot sits in a small-tier fixture.
+const mithro2 = galaxy.replace(
+  'saves/beautiful-galaxy.sav',
+  'fetched/mithro-02-mid-game-cycle-148.sav',
+)
+
+test.skipIf(!fixtures.includes(mithro2))(
+  'a sweep bot goes through the gate',
+  () => {
+    const save = parseSave(readFileSync(mithro2))
+    const bot = find(save, 'SweepBot')
+    const battery = () => find(save, 'SweepBot').amounts.find((a) => a.id === 'InternalBattery')!
+    expect(battery().max).toBe(9000)
+    // A sweep bot has no hit point trait, so that amount is read only.
+    expect(bot.amounts.find((a) => a.id === 'HitPoints')!.max).toBeUndefined()
+
+    const before = body(save)
+    const undo = applyWithRestore(save, {
+      type: 'setAmount',
+      id: bot.id,
+      amountId: 'InternalBattery',
+      value: 1e9,
+    })
+    expect(battery().value).toBe(9000)
+    undo()
+    expect(sameBytes(body(save), before)).toBe(true)
+    expect(() =>
+      applyEdit(save, { type: 'setAmount', id: bot.id, amountId: 'HitPoints', value: 5 }),
+    ).toThrow(/read only/)
+  },
+  120_000,
+)
