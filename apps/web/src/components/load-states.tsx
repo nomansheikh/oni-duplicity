@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { FileUp, LoaderCircle, TriangleAlert } from 'lucide-react'
+import { Check, ChevronRight, Copy, FileUp, LoaderCircle, TriangleAlert } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   Empty,
@@ -10,6 +11,7 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import { Progress } from '@/components/ui/progress'
+import { loadErrorReport, type LoadErrorInfo } from '@/lib/load-error'
 import { cn } from '@/lib/utils'
 
 export function OpenSave({ onFile, onPick }: { onFile: (file: File) => void; onPick: () => void }) {
@@ -70,18 +72,55 @@ export function LoadingSave({ fileName, progress }: { fileName: string; progress
   )
 }
 
-export function LoadError({ message, onPick }: { message: string; onPick: () => void }) {
+export function LoadError({ info, onPick }: { info: LoadErrorInfo; onPick: () => void }) {
+  const [showDetails, setShowDetails] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(loadErrorReport(info))
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast.error('Could not copy to the clipboard')
+    }
+  }
   return (
     <Empty className="min-h-[60vh] border border-dashed border-destructive/50">
       <EmptyHeader>
         <EmptyMedia variant="icon" className="text-destructive">
           <TriangleAlert />
         </EmptyMedia>
-        <EmptyTitle>This save could not be loaded</EmptyTitle>
-        <EmptyDescription className="font-mono text-xs break-all">{message}</EmptyDescription>
+        <EmptyTitle>{info.title}</EmptyTitle>
+        <EmptyDescription>{info.hint}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button onClick={onPick}>Try another save</Button>
+        <div className="flex w-full max-w-xl flex-col gap-2 text-left">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="self-center"
+            aria-expanded={showDetails}
+            onClick={() => setShowDetails((v) => !v)}
+          >
+            <ChevronRight className={cn('transition-transform', showDetails && 'rotate-90')} />
+            Details
+          </Button>
+          {showDetails && (
+            <div className="flex flex-col gap-2 rounded-lg border bg-muted/40 p-3">
+              <pre
+                aria-label="Error details"
+                className="max-h-64 overflow-auto font-mono text-xs break-all whitespace-pre-wrap"
+              >
+                {loadErrorReport(info).split('\n').slice(1).join('\n')}
+              </pre>
+              <Button variant="outline" size="sm" className="self-end" onClick={copy}>
+                {copied ? <Check /> : <Copy />}
+                {copied ? 'Copied' : 'Copy details'}
+              </Button>
+            </div>
+          )}
+        </div>
       </EmptyContent>
     </Empty>
   )
