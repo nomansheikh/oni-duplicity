@@ -103,6 +103,8 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       const value = range ? Math.min(range.max, Math.max(range.min, edit.value)) : edit.value
       return `${who}${GEYSER_FIELDS[edit.field]} to ${round(value)}`
     }
+    case 'setGeyserType':
+      return `${who}change type to ${findGeyser(edit.typeId)?.name ?? humanize(edit.typeId)}`
     case 'setItemMass':
       return `Set an item's mass to ${round(edit.mass)} kg`
     case 'setItemTemperature':

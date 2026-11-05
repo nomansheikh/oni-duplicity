@@ -15,6 +15,7 @@ import {
   findGeyserTypeByHash,
   findPersonality,
   findTrait,
+  geyserTypes,
   hashString,
   stories as storyCatalog,
   storyQuests,
@@ -23,6 +24,8 @@ import {
   skillGroups,
   traits as traitCatalog,
   unresample,
+  traitUnavailable,
+  type DuplicantModel,
   type GeyserTypeEntry,
   type Range,
 } from '@oni-duplicity/game-data'
@@ -41,6 +44,7 @@ import {
   type DestinationState,
   type SpaceEdit,
 } from './space-edits.ts'
+import { blockedSections, modelLabel, profileModel } from '../lib/profile.ts'
 
 // --- View models (sent to the UI) -----------------------------------------
 
@@ -85,6 +89,8 @@ export interface SkillView extends Named {
 
 export interface AmountView extends Named {
   value: number
+  /** The game's maximum for this duplicant, set for the bionic amounts only. */
+  max?: number
 }
 
 export interface EffectView extends Named {
@@ -233,6 +239,12 @@ export interface DuplicantView {
   id: string
   prefab: string
   isBionic: boolean
+  /** The duplicant model, which decides the traits and skills it can have. */
+  model: DuplicantModel
+  /** DLC IDs active in the save. */
+  dlcIds: string[]
+  /** The cycle the duplicant arrived in (`MinionIdentity.arrivalTime`; 0 for the first three). */
+  arrivalTime: number
   name: string
   gender: string
   personality: Named
@@ -275,6 +287,12 @@ export interface GeyserView {
    * editor). The game recomputes them from the rolls when it loads the save.
    */
   matchesRolls: boolean
+  /** The type ID, for geysers whose prefab and saved type agree (the only ones that can change type). */
+  typeId?: string
+  /** Types this geyser can change to: same footprint, and every DLC the save has active. */
+  swapTargets: { id: string; name: string }[]
+  /** Whether the Geyser Control mod's behaviors are on it; the mod may reapply its own values. */
+  hasGeyserControl: boolean
 }
 
 /**
@@ -291,7 +309,10 @@ export type GeyserField =
 
 const GEYSER_FIELDS: Record<
   GeyserField,
-  { roll: string; range: keyof Omit<GeyserTypeEntry, 'id'> }
+  {
+    roll: string
+    range: 'rate' | 'iterationLength' | 'iterationPercent' | 'yearLength' | 'yearPercent'
+  }
 > = {
   scaledRate: { roll: 'rateRoll', range: 'rate' },
   scaledIterationLength: { roll: 'iterationLengthRoll', range: 'iterationLength' },
@@ -318,6 +339,8 @@ function rollsMatch(config: GeyserConfig, type: GeyserTypeEntry): boolean {
 /** A portable copy of a duplicant's editable state (copy/paste and JSON export). */
 export interface DuplicantProfile {
   format: 'duplicity-duplicant@1'
+  /** The model copied from; older exports lack it (read from the traits). */
+  model?: DuplicantModel
   name: string
   gender: string
   traits: string[]
@@ -358,6 +381,7 @@ export type Edit =
   | { type: 'bulkDuplicants'; action: 'setAttributes'; level: number }
   | { type: 'setGeyserName'; id: string; name: string }
   | { type: 'setGeyserValue'; id: string; field: GeyserField; value: number }
+  | { type: 'setGeyserType'; id: string; typeId: string }
   | { type: 'setItemMass'; ref: string; mass: number }
   | { type: 'setItemTemperature'; ref: string; kelvin: number }
   | { type: 'deleteObject'; id: string }
@@ -389,6 +413,56 @@ const FULL_NEEDS: Record<string, number> = {
   Bladder: 0,
   Stress: 0,
 }
+/**
+ * Bionic amount maximums, from the decompiled game.
+ * - BionicOil: `BionicOilMonitor.OIL_CAPACITY`, and `Amounts.BionicOil` max, both 200.
+ * - BionicGunk: `GunkMonitor.GUNK_CAPACITY`, 80.
+ * - BionicOxygenTank: `BionicOxygenTankMonitor.OXYGEN_TANK_CAPACITY_KG`, 2400 s × 0.1 kg/s = 240.
+ * - BionicInternalBattery: `Amounts.BionicInternalBattery` max 480,000 J, which
+ *   `BionicBatteryMonitor.UpdateCapacityAmount` raises by 120,000 J for every electrobank slot
+ *   above 4. The slot count is the `BionicBatteryCountCapacity` attribute (base 4), and the only
+ *   thing that raises it is the `ExtraBionicBatteries` perk (+2) of the BionicsC3 skill. Installed
+ *   electrobanks play no part: they are only how the charge is topped up.
+ */
+export const BIONIC_OIL_MAX = 200
+export const BIONIC_GUNK_MAX = 80
+export const BIONIC_OXYGEN_TANK_MAX = 240
+export const BIONIC_BATTERY_BASE_MAX = 480_000
+const BIONIC_BATTERY_PER_SLOT = 120_000
+const BIONIC_BATTERY_BASE_SLOTS = 4
+const BIONIC_BATTERY_SKILL = 'BionicsC3'
+const BIONIC_BATTERY_SKILL_SLOTS = 2
+
+/** The game's maximum for a bionic amount, or undefined for any other amount. */
+export function bionicAmountMax(
+  amountId: string,
+  masteredSkills: Iterable<string>,
+): number | undefined {
+  switch (amountId) {
+    case 'BionicOil':
+      return BIONIC_OIL_MAX
+    case 'BionicGunk':
+      return BIONIC_GUNK_MAX
+    case 'BionicOxygenTank':
+      return BIONIC_OXYGEN_TANK_MAX
+    case 'BionicInternalBattery': {
+      const slots =
+        BIONIC_BATTERY_BASE_SLOTS +
+        ([...masteredSkills].includes(BIONIC_BATTERY_SKILL) ? BIONIC_BATTERY_SKILL_SLOTS : 0)
+      return BIONIC_BATTERY_BASE_MAX + BIONIC_BATTERY_PER_SLOT * (slots - BIONIC_BATTERY_BASE_SLOTS)
+    }
+    default:
+      return undefined
+  }
+}
+
+function masteredSkillIds(obj: GameObject): string[] {
+  const resume = behavior(obj, 'MinionResume')?.templateData
+  return ((resume?.MasteryBySkillID ?? []) as [string, boolean][])
+    .filter(([, mastered]) => mastered === true)
+    .map(([id]) => id)
+}
+
 const ACCESSORY_PREFIX = 'Root.Accessories.'
 
 function range(from: number, to: number): number[] {
@@ -468,6 +542,38 @@ function dlcIds(save: SaveGame): string[] {
   const info = save.header.gameInfo
   if (Array.isArray(info.dlcIds)) return info.dlcIds.filter((id) => id !== '')
   return info.dlcId ? [info.dlcId] : []
+}
+
+/** The model name a duplicant's identity saves (`Minion`, `BionicMinion`, a mod's), else its prefab. */
+function modelNameOf(obj: GameObject, prefab: string): string {
+  const model = behavior(obj, 'MinionIdentity')?.templateData?.model as
+    | { name?: string }
+    | undefined
+  return model?.name ?? prefab
+}
+
+/** Standard or bionic; the one place that decides it, for the list and for every edit. */
+function modelOf(obj: GameObject, prefab: string): DuplicantModel {
+  return modelNameOf(obj, prefab) === 'BionicMinion' ? 'BionicMinion' : 'Minion'
+}
+
+/** What an edit to one duplicant needs to know about it and the save. */
+interface DuplicantContext {
+  prefab: string
+  dlcIds: string[]
+}
+
+/** Refuses trait IDs the duplicant's model or the save's DLC rule out, before anything changes. */
+function assertTraitsAllowed(ids: readonly string[], obj: GameObject, ctx: DuplicantContext): void {
+  const model = modelOf(obj, ctx.prefab)
+  for (const id of ids) {
+    const reason = traitUnavailable(id, model, ctx.dlcIds)
+    if (reason === 'model') {
+      throw new Error(`${id} is not a trait ${modelLabel(model)} duplicants can have`)
+    }
+    if (reason === 'dlc') throw new Error(`${id} needs a DLC this save does not have`)
+    if (reason === 'inert') throw new Error(`${id} is not a trait the game defines`)
+  }
 }
 
 function named(id: string, entry: { name: string; desc?: string } | undefined): Named {
@@ -565,7 +671,7 @@ export function listDuplicants(save: SaveGame): DuplicantView[] {
       id: string
       timeRemaining: number
     }[]
-    const model = (identity.model as { name?: string } | undefined)?.name ?? prefab
+    const model = modelNameOf(obj, prefab)
     const personalityKey = typeof identity.nameStringKey === 'string' ? identity.nameStringKey : ''
 
     const skills: SkillView[] = MinionSkills.filter(
@@ -586,6 +692,9 @@ export function listDuplicants(save: SaveGame): DuplicantView[] {
       id,
       prefab,
       isBionic: prefab === 'BionicMinion',
+      model: modelOf(obj, prefab),
+      dlcIds: [...activeDlcs],
+      arrivalTime: typeof identity.arrivalTime === 'number' ? identity.arrivalTime : 0,
       name: typeof identity.name === 'string' ? identity.name : '',
       gender: typeof identity.gender === 'string' ? identity.gender : '',
       personality: withName(named(personalityKey, findPersonality(personalityKey)), identity.name),
@@ -605,10 +714,15 @@ export function listDuplicants(save: SaveGame): DuplicantView[] {
       skills,
       experience:
         typeof resume?.totalExperienceGained === 'number' ? resume.totalExperienceGained : 0,
-      amounts: (modifiers(obj)?.amounts ?? []).map((a) => ({
-        ...named(a.name, findAmount(a.name)),
-        value: Number((a.value as { value: number }).value),
-      })),
+      amounts: (modifiers(obj)?.amounts ?? []).map((a) => {
+        const max =
+          prefab === 'BionicMinion' ? bionicAmountMax(a.name, masteredSkillIds(obj)) : undefined
+        return {
+          ...named(a.name, findAmount(a.name)),
+          value: Number((a.value as { value: number }).value),
+          ...(max === undefined ? {} : { max }),
+        }
+      }),
       effects: effectList.map((e) => ({
         ...named(e.id, findEffect(e.id)),
         cyclesRemaining: e.timeRemaining / SECONDS_PER_CYCLE,
@@ -651,8 +765,96 @@ export function listGeysers(save: SaveGame): GeyserView[] {
           }
         : {}),
       matchesRolls: ranges ? rollsMatch(config, ranges) : true,
+      ...(swappable(prefab, ranges) ? { typeId: ranges!.id } : {}),
+      swapTargets: swappable(prefab, ranges)
+        ? swapTargets(save, ranges!).map((t) => ({
+            id: t.id,
+            name: findGeyser(t.id)?.name ?? humanize(t.id),
+          }))
+        : [],
+      hasGeyserControl: obj.behaviors.some((b) => b.name.startsWith('Geyser_Control.')),
     }
   })
+}
+
+// --- Changing a geyser's type (experimental) ---------------------------------
+
+/**
+ * Only the generic prefabs whose name agrees with the saved type qualify. The deprecated
+ * `NiobiumGeyser` prefab and anything a mod renamed are left alone.
+ */
+function swappable(prefab: string, type: GeyserTypeEntry | undefined): boolean {
+  return type !== undefined && prefab === `GeyserGeneric_${type.id}`
+}
+
+/** Types with the same footprint whose DLCs are all active in the save. */
+function swapTargets(save: SaveGame, from: GeyserTypeEntry): GeyserTypeEntry[] {
+  const active = new Set(dlcIds(save))
+  return geyserTypes.filter(
+    (t) =>
+      t.id !== from.id && t.shape === from.shape && t.requiredDlcIds.every((d) => active.has(d)),
+  )
+}
+
+/**
+ * Moves a geyser to another type of the same shape. The game builds the object from the prefab
+ * named by its group, then recomputes the emitter, codex entry and disease from the saved type
+ * hash, so what has to change is the group, the hash, the `scaled*` values the new ranges give
+ * the same rolls, the object's own temperature and (when it still has the default one) its name.
+ * Everything is checked before anything is touched.
+ */
+function setGeyserType(save: SaveGame, id: string, typeId: string): void {
+  const split = id.lastIndexOf(':')
+  const prefab = id.slice(0, split)
+  const obj = objectById(save, id)
+  const geyser = behavior(obj, 'Geyser')?.templateData
+  const config = geyser?.configuration as GeyserConfig | undefined
+  const element = behavior(obj, 'PrimaryElement')?.templateData
+  if (!config?.typeId || !element) throw new Error('This is not a geyser that can change type')
+  const from = geyserType(config)
+  if (!swappable(prefab, from)) {
+    throw new Error('Only the game’s generic geysers can change type')
+  }
+  const to = geyserTypes.find((t) => t.id === typeId)
+  if (!to) throw new Error(`Unknown geyser type ${typeId}`)
+  if (to.id === from!.id) throw new Error('The geyser already has that type')
+  if (to.shape !== from!.shape) {
+    throw new Error(`A ${from!.shape} geyser can't become a ${to.shape} one: the footprints differ`)
+  }
+  const active = new Set(dlcIds(save))
+  const missing = to.requiredDlcIds.filter((d) => !active.has(d))
+  if (missing.length) {
+    throw new Error(`This save doesn't have ${missing.join(', ')} active, which that type needs`)
+  }
+
+  // Move the object to its new prefab group, creating the group beside the other geysers.
+  const groups = save.gameObjects
+  const source = groups.find((g) => g.name === prefab)!
+  source.gameObjects.splice(source.gameObjects.indexOf(obj), 1)
+  const targetName = `GeyserGeneric_${to.id}`
+  let target = groups.find((g) => g.name === targetName)
+  if (!target) {
+    target = { name: targetName, gameObjects: [] }
+    groups.splice(groups.indexOf(source) + 1, 0, target)
+  }
+  target.gameObjects.push(obj)
+  // The game doesn't write empty groups.
+  if (source.gameObjects.length === 0) groups.splice(groups.indexOf(source), 1)
+
+  config.typeId.hash = hashString(to.id)
+  for (const [field, { roll, range }] of Object.entries(GEYSER_FIELDS)) {
+    config[field] = Math.fround(resample(config[roll] ?? 0, to[range]))
+  }
+  element._Temperature = Math.fround(to.geyserTemperature)
+
+  const nameable = behavior(obj, 'UserNameable')?.templateData
+  const oldName = findGeyser(from!.id)?.name
+  const newName = findGeyser(to.id)?.name
+  if (oldName && newName && typeof nameable?.savedName === 'string') {
+    if (nameable.savedName.startsWith(oldName)) {
+      nameable.savedName = newName + nameable.savedName.slice(oldName.length)
+    }
+  }
 }
 
 // --- Edits -----------------------------------------------------------------
@@ -710,9 +912,9 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
           }
         }
         if (edit.action === 'masterSkills') {
-          const model = (data(obj, 'MinionIdentity').model as { name?: string } | undefined)?.name
+          const model = modelNameOf(obj, prefab)
           for (const skill of MinionSkills) {
-            if ((skill.model ?? 'Minion') !== (model ?? prefab)) continue
+            if ((skill.model ?? 'Minion') !== model) continue
             if (!skill.requiredDlcIds.every((d) => activeDlcs.has(d))) continue
             applyEdit(save, { type: 'setSkillMastered', id, skillId: skill.id, mastered: true })
           }
@@ -737,6 +939,9 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       config[edit.field] = Math.fround(resample(roll, type[field.range]))
       return
     }
+    case 'setGeyserType':
+      setGeyserType(save, edit.id, edit.typeId)
+      return
     case 'setItemMass':
       primary(itemByRef(save, edit.ref)).Units = Math.max(0, edit.mass)
       return
@@ -809,11 +1014,14 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       applySpaceEdit(save, edit)
       return
     default:
-      applyObjectEdit(objectById(save, edit.id), edit)
+      applyObjectEdit(objectById(save, edit.id), edit, {
+        prefab: splitId(edit.id).group,
+        dlcIds: dlcIds(save),
+      })
   }
 }
 
-function applyObjectEdit(obj: GameObject, edit: Edit): void {
+function applyObjectEdit(obj: GameObject, edit: Edit, ctx: DuplicantContext): void {
   switch (edit.type) {
     case 'setDuplicantName':
       data(obj, 'MinionIdentity').name = edit.name
@@ -825,6 +1033,7 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
       return
     }
     case 'addTrait': {
+      assertTraitsAllowed([edit.traitId], obj, ctx)
       const traits = data(obj, 'Klei.AI.Traits')
       const ids = (traits.TraitIds as string[] | null) ?? []
       if (!ids.includes(edit.traitId)) traits.TraitIds = [...ids, edit.traitId]
@@ -863,6 +1072,14 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
       )
       if (edit.mastered) list.push([edit.skillId, true])
       resume.MasteryBySkillID = list
+      // Losing BionicsC3 lowers the battery cap; bring the charge down in the same edit, so undo
+      // restores both.
+      if (edit.id.startsWith('BionicMinion:')) {
+        const battery = modifiers(obj)?.amounts.find((a) => a.name === 'BionicInternalBattery')
+        const max = bionicAmountMax('BionicInternalBattery', masteredSkillIds(obj))!
+        const stored = battery?.value as { value: number } | undefined
+        if (stored && stored.value > max) stored.value = max
+      }
       return
     }
     case 'setExperience':
@@ -871,7 +1088,13 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
     case 'setAmount': {
       const amount = modifiers(obj)?.amounts.find((a) => a.name === edit.amountId)
       if (!amount) throw new Error(`No amount ${edit.amountId}`)
-      ;(amount.value as { value: number }).value = edit.value
+      if (!Number.isFinite(edit.value)) throw new Error(`Not a finite amount: ${edit.value}`)
+      // The game keeps bionic amounts within their maximum, so never write past it.
+      const max = edit.id.startsWith('BionicMinion:')
+        ? bionicAmountMax(edit.amountId, masteredSkillIds(obj))
+        : undefined
+      ;(amount.value as { value: number }).value =
+        max === undefined ? edit.value : Math.min(Math.max(edit.value, 0), max)
       return
     }
     case 'addEffect': {
@@ -911,7 +1134,7 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
       data(obj, 'WorldContainer').isDiscovered = edit.discovered
       return
     case 'applyProfile':
-      applyProfile(obj, edit.profile, new Set(edit.sections))
+      applyProfile(obj, edit.profile, new Set(edit.sections), ctx)
       return
     default:
       throw new Error(`Unhandled edit ${edit.type}`)
@@ -927,9 +1150,19 @@ function applyProfile(
   obj: GameObject,
   profile: DuplicantProfile,
   sections: Set<ProfileSection>,
+  ctx: DuplicantContext,
 ): void {
   if (profile.format !== 'duplicity-duplicant@1')
     throw new Error('Not a Duplicity duplicant profile')
+  // A bionic and a standard duplicant do not share traits, interests, skills or body parts.
+  const target = modelOf(obj, ctx.prefab)
+  const blocked = blockedSections(profile, target).filter((s) => sections.has(s))
+  if (blocked.length > 0) {
+    throw new Error(
+      `A ${modelLabel(profileModel(profile))} profile's ${blocked.join(', ')} cannot be applied to a ${modelLabel(target)} duplicant`,
+    )
+  }
+  if (sections.has('traits')) assertTraitsAllowed(profile.traits, obj, ctx)
   const identity = data(obj, 'MinionIdentity')
   if (sections.has('name')) {
     identity.name = profile.name
@@ -959,7 +1192,11 @@ function applyProfile(
   if (sections.has('appearance')) {
     for (const [slot, number] of Object.entries(profile.appearance)) {
       if (number)
-        applyObjectEdit(obj, { type: 'setAccessory', id: '', slot: slot as AccessorySlot, number })
+        applyObjectEdit(
+          obj,
+          { type: 'setAccessory', id: '', slot: slot as AccessorySlot, number },
+          ctx,
+        )
     }
   }
 }
