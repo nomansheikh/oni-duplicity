@@ -19,6 +19,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { fmt, humanize, portraitParts } from '@/lib/format'
 import type { Catalogs, DuplicantEdit, DuplicantProfile, DuplicantView, Edit } from '@/worker/model'
+import { BionicTab } from './BionicTab'
 import { ProfileActions } from './ProfileActions'
 import { CommitInput, DuplicantAvatar } from '../common'
 import {
@@ -173,6 +174,7 @@ export function DuplicantEditor({
           <TabsTrigger value="health">
             {dupe.isBionic ? 'Health & systems' : 'Health & needs'}
           </TabsTrigger>
+          {dupe.isBionic && <TabsTrigger value="bionic">Boosters & power</TabsTrigger>}
           <TabsTrigger value="effects">Effects</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
@@ -191,6 +193,11 @@ export function DuplicantEditor({
         <TabsContent value="health">
           <HealthTab dupe={dupe} edit={edit} />
         </TabsContent>
+        {dupe.isBionic && (
+          <TabsContent value="bionic">
+            <BionicTab dupeId={dupe.id} />
+          </TabsContent>
+        )}
         <TabsContent value="effects">
           <EffectsTab dupe={dupe} catalog={catalogs.effects} edit={edit} />
         </TabsContent>
