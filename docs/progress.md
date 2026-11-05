@@ -52,3 +52,7 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - CI: the step runs after the tests, with the same tier as the fixtures, and caches `.cache/oracle` by the hash of `scripts/differential/oracle.ts`.
 - Gaps: no fixture has a non-empty sickness list on `Klei.AI.Modifiers` (and only two on `MinionModifiers`); 7.28–7.32 are not covered; the oracle cannot confirm anything against the game.
 - A unit test (`scripts/differential/compare.test.ts`) checks that normalized equal values pass and tampered values fail, using synthetic objects.
+
+## Test run — 2026-11-05
+
+- Root `vp test` no longer collects tests under `.claude/`, so agent worktrees can't fail the run. The app and package configs don't set `test.exclude`, so they needed no change.
