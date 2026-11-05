@@ -19,7 +19,7 @@ import {
 import { describeEdit } from './describe.ts'
 import { worldMap } from './map.ts'
 import { applyWithRestore } from './snapshot.ts'
-import { listPois } from './pois.ts'
+import { listPoiOverview } from './pois.ts'
 
 let save: SaveGame | null = null
 let fileName = ''
@@ -70,7 +70,7 @@ const api = {
   gameSettings: () => listGameSettings(current()),
   worlds: () => listWorlds(current()),
   destinations: () => listDestinations(current()),
-  pois: () => listPois(current()),
+  pois: () => listPoiOverview(current()),
   materialItems: (elementId: string) => listMaterialItems(current(), elementId),
   rawChildren: (path: RawPath, offset?: number, limit?: number) =>
     rawChildren(current(), path, offset, limit),

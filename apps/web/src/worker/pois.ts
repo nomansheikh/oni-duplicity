@@ -106,11 +106,14 @@ function configuration(
   return { hash, rolls: Array.from({ length: rolls }, () => r.float()) }
 }
 
-interface HarvestState {
+export interface HarvestState {
   hash: number
   capacityRoll: number
   rechargeRoll: number
   capacity: number
+  /** Where `_poiCapacity` sits in the bytes, and where the `poiCapacity` parameter repeats it. */
+  capacityAt: number
+  parameterAt: number
 }
 
 interface ArtifactState {
@@ -138,9 +141,15 @@ export function readHarvestState(bytes: Uint8Array): HarvestState | null {
     r.int() // instance length
     const c = configuration(r, 16, 2)
     if (!c) return null
+    const capacityAt = r.pos
     const capacity = r.float()
     const [capacityRoll, rechargeRoll] = c.rolls as [number, number]
-    return { hash: c.hash, capacityRoll, rechargeRoll, capacity }
+    // The state machine parameter holds the same float behind its length-prefixed name.
+    const parameterAt = findName(bytes, 'poiCapacity', r.pos)
+    if (parameterAt < 0) return null
+    const copy = new Reader(bytes, parameterAt)
+    if (copy.float() !== capacity) return null
+    return { hash: c.hash, capacityRoll, rechargeRoll, capacity, capacityAt, parameterAt }
   } catch {
     return null
   }
@@ -191,12 +200,19 @@ export function readArtifactState(bytes: Uint8Array): ArtifactState | null {
   }
 }
 
+export interface FogLayout {
+  /** Where the first of `count` reveal point floats starts. */
+  valuesAt: number
+  count: number
+  points: Map<string, number>
+}
+
 /**
  * Reveal points per starmap cell, from the fog of war manager's state machine on the save game
  * object: `ClusterFogOfWarManager.m_revealPointsByCell`, written as all values and then all keys
  * (each key a length prefix of 8 and the two ints of an `AxialI`).
  */
-export function readRevealPoints(bytes: Uint8Array): Map<string, number> | null {
+export function readFog(bytes: Uint8Array): FogLayout | null {
   try {
     const r = readInstance(bytes, 'ClusterFogOfWarManager+Instance')
     if (!r) return null
@@ -205,6 +221,7 @@ export function readRevealPoints(bytes: Uint8Array): Map<string, number> | null 
     const length = r.int()
     const count = r.int()
     if (length !== count * 16 || instanceLength !== length + 8) return null
+    const valuesAt = r.pos
     const values = Array.from({ length: count }, () => r.float())
     const points = new Map<string, number>()
     for (let i = 0; i < count; i++) {
@@ -213,13 +230,15 @@ export function readRevealPoints(bytes: Uint8Array): Map<string, number> | null 
       const cellQ = r.int()
       points.set(`${cellR},${cellQ}`, values[i]!)
     }
-    return points
+    return { valuesAt, count, points }
   } catch {
     return null
   }
 }
 
-const POINTS_TO_REVEAL = 100
+export const readRevealPoints = (bytes: Uint8Array) => readFog(bytes)?.points ?? null
+
+export const POINTS_TO_REVEAL = 100
 
 function revealLevel(
   points: Map<string, number> | null,
@@ -232,17 +251,18 @@ function revealLevel(
   return value > 0 ? 'peeked' : 'hidden'
 }
 
-const harvestableByHash = new Map(harvestablePoiTypes.map((t) => [hashString(t.id) | 0, t]))
+export const harvestableByHash = new Map(harvestablePoiTypes.map((t) => [hashString(t.id) | 0, t]))
 const artifactByHash = new Map(
   [...artifactPoiTypes, defaultArtifactPoiType].map((t) => [hashString(t.id) | 0, t]),
 )
-const harvestableByPrefab = new Map(
+export const harvestableByPrefab = new Map(
   harvestablePoiTypes.map((t) => [`HarvestableSpacePOI_${t.id}`, t]),
 )
 const artifactByPrefab = new Map(artifactPoiTypes.map((t) => [`ArtifactSpacePOI_${t.id}`, t]))
 
-const mix = (range: { min: number; max: number }, roll: number) =>
-  roll * (range.max - range.min) + range.min
+/** `MathUtil.ReRange(roll, 0, 1, min, max)` in single precision, as the game computes it. */
+export const mix = (range: { min: number; max: number }, roll: number) =>
+  Math.fround(Math.fround(roll * Math.fround(range.max - range.min)) + range.min)
 
 function location(obj: GameObject, behaviorName: string): { r: number; q: number } | null {
   const loc = obj.behaviors.find((b) => b.name === behaviorName)?.templateData?.m_location as
@@ -290,11 +310,13 @@ function waitingArtifacts(save: SaveGame): Map<string, string> {
   return waiting
 }
 
-function revealPoints(save: SaveGame): Map<string, number> | null {
+export function saveGameController(save: SaveGame): Behavior | undefined {
   const obj = save.gameObjects.find((g) => g.name === 'SaveGame')?.gameObjects[0]
-  const controller: Behavior | undefined = obj?.behaviors.find(
-    (b) => b.name === 'StateMachineController',
-  )
+  return obj?.behaviors.find((b) => b.name === 'StateMachineController')
+}
+
+function revealPoints(save: SaveGame): Map<string, number> | null {
+  const controller = saveGameController(save)
   return controller ? readRevealPoints(controller.extraRaw) : null
 }
 
@@ -364,4 +386,20 @@ export function listPois(save: SaveGame): PoiView[] {
       a.name.localeCompare(b.name) ||
       a.id.localeCompare(b.id, undefined, { numeric: true }),
   )
+}
+
+export interface PoiOverview {
+  pois: PoiView[]
+  /** Known starmap cells and how many are not fully revealed; null when the fog could not be read. */
+  reveal: { cells: number; pending: number } | null
+}
+
+export function listPoiOverview(save: SaveGame): PoiOverview {
+  const controller = saveGameController(save)
+  const fog = controller ? readFog(controller.extraRaw) : null
+  const pending = fog ? [...fog.points.values()].filter((v) => v < POINTS_TO_REVEAL).length : 0
+  return {
+    pois: listPois(save),
+    reveal: fog ? { cells: fog.count, pending } : null,
+  }
 }

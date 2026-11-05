@@ -13,6 +13,7 @@ import {
 } from '@oni-duplicity/game-data'
 import type { SaveGame } from '@oni-duplicity/save-parser'
 import { listGeysers, objectById, type Edit, type GeyserField } from './model.ts'
+import { harvestableByPrefab } from './pois.ts'
 
 const GEYSER_FIELDS: Record<GeyserField, string> = {
   scaledRate: 'output per active cycle',
@@ -115,6 +116,14 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       return 'Research everything'
     case 'setGameSetting':
       return `${findGameSetting(edit.settingId)?.name ?? edit.settingId} to ${humanize(edit.level)}`
+    case 'setDestinationMass':
+      return `Destination ${edit.destination}: set recoverable mass to ${round(edit.mass)} kg`
+    case 'setDestinationAnalysis':
+      return `Destination ${edit.destination}: mark ${edit.level === 'complete' ? 'fully analyzed' : 'discovered'}`
+    case 'revealStarmap':
+      return 'Reveal the known starmap'
+    case 'setPoiStock':
+      return `${harvestableByPrefab.get(edit.id.slice(0, edit.id.lastIndexOf(':')))?.name ?? 'POI'}: set stock to ${round(edit.kg)} kg (experimental)`
     case 'setWorldDiscovered':
       return `${who}mark ${edit.discovered ? 'discovered' : 'undiscovered'}`
     case 'rawSet':

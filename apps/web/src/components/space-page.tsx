@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import {
@@ -11,16 +12,18 @@ import {
 } from '@/components/ui/table'
 import { fmt } from '@/lib/format'
 import type { DestinationView, Edit, WorldView } from '@/worker/model'
-import { CommitInput } from './common'
+import { CommitInput, NumberField } from './common'
 import { PoiTable } from './poi-table'
 
 export function SpacePage({
   worlds,
   destinations,
+  revision,
   onEdit,
 }: {
   worlds: WorldView[]
   destinations: DestinationView[]
+  revision: number
   onEdit: (edit: Edit) => void
 }) {
   return (
@@ -77,13 +80,14 @@ export function SpacePage({
           </Table>
         </CardContent>
       </Card>
-      <PoiTable />
+      <PoiTable revision={revision} onEdit={onEdit} />
       {destinations.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Starmap destinations</CardTitle>
             <CardDescription>
-              Base-game space destinations and what can be recovered from them.
+              Base-game space destinations. Set how much can still be recovered, and mark one
+              discovered or fully analyzed.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -93,11 +97,13 @@ export function SpacePage({
                   <TableHead>Destination</TableHead>
                   <TableHead className="text-right">Distance</TableHead>
                   <TableHead>Resources</TableHead>
+                  <TableHead>Recoverable mass</TableHead>
+                  <TableHead className="text-right">Analysis</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {destinations.map((d) => (
-                  <TableRow key={d.id}>
+                  <TableRow key={d.id} data-destination={d.id}>
                     <TableCell className="font-medium">{d.type}</TableCell>
                     <TableCell className="text-right tabular-nums">
                       {fmt(d.distance * 10000, 0)} km
@@ -109,12 +115,91 @@ export function SpacePage({
                         </Badge>
                       ))}
                     </TableCell>
+                    <TableCell>
+                      <MassEditor destination={d} onEdit={onEdit} />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <AnalysisEditor destination={d} onEdit={onEdit} />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
+      )}
+    </div>
+  )
+}
+
+function MassEditor({
+  destination: d,
+  onEdit,
+}: {
+  destination: DestinationView
+  onEdit: (edit: Edit) => void
+}) {
+  if (!d.mass) return <span className="text-muted-foreground">–</span>
+  const { current, capacity } = d.mass
+  return (
+    <div className="flex items-center gap-2">
+      <NumberField
+        label={`Recoverable mass of destination ${d.id}`}
+        value={current}
+        min={0}
+        max={capacity}
+        unit="kg"
+        className="w-36"
+        onCommit={(mass) => onEdit({ type: 'setDestinationMass', destination: d.id, mass })}
+      />
+      <span className="text-xs text-muted-foreground tabular-nums">of {fmt(capacity, 0)}</span>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={current >= capacity}
+        onClick={() => onEdit({ type: 'setDestinationMass', destination: d.id, mass: capacity })}
+      >
+        Fill
+      </Button>
+    </div>
+  )
+}
+
+const ANALYSIS_LABEL = { hidden: 'Hidden', discovered: 'Discovered', complete: 'Analyzed' } as const
+
+function AnalysisEditor({
+  destination: d,
+  onEdit,
+}: {
+  destination: DestinationView
+  onEdit: (edit: Edit) => void
+}) {
+  return (
+    <div className="flex items-center justify-end gap-2">
+      <Badge variant={d.analysis === 'complete' ? 'default' : 'secondary'}>
+        {ANALYSIS_LABEL[d.analysis]}
+      </Badge>
+      {d.analysis === 'hidden' && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            onEdit({ type: 'setDestinationAnalysis', destination: d.id, level: 'discovered' })
+          }
+        >
+          Discover
+        </Button>
+      )}
+      {d.analysis !== 'complete' && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() =>
+            onEdit({ type: 'setDestinationAnalysis', destination: d.id, level: 'complete' })
+          }
+        >
+          Analyze
+        </Button>
       )}
     </div>
   )

@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import {
   Table,
@@ -12,7 +20,9 @@ import {
 } from '@/components/ui/table'
 import { fmt, humanize } from '@/lib/format'
 import { saveClient } from '@/lib/save-client'
-import type { PoiView, RevealLevel } from '@/worker/pois'
+import type { Edit } from '@/worker/model'
+import type { PoiOverview, PoiView, RevealLevel } from '@/worker/pois'
+import { NumberField } from './common'
 
 const SECONDS_PER_CYCLE = 600
 
@@ -76,24 +86,67 @@ function ArtifactCell({ poi }: { poi: PoiView }) {
   )
 }
 
-export function PoiTable() {
-  const [pois, setPois] = useState<PoiView[] | null>(null)
+function StockEditor({ poi, onEdit }: { poi: PoiView; onEdit: (edit: Edit) => void }) {
+  const harvest = poi.harvest
+  if (!harvest) return <span className="text-muted-foreground">–</span>
+  return (
+    <div className="flex items-center gap-2">
+      <NumberField
+        label={`Stock of ${poi.name}`}
+        value={harvest.current}
+        min={0}
+        max={Math.floor(harvest.max)}
+        unit="kg"
+        className="w-36"
+        onCommit={(kg) => onEdit({ type: 'setPoiStock', id: poi.id, kg })}
+      />
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={harvest.current >= harvest.max - 0.5}
+        onClick={() => onEdit({ type: 'setPoiStock', id: poi.id, kg: harvest.max })}
+      >
+        Fill
+      </Button>
+    </div>
+  )
+}
+
+export function PoiTable({ revision, onEdit }: { revision: number; onEdit: (edit: Edit) => void }) {
+  const [overview, setOverview] = useState<PoiOverview | null>(null)
   useEffect(() => {
     let cancelled = false
-    void saveClient.pois().then((list) => !cancelled && setPois(list))
+    void saveClient.pois().then((next) => !cancelled && setOverview(next))
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [revision])
 
+  const pois = overview?.pois
+  const reveal = overview?.reveal
   if (!pois || pois.length === 0) return null
   return (
     <Card>
       <CardHeader>
         <CardTitle>Points of interest</CardTitle>
         <CardDescription>
-          Harvestable fields and artifact sites on the starmap. Read-only.
+          Harvestable fields and artifact sites on the starmap. Stock editing is experimental: it
+          rewrites the POI's saved state and has not been checked in game.
         </CardDescription>
+        {reveal && (
+          <CardAction>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={reveal.pending === 0}
+              onClick={() => onEdit({ type: 'revealStarmap' })}
+            >
+              {reveal.pending === 0
+                ? 'Known cells revealed'
+                : `Reveal known cells (${reveal.pending})`}
+            </Button>
+          </CardAction>
+        )}
       </CardHeader>
       <CardContent>
         <Table>
@@ -103,13 +156,16 @@ export function PoiTable() {
               <TableHead>Location</TableHead>
               <TableHead>Stock</TableHead>
               <TableHead>Recharge</TableHead>
+              <TableHead>
+                Set stock <Badge variant="secondary">Experimental</Badge>
+              </TableHead>
               <TableHead>Artifact</TableHead>
               <TableHead className="text-right">Discovered</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {pois.map((poi) => (
-              <TableRow key={poi.id} data-poi={poi.type}>
+              <TableRow key={poi.id} data-poi={poi.type} data-poi-id={poi.id}>
                 <TableCell>
                   <div className="flex flex-col gap-1">
                     <span className="font-medium">{poi.name}</span>
@@ -132,6 +188,9 @@ export function PoiTable() {
                 </TableCell>
                 <TableCell>
                   <Recharge poi={poi} />
+                </TableCell>
+                <TableCell>
+                  <StockEditor poi={poi} onEdit={onEdit} />
                 </TableCell>
                 <TableCell>
                   <ArtifactCell poi={poi} />

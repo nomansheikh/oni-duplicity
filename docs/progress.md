@@ -82,13 +82,21 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
 
-## Space points of interest (read-only) — 2026-11-05
+## Space points of interest and starmap edits — 2026-11-05
 
-- The Space page lists every Spaced Out point of interest: type, starmap location, stock and capacity, time to refill, artifact state and whether the colony has found it. Nothing is written.
+- The Space page lists every Spaced Out point of interest: type, starmap location, stock and capacity, time to refill, artifact state and whether the colony has found it.
+- Four edits, each with undo and a line in the unsaved-changes list:
+  - destination recoverable mass (base game), clamped to the destination type's range (`availableMass`, 0 to max minus min);
+  - destination analysis: discovered writes a score of 50, analyzed writes 100 and clears `analyzeDestinationID` when that destination was the scan target;
+  - reveal the known starmap: every existing `m_revealPointsByCell` value below 100 becomes 100. Cells missing from the dictionary stay hidden, because adding one would change the length;
+  - POI stock refill, labelled experimental in the UI: the same float is written to the instance field and the `poiCapacity` parameter inside the state machine bytes.
 - Where the data lives: a POI's location is plain template data (`m_location`); its type hash, two rolls, stock and artifact charge are inside the `StateMachineController` bytes, one serialized state machine instance each for `HarvestablePOIStates` and `ArtifactPOIStates`. Reveal state is `ClusterFogOfWarManager`'s `m_revealPointsByCell` in the save game object's state machine bytes. A spawned artifact waits in a `StarmapHexCellInventory` object on its tile (7.37 and later).
-- The reader in `apps/web/src/worker/pois.ts` looks for the instance's type name and reads the fields behind it. It rejects anything that does not match instead of guessing.
-- The type table (`apps/web/src/lib/space-pois.ts`) is transcribed from `HarvestablePOIConfig` and `ArtifactPOIConfig` and lives in `apps/web`, not `packages/game-data`. Every saved type hash matches a transcribed id.
-- Tests: a fixture test reads every POI in every fixture (rolls within 0–1, stock within capacity, charge within 0–1), and an e2e test checks the table renders for the galaxy fixture.
+- Byte edits go through one function that works on a copy, throws if the length changed or any byte outside the expected floats differs, and reads the result back before swapping it in. Undo puts the old array back by reference (`snapshot.ts` now keeps `extraRaw`).
+- Not done on purpose: artifact recharge, artifact string and harvest count, the POI state name, research opportunities, and revealing cells that are not in the dictionary (see open question 21).
+- The type tables (`apps/web/src/lib/space-pois.ts`, `space-destinations.ts`) are transcribed from the decompile and live in `apps/web`, not `packages/game-data`. Every saved POI type hash matches a transcribed id.
+- Tests: reader checks over every fixture; edit tests for each edit (value, clamping, only the intended fields or bytes change, undo restores the body byte for byte); Playwright specs for the table and each edit (run by CI).
 - Risks:
+  - Nothing here has been loaded in the game. The POI stock edit is the riskiest: the game may rebuild the state from the state machine parameter or the field, and both are written, but whether it moves between `idle` and `recharging` on load is unchecked.
   - The artifact fields moved between versions (see open question 20); the reader accepts both layouts, but only 7.33, 7.36, 7.37 and 7.38 saves were checked.
   - Stock is shown against a capacity worked out from the saved roll and the transcribed range. A wrong range would show a wrong capacity; the fixtures never exceed it.
+  - The base-game destination edits use the `SpaceDestinationType` masses of this decompile; a type the table does not know cannot be edited.
