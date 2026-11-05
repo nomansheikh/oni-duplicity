@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
+import { meterTone } from '@/lib/meter'
 import {
   Table,
   TableBody,
@@ -28,23 +29,27 @@ const SECONDS_PER_CYCLE = 600
 
 const cycles = (seconds: number) => fmt(seconds / SECONDS_PER_CYCLE, 0)
 
-const REVEAL: Record<RevealLevel, { label: string; variant: 'default' | 'secondary' | 'outline' }> =
-  {
-    revealed: { label: 'Revealed', variant: 'default' },
-    peeked: { label: 'Peeked', variant: 'secondary' },
-    hidden: { label: 'Hidden', variant: 'outline' },
-  }
+const REVEAL: Record<RevealLevel, { label: string; variant: 'good' | 'info' | 'secondary' }> = {
+  revealed: { label: 'Revealed', variant: 'good' },
+  peeked: { label: 'Peeked', variant: 'info' },
+  hidden: { label: 'Hidden', variant: 'secondary' },
+}
 
 function Mass({ poi }: { poi: PoiView }) {
   const harvest = poi.harvest
   if (!harvest) return <span className="text-muted-foreground">–</span>
   const percent = harvest.max > 0 ? Math.min(100, (harvest.current / harvest.max) * 100) : 0
   return (
-    <div className="flex min-w-40 flex-col gap-1">
-      <span className="tabular-nums">
+    <div className="flex min-w-48 flex-col gap-1.5">
+      <span className="type-small text-white tabular-nums">
         {fmt(harvest.current, 0)} / {fmt(harvest.max, 0)} kg
       </span>
-      <Progress value={percent} aria-label="Stock" />
+      <Progress
+        variant="gauge"
+        tone={meterTone('amount', percent)}
+        value={percent}
+        aria-label="Stock"
+      />
     </div>
   )
 }
@@ -77,8 +82,8 @@ function ArtifactCell({ poi }: { poi: PoiView }) {
   else status = humanize(artifact.state)
   return (
     <div className="flex flex-col">
-      <span className="tabular-nums">{status}</span>
-      <span className="text-xs text-muted-foreground">
+      <span className="type-small tabular-nums">{status}</span>
+      <span className="type-caption text-muted-foreground">
         {waiting ? `${waiting} · ` : ''}
         {artifact.harvests} taken
       </span>
@@ -148,7 +153,19 @@ export function PoiTable({ revision, onEdit }: { revision: number; onEdit: (edit
           </CardAction>
         )}
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-3">
+        {reveal && (
+          <Card variant="well" size="sm" data-testid="starmap-fog">
+            <CardHeader>
+              <CardTitle className="type-label">Starmap fog</CardTitle>
+              <CardDescription>
+                {reveal.pending === 0
+                  ? `All ${fmt(reveal.cells, 0)} known cells are revealed.`
+                  : `${fmt(reveal.pending, 0)} of ${fmt(reveal.cells, 0)} known cells are not revealed yet.`}
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
         <Table>
           <TableHeader>
             <TableRow>
@@ -168,7 +185,7 @@ export function PoiTable({ revision, onEdit }: { revision: number; onEdit: (edit
               <TableRow key={poi.id} data-poi={poi.type} data-poi-id={poi.id}>
                 <TableCell>
                   <div className="flex flex-col gap-1">
-                    <span className="font-medium">{poi.name}</span>
+                    <span className="type-h3">{poi.name}</span>
                     {poi.harvest && (
                       <div className="flex flex-wrap gap-1">
                         {poi.harvest.elements.map((e) => (
