@@ -1,6 +1,14 @@
 import data from './generated/game-data.json' with { type: 'json' }
 
 export { MinionSkills, type MinionSkill } from './skills.ts'
+export {
+  geyserTypes,
+  resample,
+  unresample,
+  type GeyserTypeEntry,
+  type Range,
+} from './geyser-types.ts'
+import { geyserTypes } from './geyser-types.ts'
 
 export interface GameEntry {
   id: string
@@ -84,3 +92,7 @@ export function humanize(id: string): string {
     .replace(/([a-z])([A-Z0-9])/g, '$1 $2')
     .replace(/\b\w/g, (c) => c.toUpperCase())
 }
+
+const geyserTypesByHash = new Map(geyserTypes.map((t) => [hashString(t.id), t]))
+/** Geyser type by `configuration.typeId` hash. */
+export const findGeyserTypeByHash = (hash: number) => geyserTypesByHash.get(hash)

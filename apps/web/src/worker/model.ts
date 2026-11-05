@@ -11,11 +11,16 @@ import {
   findElementByHash,
   findEffect,
   findGeyser,
+  findGeyserTypeByHash,
   findPersonality,
   findTrait,
   humanize,
+  resample,
   skillGroups,
   traits as traitCatalog,
+  unresample,
+  type GeyserTypeEntry,
+  type Range,
 } from '@oni-duplicity/game-data'
 import {
   MAX_VERIFIED_MINOR,
@@ -46,6 +51,8 @@ export interface Summary {
   clusterId: string
   isAutoSave: boolean
   sandbox: boolean
+  /** Set for good once debug tools are used; blocks achievements. */
+  debugWasUsed: boolean
   unverified: boolean
   warnings: string[]
 }
@@ -202,12 +209,59 @@ export interface GeyserView {
   name: string
   x: number
   y: number
-  /** Grams per second while erupting. */
-  rate: number
-  eruptionSeconds: number
+  /** Kilograms emitted per cycle while active (`scaledRate`). */
+  massPerCycle: number
+  /** Seconds per eruption cycle, and the share of it spent erupting. */
   iterationSeconds: number
-  activeCycles: number
-  dormancyCycles: number
+  iterationPercent: number
+  /** Seconds per activity cycle, and the share of it spent active. */
+  yearSeconds: number
+  yearPercent: number
+  /** The type's natural range per field; missing for types the editor doesn't know. */
+  ranges?: Record<GeyserField, Range>
+  /**
+   * False when the saved values aren't what the rolls give (changed by a mod or another
+   * editor). The game recomputes them from the rolls when it loads the save.
+   */
+  matchesRolls: boolean
+}
+
+/**
+ * The game saves both the rolls and the values they give (`scaled*`), but recomputes the values
+ * from the rolls when it loads a save. An edit therefore sets the roll and writes the matching
+ * value, which keeps the save consistent whichever of the two the game reads.
+ */
+export type GeyserField =
+  | 'scaledRate'
+  | 'scaledIterationLength'
+  | 'scaledIterationPercent'
+  | 'scaledYearLength'
+  | 'scaledYearPercent'
+
+const GEYSER_FIELDS: Record<
+  GeyserField,
+  { roll: string; range: keyof Omit<GeyserTypeEntry, 'id'> }
+> = {
+  scaledRate: { roll: 'rateRoll', range: 'rate' },
+  scaledIterationLength: { roll: 'iterationLengthRoll', range: 'iterationLength' },
+  scaledIterationPercent: { roll: 'iterationPercentRoll', range: 'iterationPercent' },
+  scaledYearLength: { roll: 'yearLengthRoll', range: 'yearLength' },
+  scaledYearPercent: { roll: 'yearPercentRoll', range: 'yearPercent' },
+}
+
+type GeyserConfig = Record<string, number> & { typeId?: { hash: number } }
+
+function geyserType(config: GeyserConfig): GeyserTypeEntry | undefined {
+  const hash = config.typeId?.hash
+  return hash === undefined ? undefined : findGeyserTypeByHash(hash)
+}
+
+/** The game computes in single precision; allow for that when comparing. */
+function rollsMatch(config: GeyserConfig, type: GeyserTypeEntry): boolean {
+  return Object.entries(GEYSER_FIELDS).every(([field, { roll, range }]) => {
+    const expected = resample(config[roll] ?? 0, type[range])
+    return Math.abs((config[field] ?? 0) - expected) <= Math.abs(expected) * 1e-5
+  })
 }
 
 /** A portable copy of a duplicant's editable state (copy/paste and JSON export). */
@@ -248,7 +302,11 @@ export type Edit =
   | { type: 'removeEffect'; id: string; effectId: string }
   | { type: 'setAccessory'; id: string; slot: AccessorySlot; number: string }
   | { type: 'applyProfile'; id: string; profile: DuplicantProfile; sections: ProfileSection[] }
+  | { type: 'setDebugWasUsed'; used: boolean }
+  | { type: 'bulkDuplicants'; action: 'relieveStress' | 'fillNeeds' | 'masterSkills' }
+  | { type: 'bulkDuplicants'; action: 'setAttributes'; level: number }
   | { type: 'setGeyserName'; id: string; name: string }
+  | { type: 'setGeyserValue'; id: string; field: GeyserField; value: number }
   | { type: 'setItemMass'; ref: string; mass: number }
   | { type: 'setItemTemperature'; ref: string; kelvin: number }
   | { type: 'deleteObject'; id: string }
@@ -267,6 +325,16 @@ export type Edit =
 // --- Helpers ---------------------------------------------------------------
 
 const SECONDS_PER_CYCLE = 600
+
+/** Full values for a standard duplicant; bladder and stress are best empty. */
+const FULL_NEEDS: Record<string, number> = {
+  HitPoints: 100,
+  Calories: 4_000_000,
+  Stamina: 100,
+  Breath: 100,
+  Bladder: 0,
+  Stress: 0,
+}
 const ACCESSORY_PREFIX = 'Root.Accessories.'
 
 function range(from: number, to: number): number[] {
@@ -389,6 +457,7 @@ export function summarize(save: SaveGame, fileName: string): Summary {
     clusterId: info.clusterId ?? '',
     isAutoSave: info.isAutoSave,
     sandbox: Boolean(sandbox ?? info.sandboxEnabled),
+    debugWasUsed: save.gameData.debugWasUsed === true,
     unverified: info.saveMinorVersion > MAX_VERIFIED_MINOR,
     warnings: save.warnings,
   }
@@ -502,11 +571,10 @@ export function catalogs(): Catalogs {
 
 export function listGeysers(save: SaveGame): GeyserView[] {
   return objectsWith(save, 'Geyser').map(({ id, prefab, obj }) => {
-    const config = data(obj, 'Geyser').configuration as Record<string, number>
+    const config = data(obj, 'Geyser').configuration as GeyserConfig
     const name = behavior(obj, 'UserNameable')?.templateData?.savedName
-    const yearSeconds = config.scaledYearLength ?? 0
-    const yearPercent = config.scaledYearPercent ?? 0
     const type = findGeyser(prefab)
+    const ranges = geyserType(config)
     return {
       id,
       prefab,
@@ -515,11 +583,19 @@ export function listGeysers(save: SaveGame): GeyserView[] {
       name: typeof name === 'string' ? name : (type?.name ?? prefab),
       x: Math.round(obj.position.x),
       y: Math.round(obj.position.y),
-      rate: config.scaledRate ?? 0,
-      eruptionSeconds: (config.scaledIterationLength ?? 0) * (config.scaledIterationPercent ?? 0),
+      massPerCycle: config.scaledRate ?? 0,
       iterationSeconds: config.scaledIterationLength ?? 0,
-      activeCycles: (yearSeconds * yearPercent) / SECONDS_PER_CYCLE,
-      dormancyCycles: (yearSeconds * (1 - yearPercent)) / SECONDS_PER_CYCLE,
+      iterationPercent: config.scaledIterationPercent ?? 0,
+      yearSeconds: config.scaledYearLength ?? 0,
+      yearPercent: config.scaledYearPercent ?? 0,
+      ...(ranges
+        ? {
+            ranges: Object.fromEntries(
+              Object.entries(GEYSER_FIELDS).map(([field, { range }]) => [field, ranges[range]]),
+            ) as Record<GeyserField, Range>,
+          }
+        : {}),
+      matchesRolls: ranges ? rollsMatch(config, ranges) : true,
     }
   })
 }
@@ -555,6 +631,55 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       const nameable = behavior(objectById(save, edit.id), 'UserNameable')?.templateData
       if (!nameable) throw new Error('This geyser cannot be renamed')
       nameable.savedName = edit.name
+      return
+    }
+    case 'setDebugWasUsed':
+      if (!('debugWasUsed' in save.gameData)) throw new Error('This save has no debug flag')
+      save.gameData.debugWasUsed = edit.used
+      return
+    case 'bulkDuplicants': {
+      const activeDlcs = new Set(dlcIds(save))
+      for (const { id, prefab, obj } of objectsWith(save, 'MinionIdentity')) {
+        const present = new Set(modifiers(obj)?.amounts.map((a) => a.name) ?? [])
+        const setAmount = (amountId: string, value: number) =>
+          present.has(amountId) && applyEdit(save, { type: 'setAmount', id, amountId, value })
+        if (edit.action === 'relieveStress') setAmount('Stress', 0)
+        if (edit.action === 'fillNeeds') {
+          for (const [amountId, value] of Object.entries(FULL_NEEDS)) setAmount(amountId, value)
+        }
+        if (edit.action === 'setAttributes') {
+          const levels = (behavior(obj, 'Klei.AI.AttributeLevels')?.templateData?.saveLoadLevels ??
+            []) as { attributeId: string }[]
+          for (const { attributeId } of levels) {
+            applyEdit(save, { type: 'setAttributeLevel', id, attributeId, level: edit.level })
+          }
+        }
+        if (edit.action === 'masterSkills') {
+          const model = (data(obj, 'MinionIdentity').model as { name?: string } | undefined)?.name
+          for (const skill of MinionSkills) {
+            if ((skill.model ?? 'Minion') !== (model ?? prefab)) continue
+            if (!skill.requiredDlcIds.every((d) => activeDlcs.has(d))) continue
+            applyEdit(save, { type: 'setSkillMastered', id, skillId: skill.id, mastered: true })
+          }
+        }
+      }
+      return
+    }
+    case 'setGeyserValue': {
+      const config = data(objectById(save, edit.id), 'Geyser').configuration as
+        | GeyserConfig
+        | undefined
+      const field = GEYSER_FIELDS[edit.field]
+      if (!config || !field || !(edit.field in config) || !(field.roll in config)) {
+        throw new Error('This geyser has no such setting')
+      }
+      const type = geyserType(config)
+      if (!type) throw new Error('Unknown geyser type; only its name can be changed')
+      if (!Number.isFinite(edit.value)) throw new Error('Use a number')
+      // Values are stored as single-precision floats.
+      const roll = Math.fround(unresample(edit.value, type[field.range]))
+      config[field.roll] = roll
+      config[edit.field] = Math.fround(resample(roll, type[field.range]))
       return
     }
     case 'setItemMass':
@@ -839,6 +964,9 @@ export function itemByRef(save: SaveGame, ref: string): GameObject {
 
 /** The game objects an edit may change, for undo snapshots. */
 export function touchedBy(save: SaveGame, edit: Edit): GameObject[] {
+  if (edit.type === 'bulkDuplicants') {
+    return objectsWith(save, 'MinionIdentity').map(({ obj }) => obj)
+  }
   if ('id' in edit) return [objectById(save, edit.id)]
   if ('ref' in edit) return [objectById(save, edit.ref.split('/')[0]!)]
   if ('elementId' in edit)

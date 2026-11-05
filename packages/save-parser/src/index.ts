@@ -10,5 +10,6 @@ export {
   writeSaveParts,
   type ParseOptions,
 } from './save.ts'
+export { readSimGrid, type SimGrid } from './sim-grid.ts'
 export * from './types.ts'
 export type { ModifierInstance, ModifiersExtraData, StoredItem } from './extra-data.ts'

@@ -60,6 +60,8 @@ readSaveParts / parseBody / writeBody                          // lower-level pi
 MIN_MINOR, MAX_VERIFIED_MINOR, ParseError
 ```
 
+**Sim grid.** `readSimGrid(save.simData)` decodes the cell grid: a `SIMSAVE\0` header with version (14 or 15), width and height, 9 bytes not decoded yet, then 16 bytes per cell (element SimHash, temperature in K, mass in kg, 4 bytes not decoded yet). The grid has a one-cell border, so game cell (x, y) is grid cell (x + 1, y + 1); duplicant positions confirm it. Disease and later sections are not read. The grid is only read, never written, so the round trip is unaffected.
+
 **Version policy.** Major 7, minors 31–38 are supported. A newer minor parses with a warning in `save.warnings` (with `strictVersion` it throws). An older minor throws a `ParseError` telling the user to re-save in the current game. 7.33 saves store the header DLC as `dlcId` (a string); 7.34+ store a `dlcIds` array.
 
 ## `packages/game-data`
@@ -72,7 +74,7 @@ Generated, never hand-typed. `vp run extract-game-data` reads a local game insta
 | `Managed/Assembly-CSharp.dll`                  | Exact IDs (for example `BingeEater`), read from the assembly's UTF-16 string literals |
 | `StreamingAssets/elements/*.yaml`              | Elements and their SimHashes                                                          |
 
-Coverage: traits, attributes, skill groups, amounts, effects, personalities, geysers, elements, critters, techs and game settings. Skills come from [konove/oni-save-parser](https://github.com/konove/oni-save-parser) (MIT, attributed in `src/skills.ts`). The assembly is only read locally; decompiled code is never committed.
+Coverage: traits, attributes, skill groups, amounts, effects, personalities, geysers, elements, critters, techs and game settings. Geyser types and their ranges (output, eruption and activity timing) are floats in code, which the extractor cannot read, so `src/geyser-types.ts` transcribes them from `GeyserGenericConfig`; a test checks them against every geyser in the fixtures. Skills come from [konove/oni-save-parser](https://github.com/konove/oni-save-parser) (MIT, attributed in `src/skills.ts`). The assembly is only read locally; decompiled code is never committed.
 
 ## `apps/web`
 
@@ -91,6 +93,12 @@ save(): Uint8Array
 **Edits and undo.** An edit is a plain `{ type, ...fields }` object (`setDuplicantName`, `addTrait`, `setItemMass`, `rawSet`, …) applied by `applyEdit` in `worker/model.ts`. Before applying, the worker snapshots what that edit can touch (the target's behaviors, the header, custom game settings, and for clone or delete the group lists and ID counter; raw edits snapshot only the value or array they change). Undo restores the snapshot; redo re-applies the edit.
 
 **Data flow.** After every edit, undo or redo, the app refetches its view models from the worker and bumps a `revision` that open panels use to reload. Only the page state (current page, selection, preferences) lives on the main thread.
+
+**World map.** The worker decodes the sim grid once per save, crops one asteroid using its `WorldContainer` offset and size, and transfers element indices, temperatures and masses; the page colors them on a canvas, so switching between element, temperature and mass views needs no worker call.
+
+**Geysers.** The game saves each geyser's rolls and the values they give (`scaled*`), but recomputes the values from the rolls and the type's range when it loads a save. An edit sets the roll and writes the matching value, clamped to the type's range; geysers of unknown types can only be renamed.
+
+**Unsaved changes.** The worker describes each edit in plain words as it is applied (before a delete removes the name it needs) and keeps the label with its undo entry; the header lists them.
 
 **Game data** is imported only by the worker. View models arrive with names resolved, so game data stays out of the main bundle. Pages are lazy-loaded.
 
@@ -147,9 +155,9 @@ The gate fails a phase whose time, divided by a calibration workload timed in th
 
 1. **Toolchain:** CI, repository rules, fixtures, Dependabot. Done.
 2. **Parser and game data.** Done.
-3. **Editor:** app shell, overview, duplicants (including bionic and portraits), critters, geysers, materials, research, space, game settings, raw editor, preferences. Done; not yet verified in game.
+3. **Editor:** app shell, overview, duplicants (including bionic, portraits and colony-wide actions), critters, geysers (including output and timing), materials, research, space, game settings, world map, raw editor, preferences. Done; not yet verified in game.
 4. **v0.1:** in-game verification of the main edits, then the first release.
-5. **Later:** geyser type and output editing (needs per-type ranges), more languages, map view, duplicant cloning.
+5. **Later:** changing a geyser's type, more languages, editing tiles on the map, duplicant cloning.
 
 ## Deviations from the original plan
 
@@ -159,4 +167,5 @@ The gate fails a phase whose time, divided by a calibration workload timed in th
 - **No typed behaviors.** Template data is decoded generically; only the extra data the editors need has codecs.
 - **Portraits are shown**, using react-oni-duplicant's sprites instead of committing any art.
 - **Newer minor versions open editable**, but downloading them needs the "allow unverified versions" preference.
+- **Geyser ranges are transcribed**, not generated: see `packages/game-data`.
 - **The bench gate is calibrated, not absolute.** It compares each phase against a per-platform committed baseline, scaled by a fixed memory-bound workload timed in the same run. It cannot catch a slowdown that also slows the calibration, and the save-time target is not met. See Performance.

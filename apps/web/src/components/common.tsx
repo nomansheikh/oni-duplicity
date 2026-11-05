@@ -51,6 +51,8 @@ export function NumberField({
   unit,
   digits = 0,
   min,
+  max,
+  disabled,
   className,
   label,
 }: {
@@ -59,6 +61,8 @@ export function NumberField({
   unit?: string
   digits?: number
   min?: number
+  max?: number
+  disabled?: boolean
   className?: string
   label: string
 }) {
@@ -69,13 +73,22 @@ export function NumberField({
         key={shown}
         type="number"
         min={min}
+        max={max}
+        disabled={disabled}
         step={digits > 0 ? 1 / 10 ** digits : 1}
         defaultValue={shown}
         aria-label={label}
         className="text-right tabular-nums"
         onBlur={(e) => {
-          const next = Number(e.currentTarget.value)
-          if (Number.isFinite(next) && next !== shown) onCommit(next)
+          const typed = Number(e.currentTarget.value)
+          if (!Number.isFinite(typed) || e.currentTarget.value === '') {
+            e.currentTarget.value = String(shown)
+            return
+          }
+          const next = Math.min(max ?? Infinity, Math.max(min ?? -Infinity, typed))
+          // Show what is committed, also when clamping lands on the current value.
+          e.currentTarget.value = String(Number(next.toFixed(digits)))
+          if (next !== shown) onCommit(next)
         }}
         onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
       />

@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/field'
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '@/components/ui/item'
 import { Switch } from '@/components/ui/switch'
+import { averagePerCycle } from '@/lib/geyser'
 import { fmt } from '@/lib/format'
 import type { DuplicantView, Edit, GeyserView, Summary } from '@/worker/model'
 import { CommitInput } from './common'
@@ -74,14 +75,7 @@ export function OverviewPage({
   const amount = (d: DuplicantView, id: string) => d.amounts.find((a) => a.id === id)?.value
   const stress = average(duplicants.map((d) => amount(d, 'Stress') ?? 0))
   const bionic = duplicants.filter((d) => d.isBionic).length
-  const outputKgPerCycle = geysers.reduce((sum, g) => {
-    const total = g.activeCycles + g.dormancyCycles
-    if (g.iterationSeconds <= 0 || total <= 0) return sum
-    return (
-      sum +
-      (g.rate * (g.eruptionSeconds / g.iterationSeconds) * (g.activeCycles / total) * 600) / 1000
-    )
-  }, 0)
+  const outputKgPerCycle = geysers.reduce((sum, g) => sum + averagePerCycle(g), 0)
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
@@ -147,6 +141,29 @@ export function OverviewPage({
                   id="sandbox"
                   checked={summary.sandbox}
                   onCheckedChange={(enabled) => onEdit({ type: 'setSandbox', enabled })}
+                />
+              </Field>
+              <Field orientation="horizontal">
+                <FieldContent>
+                  <FieldLabel htmlFor="debug-used">Debug mode was used</FieldLabel>
+                  <FieldDescription>
+                    The game sets this for good once debug tools are used. Achievements need it off,
+                    and sandbox mode off too.{' '}
+                    {summary.debugWasUsed || summary.sandbox ? (
+                      <Badge variant="outline" className="border-chart-3/50 text-chart-3">
+                        Achievements blocked
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-primary/50 text-primary">
+                        Achievements on
+                      </Badge>
+                    )}
+                  </FieldDescription>
+                </FieldContent>
+                <Switch
+                  id="debug-used"
+                  checked={summary.debugWasUsed}
+                  onCheckedChange={(used) => onEdit({ type: 'setDebugWasUsed', used })}
                 />
               </Field>
             </FieldGroup>

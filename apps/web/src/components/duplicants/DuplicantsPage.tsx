@@ -1,6 +1,13 @@
 import { Search } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import {
   Item,
@@ -17,6 +24,7 @@ import { useState } from 'react'
 import type { Catalogs, DuplicantProfile, DuplicantView, Edit } from '@/worker/model'
 import { portraitParts } from '@/lib/format'
 import { DuplicantAvatar } from '../common'
+import { ColonyActions } from './ColonyActions'
 import { DuplicantEditor } from './DuplicantEditor'
 
 export function DuplicantsPage({
@@ -44,6 +52,9 @@ export function DuplicantsPage({
         <CardHeader>
           <CardTitle>Duplicants</CardTitle>
           <CardDescription>{duplicants.length} in this colony</CardDescription>
+          <CardAction>
+            <ColonyActions onEdit={onEdit} />
+          </CardAction>
         </CardHeader>
         <CardContent className="space-y-3">
           <InputGroup>
