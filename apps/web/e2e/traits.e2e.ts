@@ -162,8 +162,9 @@ test.describe('traits', () => {
     await expect(names.first()).toHaveText('Builder')
     await expect(names.nth(1)).toHaveText('Digger')
 
+    // Save order starts ascending again, whichever direction the last sort left.
     await sortBy('Save order')
-    await page.getByRole('button', { name: 'Ascending order' }).click()
+    await expect(page.getByRole('button', { name: 'Ascending order' })).toBeVisible()
     await expect(names).toHaveText(saveOrder)
   })
 })
