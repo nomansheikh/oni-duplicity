@@ -27,7 +27,7 @@ export function PreferencesDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Preferences">
+        <Button variant="outline" size="icon" aria-label="Preferences">
           <Settings />
         </Button>
       </DialogTrigger>

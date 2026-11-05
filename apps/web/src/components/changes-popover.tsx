@@ -33,7 +33,9 @@ export function ChangesPopover({ count, revision }: { count: number; revision: n
       <PopoverContent align="end" className="w-96 p-0">
         <div className="border-b px-4 py-3">
           <p className="font-heading font-semibold">Unsaved changes</p>
-          <p className="text-sm text-muted-foreground">Newest first. Undo removes the top one.</p>
+          <p className="type-small text-muted-foreground">
+            Newest first. Undo removes the top one.
+          </p>
         </div>
         <ScrollArea className="max-h-80">
           {items.length === 0 && (
@@ -47,7 +49,7 @@ export function ChangesPopover({ count, revision }: { count: number; revision: n
           )}
           <ol className="flex flex-col py-1">
             {items.map((label, i) => (
-              <li key={items.length - i} className="flex gap-3 px-4 py-1.5 text-sm">
+              <li key={items.length - i} className="flex gap-3 px-4 py-1.5 type-small">
                 <span className="w-6 shrink-0 text-right text-muted-foreground tabular-nums">
                   {items.length - i}
                 </span>

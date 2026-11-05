@@ -31,7 +31,7 @@ function ItemSeparator({ className, ...props }: React.ComponentProps<typeof Sepa
 }
 
 const itemVariants = cva(
-  'group/item flex w-full flex-wrap items-center rounded-none border text-sm transition-colors duration-100 outline-none focus-visible:outline-2 focus-visible:outline-ring [a]:transition-colors [a]:hover:bg-muted',
+  'group/item flex w-full flex-wrap items-center rounded-none border type-small transition-colors duration-100 outline-none focus-visible:outline-2 focus-visible:outline-ring [a]:transition-colors [a]:hover:bg-muted',
   {
     variants: {
       variant: {
@@ -39,7 +39,7 @@ const itemVariants = cva(
         outline: 'border-ink',
         muted: 'border-transparent bg-muted/50',
         // vitals row: icon, label and value, trend arrow in ItemActions
-        need: 'grid min-h-8 grid-cols-[1.5rem_1fr_1.2rem] gap-x-[0.6rem] border-transparent px-2 py-1 [&_[data-slot=item-actions]]:justify-self-end [&_[data-slot=item-actions]]:text-[0.7rem] [&_[data-slot=item-actions]]:text-fg-2 [&_[data-slot=item-media]_svg]:size-[1.3rem]',
+        need: 'grid min-h-8 grid-cols-[1.5rem_1fr_1.2rem] gap-x-[0.6rem] border-transparent px-2 py-1 [&_[data-slot=item-actions]]:justify-self-end [&_[data-slot=item-actions]]:type-caption [&_[data-slot=item-actions]]:text-fg-2 [&_[data-slot=item-media]_svg]:size-[1.3rem]',
       },
       size: {
         default: 'gap-2.5 px-3 py-2.5',
@@ -123,7 +123,7 @@ function ItemTitle({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="item-title"
       className={cn(
-        'line-clamp-1 flex w-fit items-center gap-2 text-sm leading-snug font-medium underline-offset-4',
+        'line-clamp-1 flex w-fit items-center gap-2 type-small leading-snug font-medium underline-offset-4',
         className,
       )}
       {...props}
@@ -136,7 +136,7 @@ function ItemDescription({ className, ...props }: React.ComponentProps<'p'>) {
     <p
       data-slot="item-description"
       className={cn(
-        'line-clamp-2 text-left text-sm leading-normal font-normal text-muted-foreground group-data-[size=xs]/item:text-xs [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary',
+        'line-clamp-2 text-left type-small leading-normal font-normal text-muted-foreground group-data-[size=xs]/item:type-caption [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary',
         className,
       )}
       {...props}

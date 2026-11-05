@@ -313,6 +313,7 @@ export function CrittersPage({
                           <Button
                             variant="outline"
                             size="xs"
+                            className="min-w-[5.5rem]"
                             onClick={() =>
                               onEdit({
                                 type: 'setAmount',
