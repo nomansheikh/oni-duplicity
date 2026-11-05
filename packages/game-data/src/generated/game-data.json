@@ -1034,55 +1034,68 @@
   "effects": [
     {
       "id": "BonusBuilder",
-      "name": "Accomplished Builder"
+      "name": "Accomplished Builder",
+      "desc": "This Duplicant has built many buildings and has a sense of accomplishment!"
     },
     {
       "id": "UncomfortableFeet",
-      "name": "Aching Feet"
+      "name": "Aching Feet",
+      "desc": "This Duplicant recently walked across floor without tile, much to their chagrin"
     },
     {
       "id": "VerticalWindTunnelFlying",
-      "name": "Airborne"
+      "name": "Airborne",
+      "desc": "This Duplicant is having an exhilarating time in the wind tunnel\n\nWhoosh!"
     },
     {
       "id": "Loner",
-      "name": "Alone"
+      "name": "Alone",
+      "desc": "This Duplicant is feeling more focused now that they're alone"
     },
     {
       "id": "HistamineSuppression",
-      "name": "Antihistamines"
+      "name": "Antihistamines",
+      "desc": "This Duplicant's allergic reactions have been suppressed by medication"
     },
     {
       "id": "WorkEncouraged",
-      "name": "Appreciated"
+      "name": "Appreciated",
+      "desc": "Someone saw how hard this Duplicant was working and gave them a compliment\n\nThis Duplicant feels great about themselves now!"
     },
     {
       "id": "MessCaviar",
-      "name": "Ate Caviar"
+      "name": "Ate Caviar",
+      "desc": "This Duplicant recently ate a meal topped with Caviar\n\nThey're feeling very swanky"
     },
     {
       "id": "HasBalloon",
-      "name": "Balloon Buddy"
+      "name": "Balloon Buddy",
+      "desc": "A Balloon Artist gave this Duplicant a balloon!\n\nThis Duplicant feels super crafty now!"
     },
     {
       "id": "RoomBanquetHall",
-      "name": "Banquet Hall"
+      "name": "Banquet Hall",
+      "desc": "This Duplicant's most recent meal was eaten in a bustling Banquet Hall"
     },
     {
       "id": "BarracksStamina",
-      "name": "Barracks"
+      "name": "Barracks",
+      "desc": "This Duplicant shares sleeping quarters with others"
     },
     {
       "id": "RoomBarracks",
-      "name": "Barracks"
+      "name": "Barracks",
+      "desc": "This Duplicant slept in the Barracks last night and feels refreshed"
     },
     {
       "id": "Medicine_BasicRadPill",
-      "name": "Basic Rad Pill"
+      "name": "Basic Rad Pill",
+      "desc": "Increases a Duplicant's natural radiation absorption rate."
     },
     {
       "id": "BedHealth",
-      "name": "Bed Rest"
+      "name": "Bed Rest",
+      "desc": "This Duplicant will incrementally heal over while on Bed Rest"
     },
     {
       "id": "Breathing",
@@ -1090,23 +1103,28 @@
     },
     {
       "id": "Sunlight_Pleasant",
-      "name": "Bright and Cheerful"
+      "name": "Bright and Cheerful",
+      "desc": "The strong natural Light is making this Duplicant feel light on their feet"
     },
     {
       "id": "Catheterized",
-      "name": "Catheterized"
+      "name": "Catheterized",
+      "desc": "Let's leave it at that"
     },
     {
       "id": "CenterOfAttention",
-      "name": "Center of Attention"
+      "name": "Center of Attention",
+      "desc": "This Duplicant feels like someone's watching over them..."
     },
     {
       "id": "Charging",
-      "name": "Charging"
+      "name": "Charging",
+      "desc": "This lil bot is charging its internal battery"
     },
     {
       "id": "ScoutBotCharging",
-      "name": "Charging"
+      "name": "Charging",
+      "desc": "Rover is happily charging inside Rover's Module"
     },
     {
       "id": "ColdAir",
@@ -1114,7 +1132,8 @@
     },
     {
       "id": "Claustrophobic",
-      "name": "Claustrophobic"
+      "name": "Claustrophobic",
+      "desc": "This Duplicant recently found themselves in an upsettingly cramped space"
     },
     {
       "id": "Clothing",
@@ -1122,27 +1141,33 @@
     },
     {
       "id": "Thriver",
-      "name": "Clutchy"
+      "name": "Clutchy",
+      "desc": "This Duplicant is Stressed and has kicked into hyperdrive"
     },
     {
       "id": "cold",
-      "name": "Cold"
+      "name": "Cold",
+      "desc": "This Duplicant is uncomfortably cold"
     },
     {
       "id": "CommunalDining",
-      "name": "Communal Dining"
+      "name": "Communal Dining",
+      "desc": "This Duplicant recently had the pleasure of dining with friends at a Communal Table"
     },
     {
       "id": "CryFace",
-      "name": "Cry Face"
+      "name": "Cry Face",
+      "desc": "This Duplicant recently had a crying fit and it shows"
     },
     {
       "id": "Dancing",
-      "name": "Dancing"
+      "name": "Dancing",
+      "desc": "This Duplicant is showing off their best moves."
     },
     {
       "id": "Darkness",
-      "name": "Darkness"
+      "name": "Darkness",
+      "desc": "Eep! This Duplicant doesn't like being in the dark!"
     },
     {
       "id": "dead",
@@ -1150,165 +1175,203 @@
     },
     {
       "id": "TerribleSleep",
-      "name": "Dead Tired: Snoring Friend"
+      "name": "Dead Tired: Snoring Friend",
+      "desc": "This Duplicant didn't get any shuteye last night because of all the racket from a friend's snoring"
     },
     {
       "id": "BionicBedTimeEffect",
-      "name": "Defragmenting"
+      "name": "Defragmenting",
+      "desc": "This Duplicant is decluttering their internal data cache\n\nIt's helping them relax"
     },
     {
       "id": "Diarrhea",
       "name": "Diarrhea",
-      "desc": "Most Duplicants experience stomach upset from this meal"
+      "desc": "This Duplicant's gut is giving them some trouble"
     },
     {
       "id": "WailedAt",
-      "name": "Disturbed by Wailing"
+      "name": "Disturbed by Wailing",
+      "desc": "This Duplicant is feeling Stressed by someone's Banshee Wail"
     },
     {
       "id": "Espresso",
-      "name": "Drank Espresso"
+      "name": "Drank Espresso",
+      "desc": "This Duplicant had delicious drink!\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "Juicer",
-      "name": "Drank Juice"
+      "name": "Drank Juice",
+      "desc": "This Duplicant had delicious fruity drink!\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "BonusDream4",
-      "name": "Dream Inspired"
+      "name": "Dream Inspired",
+      "desc": "This Duplicant is inspired from all the unforgettable dreams they had"
     },
     {
       "id": "MachineTinker",
-      "name": "Engie's Jerry Rig"
+      "name": "Engie's Jerry Rig",
+      "desc": "A skilled Duplicant has jerry rigged this Generator to temporarily run faster"
     },
     {
       "id": "powertinker",
-      "name": "Engie's Tune-Up"
+      "name": "Engie's Tune-Up",
+      "desc": "A skilled Duplicant has improved this generator's Power output efficiency\n\nApplying this effect consumed one Microchip"
     },
     {
       "id": "Entitlement",
-      "name": "Entitlement"
+      "name": "Entitlement",
+      "desc": "Duplicants will demand better Decor and accommodations with each Expertise level they gain"
     },
     {
       "id": "BonusGenerator",
-      "name": "Exercised"
+      "name": "Exercised",
+      "desc": "This Duplicant ran in a Generator and has benefited from the exercise"
     },
     {
       "id": "PassedOutSleep",
-      "name": "Exhausted"
+      "name": "Exhausted",
+      "desc": "Lack of rest depleted this Duplicant's Stamina\n\nThey passed out from the fatigue"
     },
     {
       "id": "DuplicantGotMilk",
-      "name": "Extra Hydrated: Brackene"
+      "name": "Extra Hydrated: Brackene",
+      "desc": "This Duplicant recently drank Brackene. It's helping them relax"
     },
     {
       "id": "DuplicantDrankInk",
-      "name": "Extra Hydrated: Squid Ink"
+      "name": "Extra Hydrated: Squid Ink",
+      "desc": "This Duplicant recently drank Squid Ink. It's helping them relax"
     },
     {
       "id": "BionicRadiationExposureExtreme",
-      "name": "Extreme Radiation Sickness"
+      "name": "Extreme Radiation Sickness",
+      "desc": "Dangerously high Radiation exposure is making this Duplicant wish they'd never been printed"
     },
     {
       "id": "RadiationExposureExtreme",
-      "name": "Extreme Radiation Sickness"
+      "name": "Extreme Radiation Sickness",
+      "desc": "Dangerously high Radiation exposure is making this Duplicant wish they'd never been printed"
     },
     {
       "id": "FarmTinker",
-      "name": "Farmer's Touch"
+      "name": "Farmer's Touch",
+      "desc": "A skilled Duplicant has encouraged this Plant to grow a little bit faster\n\nApplying this effect consumed one dose of Micronutrient Fertilizer"
     },
     {
       "id": "UnfashionableClothing",
-      "name": "Fashion Crime"
+      "name": "Fashion Crime",
+      "desc": "This Duplicant had to wear something that was an affront to fashion"
     },
     {
       "id": "FoodSicknessRecovery",
-      "name": "Food Poisoning Antibodies"
+      "name": "Food Poisoning Antibodies",
+      "desc": "This Duplicant recently recovered from Food Poisoning and is temporarily immune to the Disease"
     },
     {
       "id": "BonusOxygen",
-      "name": "Fresh Air"
+      "name": "Fresh Air",
+      "desc": "This Duplicant breathed in some fresh air and is feeling refreshed"
     },
     {
       "id": "WarmTouch",
-      "name": "Frost Resistant"
+      "name": "Frost Resistant",
+      "desc": "This Duplicant recently visited a warming station, sauna, or hot tub\n\nThey are impervious to Chilly Surroundings and Soggy Feet as a result"
     },
     {
       "id": "WarmTouchFood",
       "name": "Frost Resistant: Spicy Diet",
-      "desc": "Eating this provides temporary immunity to Chilly Surroundings and Soggy Feet"
+      "desc": "This Duplicant ate spicy food and feels so warm inside that they don't even notice the cold right now"
     },
     {
       "id": "FullBladder",
-      "name": "Full Bladder"
+      "name": "Full Bladder",
+      "desc": "This Duplicant's Bladder is full"
     },
     {
       "id": "TelephoneChat",
-      "name": "Full of Gossip"
+      "name": "Full of Gossip",
+      "desc": "This Duplicant chatted on the phone with at least one other Duplicant\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "NoFunAllowed",
-      "name": "Fun Interrupted"
+      "name": "Fun Interrupted",
+      "desc": "This Duplicant is upset a party was rejected"
     },
     {
       "id": "Fussy",
-      "name": "Fussy"
+      "name": "Fussy",
+      "desc": "This Duplicant is hard to please"
     },
     {
       "id": "ArcadePlaying",
-      "name": "Gaming"
+      "name": "Gaming",
+      "desc": "This Duplicant is playing a video game\n\nIt looks like fun!"
     },
     {
       "id": "BonusDream1",
-      "name": "Good Dream"
+      "name": "Good Dream",
+      "desc": "This Duplicant had a good dream and is feeling psyched!"
     },
     {
       "id": "Edible1",
-      "name": "Good Meal"
+      "name": "Good Meal",
+      "desc": "The food this Duplicant last ate was Good\n\nThey thought it was pretty good!"
     },
     {
       "id": "BonusDream3",
-      "name": "Great Dream"
+      "name": "Great Dream",
+      "desc": "This Duplicant had a great dream last night and periodically remembers another great moment they previously forgot"
     },
     {
       "id": "RoomGreatHall",
-      "name": "Great Hall"
+      "name": "Great Hall",
+      "desc": "This Duplicant's most recent meal was eaten in a fancy Great Hall"
     },
     {
       "id": "Edible2",
-      "name": "Great Meal"
+      "name": "Great Meal",
+      "desc": "The food this Duplicant last ate was Great\n\nThey thought it was pretty good!"
     },
     {
       "id": "BonusToilet2",
-      "name": "Greater Comforts"
+      "name": "Greater Comforts",
+      "desc": "This Duplicant used a Outhouseand liked how comfortable it felt"
     },
     {
       "id": "NoLubricationMajor",
-      "name": "Grinding Gears"
+      "name": "Grinding Gears",
+      "desc": "This Duplicant's out of Gear Oil and cannot function properly\n\nThey need to find Gear Balm or visit a Lubrication Station as soon as possible"
     },
     {
       "id": "NoLubricationMinor",
-      "name": "Grinding Gears (Reduced)"
+      "name": "Grinding Gears (Reduced)",
+      "desc": "This Duplicant's out of Gear Oil and cannot function properly\n\nThey need to find Gear Balm or visit a Lubrication Station as soon as possible"
     },
     {
       "id": "EdibleMinus3",
-      "name": "Grisly Meal"
+      "name": "Grisly Meal",
+      "desc": "The food this Duplicant last ate was Grisly\n\nThey hope their next meal will be better"
     },
     {
       "id": "GunkSick",
-      "name": "Gunk Extraction Required"
+      "name": "Gunk Extraction Required",
+      "desc": "This Duplicant needs to visit a Gunk Extractor as soon as possible\n\nThey will use a toilet as a last resort"
     },
     {
       "id": "GunkHungover",
-      "name": "Gunk Mouth"
+      "name": "Gunk Mouth",
+      "desc": "This Duplicant recently expelled built-up Gunk and can still taste it"
     },
     {
       "id": "RefreshingTouch",
-      "name": "Heat Resistant"
+      "name": "Heat Resistant",
+      "desc": "This Duplicant recently visited a cooling station and is impervious to Toasty Surroundings as a result"
     },
     {
       "id": "BonusHitTheBooks",
-      "name": "Hit the Books"
+      "name": "Hit the Books",
+      "desc": "This Duplicant did some research and is feeling smarter"
     },
     {
       "id": "HoldingBreath",
@@ -1320,293 +1383,363 @@
     },
     {
       "id": "hot",
-      "name": "Hot"
+      "name": "Hot",
+      "desc": "This Duplicant is uncomfortably warm"
     },
     {
       "id": "BonusDigging1",
-      "name": "Hot Diggity!"
+      "name": "Hot Diggity!",
+      "desc": "This Duplicant did a lot of excavating and is really digging digging"
     },
     {
       "id": "HotStuff",
       "name": "Hot Stuff",
-      "desc": "Duplicants find this spicy meal quite invigorating"
+      "desc": "This Duplicant had an extremely spicy meal and is both exhilarated and a little Stressed"
     },
     {
       "id": "HotTub",
-      "name": "Hot Tubbed"
+      "name": "Hot Tubbed",
+      "desc": "This Duplicant recently unwound in a Hot Tub\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "Hugged",
-      "name": "Hugged"
+      "name": "Hugged",
+      "desc": "This Duplicant recently received a hug from a friendly critter\n\nIt was so fluffy!"
     },
     {
       "id": "Hungry",
-      "name": "Hungry"
+      "name": "Hungry",
+      "desc": "This Duplicant is ready for lunch"
     },
     {
       "id": "SawRoboDancer",
-      "name": "Hyped"
+      "name": "Hyped",
+      "desc": "A Flash Mobber's dance moves wowed this Duplicant\n\nThis Duplicant feels amped up now!"
     },
     {
       "id": "Medicine_IntermediateBooster",
-      "name": "Immuno Booster"
+      "name": "Immuno Booster",
+      "desc": "Significantly reduces the chance of becoming sick."
     },
     {
       "id": "Binge_Eating",
-      "name": "Insatiable Hunger"
+      "name": "Insatiable Hunger",
+      "desc": "This Duplicant is stuffing their face as a result of Stress"
     },
     {
       "id": "Inspired",
-      "name": "Inspired"
+      "name": "Inspired",
+      "desc": "This Duplicant has had a creative vision!"
     },
     {
       "id": "BonusResearch",
-      "name": "Inspired Learner"
+      "name": "Inspired Learner",
+      "desc": "This Duplicant is looking forward to some learning"
     },
     {
       "id": "Sunlight_Burning",
-      "name": "Intensely Bright"
+      "name": "Intensely Bright",
+      "desc": "The bright Light is significantly improving this Duplicant's mood, but prolonged exposure may result in burning"
     },
     {
       "id": "Medicine_IntermediateRadPill",
-      "name": "Intermediate Rad Pill"
+      "name": "Intermediate Rad Pill",
+      "desc": "Increases a Duplicant's natural radiation absorption rate."
     },
     {
       "id": "Decor2",
-      "name": "Last Cycle's Decor: Average"
+      "name": "Last Cycle's Decor: Average",
+      "desc": "This Duplicant thought the overall Decor yesterday was pretty alright"
     },
     {
       "id": "Decor4",
-      "name": "Last Cycle's Decor: Charming"
+      "name": "Last Cycle's Decor: Charming",
+      "desc": "This Duplicant thought the overall Decor yesterday was downright charming!"
     },
     {
       "id": "Decor5",
-      "name": "Last Cycle's Decor: Gorgeous"
+      "name": "Last Cycle's Decor: Gorgeous",
+      "desc": "This Duplicant thought the overall Decor yesterday was fantastic\n\nThey love what I've done with the place!"
     },
     {
       "id": "Decor1",
-      "name": "Last Cycle's Decor: Mediocre"
+      "name": "Last Cycle's Decor: Mediocre",
+      "desc": "This Duplicant had no strong opinions about the colony's Decor yesterday"
     },
     {
       "id": "Decor3",
-      "name": "Last Cycle's Decor: Nice"
+      "name": "Last Cycle's Decor: Nice",
+      "desc": "This Duplicant thought the overall Decor yesterday was quite nice!"
     },
     {
       "id": "Decor0",
-      "name": "Last Cycle's Decor: Poor"
+      "name": "Last Cycle's Decor: Poor",
+      "desc": "This Duplicant thought the overall Decor yesterday was quite poor"
     },
     {
       "id": "DecorMinus1",
-      "name": "Last Cycle's Decor: Ugly"
+      "name": "Last Cycle's Decor: Ugly",
+      "desc": "This Duplicant thought the overall Decor yesterday was downright depressing"
     },
     {
       "id": "RoomLatrine",
-      "name": "Latrine"
+      "name": "Latrine",
+      "desc": "This Duplicant used an Outhouse in a Latrine"
     },
     {
       "id": "TelephoneBabble",
-      "name": "Less Anxious"
+      "name": "Less Anxious",
+      "desc": "This Duplicant got some things off their chest by talking to themselves on the phone\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "LightWounds",
-      "name": "Light Wounds"
+      "name": "Light Wounds",
+      "desc": "This Duplicant sustained injuries that are a bit uncomfortable"
     },
     {
       "id": "LightWoundsCritter",
-      "name": "Light Wounds"
+      "name": "Light Wounds",
+      "desc": "This Critter sustained injuries that are a bit uncomfortable"
     },
     {
       "id": "BionicWaterStress",
-      "name": "Liquid Exposure"
+      "name": "Liquid Exposure",
+      "desc": "This Duplicant's bionic parts are currently in contact with incompatible Liquids\n\nProlonged exposure could have serious Stress consequences"
     },
     {
       "id": "BonusLitWorkspace",
-      "name": "Lit"
+      "name": "Lit",
+      "desc": "This Duplicant was in a well-lit environment and is feeling lit"
     },
     {
       "id": "LowOxygen",
-      "name": "Low Oxygen"
+      "name": "Low Oxygen",
+      "desc": "The air is thin in this area"
     },
     {
       "id": "BonusToilet4",
-      "name": "Luxurious"
+      "name": "Luxurious",
+      "desc": "This Duplicant feels endless luxury from the Private Bathroom"
     },
     {
       "id": "LuxuryBarracksStamina",
-      "name": "Luxury Barracks"
+      "name": "Luxury Barracks",
+      "desc": "This Duplicant shares luxurious sleeping quarters with others"
     },
     {
       "id": "RoomBedroom",
-      "name": "Luxury Barracks"
+      "name": "Luxury Barracks",
+      "desc": "This Duplicant slept in a Luxury Barracks last night and feels extra refreshed"
     },
     {
       "id": "MajorIrritation",
-      "name": "Major Eye Irritation"
+      "name": "Major Eye Irritation",
+      "desc": "Woah, something really messed up this Duplicant's eyes!\n\nCaused by exposure to a harsh liquid or gas"
     },
     {
       "id": "BionicRadiationExposureMajor",
-      "name": "Major Radiation Sickness"
+      "name": "Major Radiation Sickness",
+      "desc": "Significant Radiation exposure has left this Duplicant totally exhausted"
     },
     {
       "id": "RadiationExposureMajor",
-      "name": "Major Radiation Sickness"
+      "name": "Major Radiation Sickness",
+      "desc": "Significant Radiation exposure has left this Duplicant totally exhausted"
     },
     {
       "id": "ExpellingGunk",
-      "name": "Making a mess"
+      "name": "Making a mess",
+      "desc": "This Duplicant just couldn't hold it all in anymore"
     },
     {
       "id": "StressfulyEmptyingBladder",
-      "name": "Making a mess"
+      "name": "Making a mess",
+      "desc": "This Duplicant had no choice but to empty their Bladder"
     },
     {
       "id": "MegaBrainTankBonus",
-      "name": "Maximum Aptitude"
+      "name": "Maximum Aptitude",
+      "desc": "This Duplicant is smarter and stronger than usual thanks to the Somnium Synthesizer"
     },
     {
       "id": "RoomMessHall",
-      "name": "Mess Hall"
+      "name": "Mess Hall",
+      "desc": "This Duplicant's most recent meal was eaten in a Mess Hall"
     },
     {
       "id": "MinorIrritation",
-      "name": "Minor Eye Irritation"
+      "name": "Minor Eye Irritation",
+      "desc": "A gas or liquid made this Duplicant's eyes sting a little"
     },
     {
       "id": "BionicRadiationExposureMinor",
-      "name": "Minor Radiation Sickness"
+      "name": "Minor Radiation Sickness",
+      "desc": "A bit of Radiation exposure has made this Duplicant feel sluggish"
     },
     {
       "id": "RadiationExposureMinor",
-      "name": "Minor Radiation Sickness"
+      "name": "Minor Radiation Sickness",
+      "desc": "A bit of Radiation exposure has made this Duplicant feel sluggish"
     },
     {
       "id": "ModerateWounds",
-      "name": "Moderate Wounds"
+      "name": "Moderate Wounds",
+      "desc": "This Duplicant sustained injuries that are affecting their ability to work"
     },
     {
       "id": "ModerateWoundsCritter",
-      "name": "Moderate Wounds"
+      "name": "Moderate Wounds",
+      "desc": "This Critter sustained injuries that are really affecting their health"
     },
     {
       "id": "BotMopping",
-      "name": "Mopping"
+      "name": "Mopping",
+      "desc": "This lil bot is clearing liquids from the ground"
     },
     {
       "id": "SuddenMoraleHelper",
-      "name": "Morale Upgrade Helper"
+      "name": "Morale Upgrade Helper",
+      "desc": "This Duplicant will receive a temporary Morale bonus to buffer the new Morale system introduction"
     },
     {
       "id": "CryoFriend",
-      "name": "Motivated By Friend"
+      "name": "Motivated By Friend",
+      "desc": "This Duplicant feels motivated after meeting a long lost friend"
     },
     {
       "id": "Mourning",
-      "name": "Mourning"
+      "name": "Mourning",
+      "desc": "This Duplicant is grieving the loss of a friend"
     },
     {
       "id": "NarcolepticSleep",
-      "name": "Narcoleptic Nap"
+      "name": "Narcoleptic Nap",
+      "desc": "This Duplicant just needs to rest their eyes for a second"
     },
     {
       "id": "RoomNatureReserve",
-      "name": "Nature Reserve"
+      "name": "Nature Reserve",
+      "desc": "This Duplicant recently passed through a splendid Nature Reserve\n\nWow, nature sure is neat!"
     },
     {
       "id": "NearDeathExperience",
-      "name": "Near-Death Experience"
+      "name": "Near-Death Experience",
+      "desc": "This Duplicant recently recovered from being incapacitated\n\nIt was deeply unsettling"
     },
     {
       "id": "NewCrewArrival",
-      "name": "New Friend"
+      "name": "New Friend",
+      "desc": "This Duplicant is happy to see a new face in the colony"
     },
     {
       "id": "AnewHope",
-      "name": "New Hope"
+      "name": "New Hope",
+      "desc": "This Duplicant feels pretty optimistic about their new home"
     },
     {
       "id": "Nightmares",
-      "name": "Nightmares"
+      "name": "Nightmares",
+      "desc": "This Duplicant was visited by something in the night"
     },
     {
       "id": "NoOxygen",
-      "name": "No Oxygen"
+      "name": "No Oxygen",
+      "desc": "There is no breathable air in this area"
     },
     {
       "id": "SleepClinic",
-      "name": "Nodding Off"
+      "name": "Nodding Off",
+      "desc": "This Duplicant is losing Stamina because of their Pajamas"
     },
     {
       "id": "BonusDoor",
-      "name": "Open and Shut"
+      "name": "Open and Shut",
+      "desc": "This Duplicant closed a door and appreciates the privacy"
     },
     {
       "id": "roomPark",
-      "name": "Park"
+      "name": "Park",
+      "desc": "This Duplicant recently passed through a Park\n\nWow, nature sure is neat!"
     },
     {
       "id": "RecentlyPartied",
-      "name": "Partied Hard"
+      "name": "Partied Hard",
+      "desc": "This Duplicant recently attended a great party!"
     },
     {
       "id": "BeachChairUnlit",
-      "name": "Passably Relaxed"
+      "name": "Passably Relaxed",
+      "desc": "This Duplicant just had a mediocre beach experience\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "PeopleTooCloseWhileSleeping",
-      "name": "Personal Bubble Burst"
+      "name": "Personal Bubble Burst",
+      "desc": "This Duplicant had to sleep too close to others and it was awkward for them"
     },
     {
       "id": "PlayedArcade",
-      "name": "Played Video Games"
+      "name": "Played Video Games",
+      "desc": "This Duplicant recently played video games and is feeling like a champ"
     },
     {
       "id": "GoodConversation",
-      "name": "Pleasant Chitchat"
+      "name": "Pleasant Chitchat",
+      "desc": "This Duplicant recently had a chance to chat with a friend"
     },
     {
       "id": "EdibleMinus1",
-      "name": "Poor Meal"
+      "name": "Poor Meal",
+      "desc": "The food this Duplicant last ate was Poor\n\nThey hope their next meal will be a little better"
     },
     {
       "id": "PoppedEarDrums",
-      "name": "Popped Eardrums"
+      "name": "Popped Eardrums",
+      "desc": "This Duplicant was exposed to an over-pressurized area that popped their eardrums"
     },
     {
       "id": "BionicOffline",
-      "name": "Powerless"
+      "name": "Powerless",
+      "desc": "This Duplicant is non-functional!\n\nDeliver a charged Power Bank and reboot their systems to revive them"
     },
     {
       "id": "BedroomStamina",
-      "name": "Private Bedroom"
+      "name": "Private Bedroom",
+      "desc": "This lucky Duplicant has their own private bedroom"
     },
     {
       "id": "RoomPrivateBedroom",
-      "name": "Private Bedroom"
+      "name": "Private Bedroom",
+      "desc": "This Duplicant slept in a Private Bedroom last night and feels super refreshed"
     },
     {
       "id": "SeafoodRadiationResistance",
       "name": "Radiation Resistant: Aquatic Diet",
-      "desc": "Eating this improves Radiation resistance"
+      "desc": "This Duplicant ate sea-grown foods, which boost Radiation resistance"
     },
     {
       "id": "BonusDream2",
-      "name": "Really Good Dream"
+      "name": "Really Good Dream",
+      "desc": "This Duplicant had a really good dream and is full of possibilities!"
     },
     {
       "id": "StressReduction",
-      "name": "Receiving Massage"
+      "name": "Receiving Massage",
+      "desc": "This Duplicant's Stress is just melting away"
     },
     {
       "id": "MedicalCotDoctored",
-      "name": "Receiving treatment"
+      "name": "Receiving treatment",
+      "desc": "This Duplicant is receiving treatment for their physical injuries"
     },
     {
       "id": "WasAttacked",
-      "name": "Recently assailed"
+      "name": "Recently assailed",
+      "desc": "This Duplicant is stressed out after having been attacked"
     },
     {
       "id": "Danced",
-      "name": "Recently Danced"
+      "name": "Recently Danced",
+      "desc": "This Duplicant had a chance to cut loose!\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "RecoveringBreath",
@@ -1614,15 +1747,18 @@
     },
     {
       "id": "RedAlert",
-      "name": "Red Alert!"
+      "name": "Red Alert!",
+      "desc": "The Red Alert is stressing this Duplicant out"
     },
     {
       "id": "HotTubRelaxing",
-      "name": "Relaxing"
+      "name": "Relaxing",
+      "desc": "This Duplicant is unwinding in a hot tub\n\nThey sure look relaxed"
     },
     {
       "id": "SaunaRelaxing",
-      "name": "Relaxing"
+      "name": "Relaxing",
+      "desc": "This Duplicant is relaxing in a sauna"
     },
     {
       "id": "Resting",
@@ -1630,7 +1766,8 @@
     },
     {
       "id": "Restless",
-      "name": "Restless"
+      "name": "Restless",
+      "desc": "This Duplicant went a few minutes without working and is now completely awash with guilt"
     },
     {
       "id": "Rotting",
@@ -1638,185 +1775,228 @@
     },
     {
       "id": "DoctoredOffCotEffect",
-      "name": "Runaway Patient"
+      "name": "Runaway Patient",
+      "desc": "Tsk tsk!\nThis Duplicant cannot receive treatment while out of their medical bed!"
     },
     {
       "id": "MessTableSalt",
-      "name": "Salted Food"
+      "name": "Salted Food",
+      "desc": "This Duplicant had the luxury of using Table Salt with their last meal at a Mess Table"
     },
     {
       "id": "Greeting",
-      "name": "Saw Friend"
+      "name": "Saw Friend",
+      "desc": "This Duplicant recently saw a friend in the halls and got to say \"hi\"\n\nIt wasn't even awkward!"
     },
     {
       "id": "HeardJoySinger",
-      "name": "Serenaded"
+      "name": "Serenaded",
+      "desc": "A Yodeler's singing thrilled this Duplicant\n\nThis Duplicant works at a higher tempo now!"
     },
     {
       "id": "SevereWounds",
-      "name": "Severe Wounds"
+      "name": "Severe Wounds",
+      "desc": "This Duplicant sustained serious injuries that are impacting their work and well-being"
     },
     {
       "id": "SevereWoundsCritter",
-      "name": "Severe Wounds"
+      "name": "Severe Wounds",
+      "desc": "This Critter sustained serious injuries that could prove life-threatening"
     },
     {
       "id": "StressShocker",
-      "name": "Shocking Temper"
+      "name": "Shocking Temper",
+      "desc": "This Duplicant is short-circuiting as a result of Stress"
     },
     {
       "id": "Showered",
-      "name": "Showered"
+      "name": "Showered",
+      "desc": "This Duplicant recently had a shower and feels squeaky clean!"
     },
     {
       "id": "sleep",
-      "name": "Sleeping"
+      "name": "Sleeping",
+      "desc": "This Duplicant is recovering Stamina"
     },
     {
       "id": "LuxuryBedStamina",
-      "name": "Sleeping in a comfy bed"
+      "name": "Sleeping in a comfy bed",
+      "desc": "This Duplicant loves their snuggly bed"
     },
     {
       "id": "BedStamina",
-      "name": "Sleeping in a cot"
+      "name": "Sleeping in a cot",
+      "desc": "This Duplicant's sleeping arrangements are adequate"
     },
     {
       "id": "LadderBedStamina",
-      "name": "Sleeping in a ladder bed"
+      "name": "Sleeping in a ladder bed",
+      "desc": "This Duplicant's sleeping arrangements are adequate"
     },
     {
       "id": "FloorSleep",
-      "name": "Sleeping On Floor"
+      "name": "Sleeping On Floor",
+      "desc": "This Duplicant is uncomfortably recovering Stamina"
     },
     {
       "id": "Sleepy",
-      "name": "Sleepy"
+      "name": "Sleepy",
+      "desc": "This Duplicant is getting tired"
     },
     {
       "id": "SlimeSicknessRecovery",
-      "name": "Slimelung Antibodies"
+      "name": "Slimelung Antibodies",
+      "desc": "This Duplicant recently recovered from Slimelung and is temporarily immune to the Disease"
     },
     {
       "id": "Slipped",
-      "name": "Slipped"
+      "name": "Slipped",
+      "desc": "This Duplicant recently lost their footing on a slippery floor and feels embarrassed"
     },
     {
       "id": "BonusToilet1",
-      "name": "Small Comforts"
+      "name": "Small Comforts",
+      "desc": "This Duplicant visited the {building} and appreciated the small comforts"
     },
     {
       "id": "BonusToilet3",
-      "name": "Small Luxury"
+      "name": "Small Luxury",
+      "desc": "This Duplicant visited a Latrine and feels they could get used to this luxury"
     },
     {
       "id": "SmelledFlowers",
-      "name": "Smelled Flowers"
+      "name": "Smelled Flowers",
+      "desc": "A pleasant Floral Scent wafted over this Duplicant and brightened their day"
     },
     {
       "id": "SmelledStinky",
-      "name": "Smelled Stinky"
+      "name": "Smelled Stinky",
+      "desc": "This Duplicant got a whiff of a certain somebody"
     },
     {
       "id": "TelephoneLongDistance",
-      "name": "Sociable"
+      "name": "Sociable",
+      "desc": "This Duplicant is feeling sociable after chatting on the phone with someone across space\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "Socialized",
-      "name": "Socialized"
+      "name": "Socialized",
+      "desc": "This Duplicant had some free time to hang out with buddies"
     },
     {
       "id": "SodaFountain",
-      "name": "Soda Filled"
+      "name": "Soda Filled",
+      "desc": "This Duplicant just enjoyed a bubbly beverage\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "WetFeet",
-      "name": "Soggy Feet"
+      "name": "Soggy Feet",
+      "desc": "This Duplicant recently stepped in Liquid"
     },
     {
       "id": "SoiledSuit",
-      "name": "Soiled Suit"
+      "name": "Soiled Suit",
+      "desc": "This Duplicant's suit needs to be emptied of waste\n\n(Preferably soon)"
     },
     {
       "id": "BonusStorage",
-      "name": "Something in Store"
+      "name": "Something in Store",
+      "desc": "This Duplicant stored something in a Storage Bin and is feeling organized"
     },
     {
       "id": "SoakingWet",
-      "name": "Sopping Wet"
+      "name": "Sopping Wet",
+      "desc": "This Duplicant was recently submerged in Liquid"
     },
     {
       "id": "SoreBack",
-      "name": "Sore Back"
+      "name": "Sore Back",
+      "desc": "This Duplicant feels achy from sleeping on the floor last night and would like a bed"
     },
     {
       "id": "GoodEats",
       "name": "Soul Food",
-      "desc": "Duplicants find this home cooked meal is emotionally comforting"
+      "desc": "This Duplicant had a yummy home cooked meal and is totally stuffed"
     },
     {
       "id": "SawSparkleStreaker",
-      "name": "Sparkle Flattered"
+      "name": "Sparkle Flattered",
+      "desc": "A Sparkle Streaker's sparkles dazzled this Duplicant\n\nThis Duplicant has a spring in their step now!"
     },
     {
       "id": "IsSparkleStreaker",
-      "name": "Sparkle Streaking"
+      "name": "Sparkle Streaking",
+      "desc": "This Duplicant is currently Sparkle Streaking!\n\nBaa-ling!"
     },
     {
       "id": "Edible0",
-      "name": "Standard Meal"
+      "name": "Standard Meal",
+      "desc": "The food this Duplicant last ate was Average\n\nThey thought it was sort of okay"
     },
     {
       "id": "StarryEyed",
-      "name": "Starry Eyed"
+      "name": "Starry Eyed",
+      "desc": "This Duplicant loves being in space!"
     },
     {
       "id": "Starving",
-      "name": "Starving"
+      "name": "Starving",
+      "desc": "This Duplicant needs to eat something, soon"
     },
     {
       "id": "Sauna",
-      "name": "Steam Powered"
+      "name": "Steam Powered",
+      "desc": "This Duplicant just had a relaxing time in a sauna\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "MechanicalSurfboard",
-      "name": "Stoked"
+      "name": "Stoked",
+      "desc": "This Duplicant had a rad experience on a surfboard.\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "BeachChairLit",
-      "name": "Sun Kissed"
+      "name": "Sun Kissed",
+      "desc": "This Duplicant had an amazing experience at the Beach\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "Edible3",
-      "name": "Superb Meal"
+      "name": "Superb Meal",
+      "desc": "The food this Duplicant last ate was Superb\n\nThey thought it was really good!"
     },
     {
       "id": "MechanicalSurfing",
-      "name": "Surfin'"
+      "name": "Surfin'",
+      "desc": "This Duplicant is surfin' some artificial waves!"
     },
     {
       "id": "BotSweeping",
-      "name": "Sweeping"
+      "name": "Sweeping",
+      "desc": "This lil bot is picking up debris from the floor"
     },
     {
       "id": "BonusTalker",
-      "name": "Talker"
+      "name": "Talker",
+      "desc": "This Duplicant engaged in small talk with a coworker and is feeling connected"
     },
     {
       "id": "EdibleMinus2",
-      "name": "Terrible Meal"
+      "name": "Terrible Meal",
+      "desc": "The food this Duplicant last ate was Terrible\n\nThey hope their next meal will be better"
     },
     {
       "id": "Thirsty",
       "name": "Thirsty",
-      "desc": "Eating salty food reduces Stamina"
+      "desc": "This Duplicant ate a very salty snack and is feeling parched\n\nVisiting a Water Cooler will restore their Stamina"
     },
     {
       "id": "SpaceBuzz",
-      "name": "Thrilling Flight"
+      "name": "Thrilling Flight",
+      "desc": "This Duplicant is getting a real adrenaline rush from being in space!"
     },
     {
       "id": "CarpetFeet",
-      "name": "Tickled Tootsies"
+      "name": "Tickled Tootsies",
+      "desc": "Walking on carpet has made this Duplicant's day a little more luxurious"
     },
     {
       "id": "WarmAir",
@@ -1824,79 +2004,3428 @@
     },
     {
       "id": "BeachChairRelaxing",
-      "name": "Totally Chill"
+      "name": "Totally Chill",
+      "desc": "This Duplicant is totally chillin' in a beach chair"
     },
     {
       "id": "MedicalCot",
-      "name": "Triage Cot Rest"
+      "name": "Triage Cot Rest",
+      "desc": "Bedrest is improving this Duplicant's physical recovery time"
     },
     {
       "id": "Underwater",
-      "name": "Underwater"
+      "name": "Underwater",
+      "desc": "This Duplicant's movement is slowed"
     },
     {
       "id": "BadSleepAfraidOfDark",
-      "name": "Unrested: Afraid of Dark"
+      "name": "Unrested: Afraid of Dark",
+      "desc": "This Duplicant didn't get much sleep because they were too anxious about the lack of Light to relax"
     },
     {
       "id": "BadSleepMovement",
-      "name": "Unrested: Bed Jostling"
+      "name": "Unrested: Bed Jostling",
+      "desc": "This Duplicant was woken up when a friend climbed on their ladder bed"
     },
     {
       "id": "BadSleepCold",
-      "name": "Unrested: Cold Bedroom"
+      "name": "Unrested: Cold Bedroom",
+      "desc": "This Duplicant was shivering instead of sleeping"
     },
     {
       "id": "BadSleep",
-      "name": "Unrested: Too Bright"
+      "name": "Unrested: Too Bright",
+      "desc": "This Duplicant tossed and turned all night because a Light was left on where they were trying to sleep"
     },
     {
       "id": "Vertigo",
-      "name": "Vertigo"
+      "name": "Vertigo",
+      "desc": "This Duplicant had to climb a tall ladder that left them dizzy and unsettled"
     },
     {
       "id": "SpaceTourist",
-      "name": "Visited Space"
+      "name": "Visited Space",
+      "desc": "This Duplicant went on a trip to space and saw the wonders of the universe"
     },
     {
       "id": "Medicine_BasicBooster",
-      "name": "Vitamin Chews"
+      "name": "Vitamin Chews",
+      "desc": "Minorly reduces the chance of becoming sick."
     },
     {
       "id": "Vomiting",
-      "name": "Vomiting"
+      "name": "Vomiting",
+      "desc": "Better out than in, as they say"
     },
     {
       "id": "WarmingUp",
-      "name": "Warming Up"
+      "name": "Warming Up",
+      "desc": "This Duplicant is trying to warm back up"
     },
     {
       "id": "roomBathroom",
-      "name": "Washroom"
+      "name": "Washroom",
+      "desc": "This Duplicant used a Lavatory in a Washroom"
     },
     {
       "id": "WellFed",
-      "name": "Well fed"
+      "name": "Well fed",
+      "desc": "This Duplicant feels satisfied after having a big meal"
     },
     {
       "id": "VerticalWindTunnel",
-      "name": "Wind Swept"
+      "name": "Wind Swept",
+      "desc": "This Duplicant recently had an exhilarating wind tunnel experience\n\nLeisure activities increase Duplicants' Morale"
     },
     {
       "id": "working",
-      "name": "Working"
+      "name": "Working",
+      "desc": "This Duplicant is working up a sweat"
     },
     {
       "id": "IsJoySinger",
-      "name": "Yodeling"
+      "name": "Yodeling",
+      "desc": "This Duplicant is currently Yodeling!\n\nHow melodious!"
     },
     {
       "id": "ContaminatedLungs",
-      "name": "Yucky Lungs"
+      "name": "Yucky Lungs",
+      "desc": "This Duplicant got a big nasty lungful of Polluted Oxygen"
     },
     {
       "id": "ZombieSicknessRecovery",
-      "name": "Zombie Spores Antibodies"
+      "name": "Zombie Spores Antibodies",
+      "desc": "This Duplicant recently recovered from Zombie Spores and is temporarily immune to the Disease"
+    }
+  ],
+  "effectDetails": [
+    {
+      "id": "AnewHope",
+      "bad": false,
+      "duration": 3,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "QualityOfLife",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "ArcadePlaying",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -15,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "AteFrozenFood",
+      "bad": true,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": -2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BadSleep",
+      "bad": true,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "ImmuneLevelDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BadSleepAfraidOfDark",
+      "bad": true,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "ImmuneLevelDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BadSleepCold",
+      "bad": true,
+      "duration": 0.25,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "ImmuneLevelDelta",
+          "value": -5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BadSleepMovement",
+      "bad": true,
+      "duration": 0.25,
+      "modifiers": [
+        {
+          "attribute": "ImmuneLevelDelta",
+          "value": -5,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": 5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BarracksStamina",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 100,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BeachChairLit",
+      "bad": false,
+      "duration": 11.95,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BeachChairRelaxing",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 50,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": -15,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BeachChairUnlit",
+      "bad": false,
+      "duration": 11.95,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BedHealth",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "HitPointsDelta",
+          "value": 25,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BedroomStamina",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 200,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BedStamina",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 100,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BionicRadiationExposureExtreme",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -6,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BionicRadiationExposureMajor",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -4,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BionicRadiationExposureMinor",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusBuilder",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "Construction",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusDigging1",
+      "bad": false,
+      "duration": 5,
+      "modifiers": [
+        {
+          "attribute": "Digging",
+          "value": 10,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusDigging2",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusDoor",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "Machinery",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "GermResistance",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusDream1",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 50,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusDream2",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 50,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusDream3",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 50,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusDream4",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 50,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusGenerator",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusHitTheBooks",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "Learning",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusLitWorkspace",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "Machinery",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Construction",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusOxygen",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusResearch",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "Learning",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusStorage",
+      "bad": false,
+      "duration": 5,
+      "modifiers": [
+        {
+          "attribute": "Strength",
+          "value": 10,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusTalker",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -50,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusToilet1",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusToilet2",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusToilet3",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BonusToilet4",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BotMopping",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "InternalBatteryDelta",
+          "value": -10,
+          "units": "PerSecond",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "BotSweeping",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "InternalBatteryDelta",
+          "value": -10,
+          "units": "PerSecond",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Break1",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 0,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Break2",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Break3",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Break4",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Break5",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "CarpetFeet",
+      "bad": false,
+      "duration": 0.025,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -15,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Charging",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "InternalBatteryDelta",
+          "value": 240,
+          "units": "PerSecond",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Claustrophobic",
+      "bad": true,
+      "duration": 0.25,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "ColdAir",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StaminaDelta",
+          "value": -50,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "Athletics",
+          "value": -5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "CommunalDining",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "ContaminatedLungs",
+      "bad": true,
+      "duration": 0.2,
+      "modifiers": [
+        {
+          "attribute": "AirConsumptionRate",
+          "value": 0.03,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "CryFace",
+      "bad": true,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "Decor",
+          "value": -15,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "CryoFriend",
+      "bad": false,
+      "duration": 10,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "QualityOfLife",
+          "value": 6,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Danced",
+      "bad": false,
+      "duration": 3.95,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Dancing",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Darkness",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Decor0",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 0,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Decor1",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Decor2",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Decor3",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 6,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Decor4",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 9,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Decor5",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 12,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "DecorMinus1",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": -1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Diarrhea",
+      "bad": true,
+      "duration": 0.9,
+      "modifiers": [
+        {
+          "attribute": "ToiletEfficiency",
+          "value": -0.2,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "BladderDelta",
+          "value": 200,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "DoctoredOffCotEffect",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": [
+        {
+          "attribute": "DoctoredLevel",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "DoctoredOffRejuvenatorEffect",
+      "bad": false,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "DoctoredLevel",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "DuplicantGotMilk",
+      "bad": false,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -15,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "QualityOfLife",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Edible0",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Edible1",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Edible2",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 12,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Edible3",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 16,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "EdibleMinus1",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "EdibleMinus2",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 0,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "EdibleMinus3",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": -1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Espresso",
+      "bad": false,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Athletics",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "FarmTinker",
+      "bad": false,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "MaturityDelta",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": true
+        },
+        {
+          "attribute": "Maturity2Delta",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": true
+        }
+      ]
+    },
+    {
+      "id": "FloorSleep",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 900,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "FoodSicknessRecovery",
+      "bad": false,
+      "duration": 1.5,
+      "modifiers": []
+    },
+    {
+      "id": "FullBladder",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 30,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "GoodConversation",
+      "bad": false,
+      "duration": 0.1,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "GoodEats",
+      "bad": false,
+      "duration": 2,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -2,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": -15,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Greeting",
+      "bad": false,
+      "duration": 0.1,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "HasBalloon",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Art",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Learning",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Cooking",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Caring",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Botanist",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Ranching",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "HeardJoySinger",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Machinery",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Construction",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Strength",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "HistamineSuppression",
+      "bad": false,
+      "duration": 1.2,
+      "modifiers": []
+    },
+    {
+      "id": "HotStuff",
+      "bad": false,
+      "duration": 2,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Strength",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Sneezyness",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": 5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "HotTub",
+      "bad": false,
+      "duration": 7.95,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "HotTubRelaxing",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -15,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Hugged",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Hyperthermia",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 30,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Hypothermia",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 30,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "ImmuneSystemOverwhelmed",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "ImmuneLevelDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "IsJoySinger",
+      "bad": false,
+      "duration": 0.95,
+      "modifiers": [
+        {
+          "attribute": "Machinery",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Construction",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Strength",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "IsRoboDancer",
+      "bad": false,
+      "duration": 2,
+      "modifiers": [
+        {
+          "attribute": "Machinery",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "IsSparkleStreaker",
+      "bad": false,
+      "duration": 0.95,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Juicer",
+      "bad": false,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Strength",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "LadderBedStamina",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 100,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "LightWounds",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "LightWoundsCritter",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Loner",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Construction",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Digging",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Machinery",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Athletics",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Learning",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Cooking",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Caring",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Strength",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Art",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Botanist",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Ranching",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "SpaceNavigation",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "LowOxygen",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "LuxuryBarracksStamina",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 100,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "LuxuryBedStamina",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 200,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MachineTinker",
+      "bad": false,
+      "duration": 2,
+      "modifiers": [
+        {
+          "attribute": "MachinerySpeed",
+          "value": 0.1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MajorIrritation",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 15,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MechanicalSurfboard",
+      "bad": false,
+      "duration": 3.95,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MechanicalSurfing",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MedicalCot",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "HitPointsDelta",
+          "value": 50,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "BreathDelta",
+          "value": 1,
+          "units": "PerSecond",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MedicalCotDoctored",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": [
+        {
+          "attribute": "HitPointsDelta",
+          "value": 75,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "DoctoredLevel",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "BreathDelta",
+          "value": 1,
+          "units": "PerSecond",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Medicine_BasicBooster",
+      "bad": false,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "GermResistance",
+          "value": 0.5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Medicine_BasicRadPill",
+      "bad": false,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "RadiationRecovery",
+          "value": -100,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Medicine_GenericPill",
+      "bad": false,
+      "duration": 0.9,
+      "modifiers": [
+        {
+          "attribute": "DiseaseCureSpeed",
+          "value": 0.01,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Medicine_IntermediateBooster",
+      "bad": false,
+      "duration": 2,
+      "modifiers": [
+        {
+          "attribute": "GermResistance",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Medicine_IntermediateRadPill",
+      "bad": false,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "RadiationRecovery",
+          "value": -400,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Medicine_VitaminSupplement",
+      "bad": false,
+      "duration": 2,
+      "modifiers": [
+        {
+          "attribute": "ImmuneLevelDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MegaBrainTankRelax",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MegaBrainTankStress",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 80,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MentalBreak",
+      "bad": true,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MessCaviar",
+      "bad": false,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MessTableSalt",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "MinorIrritation",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "ModerateWounds",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -6,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "ModerateWoundsCritter",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -6,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Mourning",
+      "bad": true,
+      "duration": 3,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 20,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "NarcolepticSleep",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 400,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "NearDeathExperience",
+      "bad": true,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": 5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "NewCrewArrival",
+      "bad": false,
+      "duration": 3,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "NoFunAllowed",
+      "bad": true,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 25,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "NoiseMajor",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 20,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "Learning",
+          "value": -2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "NoiseMinor",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "Learning",
+          "value": -2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "NoisePeaceful",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "Learning",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "NoOxygen",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 20,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "PeacefulSleep",
+      "bad": false,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "ImmuneLevelDelta",
+          "value": 5,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "Learning",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "PeopleTooCloseWhileSleeping",
+      "bad": true,
+      "duration": 0.25,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "PlayedArcade",
+      "bad": false,
+      "duration": 3.95,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "PlayedSinglePlayerArcade",
+      "bad": false,
+      "duration": 3.95,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "PoppedEarDrums",
+      "bad": true,
+      "duration": 0.5,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 20,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "PostDiseaseRecovery",
+      "bad": false,
+      "duration": 1.5,
+      "modifiers": [
+        {
+          "attribute": "ImmuneLevelDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "PowerTinker",
+      "bad": false,
+      "duration": 3,
+      "modifiers": [
+        {
+          "attribute": "GeneratorOutput",
+          "value": 50,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RadiationExposureExtreme",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -6,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StaminaDelta",
+          "value": -75,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "ToiletEfficiency",
+          "value": -0.3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RadiationExposureMajor",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StaminaDelta",
+          "value": -50,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "ToiletEfficiency",
+          "value": -0.3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RadiationExposureMinor",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": -25,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "ToiletEfficiency",
+          "value": -0.3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RecentlyBeachChair",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RecentlyDanced",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RecentlyHotTub",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RecentlyMechanicalSurfboard",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RecentlyPartied",
+      "bad": false,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -15,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RecentlyPlayedArcade",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RecentlyPlayedSinglePlayerArcade",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RecentlyRecDrink",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RecentlySauna",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RecentlySawRoboDancer",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RecentlySocialized",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RecentlyTelephoned",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RecentlyVerticalWindTunnel",
+      "bad": false,
+      "duration": 0.5,
+      "modifiers": []
+    },
+    {
+      "id": "RedAlert",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 50,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Rejuvenator",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "DiseaseCureSpeed",
+          "value": 0.25,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": -15,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "BreathDelta",
+          "value": 1,
+          "units": "PerSecond",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RejuvenatorDoctored",
+      "bad": false,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "DiseaseCureSpeed",
+          "value": 0.5,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "DoctoredLevel",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": -25,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "BreathDelta",
+          "value": 1,
+          "units": "PerSecond",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RestfulSleep",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -30,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StaminaDelta",
+          "value": 1500,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Restless",
+      "bad": true,
+      "duration": 0.25,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RoomBanquetHall",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 6,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RoomBarracks",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RoomBathroom",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RoomBedroom",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RoomGreatHall",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RoomLatrine",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RoomMessHall",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RoomNatureReserve",
+      "bad": false,
+      "duration": 0.4,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 6,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RoomPark",
+      "bad": false,
+      "duration": 0.4,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "RoomPrivateBedroom",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Sauna",
+      "bad": false,
+      "duration": 3.95,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SaunaRelaxing",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SawRoboDancer",
+      "bad": false,
+      "duration": 2,
+      "modifiers": [
+        {
+          "attribute": "Machinery",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": -15,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SawSparkleStreaker",
+      "bad": false,
+      "duration": 0.95,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "ScoutBotCharging",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "InternalChemicalBatteryDelta",
+          "value": 1000,
+          "units": "PerSecond",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SeafoodRadiationResistance",
+      "bad": false,
+      "duration": 2,
+      "modifiers": [
+        {
+          "attribute": "RadiationResistance",
+          "value": 0.2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SevereWounds",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -9,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SevereWoundsCritter",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -9,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Showered",
+      "bad": false,
+      "duration": 0.9,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SinglePlayerArcadePlaying",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Sleep",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": 900,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SleepClinic",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -8,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StaminaDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SlimeSicknessRecovery",
+      "bad": false,
+      "duration": 2.5,
+      "modifiers": []
+    },
+    {
+      "id": "SmelledFlowers",
+      "bad": false,
+      "duration": 0.3,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SmelledPutridOdour",
+      "bad": true,
+      "duration": 0.05,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 0.02,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SmelledStinky",
+      "bad": true,
+      "duration": 0.03,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 0.01,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SoakingWet",
+      "bad": true,
+      "duration": 0.25,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StaminaDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Socialized",
+      "bad": false,
+      "duration": 1.1,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SodaFountain",
+      "bad": false,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Learning",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SoiledSuit",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 40,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SoreBack",
+      "bad": true,
+      "duration": 0.5,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SpaceBuzz",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SpaceTourist",
+      "bad": false,
+      "duration": 25,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 8,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Learning",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Machinery",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Cooking",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Construction",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Athletics",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Strength",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Caring",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Digging",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Art",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Botanist",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Ranching",
+          "value": 3,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "StaleFood",
+      "bad": true,
+      "duration": 0.5,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "StarryEyed",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 10,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SteppedInContaminatedWater",
+      "bad": true,
+      "duration": 0.25,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "StressfulyEmptyingBladder",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "BladderDelta",
+          "value": -7500,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": 50,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "SuddenMoraleHelper",
+      "bad": false,
+      "duration": 5,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 20,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Sunlight_Burning",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Sunlight_Pleasant",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "TelephoneBabble",
+      "bad": false,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 1,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "TelephoneChat",
+      "bad": false,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "TelephoneLongDistance",
+      "bad": false,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 4,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "TerribleSleep",
+      "bad": true,
+      "duration": 0.75,
+      "modifiers": [
+        {
+          "attribute": "ImmuneLevelDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "Learning",
+          "value": -2,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Athletics",
+          "value": -2,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "StressDelta",
+          "value": 20,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Thirsty",
+      "bad": false,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "StaminaDelta",
+          "value": -20,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "Athletics",
+          "value": -2,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Thriver",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Construction",
+          "value": 7,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Digging",
+          "value": 7,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Machinery",
+          "value": 7,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Athletics",
+          "value": 7,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Learning",
+          "value": 7,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Cooking",
+          "value": 7,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Caring",
+          "value": 7,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Strength",
+          "value": 7,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Art",
+          "value": 7,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Botanist",
+          "value": 7,
+          "units": "Flat",
+          "multiplier": false
+        },
+        {
+          "attribute": "Ranching",
+          "value": 7,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "UncomfortableFeet",
+      "bad": true,
+      "duration": 0.25,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "UnderWater",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "Athletics",
+          "value": -5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "UnfashionableClothing",
+      "bad": true,
+      "duration": 0.25,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "VerticalWindTunnel",
+      "bad": false,
+      "duration": 7.95,
+      "modifiers": [
+        {
+          "attribute": "QualityOfLife",
+          "value": 5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "VerticalWindTunnelFlying",
+      "bad": false,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -15,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Vertigo",
+      "bad": true,
+      "duration": 0.25,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "Vomiting",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 400,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "CaloriesDelta",
+          "value": -30000,
+          "units": "PerSecond",
+          "multiplier": false
+        },
+        {
+          "attribute": "ToxicityDelta",
+          "value": -35000,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "WailedAt",
+      "bad": true,
+      "duration": 0.5,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "WarmAir",
+      "bad": true,
+      "duration": 0,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 10,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StaminaDelta",
+          "value": -50,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "Athletics",
+          "value": -5,
+          "units": "Flat",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "WasAttacked",
+      "bad": true,
+      "duration": 0.5,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 15,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "WellFed",
+      "bad": false,
+      "duration": 1,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "WetFeet",
+      "bad": true,
+      "duration": 0.2,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": 5,
+          "units": "PerDay",
+          "multiplier": false
+        },
+        {
+          "attribute": "StaminaDelta",
+          "value": -10,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "WorkEncouraged",
+      "bad": false,
+      "duration": 0.1,
+      "modifiers": [
+        {
+          "attribute": "StressDelta",
+          "value": -5,
+          "units": "PerDay",
+          "multiplier": false
+        }
+      ]
+    },
+    {
+      "id": "ZombieSicknessRecovery",
+      "bad": false,
+      "duration": 3.5,
+      "modifiers": []
     }
   ],
   "personalities": [
