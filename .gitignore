@@ -29,3 +29,6 @@ dist-ssr
 
 # Fixtures downloaded by `vp run fixtures`
 test-data/fetched/
+
+# Oracle parser built by `vp run differential`
+.cache/
