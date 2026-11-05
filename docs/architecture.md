@@ -119,8 +119,8 @@ save(): Uint8Array
 | Layer      | What                                                                                                     | Where                              |
 | ---------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | Round trip | Header and decompressed body byte-equal after writing a parsed save back                                 | every fixture                      |
-| Fixtures   | Manifest parsing, tiers and checksum verification                                                        | `scripts/`                         |
 | Fuzz       | Corrupt or truncated saves end in a `ParseError`, never a hang or crash                                  | `apple-park`                       |
+| Fixtures   | Manifest parsing, tiers and checksum verification                                                        | `scripts/`                         |
 | Unit       | Edit models, e.g. geyser rolls and ranges                                                                | `apps/web/tests`, package `tests/` |
 | End to end | Load a fixture in Chromium → edit through the UI → download → re-parse → only the intended paths changed | `apps/web/e2e`                     |
 | Manual     | Load → edit → download → reload, in Chrome                                                               | before each PR                     |
@@ -164,10 +164,11 @@ The gate fails a phase whose time, divided by a calibration workload timed in th
 ## Deviations from the original plan
 
 - **Smaller stack.** No TanStack Router, Query, Table or Zustand, and no i18n library: plain React state and a worker call per view were enough.
-- **No component tests yet.** The round-trip test over every fixture and the differential test against konove's oni-save-parser (a clone-on-demand script, not a dev dependency, so the lockfile stays untouched) are the parser's safety net.
+- **No component tests yet.** The round-trip test over every fixture, the fuzz tests and the differential test against konove's oni-save-parser (a clone-on-demand script, not a dev dependency, so the lockfile stays untouched) are the parser's safety net; Playwright covers the editor end to end.
 - **No dump mod.** IDs come from string literals in `Assembly-CSharp.dll` instead of a mod that dumps the live `Db` registries.
 - **No typed behaviors.** Template data is decoded generically; only the extra data the editors need has codecs.
 - **Portraits are shown**, using react-oni-duplicant's sprites instead of committing any art.
 - **Newer minor versions open editable**, but downloading them needs the "allow unverified versions" preference.
+- **Geyser ranges are transcribed**, not generated: see `packages/game-data`.
 - **The bench gate is calibrated, not absolute.** It compares each phase against a per-platform committed baseline, scaled by a fixed memory-bound workload timed in the same run. It cannot catch a slowdown that also slows the calibration, and the save-time target is not met. See Performance.
 - **Geyser ranges are transcribed**, not generated: see `packages/game-data`.
