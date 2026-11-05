@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { FlaskConical, Lock } from 'lucide-react'
+import { cn } from 'cn'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -42,8 +43,11 @@ export function PageHeader({
   className?: string
 }) {
   const badge = status ? STATUS[status] : null
+  const hasSummary = summary !== undefined && summary.length > 0
   return (
-    <Card data-slot="page-header" className={className}>
+    // Without a summary the header is just the title bar: drop the panel's bottom padding so no
+    // empty strip shows under it.
+    <Card data-slot="page-header" className={cn(!hasSummary && 'pb-0', className)}>
       <CardHeader className="items-center">
         <CardTitle className="flex flex-wrap items-center gap-2">
           <h2 className="type-title-bar">{title}</h2>
@@ -58,10 +62,10 @@ export function PageHeader({
         )}
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      {summary && summary.length > 0 && (
+      {hasSummary && (
         <CardContent>
           <dl className="grid grid-cols-2 gap-2 @3xl/main:grid-cols-4">
-            {summary.slice(0, 4).map((stat) => (
+            {summary!.slice(0, 4).map((stat) => (
               <div key={stat.label} className="well flex flex-col gap-0.5 px-3 py-1.5">
                 <dt className="type-caption text-muted-foreground uppercase">{stat.label}</dt>
                 <dd className="type-h3 tabular-nums">{stat.value}</dd>
