@@ -37,13 +37,16 @@ import {
 } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
+import { findTraitInfo } from '@oni-duplicity/game-data'
 import { humanize, portraitParts } from '@/lib/format'
+import { heldConflicts } from '@/lib/traits'
 import type { AmountView, DuplicantEdit, DuplicantView, Named } from '@/worker/model'
 import { DuplicantAvatar, Hint, NumberField, SearchPicker } from '../common'
+import { TraitCategoryBadge, TraitPicker } from './TraitPicker'
 
 type EditFn = (change: DuplicantEdit) => void
 
-function Panel({
+export function Panel({
   title,
   description,
   action,
@@ -66,7 +69,7 @@ function Panel({
   )
 }
 
-function Nothing({ title, description }: { title: string; description: string }) {
+export function Nothing({ title, description }: { title: string; description: string }) {
   return (
     <Empty className="border border-dashed">
       <EmptyHeader>
@@ -91,16 +94,15 @@ export function TraitsTab({
   catalog: Named[]
   edit: EditFn
 }) {
+  const conflicts = heldConflicts(dupe, catalog)
   return (
     <Panel
       title="Traits"
-      description="Traits are applied when the game loads the save."
+      description="Traits are applied when the game loads the save. Traits the model or the save's DLC rule out are not offered, and clashing ones are blocked."
       action={
-        <SearchPicker
-          label="Add trait"
-          heading="Traits"
-          items={catalog}
-          exclude={dupe.traits.map((t) => t.id)}
+        <TraitPicker
+          subject={dupe}
+          catalog={catalog}
           onSelect={(traitId) => edit({ type: 'addTrait', traitId })}
         />
       }
@@ -110,11 +112,19 @@ export function TraitsTab({
       ) : (
         <ItemGroup className="grid gap-2 @3xl/main:grid-cols-2">
           {dupe.traits.map((trait) => (
-            <Item key={trait.id} variant="outline">
+            <Item key={trait.id} variant="outline" data-trait={trait.id}>
               <ItemContent>
-                <ItemTitle>{trait.name}</ItemTitle>
+                <ItemTitle>
+                  {trait.name}
+                  <TraitCategoryBadge category={findTraitInfo(trait.id)?.category} />
+                </ItemTitle>
                 {trait.desc && (
                   <ItemDescription className="whitespace-pre-line">{trait.desc}</ItemDescription>
+                )}
+                {conflicts.has(trait.id) && (
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    {conflicts.get(trait.id)} The save has it, so it is kept.
+                  </p>
                 )}
               </ItemContent>
               <ItemActions>
@@ -289,10 +299,11 @@ const AMOUNT_FORMATS: Record<string, AmountFormat> = {
   Temperature: { max: 100, unit: '°C', offset: -273.15, digits: 1 },
   RadiationBalance: { max: 1000, unit: 'rads' },
   Decor: { max: 200, unit: 'decor' },
+  // The bionic maximums come from the worker (`AmountView.max`); these are the game's base values.
   BionicOil: { max: 200, unit: 'kg', digits: 1 },
-  BionicGunk: { max: 200, unit: 'kg', digits: 1 },
-  BionicOxygenTank: { max: 200, unit: 'kg', digits: 1 },
-  BionicInternalBattery: { max: 1000, unit: 'kJ', scale: 1 / 1000, digits: 1 },
+  BionicGunk: { max: 80, unit: 'kg', digits: 1 },
+  BionicOxygenTank: { max: 240, unit: 'kg', digits: 1 },
+  BionicInternalBattery: { max: 480, unit: 'kJ', scale: 1 / 1000, digits: 1 },
   Age: { max: 100, unit: 'cycles', digits: 1 },
   Wildness: { max: 100, unit: '%' },
   Fertility: { max: 100, unit: '%' },
@@ -318,6 +329,7 @@ function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
   const scale = format.scale ?? 1
   const offset = format.offset ?? 0
   const shown = amount.value * scale + offset
+  const cap = amount.max === undefined ? format.max : amount.max * scale + offset
   const commit = (next: number) =>
     edit({ type: 'setAmount', amountId: amount.id, value: (next - offset) / scale })
   return (
@@ -329,7 +341,7 @@ function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
         <Slider
           value={[shown]}
           min={Math.min(0, shown)}
-          max={Math.max(format.max, shown)}
+          max={Math.max(cap, shown)}
           step={format.digits ? 0.1 : 1}
           onValueCommit={([v]) => commit(v!)}
         />
@@ -338,6 +350,8 @@ function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
           value={shown}
           digits={format.digits ?? 0}
           unit={format.unit}
+          min={amount.max === undefined ? undefined : 0}
+          max={amount.max === undefined ? undefined : cap}
           className="w-36"
           onCommit={commit}
         />

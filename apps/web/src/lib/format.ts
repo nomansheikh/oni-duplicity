@@ -20,6 +20,7 @@ export function portraitParts(appearance: { slot: string; current: string }[]) {
 export function toProfile(dupe: DuplicantView): DuplicantProfile {
   return {
     format: 'duplicity-duplicant@1',
+    model: dupe.model,
     name: dupe.name,
     gender: dupe.gender,
     traits: dupe.traits.map((t) => t.id),
