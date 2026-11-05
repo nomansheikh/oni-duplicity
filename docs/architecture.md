@@ -34,7 +34,7 @@ Packages are scoped `@oni-duplicity/*` and `private`; npm publishing is decided 
 
 ## `packages/save-parser`
 
-Our own reader and writer. [oni-save-parser](https://github.com/RoboPhred/oni-save-parser) and its forks were used as references for the format; no code is shared and there is no differential test against them.
+Our own reader and writer. [oni-save-parser](https://github.com/RoboPhred/oni-save-parser) and its forks were used as references for the format; no code is shared. `vp run differential` compares every fixture against konove's fork, built from source at a pinned commit (see [save-format.md](save-format.md)).
 
 **Model.** Header (build version, JSON game info), type templates, the `world` and `Game+Settings` sections, raw sim data, the `KSAV` version, game objects grouped by prefab, and `Game+GameSaveData`. Every object keeps its position, rotation, scale and behaviors; each behavior holds its template data and any trailing "extra" bytes.
 
@@ -136,7 +136,7 @@ save(): Uint8Array
 ## Deviations from the original plan
 
 - **Smaller stack.** No TanStack Router, Query, Table or Zustand, and no i18n library: plain React state and a worker call per view were enough.
-- **No differential test** against oni-save-parser, no fuzzing, no end-to-end or component tests yet. The round-trip test over every fixture is the parser's safety net.
+- **No fuzzing, end-to-end or component tests yet.** The round-trip test over every fixture and the differential test against konove's oni-save-parser (a clone-on-demand script, not a dev dependency, so the lockfile stays untouched) are the parser's safety net.
 - **No dump mod.** IDs come from string literals in `Assembly-CSharp.dll` instead of a mod that dumps the live `Db` registries.
 - **No typed behaviors.** Template data is decoded generically; only the extra data the editors need has codecs.
 - **Portraits are shown**, using react-oni-duplicant's sprites instead of committing any art.

@@ -58,5 +58,15 @@ jobs:
 
       - run: vp test
 
+      - name: Restore differential oracle
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache/oracle
+          key: oracle-${{ hashFiles('scripts/differential/oracle.ts') }}
+
+      # Compares every fixture against konove's oni-save-parser, built from source at a pinned commit.
+      - name: Differential test against oni-save-parser
+        run: vp run differential --tier "$FIXTURE_TIER"
+
       - name: Build app and pack libraries
         run: vp run -r build

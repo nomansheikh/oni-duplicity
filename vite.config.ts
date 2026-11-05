@@ -46,6 +46,10 @@ export default defineConfig({
         command: 'node scripts/fetch-fixtures.ts',
         cache: false,
       },
+      differential: {
+        command: 'node scripts/run-differential.ts',
+        cache: false,
+      },
     },
   },
 })
