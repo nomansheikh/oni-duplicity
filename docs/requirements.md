@@ -38,7 +38,7 @@ Every mutating feature needs a unit test on its model, a fixture test (edit → 
 ## Parser acceptance
 
 - **Round trip:** for every fixture, `writeSave(parseSave(x))` reproduces the header and the decompressed body byte for byte.
-- **Differential:** every fixture parses to the same JSON as oni-save-parser (dev dependency, `versionStrictness: "major"`). Every intentional difference is listed and explained in `save-format.md`.
+- **Differential:** every fixture parses to the same JSON as oni-save-parser (konove's fork built from source at a pinned commit, `versionStrictness: "major"`). Every intentional difference is listed and explained in `save-format.md`.
 - **Performance** on a normal laptop: the 40 MB fixture parses in under 5 s and writes in under 5 s. Peak memory is documented. `vp run bench` exists, and CI fails on a regression over 30%.
 - **Robustness:** truncated or corrupted files fail with a `ParseError`, never hang or crash. Fuzz tests prove it.
 - Unit tests for every primitive type, template type code and extra-data parser.
