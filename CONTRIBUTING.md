@@ -20,6 +20,9 @@ vp test         # tests; saves that aren't downloaded are skipped
 # every test save (about 120 MB) and the slow round trips
 vp run fixtures --tier all && FIXTURE_TIER=all vp test
 
+# only named saves (checksums still verified), e.g. for the benchmark
+vp run fixtures --file mithro-03-late-game-cycle-1160.sav
+
 # parser benchmark and regression gate (needs the full tier)
 vp run bench            # compare against test-data/bench-baseline.json
 vp run bench --update   # re-record the baseline after an intended change
