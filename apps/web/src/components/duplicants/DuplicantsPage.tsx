@@ -18,7 +18,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/components/ui/item'
-import { Progress } from '@/components/ui/progress'
+import { Progress, meterTone } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
@@ -62,6 +62,7 @@ export function DuplicantsPage({
   const [sortKey, setSortKey] = useState<SortKey>('save')
   const [descending, setDescending] = useState(false)
   const [clipboard, setClipboard] = useState<DuplicantProfile | null>(null)
+  const healthOf = (d: DuplicantView) => d.amounts.find((a) => a.id === 'HitPoints')?.value ?? 0
   const selected = duplicants.find((d) => d.id === selectedId) ?? duplicants[0]
   const visible = sortDuplicants(searchDuplicants(duplicants, query), sortKey, descending)
   const metric = (d: DuplicantView): string | null => {
@@ -80,7 +81,7 @@ export function DuplicantsPage({
   }
 
   return (
-    <div className="grid gap-4 @4xl/main:grid-cols-[18rem_1fr] md:gap-6">
+    <div className="grid gap-4 @4xl/main:grid-cols-[22rem_1fr] md:gap-6">
       <Card className="self-start">
         <CardHeader>
           <CardTitle>Duplicants</CardTitle>
@@ -141,28 +142,36 @@ export function DuplicantsPage({
                   asChild
                   size="sm"
                   variant={d.id === selected?.id ? 'muted' : 'default'}
-                  className={d.id === selected?.id ? 'ring-1 ring-primary/40' : ''}
+                  className={d.id === selected?.id ? 'border-primary/60' : 'hover:bg-muted/30'}
                 >
                   <button type="button" onClick={() => onSelect(d.id)} className="text-left">
                     <ItemMedia>
                       <DuplicantAvatar
                         name={d.name}
                         parts={portraitParts(d.appearance)}
-                        size={36}
+                        size={48}
                       />
                     </ItemMedia>
-                    <ItemContent className="gap-1.5">
-                      <ItemTitle>{d.name}</ItemTitle>
-                      <ItemDescription className="flex items-center gap-2 text-xs">
+                    <ItemContent className="gap-2">
+                      <ItemTitle className="type-h3 normal-case">{d.name}</ItemTitle>
+                      <ItemDescription className="grid grid-cols-[3.5rem_1fr] items-center gap-x-2 gap-y-1 type-caption">
+                        Health
+                        <Progress
+                          value={healthOf(d)}
+                          tone={meterTone('health', healthOf(d))}
+                          aria-label={`${d.name} health`}
+                        />
                         Stress
-                        <Progress value={stressOf(d)} className="h-1 w-16" />
+                        <Progress
+                          value={stressOf(d)}
+                          tone={meterTone('stress', stressOf(d))}
+                          aria-label={`${d.name} stress`}
+                        />
                       </ItemDescription>
                     </ItemContent>
-                    <ItemActions>
+                    <ItemActions className="flex-col items-end gap-1">
                       {metric(d) && (
-                        <span className="text-xs text-muted-foreground tabular-nums">
-                          {metric(d)}
-                        </span>
+                        <span className="type-caption text-fg-2 tabular-nums">{metric(d)}</span>
                       )}
                       {d.isBionic && <Badge variant="secondary">Bionic</Badge>}
                     </ItemActions>
@@ -170,7 +179,7 @@ export function DuplicantsPage({
                 </Item>
               ))}
               {visible.length === 0 && (
-                <p className="px-2 py-6 text-center text-sm text-muted-foreground">
+                <p className="px-2 py-6 text-center type-small text-muted-foreground">
                   No duplicants match.
                 </p>
               )}
