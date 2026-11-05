@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, Plus } from 'lucide-react'
+import { Check, Plus, SearchX } from 'lucide-react'
 import { effectGroupLabels } from '@oni-duplicity/game-data'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { effectDetail, groupEffects } from '@/lib/effects'
 import type { Named } from '@/worker/model'
 import { EffectModifiers } from './EffectModifiers'
+import { EmptyState } from '../empty-state'
 
 /** Add-effect list: grouped into good and bad, with descriptions, modifiers and search. */
 export function EffectPicker({
@@ -38,7 +39,15 @@ export function EffectPicker({
         <Command>
           <CommandInput placeholder="Search effects…" />
           <CommandList className="max-h-96">
-            <CommandEmpty>Nothing found.</CommandEmpty>
+            <CommandEmpty className="p-0">
+              <EmptyState
+                size="compact"
+                className="border-0"
+                icon={SearchX}
+                title="No such effect"
+                description="Nothing matches that. Try another word."
+              />
+            </CommandEmpty>
             {groupEffects(catalog).map(({ group, items }) => (
               <CommandGroup key={group} heading={effectGroupLabels[group]}>
                 {items.map((item) => (

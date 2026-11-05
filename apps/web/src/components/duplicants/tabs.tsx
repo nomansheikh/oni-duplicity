@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { EmptyState } from '../empty-state'
 import {
   Field,
   FieldContent,
@@ -76,18 +76,16 @@ export function Panel({
   )
 }
 
-export function Nothing({ title, description }: { title: string; description: string }) {
-  return (
-    <Empty className="well border border-dashed">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Sparkles />
-        </EmptyMedia>
-        <EmptyTitle>{title}</EmptyTitle>
-        <EmptyDescription>{description}</EmptyDescription>
-      </EmptyHeader>
-    </Empty>
-  )
+export function Nothing({
+  title,
+  description,
+  icon = Sparkles,
+}: {
+  title: string
+  description: string
+  icon?: LucideIcon
+}) {
+  return <EmptyState size="compact" icon={icon} title={title} description={description} />
 }
 
 /** The trait name as a badge: green for a positive trait, red for a negative one, plain otherwise. */

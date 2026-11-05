@@ -28,7 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { EmptyState } from '@/components/empty-state'
 import { Input } from '@/components/ui/input'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import {
@@ -492,15 +492,26 @@ export default function Gallery() {
               ))}
             </div>
           </ScrollArea>
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <SearchIcon />
-              </EmptyMedia>
-              <EmptyTitle>Nothing here</EmptyTitle>
-              <EmptyDescription>No geysers match the filter.</EmptyDescription>
-            </EmptyHeader>
-          </Empty>
+          <EmptyState
+            icon={SearchIcon}
+            title="No geysers"
+            description="No geysers on this asteroid. Nothing is about to erupt here."
+            action={{ label: 'Show all asteroids', onClick: () => {} }}
+          />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <EmptyState
+            icon={SearchIcon}
+            title="Default size"
+            description="Big hex badge, caps title and a line in the colony's voice."
+            action={{ label: 'Clear search', onClick: () => {} }}
+          />
+          <EmptyState
+            size="compact"
+            icon={SearchIcon}
+            title="Compact size"
+            description="For small panels, table rows and pickers."
+          />
         </div>
         <Row>
           <SkullIcon className="size-4" />

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FlaskConical, SlidersHorizontal, TriangleAlert } from 'lucide-react'
+import { Flame, FlaskConical, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -33,6 +33,7 @@ import { AsteroidFilter } from './asteroid-filter'
 import { asteroidName } from '@/lib/asteroid'
 import { CommitInput, Hint, NumberField } from './common'
 import { PageHeader } from './page-header'
+import { EmptyState } from './empty-state'
 
 export function GeysersPage({
   geysers,
@@ -64,6 +65,23 @@ export function GeysersPage({
       />
       <Card>
         <CardContent>
+          {visible.length === 0 && (
+            <EmptyState
+              icon={Flame}
+              title="No geysers"
+              description={
+                geysers.length === 0
+                  ? 'This save has no geysers, vents or volcanoes. The ground is calm.'
+                  : 'No geysers on this asteroid. Nothing is about to erupt here.'
+              }
+              action={
+                geysers.length > 0
+                  ? { label: 'Show all asteroids', onClick: () => setAsteroid('all') }
+                  : undefined
+              }
+              data-testid="geysers-empty"
+            />
+          )}
           <div
             role="table"
             aria-label="Geysers"

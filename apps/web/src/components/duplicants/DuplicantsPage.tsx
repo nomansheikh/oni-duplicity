@@ -1,4 +1,4 @@
-import { ArrowDownNarrowWide, ArrowUpNarrowWide, Search } from 'lucide-react'
+import { ArrowDownNarrowWide, ArrowUpNarrowWide, Search, SearchX } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
@@ -38,6 +38,7 @@ import { DuplicantAvatar } from '../common'
 import { ColonyActions } from './ColonyActions'
 import { PageHeader } from '../page-header'
 import { DuplicantEditor } from './DuplicantEditor'
+import { EmptyState } from '../empty-state'
 
 export function DuplicantsPage({
   duplicants,
@@ -180,9 +181,16 @@ export function DuplicantsPage({
                   </Item>
                 ))}
                 {visible.length === 0 && (
-                  <p className="px-2 py-6 text-center type-small text-muted-foreground">
-                    No duplicants match.
-                  </p>
+                  <EmptyState
+                    size="compact"
+                    icon={SearchX}
+                    title="No duplicants"
+                    description={
+                      duplicants.length === 0
+                        ? 'The colony is empty. Where did everyone go?'
+                        : 'Nobody matches that search. Try another name.'
+                    }
+                  />
                 )}
               </ItemGroup>
             </ScrollArea>

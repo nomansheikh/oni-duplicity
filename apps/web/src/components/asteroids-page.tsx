@@ -1,3 +1,4 @@
+import { Globe } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/table'
 import type { Edit, WorldView } from '@/worker/model'
 import { CommitInput } from './common'
+import { EmptyState } from './empty-state'
 import { PageHeader } from './page-header'
 
 export function AsteroidsPage({
@@ -43,6 +45,17 @@ export function AsteroidsPage({
               </TableRow>
             </TableHeader>
             <TableBody>
+              {worlds.length === 0 && (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={5} className="p-0">
+                    <EmptyState
+                      icon={Globe}
+                      title="No asteroids"
+                      description="This save has no asteroids. Space is very, very empty."
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
               {worlds.map((world) => (
                 <TableRow key={world.id}>
                   <TableCell>

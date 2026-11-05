@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Ban, Check, Plus } from 'lucide-react'
+import { Ban, Check, Plus, SearchX } from 'lucide-react'
 import { traitCategoryLabels, type TraitCategory } from '@oni-duplicity/game-data'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -21,6 +21,7 @@ import {
 import { cn } from '@/lib/utils'
 import type { Named } from '@/worker/model'
 import { modelLabel } from '@/lib/profile'
+import { EmptyState } from '../empty-state'
 
 const CATEGORY_STYLE: Record<TraitCategory, string> = {
   positive: 'border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
@@ -125,9 +126,13 @@ export function TraitPicker({
           <CommandInput placeholder="Search traits…" value={search} onValueChange={setSearch} />
           <CommandList className="max-h-96">
             {!shown && (
-              <div className="py-6 text-center type-small text-muted-foreground">
-                Nothing found.
-              </div>
+              <EmptyState
+                size="compact"
+                className="border-0"
+                icon={SearchX}
+                title="No such trait"
+                description="Nothing matches that. Try another word."
+              />
             )}
             {groups
               .filter((g) => g.items.length > 0)

@@ -1,5 +1,14 @@
 import type { ReactNode } from 'react'
-import { ArrowDown, ArrowRight, Info } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowRight,
+  Fish,
+  Info,
+  PackageOpen,
+  Rabbit,
+  type LucideIcon,
+} from 'lucide-react'
+import { EmptyState } from '@/components/empty-state'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
@@ -91,8 +100,16 @@ function InfoTip({ text, label }: { text: string; label: string }) {
   )
 }
 
-function Nothing({ children }: { children: ReactNode }) {
-  return <p className="type-small text-muted-foreground">{children}</p>
+function Nothing({
+  title,
+  icon = Rabbit,
+  children,
+}: {
+  title: string
+  icon?: LucideIcon
+  children: ReactNode
+}) {
+  return <EmptyState size="compact" icon={icon} title={title} description={children} />
 }
 
 // ---------------------------------------------------------------- what it takes
@@ -113,7 +130,7 @@ function TakesPanel({
       <div className="flex flex-col gap-2">
         <SectionLabel>Feed, one of</SectionLabel>
         {plan.critters === 0 ? (
-          <Nothing>Enter a herd size to see the feed.</Nothing>
+          <Nothing title="No herd yet">Enter a herd size to see the feed.</Nothing>
         ) : (
           plan.feed.map((line, i) => <FeedItem key={i} line={line} letter={LETTERS[i] ?? ''} />)
         )}
@@ -224,9 +241,11 @@ function TimePanel({
       <div className="flex flex-col gap-2">
         <SectionLabel>Rancher</SectionLabel>
         {fish ? (
-          <Nothing>The grooming station skips swimming critters, so fish need no rancher.</Nothing>
+          <Nothing title="No rancher needed" icon={Fish}>
+            The grooming station skips swimming critters, so fish need no rancher.
+          </Nothing>
         ) : plan.critters === 0 ? (
-          <Nothing>Enter a herd size to see the rancher time.</Nothing>
+          <Nothing title="No herd yet">Enter a herd size to see the rancher time.</Nothing>
         ) : (
           <>
             <Progress
@@ -288,9 +307,11 @@ function GetPanel({ species, plan }: { species: RanchSpecies; plan: RanchPlan })
     <Panel title="What you get">
       <div className="flex flex-col gap-2">
         {plan.critters === 0 ? (
-          <Nothing>Enter a herd size to see the output.</Nothing>
+          <Nothing title="No herd yet">Enter a herd size to see the output.</Nothing>
         ) : outputs.length === 0 ? (
-          <Nothing>Nothing this species produces is counted.</Nothing>
+          <Nothing title="No output" icon={PackageOpen}>
+            Nothing this species produces is counted.
+          </Nothing>
         ) : (
           outputs.map((o) => (
             <Item key={o.key} variant="outline" size="xs" data-testid="ranch-output">

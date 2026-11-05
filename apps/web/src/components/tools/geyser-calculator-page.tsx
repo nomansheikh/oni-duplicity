@@ -15,7 +15,9 @@ import {
 } from '@/lib/tools/geyser-calc'
 import type { GeyserView } from '@/worker/model'
 import { parseDemand } from '@/lib/tools/parse'
+import { EmptyState } from '@/components/empty-state'
 import { PageHeader } from '@/components/page-header'
+import { Calculator, Flame } from 'lucide-react'
 import { Stat } from './tool-header'
 
 /** Read only: nothing here edits the save. */
@@ -27,7 +29,11 @@ export function GeyserCalculatorPage({ geysers }: { geysers: GeyserView[] }) {
         description="Average output over each geyser's whole activity cycle, and what it can supply. Enter a demand to see whether it is covered. Geyser Control and Geotuner changes are not counted."
       />
       {geysers.length === 0 ? (
-        <p className="type-small text-muted-foreground">This save has no geysers.</p>
+        <EmptyState
+          icon={Flame}
+          title="No geysers"
+          description="This save has no geysers to calculate. The ground is calm."
+        />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
           {geysers.map((g) => (
@@ -75,11 +81,16 @@ function GeyserCalcCard({ geyser: g }: { geyser: GeyserView }) {
           aria-label="Share of time erupting"
         />
         {rows.length === 0 ? (
-          <p className="type-small text-muted-foreground">
-            {type
-              ? 'No conversion for this output is cited from the game files yet.'
-              : 'This geyser type is not known to Duplicity.'}
-          </p>
+          <EmptyState
+            size="compact"
+            icon={Calculator}
+            title="No numbers"
+            description={
+              type
+                ? 'No conversion for this output is cited from the game files yet.'
+                : 'This geyser type is not known to Duplicity.'
+            }
+          />
         ) : (
           rows.map((row) => <CoverageRow key={row.id} row={row} peak={out.peakKgPerSecond} />)
         )}

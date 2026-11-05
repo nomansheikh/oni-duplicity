@@ -7,6 +7,7 @@ import {
   CornerDownRight,
   EllipsisVertical,
   Loader2,
+  PackageOpen,
   Plus,
   Route,
   Search,
@@ -41,6 +42,7 @@ import type { RawMatch, RawSearchResult } from '@/worker/raw'
 import { formatPath, parsePath } from '@/lib/raw-path'
 import { CommitInput } from './common'
 import { PageHeader } from './page-header'
+import { EmptyState } from './empty-state'
 
 const PAGE = 500
 /** Pixels of indent per tree level. */
@@ -368,7 +370,13 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
               })}
             </div>
             {rows.length === 0 && (
-              <p className="p-6 text-center type-small text-fg-2">Nothing here.</p>
+              <EmptyState
+                size="compact"
+                className="border-0"
+                icon={PackageOpen}
+                title="Nothing here"
+                description="This node is empty. Not a value in sight."
+              />
             )}
           </div>
         </CardContent>

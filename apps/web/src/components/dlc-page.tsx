@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { FlaskConical, Info, TriangleAlert } from 'lucide-react'
+import { FlaskConical, Info, Package, TriangleAlert } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
+import { EmptyState } from './empty-state'
 import { Progress } from '@/components/ui/progress'
 import {
   Table,
@@ -40,15 +40,11 @@ export function DlcPage({ revision, onEdit }: { revision: number; onEdit: (edit:
           title="Content"
           description="What this save was generated with: the Prehistoric Planet impactor, the Frosty Planet geothermal quest and the world mixing chosen at world generation."
         />
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>Nothing DLC-specific in this save</EmptyTitle>
-            <EmptyDescription>
-              Sections appear here for the Prehistoric Planet impactor, the Frosty Planet geothermal
-              quest, and the world mixing chosen at world generation.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <EmptyState
+          icon={Package}
+          title="Nothing DLC-specific"
+          description="Sections appear here for the Prehistoric Planet impactor, the Frosty Planet geothermal quest, and the world mixing chosen at world generation."
+        />
       </div>
     )
   }

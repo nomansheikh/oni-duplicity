@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Search, SlidersHorizontal, Trash2, TriangleAlert } from 'lucide-react'
+import { Package, Search, SearchX, SlidersHorizontal, Trash2, TriangleAlert } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -35,6 +35,7 @@ import { fmt, fmtMass, toCelsius } from '@/lib/format'
 import { saveClient } from '@/lib/save-client'
 import type { Edit, MaterialItemView, MaterialView } from '@/worker/model'
 import { Hint, NumberField } from './common'
+import { EmptyState } from './empty-state'
 import { PageHeader } from './page-header'
 
 // Element states use the game's resource colours: gas cyan, liquid blue, solid tan.
@@ -131,6 +132,33 @@ export function MaterialsPage({
               </TableRow>
             </TableHeader>
             <TableBody>
+              {visible.length === 0 && (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={7} className="p-0">
+                    <EmptyState
+                      icon={materials.length === 0 ? Package : SearchX}
+                      title={materials.length === 0 ? 'No resources' : 'No such element'}
+                      description={
+                        materials.length === 0
+                          ? 'No loose or stored resources in this save. The colony is bare.'
+                          : 'No element matches those filters. The periodic table shrugs.'
+                      }
+                      action={
+                        materials.length > 0
+                          ? {
+                              label: 'Clear filters',
+                              onClick: () => {
+                                setQuery('')
+                                setState('all')
+                              },
+                            }
+                          : undefined
+                      }
+                      data-testid="materials-empty"
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
               {visible.map((m) => (
                 <TableRow key={m.id}>
                   <TableCell className="type-label tracking-normal normal-case">{m.name}</TableCell>
@@ -363,6 +391,18 @@ function MaterialSheet({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                  {items.length === 0 && (
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell colSpan={8} className="p-0">
+                        <EmptyState
+                          size="compact"
+                          icon={Package}
+                          title="No items"
+                          description="No loose or stored items of this element."
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
                   {items.map((item) => (
                     <TableRow key={item.ref}>
                       <TableCell>
