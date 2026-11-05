@@ -7,7 +7,11 @@ export interface RunOptions {
   /** Time one case may take before its worker is terminated and the case counts as a hang. */
   deadlineMs: number
   concurrency: number
-  /** Old-generation heap cap per worker; exceeding it is reported as an out-of-memory failure. */
+  /**
+   * Old-generation heap cap per worker; exceeding it is reported as an out-of-memory failure. It
+   * does not cap typed-array (ArrayBuffer) memory, so a huge allocation can still exhaust the process. The
+   * fixture's cases stay under 128 MB, so 256 leaves headroom.
+   */
   maxHeapMb?: number
 }
 
@@ -26,9 +30,12 @@ interface Slot {
  * or runs it out of memory is recorded as a bug and the worker is replaced.
  */
 export function runCases(options: RunOptions): Promise<CaseResult[]> {
-  const { cases, deadlineMs, concurrency, fixturePath, maxHeapMb = 2048 } = options
+  const { cases, deadlineMs, concurrency, fixturePath, maxHeapMb = 256 } = options
   const results: (CaseResult | undefined)[] = new Array(cases.length)
   let next = 0
+  // Timed-out cases get one more try in a fresh worker before they count as hangs.
+  const retries: number[] = []
+  const retried = new Set<number>()
   let done = 0
   const slots = new Set<Slot>()
 
@@ -50,21 +57,26 @@ export function runCases(options: RunOptions): Promise<CaseResult[]> {
     }
 
     const dispatch = (slot: Slot) => {
-      if (next >= cases.length) {
+      if (next >= cases.length && retries.length === 0) {
         slot.closed = true
         void slot.worker.terminate()
         slots.delete(slot)
         return
       }
-      const index = next++
+      const index = retries.shift() ?? next++
       slot.current = index
       slot.timer = setTimeout(() => {
-        record(index, {
-          outcome: 'bug',
-          kind: 'timeout',
-          message: `no result in ${deadlineMs} ms`,
-          ms: deadlineMs,
-        })
+        if (retried.has(index)) {
+          record(index, {
+            outcome: 'bug',
+            kind: 'timeout',
+            message: `no result in ${deadlineMs} ms, twice`,
+            ms: deadlineMs,
+          })
+        } else {
+          retried.add(index)
+          retries.push(index)
+        }
         retire(slot)
       }, deadlineMs)
       slot.worker.postMessage({ index, case: cases[index] })
@@ -77,7 +89,7 @@ export function runCases(options: RunOptions): Promise<CaseResult[]> {
       slot.current = undefined
       slots.delete(slot)
       void slot.worker.terminate()
-      if (next < cases.length) spawn()
+      if (next < cases.length || retries.length > 0) spawn()
     }
 
     const spawn = () => {

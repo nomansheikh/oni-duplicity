@@ -13,15 +13,17 @@ import {
   type FuzzCase,
 } from './shared.ts'
 
-// Corrupt input must end in a ParseError. A mutation that still parses is fine, but the result must
-// stay writable. Anything else (TypeError, RangeError, raw zlib errors, a hang, out of memory) is a
-// parser bug.
+// Corrupt input must end in a ParseError. A mutation that still parses is fine only if it writes
+// back, the written bytes parse again, and writing that result gives the same bytes (idempotence).
+// A ParseError from the writer or from re-parsing our own output is a bug, as is anything else
+// (TypeError, RangeError, raw zlib errors, a hang, out of memory).
 //
 // Knobs, all optional:
 //   FUZZ_SEED         string seed, default below; failure messages print it
 //   FUZZ_SCALE        multiplier on the case counts, default 1 (about 500 cases)
 //   FUZZ_DEADLINE_MS  per-case deadline before the worker is terminated, default 5000
-//   FUZZ_ONLY         replay one case, e.g. FUZZ_ONLY=body-objects#37
+//   FUZZ_ONLY         replay one case, e.g. FUZZ_ONLY=body-objects#37 (independent of FUZZ_SCALE;
+//                     an unknown name fails)
 //   FUZZ_VERBOSE      print per-category counts
 
 const fixture = fileURLToPath(
@@ -38,11 +40,21 @@ const results = new Map<Category, CaseResult[]>()
 beforeAll(async () => {
   const layout = readLayout(fixture)
   const cases: FuzzCase[] = []
-  for (const category of CATEGORIES) {
-    for (let i = 0; i < BASE_COUNTS[category] * scale; i++) {
-      const fuzzCase = generateCase(layout, seed, category, i)
-      if (only === undefined || only === fuzzCase.name) cases.push(fuzzCase)
+  if (only === undefined) {
+    for (const category of CATEGORIES) {
+      for (let i = 0; i < BASE_COUNTS[category] * scale; i++) {
+        cases.push(generateCase(layout, seed, category, i))
+      }
     }
+  } else {
+    // A replay is generated directly, so it does not depend on FUZZ_SCALE.
+    const [category, index] = only.split('#')
+    if (!CATEGORIES.includes(category as Category) || !/^\d+$/.test(index ?? '')) {
+      throw new Error(
+        `FUZZ_ONLY="${only}" is not <category>#<index>; categories: ${CATEGORIES.join(', ')}`,
+      )
+    }
+    cases.push(generateCase(layout, seed, category as Category, Number(index)))
   }
   const all = await runCases({
     fixturePath: fixture,
@@ -88,7 +100,7 @@ function report(category: Category, bugs: CaseResult[]): string {
 }
 
 for (const category of CATEGORIES) {
-  test(`${category}: corrupt input ends in ParseError or a writable parse`, () => {
+  test(`${category}: corrupt input ends in ParseError or a stable round trip`, () => {
     const list = results.get(category)!
     const bugs = list.filter((r) => r.outcome === 'bug')
     expect(bugs.length, report(category, bugs)).toBe(0)

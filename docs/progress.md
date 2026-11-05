@@ -45,10 +45,10 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 
 ## Parser fuzz tests — 2026-11-05
 
-- `packages/save-parser/tests/fuzz` mutates `apple-park.sav` with a seeded PRNG and requires every case to end in a `ParseError`, or in a parse that writes back without a non-`ParseError` exception. Anything else (`TypeError`, `RangeError`, a raw zlib error, a hang, out of memory) counts as a bug.
+- `packages/save-parser/tests/fuzz` mutates `apple-park.sav` with a seeded PRNG and requires every case to end in a `ParseError`, or in a parse that writes back, re-parses its own output and writes the same bytes again. A `ParseError` from the writer or from re-parsing our own output is a bug, as is anything else (`TypeError`, `RangeError`, a raw zlib error, a hang, out of memory) counts as a bug.
 - Seven regions: whole-file truncation, header flips, template flips, compressed-body flips, and, on the decompressed body, truncation, flips in the world and settings data, and flips in the game objects and game data. Body flips mostly avoid opaque payloads such as sim data.
-- Cases run in `node:worker_threads` workers with a 5 s deadline; a hung worker is terminated, and a timeout, crash or out-of-memory counts as a failure. Failures are grouped by error and print the seed and mutation, and `FUZZ_ONLY` replays one case.
-- The default run is about 500 cases in roughly 6 s. At `FUZZ_SCALE=20` (10,000 cases, about 2 minutes) no case failed.
-- Fault injection: removing the bounds check in `Reader` produced grouped `RangeError` failures, and an infinite loop in the header reader produced a `timeout` failure, so the harness does detect bugs. Both changes were reverted.
+- Cases run in `node:worker_threads` workers with a 5 s deadline; a hung worker is terminated and the case is retried once in a fresh worker before it counts as a hang; a crash or out-of-memory (256 MB old-generation cap, which does not cover typed arrays) also counts as a failure. Failures are grouped by error and print the seed and mutation, and `FUZZ_ONLY` replays one case regardless of scale.
+- The default run is about 500 cases in roughly 12 s. At `FUZZ_SCALE=20` (10,000 cases, 3 to 4.5 minutes) one case failed: a flipped type byte in the templates leaves a collection type without its element type, and `readCollection` throws a `TypeError` instead of a `ParseError` (`FUZZ_SEED=big2 FUZZ_ONLY=templates#105`). It is not fixed in this change.
+- Fault injection: removing the bounds check in `Reader` produced grouped `RangeError` failures, an infinite loop in the header reader produced a `timeout` failure, and a body that stops re-parsing produced a `reparse` failure, so the harness does detect bugs. All changes were reverted.
 - Gaps: one fixture, and no well-formed but hostile inputs such as huge valid counts or lengths.
 - Next: the differential test against oni-save-parser.
