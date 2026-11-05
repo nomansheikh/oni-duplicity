@@ -39,6 +39,12 @@ import {
   type TemplateData,
 } from '@oni-duplicity/save-parser'
 import { demoliorObjects, setDemoliorImpact } from './dlc.ts'
+import {
+  applySpaceEdit,
+  destinationState,
+  type DestinationState,
+  type SpaceEdit,
+} from './space-edits.ts'
 import { blockedSections, modelLabel, profileModel } from '../lib/profile.ts'
 
 // --- View models (sent to the UI) -----------------------------------------
@@ -151,7 +157,7 @@ export interface WorldView {
   visited: boolean
 }
 
-export interface DestinationView {
+export interface DestinationView extends DestinationState {
   id: number
   type: string
   distance: number
@@ -394,6 +400,7 @@ export type Edit =
   | { type: 'setMaterialTemperature'; elementId: string; kelvin: number }
   | { type: 'scaleMaterialMass'; elementId: string; factor: number }
   | { type: 'setDemoliorImpact'; impactCycle: number }
+  | SpaceEdit
 
 // --- Helpers ---------------------------------------------------------------
 
@@ -1005,6 +1012,12 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
     case 'setDemoliorImpact':
       setDemoliorImpact(save, edit.impactCycle)
       return
+    case 'setDestinationMass':
+    case 'setDestinationAnalysis':
+    case 'revealStarmap':
+    case 'setPoiStock':
+      applySpaceEdit(save, edit)
+      return
     default:
       applyObjectEdit(objectById(save, edit.id), edit, {
         prefab: splitId(edit.id).group,
@@ -1574,8 +1587,10 @@ export function listDestinations(save: SaveGame): DestinationView[] {
     type: string
     distance: number
     recoverableElements?: [number, number][]
+    availableMass?: number
   }[]
   return destinations.map((d) => ({
+    ...destinationState(save, d),
     id: d.id,
     type: humanize(d.type),
     distance: d.distance,

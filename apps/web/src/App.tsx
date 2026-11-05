@@ -450,6 +450,7 @@ export default function App() {
                   <SpacePage
                     worlds={loaded.views.worlds}
                     destinations={loaded.views.destinations}
+                    revision={revision}
                     onEdit={edit}
                   />
                 )}
