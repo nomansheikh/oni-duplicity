@@ -5,14 +5,19 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { CATEGORY_ORDER, traitChoices, type TraitSubject } from '@/lib/traits'
+import {
+  CATEGORY_ORDER,
+  searchTraitChoices,
+  traitChoices,
+  type TraitChoice,
+  type TraitSubject,
+} from '@/lib/traits'
 import { cn } from '@/lib/utils'
 import type { Named } from '@/worker/model'
 import { modelLabel } from '@/lib/profile'
@@ -63,59 +68,75 @@ export function TraitPicker({
   onSelect: (traitId: string) => void
 }) {
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
   const { choices, hidden } = traitChoices(subject, catalog)
-  const groups = [...CATEGORY_ORDER, undefined].map((category) => ({
-    category,
-    items: choices.filter((c) => c.category === category),
-  }))
+  const searching = search.trim().length > 0
+  // Without a search the list is grouped by category; with one it is a single ranked list.
+  const groups = searching
+    ? [{ category: undefined, items: searchTraitChoices(choices, search) }]
+    : [...CATEGORY_ORDER, undefined].map((category) => ({
+        category,
+        items: choices.filter((c) => c.category === category),
+      }))
+  const shown = groups.some((g) => g.items.length > 0)
+
+  const row = ({ trait, state, reason, category }: TraitChoice) => (
+    <CommandItem
+      key={trait.id}
+      value={`${trait.name} ${trait.id}`}
+      disabled={state !== 'available'}
+      onSelect={() => {
+        onSelect(trait.id)
+        setOpen(false)
+      }}
+      className="flex-col items-start gap-0.5"
+    >
+      <span className="flex w-full items-center gap-2 font-medium">
+        {trait.name}
+        <TraitCategoryBadge category={category} className="ml-auto" />
+        {state === 'held' && <Check />}
+        {state === 'conflict' && <Ban className="text-destructive" />}
+      </span>
+      {state === 'conflict' ? (
+        <span className="text-xs text-destructive">{reason}</span>
+      ) : (
+        trait.desc && (
+          <span className="line-clamp-2 text-xs text-muted-foreground">{trait.desc}</span>
+        )
+      )}
+    </CommandItem>
+  )
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next)
+        if (!next) setSearch('')
+      }}
+    >
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm">
           <Plus /> Add trait
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[26rem] p-0" align="end">
-        <Command>
-          <CommandInput placeholder="Search traits…" />
+        <Command shouldFilter={false}>
+          <CommandInput placeholder="Search traits…" value={search} onValueChange={setSearch} />
           <CommandList className="max-h-96">
-            <CommandEmpty>Nothing found.</CommandEmpty>
+            {!shown && (
+              <div className="py-6 text-center text-sm text-muted-foreground">Nothing found.</div>
+            )}
             {groups
               .filter((g) => g.items.length > 0)
               .map((g) => (
                 <CommandGroup
                   key={g.category ?? 'other'}
-                  heading={g.category ? traitCategoryLabels[g.category] : 'Other'}
+                  heading={
+                    searching ? undefined : g.category ? traitCategoryLabels[g.category] : 'Other'
+                  }
                 >
-                  {g.items.map(({ trait, state, reason, category }) => (
-                    <CommandItem
-                      key={trait.id}
-                      value={`${trait.name} ${trait.id}`}
-                      disabled={state !== 'available'}
-                      onSelect={() => {
-                        onSelect(trait.id)
-                        setOpen(false)
-                      }}
-                      className="flex-col items-start gap-0.5"
-                    >
-                      <span className="flex w-full items-center gap-2 font-medium">
-                        {trait.name}
-                        <TraitCategoryBadge category={category} className="ml-auto" />
-                        {state === 'held' && <Check />}
-                        {state === 'conflict' && <Ban className="text-destructive" />}
-                      </span>
-                      {state === 'conflict' ? (
-                        <span className="text-xs text-destructive">{reason}</span>
-                      ) : (
-                        trait.desc && (
-                          <span className="line-clamp-2 text-xs text-muted-foreground">
-                            {trait.desc}
-                          </span>
-                        )
-                      )}
-                    </CommandItem>
-                  ))}
+                  {g.items.map(row)}
                 </CommandGroup>
               ))}
           </CommandList>

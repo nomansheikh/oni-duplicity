@@ -6,7 +6,12 @@ import { describe, expect, test } from 'vite-plus/test'
 import { searchDuplicants, sortDuplicants, masteredOf, stressOf } from '../src/lib/duplicants.ts'
 import { toProfile } from '../src/lib/format.ts'
 import { blockedSections, profileModel } from '../src/lib/profile.ts'
-import { heldConflicts, traitChoices, type TraitSubject } from '../src/lib/traits.ts'
+import {
+  heldConflicts,
+  searchTraitChoices,
+  traitChoices,
+  type TraitSubject,
+} from '../src/lib/traits.ts'
 import { applyEdit, listDuplicants, type DuplicantView } from '../src/worker/model.ts'
 
 const testData = fileURLToPath(new URL('../../../test-data/', import.meta.url))
@@ -180,6 +185,19 @@ describe('the add-trait list', () => {
     const subject = view({ traits: held('Anemic') })
     expect(stateOf(subject, 'Anemic')?.state).toBe('held')
     expect(stateOf(subject, 'IronGut')?.state).toBe('available')
+  })
+
+  test('ranks an exact name or ID first and needs every word to match', () => {
+    const all = traitChoices(view({ dlcIds: ['EXPANSION1_ID'] }), catalog).choices
+    const ids = (q: string) => searchTraitChoices(all, q).map((c) => c.trait.id)
+    expect(ids('Anemic')[0]).toBe('Anemic')
+    expect(ids('anemic')).toContain('Anemic')
+    // Foodie is Gourmet in game; its ID still finds it, and a word of a name finds that trait.
+    expect(ids('Foodie')[0]).toBe('Foodie')
+    expect(ids('gourmet')).toEqual(['Foodie'])
+    expect(ids('tastes')).toEqual(['SimpleTastes'])
+    expect(ids('zzzz')).toEqual([])
+    expect(searchTraitChoices(all, '  ')).toBe(all)
   })
 
   test('reports conflicts already in a save without removing anything', () => {

@@ -26,9 +26,8 @@ async function pick(page: Page, name: string): Promise<void> {
   await expect(page.getByLabel('Name', { exact: true })).toHaveValue(name)
 }
 
-/** The names in the duplicant list, top to bottom. */
-const listed = (page: Page) =>
-  page.locator('button[data-slot="item"] [data-slot="item-title"]').allTextContents()
+/** The names in the duplicant list, top to bottom; assert on it with `toHaveText`. */
+const listed = (page: Page) => page.locator('button[data-slot="item"] [data-slot="item-title"]')
 
 async function openTraitPicker(page: Page, search: string): Promise<void> {
   await page.getByRole('button', { name: 'Add trait' }).click()
@@ -65,24 +64,24 @@ test.describe('traits', () => {
   })
 
   test('blocks a trait that clashes with an interest and says why', async ({ page }) => {
-    // Digger has the Mining interest; Can't Dig excludes it.
+    // Digger has the Mining interest, which the game names Digger; Can't Dig excludes it.
     await pick(page, 'Digger')
     await openTraitPicker(page, 'CantDig')
     const option = page.getByRole('option').first()
     await expect(option).toHaveAttribute('aria-disabled', 'true')
-    await expect(option).toContainText("Can't be combined with the Mining interest.")
+    await expect(option).toContainText("Can't be combined with the Digger interest.")
     await option.click({ force: true })
     await expect(page.locator('[data-trait="CantDig"]')).toHaveCount(0)
     expect(await editCount(page)).toBe(0)
   })
 
   test('blocks a trait that clashes with a trait and says why', async ({ page }) => {
-    // Farmer has Simple Tastes; Foodie excludes it.
+    // Farmer has Simple Tastes (Shrivelled Tastebuds in game); Foodie excludes it.
     await pick(page, 'Farmer')
     await openTraitPicker(page, 'Foodie')
     const option = page.getByRole('option').first()
     await expect(option).toHaveAttribute('aria-disabled', 'true')
-    await expect(option).toContainText("Can't be combined with the trait Simple Tastes.")
+    await expect(option).toContainText("Can't be combined with the trait Shrivelled Tastebuds.")
     await option.click({ force: true })
     await expect(page.locator('[data-trait="Foodie"]')).toHaveCount(0)
     expect(await editCount(page)).toBe(0)
@@ -98,47 +97,74 @@ test.describe('traits', () => {
 
   test('searches the duplicant list by name, trait and interest', async ({ page }) => {
     const search = page.getByLabel('Search duplicants')
+    const names = listed(page)
+    await expect(names).toHaveCount(9)
+
+    await search.fill('supplier')
+    await expect(names).toHaveText(['Supplier'])
+    // Artist matches by name and, through the Balloon Artist trait, three more.
     await search.fill('artist')
-    expect(await listed(page)).toEqual(['Artist'])
+    await expect(names).toHaveText(['Farmer', 'Cook', 'Operator', 'Artist'])
     // Binge Eater: Digger, Operator and Artist.
     await search.fill('binge eater')
-    expect((await listed(page)).sort()).toEqual(['Artist', 'Digger', 'Operator'])
-    // The Ranching interest: Rancher.
-    await search.fill('ranching')
-    expect(await listed(page)).toContain('Rancher')
+    await expect(names).toHaveText(['Digger', 'Operator', 'Artist'])
+    // The Hauling interest: Supplier.
+    await search.fill('hauling')
+    await expect(names).toHaveText(['Supplier'])
     await search.fill('no such thing')
     await expect(page.getByText('No duplicants match.')).toBeVisible()
   })
 
   test('sorts the duplicant list', async ({ page }) => {
+    const names = listed(page)
     const sortBy = async (label: string) => {
       await page.getByRole('combobox', { name: 'Sort duplicants' }).click()
       await page.getByRole('option', { name: `Sort: ${label}` }).click()
     }
-    const saveOrder = await listed(page)
-    expect(saveOrder).toHaveLength(9)
+    const saveOrder = [
+      'Digger',
+      'Researcher',
+      'Farmer',
+      'Cook',
+      'Supplier',
+      'Rancher',
+      'Builder',
+      'Operator',
+      'Artist',
+    ]
+    await expect(names).toHaveText(saveOrder)
 
+    const byName = [...saveOrder].sort((a, b) => a.localeCompare(b))
     await sortBy('Name')
-    const byName = await listed(page)
-    expect(byName).toEqual([...saveOrder].sort((a, b) => a.localeCompare(b)))
-
+    await expect(names).toHaveText(byName)
     await page.getByRole('button', { name: 'Ascending order' }).click()
-    expect(await listed(page)).toEqual([...byName].reverse())
+    await expect(names).toHaveText([...byName].reverse())
 
-    // Arrival runs oldest first: the three starters, then later arrivals; Artist came last.
+    // Oldest arrival first: the starters (cycle 0) in save order, then Farmer (3), Cook (6),
+    // Supplier (9), Rancher (13), Operator (26) and Artist (57).
     await sortBy('Arrival')
-    const byArrival = await listed(page)
-    expect(byArrival.at(-1)).toBe('Artist')
+    await expect(names).toHaveText([
+      'Digger',
+      'Researcher',
+      'Builder',
+      'Farmer',
+      'Cook',
+      'Supplier',
+      'Rancher',
+      'Operator',
+      'Artist',
+    ])
     await page.getByRole('button', { name: 'Ascending order' }).click()
-    expect((await listed(page))[0]).toBe('Artist')
+    await expect(names.first()).toHaveText('Artist')
 
-    // Stress starts with the most stressed: Builder (9%), then Digger (8%).
+    // Most stressed first: Builder (9%), then Digger (8%).
     await sortBy('Stress')
-    expect((await listed(page)).slice(0, 2)).toEqual(['Builder', 'Digger'])
+    await expect(names.first()).toHaveText('Builder')
+    await expect(names.nth(1)).toHaveText('Digger')
 
     await sortBy('Save order')
     await page.getByRole('button', { name: 'Ascending order' }).click()
-    expect(await listed(page)).toEqual(saveOrder)
+    await expect(names).toHaveText(saveOrder)
   })
 })
 

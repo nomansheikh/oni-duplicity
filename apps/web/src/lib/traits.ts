@@ -124,3 +124,32 @@ export function heldConflicts(
   }
   return out
 }
+
+/** Where a choice ranks for a search: exact, prefix, word start, then any other match. */
+function rank(choice: TraitChoice, query: string): number {
+  const name = choice.trait.name.toLowerCase()
+  const id = choice.trait.id.toLowerCase()
+  if (name === query || id === query) return 0
+  if (name.startsWith(query) || id.startsWith(query)) return 1
+  if (name.split(/[^a-z0-9]+/).some((w) => w.startsWith(query))) return 2
+  return 3
+}
+
+/**
+ * The choices matching a search, best first. Every word of the query must appear in the trait's
+ * name or ID, so a typed ID such as `Anemic` finds exactly that trait ahead of any looser match.
+ * Ties keep the category order of the unfiltered list.
+ */
+export function searchTraitChoices(choices: TraitChoice[], query: string): TraitChoice[] {
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean)
+  if (words.length === 0) return choices
+  const phrase = words.join(' ')
+  return choices
+    .filter((c) => {
+      const text = `${c.trait.name} ${c.trait.id}`.toLowerCase()
+      return words.every((w) => text.includes(w))
+    })
+    .map((c, i) => ({ c, i, r: rank(c, phrase) }))
+    .sort((a, b) => a.r - b.r || a.i - b.i)
+    .map((x) => x.c)
+}
