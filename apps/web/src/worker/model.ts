@@ -1,5 +1,8 @@
+import { rawCanAdd, rawDefaultItem } from './raw.ts'
 import {
   MinionSkills,
+  critterAmountMax,
+  critterAmountNames,
   effects as effectCatalog,
   findAmount,
   findCritter,
@@ -14,11 +17,17 @@ import {
   findGeyserTypeByHash,
   findPersonality,
   findTrait,
+  geyserTypes,
+  hashString,
+  stories as storyCatalog,
+  storyQuests,
   humanize,
   resample,
   skillGroups,
   traits as traitCatalog,
   unresample,
+  traitUnavailable,
+  type DuplicantModel,
   type GeyserTypeEntry,
   type Range,
 } from '@oni-duplicity/game-data'
@@ -31,6 +40,14 @@ import {
   type StoredItem,
   type TemplateData,
 } from '@oni-duplicity/save-parser'
+import { demoliorObjects, setDemoliorImpact } from './dlc.ts'
+import {
+  applySpaceEdit,
+  destinationState,
+  type DestinationState,
+  type SpaceEdit,
+} from './space-edits.ts'
+import { blockedSections, modelLabel, profileModel } from '../lib/profile.ts'
 
 // --- View models (sent to the UI) -----------------------------------------
 
@@ -75,6 +92,10 @@ export interface SkillView extends Named {
 
 export interface AmountView extends Named {
   value: number
+  /** Highest value the game allows, when known. Critter amounts only. */
+  max?: number
+  /** Why the amount can't be edited (an unconfirmed maximum, a missing DLC). Critter amounts only. */
+  readOnlyReason?: string
 }
 
 export interface EffectView extends Named {
@@ -101,6 +122,10 @@ export interface MaterialItemView {
   y: number
   mass: number
   temperature: number
+  /** Loose items a move order points at; deleting one would leave a dangling reference. */
+  protected: boolean
+  /** KPrefabID instance ID of a loose chunk, which is what delete edits are addressed by. */
+  instanceId: number | null
 }
 
 export interface CritterView {
@@ -136,11 +161,42 @@ export interface WorldView {
   visited: boolean
 }
 
-export interface DestinationView {
+export interface DestinationView extends DestinationState {
   id: number
   type: string
   distance: number
   resources: { name: string; amount: number }[]
+}
+
+/** `StoryInstance.State`; RETROFITTED (-1) is added by the game to saves that predate a story. */
+export type StoryState =
+  | 'retrofitted'
+  | 'notStarted'
+  | 'discovered'
+  | 'inProgress'
+  | 'complete'
+  /** A state value this version of the editor does not know. */
+  | 'unknown'
+
+export interface StoryQuestView {
+  id: string
+  name: string
+  goal: string
+  /** `Quest.State`. */
+  state: 'notStarted' | 'inProgress' | 'completed' | 'unknown'
+}
+
+export interface StoryView {
+  id: string
+  name: string
+  state: StoryState
+  /** The asteroid the story was created on, if it can be found. */
+  world: string | undefined
+  /** Cycle each state was first reached; absent if never. */
+  cycles: { discovered?: number; inProgress?: number; completed?: number; retrofitted?: number }
+  quests: StoryQuestView[]
+  /** Decoded building flags that show progress, e.g. the Activatable of a Gravitas machine. */
+  activated: boolean | undefined
 }
 
 export type RawKind =
@@ -163,12 +219,16 @@ export interface RawEntry {
   kind: RawKind
   /** Children count for objects, arrays and byte arrays. */
   size?: number
+  /** Arrays only: whether "add item" can build a valid new element (see `rawDefaultItem`). */
+  canAdd?: boolean
   value?: string | number | boolean | null
 }
 
 export interface RawChildren {
   entries: RawEntry[]
   total: number
+  /** Set when the node is an array that accepts a new item. */
+  canAdd?: boolean
 }
 
 export type AccessorySlot = 'hair' | 'headshape' | 'eyes' | 'mouth' | 'torso' | 'skin'
@@ -184,6 +244,12 @@ export interface DuplicantView {
   id: string
   prefab: string
   isBionic: boolean
+  /** The duplicant model, which decides the traits and skills it can have. */
+  model: DuplicantModel
+  /** DLC IDs active in the save. */
+  dlcIds: string[]
+  /** The cycle the duplicant arrived in (`MinionIdentity.arrivalTime`; 0 for the first three). */
+  arrivalTime: number
   name: string
   gender: string
   personality: Named
@@ -226,6 +292,12 @@ export interface GeyserView {
    * editor). The game recomputes them from the rolls when it loads the save.
    */
   matchesRolls: boolean
+  /** The type ID, for geysers whose prefab and saved type agree (the only ones that can change type). */
+  typeId?: string
+  /** Types this geyser can change to: same footprint, and every DLC the save has active. */
+  swapTargets: { id: string; name: string }[]
+  /** Whether the Geyser Control mod's behaviors are on it; the mod may reapply its own values. */
+  hasGeyserControl: boolean
 }
 
 /**
@@ -242,7 +314,10 @@ export type GeyserField =
 
 const GEYSER_FIELDS: Record<
   GeyserField,
-  { roll: string; range: keyof Omit<GeyserTypeEntry, 'id'> }
+  {
+    roll: string
+    range: 'rate' | 'iterationLength' | 'iterationPercent' | 'yearLength' | 'yearPercent'
+  }
 > = {
   scaledRate: { roll: 'rateRoll', range: 'rate' },
   scaledIterationLength: { roll: 'iterationLengthRoll', range: 'iterationLength' },
@@ -269,6 +344,8 @@ function rollsMatch(config: GeyserConfig, type: GeyserTypeEntry): boolean {
 /** A portable copy of a duplicant's editable state (copy/paste and JSON export). */
 export interface DuplicantProfile {
   format: 'duplicity-duplicant@1'
+  /** The model copied from; older exports lack it (read from the traits). */
+  model?: DuplicantModel
   name: string
   gender: string
   traits: string[]
@@ -309,9 +386,11 @@ export type Edit =
   | { type: 'bulkDuplicants'; action: 'setAttributes'; level: number }
   | { type: 'setGeyserName'; id: string; name: string }
   | { type: 'setGeyserValue'; id: string; field: GeyserField; value: number }
+  | { type: 'setGeyserType'; id: string; typeId: string }
   | { type: 'setItemMass'; ref: string; mass: number }
   | { type: 'setItemTemperature'; ref: string; kelvin: number }
   | { type: 'deleteObject'; id: string }
+  | { type: 'deleteDebris'; ids: number[] }
   | { type: 'cloneObject'; id: string }
   | { type: 'setTechResearched'; techId: string; complete: boolean }
   | { type: 'researchAll' }
@@ -321,8 +400,11 @@ export type Edit =
   | { type: 'rawSet'; path: RawPath; value: string | number | boolean | null }
   | { type: 'rawRemove'; path: RawPath }
   | { type: 'rawDuplicate'; path: RawPath }
+  | { type: 'rawAdd'; path: RawPath }
   | { type: 'setMaterialTemperature'; elementId: string; kelvin: number }
   | { type: 'scaleMaterialMass'; elementId: string; factor: number }
+  | { type: 'setDemoliorImpact'; impactCycle: number }
+  | SpaceEdit
 
 // --- Helpers ---------------------------------------------------------------
 
@@ -337,6 +419,56 @@ const FULL_NEEDS: Record<string, number> = {
   Bladder: 0,
   Stress: 0,
 }
+/**
+ * Bionic amount maximums, from the decompiled game.
+ * - BionicOil: `BionicOilMonitor.OIL_CAPACITY`, and `Amounts.BionicOil` max, both 200.
+ * - BionicGunk: `GunkMonitor.GUNK_CAPACITY`, 80.
+ * - BionicOxygenTank: `BionicOxygenTankMonitor.OXYGEN_TANK_CAPACITY_KG`, 2400 s × 0.1 kg/s = 240.
+ * - BionicInternalBattery: `Amounts.BionicInternalBattery` max 480,000 J, which
+ *   `BionicBatteryMonitor.UpdateCapacityAmount` raises by 120,000 J for every electrobank slot
+ *   above 4. The slot count is the `BionicBatteryCountCapacity` attribute (base 4), and the only
+ *   thing that raises it is the `ExtraBionicBatteries` perk (+2) of the BionicsC3 skill. Installed
+ *   electrobanks play no part: they are only how the charge is topped up.
+ */
+export const BIONIC_OIL_MAX = 200
+export const BIONIC_GUNK_MAX = 80
+export const BIONIC_OXYGEN_TANK_MAX = 240
+export const BIONIC_BATTERY_BASE_MAX = 480_000
+const BIONIC_BATTERY_PER_SLOT = 120_000
+const BIONIC_BATTERY_BASE_SLOTS = 4
+const BIONIC_BATTERY_SKILL = 'BionicsC3'
+const BIONIC_BATTERY_SKILL_SLOTS = 2
+
+/** The game's maximum for a bionic amount, or undefined for any other amount. */
+export function bionicAmountMax(
+  amountId: string,
+  masteredSkills: Iterable<string>,
+): number | undefined {
+  switch (amountId) {
+    case 'BionicOil':
+      return BIONIC_OIL_MAX
+    case 'BionicGunk':
+      return BIONIC_GUNK_MAX
+    case 'BionicOxygenTank':
+      return BIONIC_OXYGEN_TANK_MAX
+    case 'BionicInternalBattery': {
+      const slots =
+        BIONIC_BATTERY_BASE_SLOTS +
+        ([...masteredSkills].includes(BIONIC_BATTERY_SKILL) ? BIONIC_BATTERY_SKILL_SLOTS : 0)
+      return BIONIC_BATTERY_BASE_MAX + BIONIC_BATTERY_PER_SLOT * (slots - BIONIC_BATTERY_BASE_SLOTS)
+    }
+    default:
+      return undefined
+  }
+}
+
+function masteredSkillIds(obj: GameObject): string[] {
+  const resume = behavior(obj, 'MinionResume')?.templateData
+  return ((resume?.MasteryBySkillID ?? []) as [string, boolean][])
+    .filter(([, mastered]) => mastered === true)
+    .map(([id]) => id)
+}
+
 const ACCESSORY_PREFIX = 'Root.Accessories.'
 
 function range(from: number, to: number): number[] {
@@ -416,6 +548,38 @@ function dlcIds(save: SaveGame): string[] {
   const info = save.header.gameInfo
   if (Array.isArray(info.dlcIds)) return info.dlcIds.filter((id) => id !== '')
   return info.dlcId ? [info.dlcId] : []
+}
+
+/** The model name a duplicant's identity saves (`Minion`, `BionicMinion`, a mod's), else its prefab. */
+function modelNameOf(obj: GameObject, prefab: string): string {
+  const model = behavior(obj, 'MinionIdentity')?.templateData?.model as
+    | { name?: string }
+    | undefined
+  return model?.name ?? prefab
+}
+
+/** Standard or bionic; the one place that decides it, for the list and for every edit. */
+function modelOf(obj: GameObject, prefab: string): DuplicantModel {
+  return modelNameOf(obj, prefab) === 'BionicMinion' ? 'BionicMinion' : 'Minion'
+}
+
+/** What an edit to one duplicant needs to know about it and the save. */
+interface DuplicantContext {
+  prefab: string
+  dlcIds: string[]
+}
+
+/** Refuses trait IDs the duplicant's model or the save's DLC rule out, before anything changes. */
+function assertTraitsAllowed(ids: readonly string[], obj: GameObject, ctx: DuplicantContext): void {
+  const model = modelOf(obj, ctx.prefab)
+  for (const id of ids) {
+    const reason = traitUnavailable(id, model, ctx.dlcIds)
+    if (reason === 'model') {
+      throw new Error(`${id} is not a trait ${modelLabel(model)} duplicants can have`)
+    }
+    if (reason === 'dlc') throw new Error(`${id} needs a DLC this save does not have`)
+    if (reason === 'inert') throw new Error(`${id} is not a trait the game defines`)
+  }
 }
 
 function named(id: string, entry: { name: string; desc?: string } | undefined): Named {
@@ -513,7 +677,7 @@ export function listDuplicants(save: SaveGame): DuplicantView[] {
       id: string
       timeRemaining: number
     }[]
-    const model = (identity.model as { name?: string } | undefined)?.name ?? prefab
+    const model = modelNameOf(obj, prefab)
     const personalityKey = typeof identity.nameStringKey === 'string' ? identity.nameStringKey : ''
 
     const skills: SkillView[] = MinionSkills.filter(
@@ -534,6 +698,9 @@ export function listDuplicants(save: SaveGame): DuplicantView[] {
       id,
       prefab,
       isBionic: prefab === 'BionicMinion',
+      model: modelOf(obj, prefab),
+      dlcIds: [...activeDlcs],
+      arrivalTime: typeof identity.arrivalTime === 'number' ? identity.arrivalTime : 0,
       name: typeof identity.name === 'string' ? identity.name : '',
       gender: typeof identity.gender === 'string' ? identity.gender : '',
       personality: withName(named(personalityKey, findPersonality(personalityKey)), identity.name),
@@ -553,10 +720,15 @@ export function listDuplicants(save: SaveGame): DuplicantView[] {
       skills,
       experience:
         typeof resume?.totalExperienceGained === 'number' ? resume.totalExperienceGained : 0,
-      amounts: (modifiers(obj)?.amounts ?? []).map((a) => ({
-        ...named(a.name, findAmount(a.name)),
-        value: Number((a.value as { value: number }).value),
-      })),
+      amounts: (modifiers(obj)?.amounts ?? []).map((a) => {
+        const max =
+          prefab === 'BionicMinion' ? bionicAmountMax(a.name, masteredSkillIds(obj)) : undefined
+        return {
+          ...named(a.name, findAmount(a.name)),
+          value: Number((a.value as { value: number }).value),
+          ...(max === undefined ? {} : { max }),
+        }
+      }),
       effects: effectList.map((e) => ({
         ...named(e.id, findEffect(e.id)),
         cyclesRemaining: e.timeRemaining / SECONDS_PER_CYCLE,
@@ -599,8 +771,96 @@ export function listGeysers(save: SaveGame): GeyserView[] {
           }
         : {}),
       matchesRolls: ranges ? rollsMatch(config, ranges) : true,
+      ...(swappable(prefab, ranges) ? { typeId: ranges!.id } : {}),
+      swapTargets: swappable(prefab, ranges)
+        ? swapTargets(save, ranges!).map((t) => ({
+            id: t.id,
+            name: findGeyser(t.id)?.name ?? humanize(t.id),
+          }))
+        : [],
+      hasGeyserControl: obj.behaviors.some((b) => b.name.startsWith('Geyser_Control.')),
     }
   })
+}
+
+// --- Changing a geyser's type (experimental) ---------------------------------
+
+/**
+ * Only the generic prefabs whose name agrees with the saved type qualify. The deprecated
+ * `NiobiumGeyser` prefab and anything a mod renamed are left alone.
+ */
+function swappable(prefab: string, type: GeyserTypeEntry | undefined): boolean {
+  return type !== undefined && prefab === `GeyserGeneric_${type.id}`
+}
+
+/** Types with the same footprint whose DLCs are all active in the save. */
+function swapTargets(save: SaveGame, from: GeyserTypeEntry): GeyserTypeEntry[] {
+  const active = new Set(dlcIds(save))
+  return geyserTypes.filter(
+    (t) =>
+      t.id !== from.id && t.shape === from.shape && t.requiredDlcIds.every((d) => active.has(d)),
+  )
+}
+
+/**
+ * Moves a geyser to another type of the same shape. The game builds the object from the prefab
+ * named by its group, then recomputes the emitter, codex entry and disease from the saved type
+ * hash, so what has to change is the group, the hash, the `scaled*` values the new ranges give
+ * the same rolls, the object's own temperature and (when it still has the default one) its name.
+ * Everything is checked before anything is touched.
+ */
+function setGeyserType(save: SaveGame, id: string, typeId: string): void {
+  const split = id.lastIndexOf(':')
+  const prefab = id.slice(0, split)
+  const obj = objectById(save, id)
+  const geyser = behavior(obj, 'Geyser')?.templateData
+  const config = geyser?.configuration as GeyserConfig | undefined
+  const element = behavior(obj, 'PrimaryElement')?.templateData
+  if (!config?.typeId || !element) throw new Error('This is not a geyser that can change type')
+  const from = geyserType(config)
+  if (!swappable(prefab, from)) {
+    throw new Error('Only the game’s generic geysers can change type')
+  }
+  const to = geyserTypes.find((t) => t.id === typeId)
+  if (!to) throw new Error(`Unknown geyser type ${typeId}`)
+  if (to.id === from!.id) throw new Error('The geyser already has that type')
+  if (to.shape !== from!.shape) {
+    throw new Error(`A ${from!.shape} geyser can't become a ${to.shape} one: the footprints differ`)
+  }
+  const active = new Set(dlcIds(save))
+  const missing = to.requiredDlcIds.filter((d) => !active.has(d))
+  if (missing.length) {
+    throw new Error(`This save doesn't have ${missing.join(', ')} active, which that type needs`)
+  }
+
+  // Move the object to its new prefab group, creating the group beside the other geysers.
+  const groups = save.gameObjects
+  const source = groups.find((g) => g.name === prefab)!
+  source.gameObjects.splice(source.gameObjects.indexOf(obj), 1)
+  const targetName = `GeyserGeneric_${to.id}`
+  let target = groups.find((g) => g.name === targetName)
+  if (!target) {
+    target = { name: targetName, gameObjects: [] }
+    groups.splice(groups.indexOf(source) + 1, 0, target)
+  }
+  target.gameObjects.push(obj)
+  // The game doesn't write empty groups.
+  if (source.gameObjects.length === 0) groups.splice(groups.indexOf(source), 1)
+
+  config.typeId.hash = hashString(to.id)
+  for (const [field, { roll, range }] of Object.entries(GEYSER_FIELDS)) {
+    config[field] = Math.fround(resample(config[roll] ?? 0, to[range]))
+  }
+  element._Temperature = Math.fround(to.geyserTemperature)
+
+  const nameable = behavior(obj, 'UserNameable')?.templateData
+  const oldName = findGeyser(from!.id)?.name
+  const newName = findGeyser(to.id)?.name
+  if (oldName && newName && typeof nameable?.savedName === 'string') {
+    if (nameable.savedName.startsWith(oldName)) {
+      nameable.savedName = newName + nameable.savedName.slice(oldName.length)
+    }
+  }
 }
 
 // --- Edits -----------------------------------------------------------------
@@ -658,9 +918,9 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
           }
         }
         if (edit.action === 'masterSkills') {
-          const model = (data(obj, 'MinionIdentity').model as { name?: string } | undefined)?.name
+          const model = modelNameOf(obj, prefab)
           for (const skill of MinionSkills) {
-            if ((skill.model ?? 'Minion') !== (model ?? prefab)) continue
+            if ((skill.model ?? 'Minion') !== model) continue
             if (!skill.requiredDlcIds.every((d) => activeDlcs.has(d))) continue
             applyEdit(save, { type: 'setSkillMastered', id, skillId: skill.id, mastered: true })
           }
@@ -685,6 +945,9 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       config[edit.field] = Math.fround(resample(roll, type[field.range]))
       return
     }
+    case 'setGeyserType':
+      setGeyserType(save, edit.id, edit.typeId)
+      return
     case 'setItemMass':
       primary(itemByRef(save, edit.ref)).Units = Math.max(0, edit.mass)
       return
@@ -693,9 +956,13 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       return
     case 'deleteObject': {
       const { list, index } = locate(save, edit.id)
+      assertNotMarkedForMove(list[index]!, markedForMoveIds(save), edit.id)
       list.splice(index, 1)
       return
     }
+    case 'deleteDebris':
+      deleteDebris(save, edit.ids)
+      return
     case 'cloneObject': {
       const { list, index } = locate(save, edit.id)
       const copy = cloneValue(list[index]!)
@@ -730,6 +997,12 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       parent.splice(Number(key) + 1, 0, cloneValue(parent[Number(key)]))
       return
     }
+    case 'rawAdd': {
+      const item = rawDefaultItem(save, edit.path)
+      if (!item) throw new Error('Items cannot be added to this array')
+      ;(rawGet(save, edit.path) as unknown[]).push(item.value)
+      return
+    }
     case 'setMaterialTemperature':
       for (const item of materialItems(save, edit.elementId))
         primary(item.obj)._Temperature = edit.kelvin
@@ -740,12 +1013,42 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
         pe.Units = Math.max(0, Number(pe.Units) * edit.factor)
       }
       return
+    case 'setDemoliorImpact':
+      setDemoliorImpact(save, edit.impactCycle)
+      return
+    case 'setAmount': {
+      if (!Number.isFinite(edit.value)) throw new Error('An amount must be a finite number')
+      const obj = objectById(save, edit.id)
+      let value = edit.value
+      if (behavior(obj, 'CreatureBrain')?.templateData) {
+        // A critter's maximum comes from the game's data, so refuse what isn't confirmed.
+        const limit = critterAmountMax(splitId(edit.id).group, edit.amountId, dlcIds(save))
+        if (limit.max === undefined)
+          throw new Error(`${edit.amountId} is read only: ${limit.reason}`)
+        value = Math.min(Math.max(value, 0), limit.max)
+      }
+      applyObjectEdit(
+        obj,
+        { ...edit, value },
+        { prefab: splitId(edit.id).group, dlcIds: dlcIds(save) },
+      )
+      return
+    }
+    case 'setDestinationMass':
+    case 'setDestinationAnalysis':
+    case 'revealStarmap':
+    case 'setPoiStock':
+      applySpaceEdit(save, edit)
+      return
     default:
-      applyObjectEdit(objectById(save, edit.id), edit)
+      applyObjectEdit(objectById(save, edit.id), edit, {
+        prefab: splitId(edit.id).group,
+        dlcIds: dlcIds(save),
+      })
   }
 }
 
-function applyObjectEdit(obj: GameObject, edit: Edit): void {
+function applyObjectEdit(obj: GameObject, edit: Edit, ctx: DuplicantContext): void {
   switch (edit.type) {
     case 'setDuplicantName':
       data(obj, 'MinionIdentity').name = edit.name
@@ -757,6 +1060,7 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
       return
     }
     case 'addTrait': {
+      assertTraitsAllowed([edit.traitId], obj, ctx)
       const traits = data(obj, 'Klei.AI.Traits')
       const ids = (traits.TraitIds as string[] | null) ?? []
       if (!ids.includes(edit.traitId)) traits.TraitIds = [...ids, edit.traitId]
@@ -795,6 +1099,14 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
       )
       if (edit.mastered) list.push([edit.skillId, true])
       resume.MasteryBySkillID = list
+      // Losing BionicsC3 lowers the battery cap; bring the charge down in the same edit, so undo
+      // restores both.
+      if (edit.id.startsWith('BionicMinion:')) {
+        const battery = modifiers(obj)?.amounts.find((a) => a.name === 'BionicInternalBattery')
+        const max = bionicAmountMax('BionicInternalBattery', masteredSkillIds(obj))!
+        const stored = battery?.value as { value: number } | undefined
+        if (stored && stored.value > max) stored.value = max
+      }
       return
     }
     case 'setExperience':
@@ -803,7 +1115,13 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
     case 'setAmount': {
       const amount = modifiers(obj)?.amounts.find((a) => a.name === edit.amountId)
       if (!amount) throw new Error(`No amount ${edit.amountId}`)
-      ;(amount.value as { value: number }).value = edit.value
+      if (!Number.isFinite(edit.value)) throw new Error(`Not a finite amount: ${edit.value}`)
+      // The game keeps bionic amounts within their maximum, so never write past it.
+      const max = edit.id.startsWith('BionicMinion:')
+        ? bionicAmountMax(edit.amountId, masteredSkillIds(obj))
+        : undefined
+      ;(amount.value as { value: number }).value =
+        max === undefined ? edit.value : Math.min(Math.max(edit.value, 0), max)
       return
     }
     case 'addEffect': {
@@ -843,7 +1161,7 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
       data(obj, 'WorldContainer').isDiscovered = edit.discovered
       return
     case 'applyProfile':
-      applyProfile(obj, edit.profile, new Set(edit.sections))
+      applyProfile(obj, edit.profile, new Set(edit.sections), ctx)
       return
     default:
       throw new Error(`Unhandled edit ${edit.type}`)
@@ -859,9 +1177,19 @@ function applyProfile(
   obj: GameObject,
   profile: DuplicantProfile,
   sections: Set<ProfileSection>,
+  ctx: DuplicantContext,
 ): void {
   if (profile.format !== 'duplicity-duplicant@1')
     throw new Error('Not a Duplicity duplicant profile')
+  // A bionic and a standard duplicant do not share traits, interests, skills or body parts.
+  const target = modelOf(obj, ctx.prefab)
+  const blocked = blockedSections(profile, target).filter((s) => sections.has(s))
+  if (blocked.length > 0) {
+    throw new Error(
+      `A ${modelLabel(profileModel(profile))} profile's ${blocked.join(', ')} cannot be applied to a ${modelLabel(target)} duplicant`,
+    )
+  }
+  if (sections.has('traits')) assertTraitsAllowed(profile.traits, obj, ctx)
   const identity = data(obj, 'MinionIdentity')
   if (sections.has('name')) {
     identity.name = profile.name
@@ -891,7 +1219,11 @@ function applyProfile(
   if (sections.has('appearance')) {
     for (const [slot, number] of Object.entries(profile.appearance)) {
       if (number)
-        applyObjectEdit(obj, { type: 'setAccessory', id: '', slot: slot as AccessorySlot, number })
+        applyObjectEdit(
+          obj,
+          { type: 'setAccessory', id: '', slot: slot as AccessorySlot, number },
+          ctx,
+        )
     }
   }
 }
@@ -917,14 +1249,18 @@ interface MaterialItem {
   loose: boolean
 }
 
+/** A loose chunk: an object in a group named after an element, with its own mass. */
+function isLooseChunk(groupName: string, obj: GameObject): boolean {
+  return ELEMENT_IDS.has(groupName) && !!behavior(obj, 'PrimaryElement')?.templateData
+}
+
 /** Loose chunks (groups named after an element) and items held in storages. */
 function allMaterialItems(save: SaveGame): MaterialItem[] {
   const items: MaterialItem[] = []
   for (const group of save.gameObjects) {
-    const loose = ELEMENT_IDS.has(group.name)
     group.gameObjects.forEach((obj, index) => {
       const id = `${group.name}:${index}`
-      if (loose && behavior(obj, 'PrimaryElement')?.templateData) {
+      if (isLooseChunk(group.name, obj)) {
         items.push({ ref: id, obj, owner: obj, where: 'Loose', loose: true })
       }
       obj.behaviors.forEach((b, bIndex) => {
@@ -967,6 +1303,7 @@ export function itemByRef(save: SaveGame, ref: string): GameObject {
 
 /** The game objects an edit may change, for undo snapshots. */
 export function touchedBy(save: SaveGame, edit: Edit): GameObject[] {
+  if (edit.type === 'setDemoliorImpact') return demoliorObjects(save)
   if (edit.type === 'bulkDuplicants') {
     return objectsWith(save, 'MinionIdentity').map(({ obj }) => obj)
   }
@@ -1015,6 +1352,7 @@ export function listMaterials(save: SaveGame): MaterialView[] {
 }
 
 export function listMaterialItems(save: SaveGame, elementId: string): MaterialItemView[] {
+  const moving = markedForMoveIds(save)
   return materialItems(save, elementId).map((item) => {
     const pe = primary(item.obj)
     const position = item.loose ? item.obj.position : item.owner.position
@@ -1026,8 +1364,79 @@ export function listMaterialItems(save: SaveGame, elementId: string): MaterialIt
       y: Math.round(position.y),
       mass: Number(pe.Units) || 0,
       temperature: Number(pe._Temperature) || 0,
+      protected: item.loose && isMarkedForMove(item.obj, moving),
+      instanceId: item.loose ? (instanceId(item.obj) ?? null) : null,
     }
   })
+}
+
+// --- Deleting loose debris -------------------------------------------------------
+
+const instanceId = (obj: GameObject): number | undefined =>
+  behavior(obj, 'KPrefabID')?.templateData?.InstanceID as number | undefined
+
+/**
+ * KPrefabID instance IDs that a move order (the "Move here" tool) points at. Each order is a
+ * MovePickupablePlacer whose CancellableMove behavior saves a list of `Ref<Movable>` IDs, and
+ * the game's `CancellableMove.OnCancel` calls `ClearMove()` on whatever the ID resolves to
+ * without a null check, so deleting an item that is still listed there can crash the game.
+ */
+function markedForMoveIds(save: SaveGame): Set<number> {
+  const ids = new Set<number>()
+  for (const group of save.gameObjects) {
+    for (const obj of group.gameObjects) {
+      const movables = behavior(obj, 'CancellableMove')?.templateData?.movables
+      if (!Array.isArray(movables)) continue
+      for (const ref of movables as { id?: unknown }[]) {
+        if (typeof ref?.id === 'number') ids.add(ref.id)
+      }
+    }
+  }
+  return ids
+}
+
+function isMarkedForMove(obj: GameObject, moving: Set<number>): boolean {
+  if (behavior(obj, 'Movable')?.templateData?.isMarkedForMove === true) return true
+  const id = instanceId(obj)
+  return id !== undefined && moving.has(id)
+}
+
+function assertNotMarkedForMove(obj: GameObject, moving: Set<number>, id: string): void {
+  if (isMarkedForMove(obj, moving)) {
+    throw new Error(`${id} is marked for a move order; cancel the move in game first`)
+  }
+}
+
+/**
+ * Removes loose element chunks by KPrefabID instance ID. Positions (`<element>:<index>`) shift
+ * after every delete, so a click made on a list that has since changed could hit a different
+ * chunk; instance IDs do not. Refuses unknown IDs and anything a move order points at, before
+ * changing anything. Stored items, buildings and critters are never loose chunks, so they are
+ * never found.
+ */
+function deleteDebris(save: SaveGame, ids: number[]): void {
+  const wanted = new Set(ids)
+  const found = new Map<number, { list: GameObject[]; index: number }>()
+  const moving = markedForMoveIds(save)
+  for (const group of save.gameObjects) {
+    group.gameObjects.forEach((obj, index) => {
+      if (!isLooseChunk(group.name, obj)) return
+      const id = instanceId(obj)
+      if (id === undefined || !wanted.has(id)) return
+      if (found.has(id)) throw new Error(`Loose item ${id} is ambiguous`)
+      assertNotMarkedForMove(obj, moving, `${group.name}:${index}`)
+      found.set(id, { list: group.gameObjects, index })
+    })
+  }
+  for (const id of wanted) {
+    if (!found.has(id)) throw new Error(`Loose item ${id} no longer exists`)
+  }
+  const byList = new Map<GameObject[], number[]>()
+  for (const { list, index } of found.values())
+    byList.set(list, [...(byList.get(list) ?? []), index])
+  for (const [list, indexes] of byList) {
+    for (const index of indexes.sort((a, b) => b - a)) list.splice(index, 1)
+  }
 }
 
 // --- Structural edits (clone / delete) and critters ----------------------------------
@@ -1071,6 +1480,7 @@ function assignNewIds(save: SaveGame, obj: GameObject): void {
 }
 
 export function listCritters(save: SaveGame): CritterView[] {
+  const dlcs = dlcIds(save)
   return objectsWith(save, 'CreatureBrain').map(({ id, prefab, obj }) => {
     const entry = findCritter(prefab)
     return {
@@ -1081,10 +1491,14 @@ export function listCritters(save: SaveGame): CritterView[] {
       baby: entry?.baby ?? prefab.endsWith('Baby'),
       x: Math.round(obj.position.x),
       y: Math.round(obj.position.y),
-      amounts: (modifiers(obj)?.amounts ?? []).map((a) => ({
-        ...named(a.name, findAmount(a.name)),
-        value: Number((a.value as { value: number }).value),
-      })),
+      amounts: (modifiers(obj)?.amounts ?? []).map((a) => {
+        const limit = critterAmountMax(prefab, a.name, dlcs)
+        return {
+          ...named(a.name, findAmount(a.name) ?? critterAmountNames[a.name]),
+          value: Number((a.value as { value: number }).value),
+          ...(limit.max === undefined ? { readOnlyReason: limit.reason } : { max: limit.max }),
+        }
+      }),
     }
   })
 }
@@ -1200,8 +1614,10 @@ export function listDestinations(save: SaveGame): DestinationView[] {
     type: string
     distance: number
     recoverableElements?: [number, number][]
+    availableMass?: number
   }[]
   return destinations.map((d) => ({
+    ...destinationState(save, d),
     id: d.id,
     type: humanize(d.type),
     distance: d.distance,
@@ -1289,8 +1705,10 @@ export function rawChildren(save: SaveGame, path: RawPath, offset = 0, limit = 5
     const entry: RawEntry = { key, path: [...path, key], kind }
     const label = labelFor(value)
     if (label) entry.label = label
-    if (kind === 'array') entry.size = (value as unknown[]).length
-    else if (kind === 'object') entry.size = Object.keys(value as object).length
+    if (kind === 'array') {
+      entry.size = (value as unknown[]).length
+      entry.canAdd = rawCanAdd(save, entry.path)
+    } else if (kind === 'object') entry.size = Object.keys(value as object).length
     else if (kind === 'bytes') {
       entry.size = (value as Uint8Array).length
       entry.value = hex(value as Uint8Array)
@@ -1299,5 +1717,160 @@ export function rawChildren(save: SaveGame, path: RawPath, offset = 0, limit = 5
     else entry.value = value as string | number | boolean
     return entry
   })
-  return { entries, total: pairs.length }
+  const result: RawChildren = { entries, total: pairs.length }
+  if (Array.isArray(node) && rawCanAdd(save, path)) result.canAdd = true
+  return result
+}
+
+/**
+ * Every ancestor of `path` (the root first) with its children loaded far enough to include the
+ * next step down, so the editor can open the whole route to a search result in one round trip.
+ */
+export function rawReveal(
+  save: SaveGame,
+  path: RawPath,
+  page = 500,
+): { path: RawPath; children: RawChildren }[] {
+  const out: { path: RawPath; children: RawChildren }[] = []
+  for (let depth = 0; depth < path.length; depth++) {
+    const parent = path.slice(0, depth)
+    const node = rawGet(save, parent)
+    const key = path[depth]!
+    const position = Array.isArray(node)
+      ? Number(key)
+      : node && typeof node === 'object'
+        ? Object.keys(node).indexOf(String(key))
+        : -1
+    if (position < 0) throw new Error(`No value at ${path.join('.')}`)
+    const limit = Math.ceil((position + 1) / page) * page
+    out.push({ path: parent, children: rawChildren(save, parent, 0, limit) })
+  }
+  return out
+}
+
+const STORY_STATES: Record<number, StoryState> = {
+  [-1]: 'retrofitted',
+  0: 'notStarted',
+  1: 'discovered',
+  2: 'inProgress',
+  3: 'complete',
+}
+const QUEST_STATES = ['notStarted', 'inProgress', 'completed'] as const
+
+/** Prefab whose `Activatable` shows whether a story machine was switched on. */
+const STORY_MACHINES: Record<string, string> = {
+  CreatureManipulator: 'GravitasCreatureManipulator',
+  HijackHeadquarters: 'HijackedHeadquarters',
+  MegaBrainTank: 'MegaBrainTank',
+}
+
+interface WorldBox {
+  id: number
+  name: string
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+function worldBoxes(save: SaveGame): WorldBox[] {
+  const boxes: WorldBox[] = []
+  for (const { obj } of objectsWith(save, 'WorldContainer')) {
+    const world = data(obj, 'WorldContainer')
+    const asteroid = behavior(obj, 'AsteroidGridEntity')?.templateData
+    const name = typeof asteroid?.m_name === 'string' ? asteroid.m_name : world.worldName
+    const offset = world.worldOffset as { x: number; y: number } | undefined
+    const size = world.worldSize as { x: number; y: number } | undefined
+    if (typeof world.id !== 'number' || typeof name !== 'string' || !offset || !size) continue
+    boxes.push({ id: world.id, name, x: offset.x, y: offset.y, width: size.x, height: size.y })
+  }
+  return boxes
+}
+
+/**
+ * Read-only: story states from `StoryManager`, quest progress from `QuestManager`.
+ * Returns an empty list for a save without a `StoryManager`.
+ */
+export function listStories(save: SaveGame): StoryView[] {
+  const saveGame = saveGameObject(save)
+  const manager = saveGame ? behavior(saveGame, 'StoryManager')?.templateData : undefined
+  const instances = (manager?._stories ?? []) as [
+    number,
+    {
+      storyId: string
+      worldId: number
+      state: number
+      telemetry?: { Retrofitted: number; Discovered: number; InProgress: number; Completed: number }
+    },
+  ][]
+  const questManager = saveGame ? behavior(saveGame, 'QuestManager')?.templateData : undefined
+  // Quests are saved per owner: the Lonely Minion's house, or the fossil dig site. Each story
+  // exists once per save, so a story's quests belong to one owner; with several, none is shown.
+  const questsByOwner = new Map<number, Map<number, number>>()
+  for (const [owner, quests] of (questManager?.ownerToQuests ?? []) as [
+    number,
+    [{ hash: number }, { currentState: number }][],
+  ][]) {
+    questsByOwner.set(owner, new Map(quests.map(([key, quest]) => [key.hash, quest.currentState])))
+  }
+  const worlds = worldBoxes(save)
+  const cycle = (value: number | undefined) =>
+    typeof value === 'number' && value >= 0 ? value : undefined
+  return instances
+    .map(([, story]) => {
+      const entry = storyCatalog.find((s) => s.id === story.storyId)
+      const t = story.telemetry
+      const world = worlds.find((w) => w.id === story.worldId)
+      const machine = STORY_MACHINES[story.storyId]
+      // The machine's `Activatable`, for the copy standing in the story's own world.
+      const activations = machine
+        ? (save.gameObjects.find((g) => g.name === machine)?.gameObjects ?? [])
+            .filter(
+              (obj) =>
+                world !== undefined &&
+                obj.position.x >= world.x &&
+                obj.position.x < world.x + world.width &&
+                obj.position.y >= world.y &&
+                obj.position.y < world.y + world.height,
+            )
+            .map((obj) => behavior(obj, 'Activatable')?.templateData?.activated)
+            .filter((v): v is boolean => typeof v === 'boolean')
+        : []
+      const cycles: StoryView['cycles'] = {}
+      for (const [key, value] of [
+        ['retrofitted', t?.Retrofitted],
+        ['discovered', t?.Discovered],
+        ['inProgress', t?.InProgress],
+        ['completed', t?.Completed],
+      ] as const) {
+        const found = cycle(value)
+        if (found !== undefined) cycles[key] = found
+      }
+      const catalogQuests = storyQuests.filter((q) => q.story === story.storyId)
+      const owners = [...questsByOwner.values()].filter((quests) =>
+        catalogQuests.some((q) => quests.has(hashString(q.id))),
+      )
+      const owned = owners.length === 1 ? owners[0] : undefined
+      return {
+        order: entry?.order ?? Number.MAX_SAFE_INTEGER,
+        view: {
+          id: story.storyId,
+          name: entry?.name ?? humanize(story.storyId),
+          state: STORY_STATES[story.state] ?? 'unknown',
+          world: world?.name,
+          cycles,
+          quests: catalogQuests
+            .filter((q) => owned?.has(hashString(q.id)))
+            .map((q) => ({
+              id: q.id,
+              name: q.name,
+              goal: q.goal,
+              state: QUEST_STATES[owned?.get(hashString(q.id)) ?? 0] ?? 'unknown',
+            })),
+          activated: activations.length > 0 ? activations.some(Boolean) : undefined,
+        } satisfies StoryView,
+      }
+    })
+    .sort((a, b) => a.order - b.order)
+    .map((r) => r.view)
 }

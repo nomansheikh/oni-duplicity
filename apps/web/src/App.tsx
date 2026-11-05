@@ -24,6 +24,7 @@ import type {
   DestinationView,
   GameSettingView,
   TechView,
+  StoryView,
   WorldView,
   DuplicantView,
   Edit,
@@ -46,6 +47,7 @@ interface Views {
   techs: TechView[]
   gameSettings: GameSettingView[]
   worlds: WorldView[]
+  stories: StoryView[]
   destinations: DestinationView[]
 }
 
@@ -59,6 +61,7 @@ interface EditStatus {
 const CrittersPage = lazy(() =>
   import('@/components/critters-page').then((m) => ({ default: m.CrittersPage })),
 )
+const DlcPage = lazy(() => import('@/components/dlc-page').then((m) => ({ default: m.DlcPage })))
 const DuplicantsPage = lazy(() =>
   import('@/components/duplicants/DuplicantsPage').then((m) => ({ default: m.DuplicantsPage })),
 )
@@ -78,6 +81,9 @@ const ResearchPage = lazy(() =>
 )
 const SettingsPage = lazy(() =>
   import('@/components/settings-page').then((m) => ({ default: m.SettingsPage })),
+)
+const StoriesPage = lazy(() =>
+  import('@/components/stories-page').then((m) => ({ default: m.StoriesPage })),
 )
 const SpacePage = lazy(() =>
   import('@/components/space-page').then((m) => ({ default: m.SpacePage })),
@@ -130,6 +136,7 @@ export default function App() {
       techs,
       gameSettings,
       worlds,
+      stories,
       destinations,
     ] = await Promise.all([
       saveClient.summary(),
@@ -140,6 +147,7 @@ export default function App() {
       saveClient.techs(),
       saveClient.gameSettings(),
       saveClient.worlds(),
+      saveClient.stories(),
       saveClient.destinations(),
     ])
     setState({ status: 'loaded', summary })
@@ -151,6 +159,7 @@ export default function App() {
       techs,
       gameSettings,
       worlds,
+      stories,
       destinations,
     })
     setRevision((r) => r + 1)
@@ -357,6 +366,7 @@ export default function App() {
                 materials: loaded.views.materials.length,
                 critters: loaded.views.critters.length,
                 space: loaded.views.worlds.length,
+                stories: loaded.views.stories.length,
               }
             : {}
         }
@@ -426,9 +436,12 @@ export default function App() {
                   <SpacePage
                     worlds={loaded.views.worlds}
                     destinations={loaded.views.destinations}
+                    revision={revision}
                     onEdit={edit}
                   />
                 )}
+                {loaded && page === 'stories' && <StoriesPage stories={loaded.views.stories} />}
+                {loaded && page === 'dlc' && <DlcPage revision={revision} onEdit={edit} />}
                 {loaded && page === 'settings' && (
                   <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
                 )}

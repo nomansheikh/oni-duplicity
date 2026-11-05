@@ -3,10 +3,12 @@ import {
   Braces,
   Droplets,
   FlaskConical,
+  BookOpen,
   Gauge,
   LayoutDashboard,
   Map as MapIcon,
   Package,
+  Puzzle,
   Rabbit,
   Rocket,
   Users,
@@ -23,6 +25,8 @@ export type Page =
   | 'materials'
   | 'research'
   | 'space'
+  | 'stories'
+  | 'dlc'
   | 'settings'
   | 'raw'
 
@@ -36,6 +40,8 @@ const PAGES: { id: Page; title: string; icon: ReactNode; color: string }[] = [
   { id: 'materials', title: 'Materials', icon: <Package />, color: 'var(--cat-metal)' },
   { id: 'research', title: 'Research', icon: <FlaskConical />, color: 'var(--cat-plant)' },
   { id: 'space', title: 'Space', icon: <Rocket />, color: 'var(--cat-liquid)' },
+  { id: 'stories', title: 'Stories', icon: <BookOpen />, color: 'var(--cat-food)' },
+  { id: 'dlc', title: 'DLC', icon: <Puzzle />, color: 'var(--cat-dlc)' },
   { id: 'settings', title: 'Game settings', icon: <Gauge />, color: 'var(--cat-power)' },
   { id: 'raw', title: 'Raw data', icon: <Braces />, color: 'var(--cat-vacuum)' },
 ]
