@@ -19,12 +19,19 @@ import {
 } from '@/components/ui/input-group'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { draftAfterModelChange, textToCommit } from '@/lib/draft'
 import { cn } from '@/lib/utils'
 import type { Named } from '@/worker/model'
 import { Portrait } from './portrait/Portrait'
 import { canDrawPortrait, type PortraitParts } from './portrait/sprites'
 
-/** Text input that commits on blur or Enter instead of on every keystroke. */
+/**
+ * Text input that commits on blur or Enter instead of on every keystroke.
+ *
+ * Edits reach `value` after a worker round trip, so `value` can change while the user is
+ * typing (the answer to an earlier edit). A focused field keeps its draft; remounting it
+ * on every new value would throw away what was just typed.
+ */
 export function CommitInput({
   value,
   onCommit,
@@ -33,11 +40,24 @@ export function CommitInput({
   value: string
   onCommit: (value: string) => void
 }) {
+  const [draft, setDraft] = useState<string | null>(null)
+  const [focused, setFocused] = useState(false)
+  const [seen, setSeen] = useState(value)
+  if (value !== seen) {
+    setSeen(value)
+    setDraft(draftAfterModelChange(draft, focused))
+  }
   return (
     <Input
-      key={value}
-      defaultValue={value}
-      onBlur={(e) => e.currentTarget.value !== value && onCommit(e.currentTarget.value)}
+      value={draft ?? value}
+      onChange={(e) => setDraft(e.currentTarget.value)}
+      onFocus={() => setFocused(true)}
+      onBlur={() => {
+        setFocused(false)
+        const text = textToCommit(draft, value)
+        if (text === null) setDraft(null)
+        else onCommit(text)
+      }}
       onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
       {...props}
     />

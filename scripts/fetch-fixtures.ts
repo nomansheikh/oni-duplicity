@@ -1,7 +1,7 @@
 import { join } from 'node:path'
-import { parseTierArg } from './fixtures/args.ts'
+import { parseFixtureArgs } from './fixtures/args.ts'
 import { ensureFixture, type Download } from './fixtures/ensure.ts'
-import { loadManifest, selectFixtures } from './fixtures/manifest.ts'
+import { loadManifest, selectFiles, selectFixtures } from './fixtures/manifest.ts'
 
 const root = join(import.meta.dirname, '..')
 
@@ -13,11 +13,13 @@ const download: Download = async (url) => {
   return new Uint8Array(await response.arrayBuffer())
 }
 
-const selection = parseTierArg(process.argv.slice(2))
+const args = parseFixtureArgs(process.argv.slice(2))
 const manifest = await loadManifest(join(root, 'test-data/fixtures.json'))
 
 let failed = 0
-for (const fixture of selectFixtures(manifest, selection)) {
+const selected =
+  args.files.length > 0 ? selectFiles(manifest, args.files) : selectFixtures(manifest, args.tier)
+for (const fixture of selected) {
   try {
     const result = await ensureFixture(root, manifest.baseUrl, fixture, download)
     console.log(`${result === 'present' ? 'ok        ' : 'downloaded'}  ${fixture.file}`)

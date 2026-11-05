@@ -73,3 +73,103 @@ test('duplicates an array item', async ({ page }) => {
     /^gameData\/customGameSettings\/CurrentMixingLevelsBySetting\/(length|17)$/,
   ])
 })
+
+/** The first array of strings named TraitIds in tree order, as the whole-tree search finds it. */
+function firstTraitIds(save: ReturnType<typeof original>) {
+  for (const group of save.gameObjects) {
+    for (const [index, obj] of group.gameObjects.entries()) {
+      for (const b of obj.behaviors) {
+        const ids = b.templateData?.TraitIds
+        if (Array.isArray(ids) && ids.length > 0)
+          return { group: group.name, index, ids: ids as string[] }
+      }
+    }
+  }
+  throw new Error('no TraitIds in the fixture')
+}
+
+test('searches the whole save for a deep key, jumps to it and edits it', async ({ page }) => {
+  const { group, index, ids } = firstTraitIds(original(GALAXY))
+  await openSave(page)
+  await goTo(page, 'Raw data')
+
+  // Nothing is expanded, so only a search of the whole save can reach this row.
+  await page
+    .getByRole('textbox', { name: 'Search the whole save' })
+    .fill('templateData.TraitIds[0]')
+  const results = page.getByRole('list', { name: 'Search results' })
+  const hit = results.getByRole('button').first()
+  await expect(hit).toContainText('templateData.TraitIds[0]')
+  await expect(hit).toContainText(ids[0]!)
+  await hit.click()
+
+  // The tree opened down to the row and the row is the highlighted one.
+  const field = page.getByRole('textbox', { name: '0', exact: true })
+  await expect(field).toHaveValue(ids[0]!)
+  await expect(page.locator('.group.ring-primary')).toHaveCount(1)
+  await field.fill('Anemic')
+  await field.press('Enter')
+  await expect(field).toHaveValue('Anemic')
+
+  const { save } = await downloadSave(page)
+  expect(firstTraitIds(save).ids[0]).toBe('Anemic')
+  const escaped = group.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  expectOnlyChanged(original(GALAXY), save, [
+    new RegExp(`^objects/${escaped}/${index}/[^/]+/templateData/TraitIds/0$`),
+  ])
+})
+
+test('says when a search finds nothing', async ({ page }) => {
+  await openSave(page)
+  await goTo(page, 'Raw data')
+  await page.getByRole('textbox', { name: 'Search the whole save' }).fill('no_such_key_anywhere')
+  await expect(page.getByText('No matches in the whole save')).toBeVisible()
+})
+
+test('adds an item to an array of objects', async ({ page }) => {
+  const before = (original(GALAXY).world as { active_mods: unknown[] }).active_mods
+  expect(before.length).toBeGreaterThan(0)
+  await openSave(page)
+  await openRaw(page, 'world')
+
+  await openRowActions(page, 'active_mods')
+  await page.getByRole('menuitem', { name: 'Add item', exact: true }).click()
+  await expect(page.getByText(`[ ${before.length + 1} ]`).first()).toBeVisible()
+
+  const { save } = await downloadSave(page)
+  const after = (save.world as { active_mods: Record<string, unknown>[] }).active_mods
+  expect(after).toHaveLength(before.length + 1)
+  expect(after.slice(0, -1)).toEqual(before)
+  // Every field of the new item exists, with the zero value of its type.
+  expect(Object.keys(after.at(-1)!)).toEqual(Object.keys(before[0] as object))
+  expectOnlyChanged(original(GALAXY), save, [
+    new RegExp(`^world/active_mods/(length|${before.length})(/.*)?$`),
+  ])
+})
+
+test('adds an item to an array of strings, and only where the type is known', async ({ page }) => {
+  const { group, index, ids } = firstTraitIds(original(GALAXY))
+  await openSave(page)
+  // The header JSON has no type definitions, so its arrays offer no "Add item".
+  await openRaw(page, 'header.gameInfo')
+  await openRowActions(page, 'dlcIds')
+  await expect(page.getByRole('menuitem', { name: 'Add item', exact: true })).toBeDisabled()
+  await page.keyboard.press('Escape')
+
+  await page
+    .getByRole('textbox', { name: 'Search the whole save' })
+    .fill('templateData.TraitIds[0]')
+  await page.getByRole('list', { name: 'Search results' }).getByRole('button').first().click()
+  // From an item of the array, "Add item to this array" appends at the end.
+  await page.locator('.group.ring-primary').getByRole('button', { name: 'Row actions' }).click()
+  await page.getByRole('menuitem', { name: 'Add item to this array' }).click()
+  await expect(page.getByRole('textbox', { name: String(ids.length), exact: true })).toHaveValue('')
+
+  const { save } = await downloadSave(page)
+  const traits = firstTraitIds(save).ids
+  expect(traits).toEqual([...ids, ''])
+  const escaped = group.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  expectOnlyChanged(original(GALAXY), save, [
+    new RegExp(`^objects/${escaped}/${index}/[^/]+/templateData/TraitIds/(length|${ids.length})$`),
+  ])
+})
