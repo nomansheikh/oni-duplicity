@@ -40,6 +40,13 @@ import {
   type StoredItem,
   type TemplateData,
 } from '@oni-duplicity/save-parser'
+import { demoliorObjects, setDemoliorImpact } from './dlc.ts'
+import {
+  applySpaceEdit,
+  destinationState,
+  type DestinationState,
+  type SpaceEdit,
+} from './space-edits.ts'
 import { blockedSections, modelLabel, profileModel } from '../lib/profile.ts'
 
 // --- View models (sent to the UI) -----------------------------------------
@@ -85,7 +92,7 @@ export interface SkillView extends Named {
 
 export interface AmountView extends Named {
   value: number
-  /** Highest value the game allows, when known: critter amounts and the bionic amounts. */
+  /** Highest value the game allows, when known. Critter amounts only. */
   max?: number
   /** Why the amount can't be edited (an unconfirmed maximum, a missing DLC). Critter amounts only. */
   readOnlyReason?: string
@@ -154,7 +161,7 @@ export interface WorldView {
   visited: boolean
 }
 
-export interface DestinationView {
+export interface DestinationView extends DestinationState {
   id: number
   type: string
   distance: number
@@ -396,6 +403,8 @@ export type Edit =
   | { type: 'rawAdd'; path: RawPath }
   | { type: 'setMaterialTemperature'; elementId: string; kelvin: number }
   | { type: 'scaleMaterialMass'; elementId: string; factor: number }
+  | { type: 'setDemoliorImpact'; impactCycle: number }
+  | SpaceEdit
 
 // --- Helpers ---------------------------------------------------------------
 
@@ -1004,6 +1013,9 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
         pe.Units = Math.max(0, Number(pe.Units) * edit.factor)
       }
       return
+    case 'setDemoliorImpact':
+      setDemoliorImpact(save, edit.impactCycle)
+      return
     case 'setAmount': {
       if (!Number.isFinite(edit.value)) throw new Error('An amount must be a finite number')
       const obj = objectById(save, edit.id)
@@ -1022,6 +1034,12 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       )
       return
     }
+    case 'setDestinationMass':
+    case 'setDestinationAnalysis':
+    case 'revealStarmap':
+    case 'setPoiStock':
+      applySpaceEdit(save, edit)
+      return
     default:
       applyObjectEdit(objectById(save, edit.id), edit, {
         prefab: splitId(edit.id).group,
@@ -1285,6 +1303,7 @@ export function itemByRef(save: SaveGame, ref: string): GameObject {
 
 /** The game objects an edit may change, for undo snapshots. */
 export function touchedBy(save: SaveGame, edit: Edit): GameObject[] {
+  if (edit.type === 'setDemoliorImpact') return demoliorObjects(save)
   if (edit.type === 'bulkDuplicants') {
     return objectsWith(save, 'MinionIdentity').map(({ obj }) => obj)
   }
@@ -1595,8 +1614,10 @@ export function listDestinations(save: SaveGame): DestinationView[] {
     type: string
     distance: number
     recoverableElements?: [number, number][]
+    availableMass?: number
   }[]
   return destinations.map((d) => ({
+    ...destinationState(save, d),
     id: d.id,
     type: humanize(d.type),
     distance: d.distance,

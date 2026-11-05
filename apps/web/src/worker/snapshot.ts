@@ -31,6 +31,7 @@ export function snapshot(save: SaveGame, edit: Edit): () => void {
       b,
       templateData: cloneValue(b.templateData),
       extraData: cloneValue(b.extraData),
+      extraRaw: b.extraRaw,
     })),
   )
   // Cloning or deleting changes group lists and the unique ID counter, not just behaviors.
@@ -59,6 +60,9 @@ export function snapshot(save: SaveGame, edit: Edit): () => void {
     for (const s of behaviors) {
       s.b.templateData = s.templateData
       if (s.extraData !== undefined) s.b.extraData = s.extraData
+      // Edits that touch raw bytes replace the array instead of changing it in place.
+      // Byte edits swap in a new array, so the old one goes back by reference.
+      s.b.extraRaw = s.extraRaw
     }
     for (const { g, list } of groups) g.gameObjects = list
     if (settings) save.settings = settings
