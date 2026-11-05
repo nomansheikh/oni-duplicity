@@ -50,6 +50,8 @@ export interface Summary {
   dlcIds: string[]
   clusterId: string
   isAutoSave: boolean
+  /** The save this was written from (`gameInfo.originalSaveName`); autosaves are named after it. */
+  originalSaveName: string
   sandbox: boolean
   /** Set for good once debug tools are used; blocks achievements. */
   debugWasUsed: boolean
@@ -456,6 +458,7 @@ export function summarize(save: SaveGame, fileName: string): Summary {
     dlcIds: dlcIds(save),
     clusterId: info.clusterId ?? '',
     isAutoSave: info.isAutoSave,
+    originalSaveName: typeof info.originalSaveName === 'string' ? info.originalSaveName : '',
     sandbox: Boolean(sandbox ?? info.sandboxEnabled),
     debugWasUsed: save.gameData.debugWasUsed === true,
     unverified: info.saveMinorVersion > MAX_VERIFIED_MINOR,

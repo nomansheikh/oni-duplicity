@@ -81,3 +81,12 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - The bionic test needs the 40 MB full-tier fixture, so it is skipped on PRs and runs only on full-tier CI (`main` and nightly). There it fails instead of skipping when the fixture is missing (`CI` set and `FIXTURE_TIER=all`).
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
+
+## Load/save polish — 2026-11-05
+
+- Autosave: saves whose header says `isAutoSave` get an "Autosave" badge in the header and a note that the game's autosave rotation may overwrite an edited autosave. The note names `gameInfo.originalSaveName` (a field of `SaveGame.GameInfo` in the decompile, present in the fixtures) and `Summary` now carries it. The download name is unchanged.
+- Load errors: a friendly title (not an ONI save, unsupported version, truncated or corrupted, or unknown) picked from the parser's message, plus a collapsible "Details" section with the message, byte offset and stack, and a copy button. Errors cross the worker as plain `Error`s, so the offset is read back from the message.
+- "Download save" now opens a confirm dialog: distinct changed targets ("3 duplicants, 1 geyser, colony settings"), the edit labels, and a "Back up your original save first" warning. Each history entry in the worker carries a category and key (`editTarget` in `describe.ts`). The post-download toast no longer repeats the backup advice.
+- The tab title starts with "• " while there are unsaved edits.
+- Tests: unit tests for the grouping and error classification, and e2e for the dialog (cancel, confirm), grouping, the title, autosave, a truncated file and a non-save file. No fixture is an autosave, so the autosave e2e rewrites the header of `beautiful-galaxy` and loads that.
+- Risk: the "not an ONI save" versus "truncated" split is a heuristic on the parser's message, since the worker boundary drops `ParseError`'s fields.
