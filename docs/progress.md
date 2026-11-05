@@ -50,3 +50,26 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Four geysers in the owner's colony sit at their type maximums regardless of their rolls, most likely from a mod. The editor flags them.
 - Next: in-game check of a geyser edit; e2e tests.
 - Risk: the decompile's game build is unknown. If a build keeps the saved values instead, the edits still hold, since both are written.
+
+## End-to-end tests — 2026-11-05
+
+- Playwright suite in `apps/web/e2e/`: each test loads a fixture, edits through the UI, downloads the save and re-parses it with the save-parser. `expectOnlyChanged` then asserts that the diff against the original is exactly the intended paths and nothing else.
+- Coverage (33 tests):
+  - colony rename, sandbox and debug flag;
+  - undo/redo and the unsaved-changes list;
+  - duplicant traits, skills, attributes, amounts and effects;
+  - a colony-wide action;
+  - bionic power bank and gear oil;
+  - critter tame, wild, clone and delete;
+  - geyser value, clamp and rename;
+  - materials mass, temperature and bulk edits;
+  - research;
+  - asteroid rename and discover;
+  - a difficulty setting;
+  - raw edit, plus array remove and duplicate.
+- The suite runs in about 47 s locally (33 passed, twice in a row).
+- CI runs it in the `ci` job after the build.
+- Risks:
+  - The bionic test needs the 40 MB full-tier fixture, so it is skipped on PRs and runs on `main` and nightly.
+  - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
+- Next: parser acceptance (bench, fuzz, differential).

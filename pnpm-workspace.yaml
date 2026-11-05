@@ -17,6 +17,7 @@ catalog:
   '@fontsource/chakra-petch': ^5.3.0
   '@oni-duplicity/game-data': workspace:*
   '@oni-duplicity/save-parser': workspace:*
+  '@playwright/test': ^1.64.1
   '@tailwindcss/vite': ^4.3.3
   '@tanstack/react-table': ^9.2.4
   '@tanstack/react-virtual': ^3.14.13

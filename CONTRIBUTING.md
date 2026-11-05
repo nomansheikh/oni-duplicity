@@ -19,7 +19,13 @@ vp test         # tests; saves that aren't downloaded are skipped
 
 # every test save (about 120 MB) and the slow round trips
 vp run fixtures --tier all && FIXTURE_TIER=all vp test
+
+# end-to-end tests in Chromium (builds the app and serves it on port 5179)
+vp -C apps/web exec playwright install chromium   # once
+vp -C apps/web run e2e
 ```
+
+If the bundled browser can't be downloaded, set `PLAYWRIGHT_CHROMIUM_PATH` to a local Chromium or Chrome.
 
 The pre-commit hook runs `vp check --fix` on staged files.
 
@@ -30,6 +36,7 @@ The pre-commit hook runs `vp check --fix` on staged files.
 - Code style is whatever `vp check --fix` produces: no semicolons, single quotes.
 - Parser changes must keep the round-trip test passing on every fixture (the last command above).
 - New editors go through `worker/model.ts`: add a view model, an `Edit` variant and its `applyEdit` case, and make sure undo restores it.
+- Every mutating feature gets an end-to-end test in `apps/web/e2e`: edit through the UI, download, and use `expectOnlyChanged` to assert the save changed exactly where intended.
 
 ## Game data
 

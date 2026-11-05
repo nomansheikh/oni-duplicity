@@ -116,17 +116,19 @@ save(): Uint8Array
 
 ## Testing
 
-| Layer      | What                                                                     | Where          |
-| ---------- | ------------------------------------------------------------------------ | -------------- |
-| Round trip | Header and decompressed body byte-equal after writing a parsed save back | every fixture  |
-| Fixtures   | Manifest parsing, tiers and checksum verification                        | `scripts/`     |
-| Manual     | Load → edit → download → reload, in Chrome                               | before each PR |
+| Layer      | What                                                                                                     | Where                              |
+| ---------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Round trip | Header and decompressed body byte-equal after writing a parsed save back                                 | every fixture                      |
+| Fixtures   | Manifest parsing, tiers and checksum verification                                                        | `scripts/`                         |
+| Unit       | Edit models, e.g. geyser rolls and ranges                                                                | `apps/web/tests`, package `tests/` |
+| End to end | Load a fixture in Chromium → edit through the UI → download → re-parse → only the intended paths changed | `apps/web/e2e`                     |
+| Manual     | Load → edit → download → reload, in Chrome                                                               | before each PR                     |
 
 **In-game verification.** Edited saves are loaded in the real game before a feature is called verified; [verified-in-game.md](verified-in-game.md) records the edit, game version, DLCs, date and verifier.
 
 ## CI, fixtures and releases
 
-- **CI** (`voidzero-dev/setup-vp`, pinned): `vp install`, `vp check`, `vp test`, `vp run -r build` on every push and PR, plus a nightly run.
+- **CI** (`voidzero-dev/setup-vp`, pinned): `vp install`, `vp check`, `vp test`, `vp run -r build` and the Playwright suite on every push and PR, plus a nightly run.
 - **Fixtures:** the owner's saves are committed in `test-data/saves/` (CC0-1.0). The konove save and the six mithro saves are mirrored to the `fixtures-v1` prerelease with their licenses; `test-data/fixtures.json` pins every file by SHA-256. `vp run fixtures [--tier small|all]` downloads into the git-ignored `test-data/fetched/` and verifies checksums; CI caches that folder by manifest hash. PRs run the small tier unless they change `fixtures.json`; pushes to `main`, manifest changes and the nightly job run all of them.
 - **Repository rules:** `main` requires a PR and green CI (admin bypass allowed); squash merge only; a CI check requires a conventional PR title.
 - **Dependabot** for npm and GitHub Actions.
@@ -143,7 +145,7 @@ save(): Uint8Array
 ## Deviations from the original plan
 
 - **Smaller stack.** No TanStack Router, Query, Table or Zustand, and no i18n library: plain React state and a worker call per view were enough.
-- **No differential test** against oni-save-parser, no fuzzing, no end-to-end or component tests yet. The round-trip test over every fixture is the parser's safety net.
+- **No differential test** against oni-save-parser, no fuzzing and no component tests yet. The round-trip test over every fixture is the parser's safety net.
 - **No dump mod.** IDs come from string literals in `Assembly-CSharp.dll` instead of a mod that dumps the live `Db` registries.
 - **No typed behaviors.** Template data is decoded generically; only the extra data the editors need has codecs.
 - **Portraits are shown**, using react-oni-duplicant's sprites instead of committing any art.
