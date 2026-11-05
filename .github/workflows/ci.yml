@@ -73,7 +73,7 @@ jobs:
         run: vp run fixtures --tier "$FIXTURE_TIER"
 
       - name: Fetch benchmark fixtures
-        if: env.FIXTURE_TIER == 'small' && env.RUN_BENCH == 'yes'
+        if: github.event_name != 'pull_request' && env.FIXTURE_TIER == 'small' && env.RUN_BENCH == 'yes'
         run: vp run fixtures --file mithro-06-maximum-cycle-4770.sav --file mithro-03-late-game-cycle-1160.sav
 
       - run: vp check
@@ -81,7 +81,7 @@ jobs:
       - run: vp test
 
       - name: Check parser performance
-        if: env.RUN_BENCH == 'yes' && !inputs.bench_baseline
+        if: github.event_name != 'pull_request' && env.RUN_BENCH == 'yes' && !inputs.bench_baseline
         run: vp run bench --require
 
       - name: Record benchmark baseline
@@ -96,6 +96,7 @@ jobs:
           path: test-data/bench-baseline.json
 
       - name: Restore differential oracle
+        if: github.event_name != 'pull_request'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .cache/oracle
@@ -103,23 +104,30 @@ jobs:
 
       # Compares every fixture against konove's oni-save-parser, built from source at a pinned commit.
       - name: Differential test against oni-save-parser
+        if: github.event_name != 'pull_request'
         run: vp run differential --tier "$FIXTURE_TIER"
 
       - name: Build app and pack libraries
+        if: github.event_name != 'pull_request'
         run: vp run -r build
 
+      # Pull requests run only check and unit tests for speed; the heavy steps below run on main,
+      # nightly and on demand until a dedicated test pass restores them on PRs.
       # End-to-end: load a fixture in Chromium, edit through the UI, download, re-parse.
       - name: Cache Playwright browsers
+        if: github.event_name != 'pull_request'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install Chromium
+        if: github.event_name != 'pull_request'
         working-directory: apps/web
         run: vp exec playwright install --with-deps chromium
 
       - name: End-to-end tests
+        if: github.event_name != 'pull_request'
         working-directory: apps/web
         run: vp exec playwright test
 

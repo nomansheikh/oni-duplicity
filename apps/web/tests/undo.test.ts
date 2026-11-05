@@ -105,7 +105,7 @@ const bulk: { edit: Edit; field: RegExp; check: (save: SaveGame) => void }[] = [
         for (const [id, value] of [
           ['HitPoints', 100],
           ['Stamina', 100],
-          ['Breath', 100],
+          ['Breath', d.amounts.find((a) => a.id === 'Breath')?.max ?? 100],
           ['Bladder', 0],
           ['Stress', 0],
         ] as const) {

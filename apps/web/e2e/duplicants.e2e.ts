@@ -206,6 +206,28 @@ test.describe('duplicants', () => {
     ])
   })
 
+  test('clamps amounts to the real maximums', async ({ page }) => {
+    await pick(page, 'Digger')
+    await page.getByRole('tab', { name: 'Health & needs' }).click()
+    await setNumber(page, 'Stress', 500)
+    // 9,999 kcal is well past the 4,000 kcal stomach.
+    await setNumber(page, 'Calories', 9999)
+
+    const { save } = await downloadSave(page)
+    const before = fixtureDupe(GALAXY, 'Minion', 0).amounts
+    const stress = indexOf(before, (a) => a.name === 'Stress')
+    const calories = indexOf(before, (a) => a.name === 'Calories')
+    const amounts = (
+      behavior(group(save, 'Minion')[0]!, 'MinionModifiers')!.extraData as { amounts: Amount[] }
+    ).amounts
+    expect(amounts[stress]!.value.value).toBeCloseTo(100, 4)
+    expect(amounts[calories]!.value.value).toBeCloseTo(4_000_000, 0)
+    expectOnlyChanged(original(GALAXY), save, [
+      new RegExp(path('Minion', 0, 'MinionModifiers', `extraData/amounts/${stress}/value/value`)),
+      new RegExp(path('Minion', 0, 'MinionModifiers', `extraData/amounts/${calories}/value/value`)),
+    ])
+  })
+
   test('adds an effect', async ({ page }) => {
     await pick(page, 'Artist')
     await page.getByRole('tab', { name: 'Effects' }).click()

@@ -52,3 +52,13 @@ Charging a bank would need:
 2. For an empty bank, the game swaps the object for a different prefab (`Electrobank.ReplaceChargedWithEmpty`), so charging means replacing the stored object, with new `InstanceID` and behaviors, not editing it.
 3. `BionicBatteryMonitor` keeps `ChargedElectrobankCount` and `DepletedElectrobankCount` as state machine parameters in the same opaque blob; they may need to agree with the storage contents. Unknown whether the game recounts on load.
 4. The `BionicInternalBattery` amount is already editable and may be what the game actually draws from; how it relates to the banks is unverified.
+
+## Duplicant amount maximums
+
+The editor clamps a duplicant's amounts to the game's range (`Database/Amounts.cs`, `BaseMinionConfig`, `MinionConfig`; see `DUPLICANT_AMOUNT_LIMITS` in `apps/web/src/worker/model.ts`). Checked against every fixture: no saved value exceeds its derived maximum. Not confirmed in game:
+
+- Breath is the only amount whose maximum moves: the `Minnow` trait (+400) and the Swimming skill (+100). Both come from the decompile and are read from the save's trait and skill lists. A mod or a game update that adds another `BreathMax` source would make the cap too low.
+- An amount outside the table (a modded one) has no derivable maximum. It stays editable and unclamped, and the UI says so.
+- Bionics have no calories amount (`MAX_CALORIES = 0`), so a `Calories` entry on a bionic is left unclamped.
+- Importing a duplicant profile (`applyProfile`) can change traits and skills without re-clamping breath. The game does not clamp a loaded value (`AmountInstance.value` is a raw serialized float; clamping happens on the next `SetValue` or `ApplyDelta`), so an imported profile could leave breath above a lowered maximum until then.
+- The Swimming skill needs `DLC5_ID`; the editor trusts the mastery list in the save and does not check the DLC.

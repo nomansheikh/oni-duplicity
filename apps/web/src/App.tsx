@@ -15,6 +15,7 @@ import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
 import { describeLoadError, type LoadErrorInfo } from '@/lib/load-error'
 import { useAllowUnverified } from '@/lib/preferences'
 import { downloadBytes, loadSave, saveClient } from '@/lib/save-client'
@@ -98,16 +99,42 @@ function PageFallback() {
   )
 }
 
-const BODY = 'flex flex-1 flex-col gap-4 bg-field p-3 md:gap-6 md:p-5'
+const BODY = 'flex flex-1 flex-col bg-field p-3 md:p-5'
+const INNER = 'flex w-full flex-1 flex-col gap-4 md:gap-6'
+
+/**
+ * Content width per page, configured in one place. `readable` caps and centres the content on wide
+ * screens; `full` lets data-heavy pages use the whole width. The header and tab strip are always
+ * full width.
+ */
+const PAGE_WIDTH: Record<Page, 'readable' | 'full'> = {
+  overview: 'readable',
+  settings: 'readable',
+  research: 'readable',
+  stories: 'readable',
+  dlc: 'readable',
+  space: 'readable',
+  map: 'full',
+  raw: 'full',
+  materials: 'full',
+  critters: 'full',
+  duplicants: 'full',
+  geysers: 'full',
+}
 
 /** Pages sit in the tab panel once a save is open, so each tab names a real panel. */
 function Body({ page, children }: { page: Page | null; children: ReactNode }) {
+  const inner = (
+    <div className={cn(INNER, page && PAGE_WIDTH[page] === 'readable' && 'mx-auto max-w-content')}>
+      {children}
+    </div>
+  )
   return page ? (
     <TabsContent value={page} className={BODY}>
-      {children}
+      {inner}
     </TabsContent>
   ) : (
-    <div className={BODY}>{children}</div>
+    <div className={BODY}>{inner}</div>
   )
 }
 

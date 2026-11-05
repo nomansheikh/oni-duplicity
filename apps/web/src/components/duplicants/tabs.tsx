@@ -445,11 +445,11 @@ export function Vital({ amount, Icon }: { amount: AmountView; Icon: LucideIcon }
 
 export function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
   const { format, scale, offset, shown } = readAmount(amount)
-  // Critter amounts carry the game's own maximum; duplicants fall back to a typical range.
+  // The worker sends the game's own range when it could derive one; otherwise a typical range.
   const bounded = amount.max !== undefined
   const readOnly = amount.readOnlyReason !== undefined
   const top = bounded ? amount.max! * scale + offset : Math.max(format.max, shown)
-  const bottom = bounded ? offset : Math.min(0, shown)
+  const bottom = bounded ? (amount.min ?? 0) * scale + offset : Math.min(0, shown)
   // The slider uses the shorter range when the amount has one; the field keeps the true bounds.
   const sliderTop = format.range ? Math.max(Math.min(top, format.range[1]), shown) : top
   const sliderBottom = format.range ? Math.min(Math.max(bottom, format.range[0]), shown) : bottom
@@ -485,6 +485,7 @@ export function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn
       {readOnly && (
         <p className="text-xs text-muted-foreground">Read only. {amount.readOnlyReason}.</p>
       )}
+      {amount.warning && <p className="text-xs text-muted-foreground">{amount.warning}</p>}
     </Field>
   )
 }
@@ -514,10 +515,7 @@ export function HealthTab({ dupe, edit }: { dupe: DuplicantView; edit: EditFn })
           <AmountGroup amounts={pick(BIONIC)} edit={edit} />
         </Panel>
       )}
-      <Panel
-        title="Needs"
-        description="The game clamps values to each duplicant's maximum when it loads."
-      >
+      <Panel title="Needs" description="Values are limited to each duplicant's real maximum.">
         <AmountGroup amounts={pick(NEEDS)} edit={edit} />
       </Panel>
       {other.length > 0 && (
