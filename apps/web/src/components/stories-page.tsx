@@ -1,14 +1,13 @@
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { fmt } from '@/lib/format'
 import type { StoryQuestView, StoryState, StoryView } from '@/worker/model'
 
@@ -29,23 +28,81 @@ const QUEST_LABELS: Record<StoryQuestView['state'], string> = {
 }
 
 function stateVariant(state: StoryState) {
-  if (state === 'complete') return 'default'
-  if (state === 'inProgress' || state === 'discovered') return 'secondary'
+  if (state === 'complete') return 'good'
+  if (state === 'inProgress') return 'warn'
+  if (state === 'discovered') return 'info'
   return 'outline'
 }
 
 function Timeline({ cycles }: { cycles: StoryView['cycles'] }) {
-  const parts = [
+  const steps: [string, number | undefined][] = [
     ['Added', cycles.retrofitted],
     ['Discovered', cycles.discovered],
     ['Started', cycles.inProgress],
     ['Completed', cycles.completed],
-  ].filter((p): p is [string, number] => typeof p[1] === 'number')
-  if (parts.length === 0) return <span className="text-muted-foreground">-</span>
+  ]
+  if (steps.every(([, cycle]) => typeof cycle !== 'number')) {
+    return <span className="type-small text-muted-foreground">No cycles recorded</span>
+  }
   return (
-    <span className="text-muted-foreground">
-      {parts.map(([label, cycle]) => `${label} cycle ${fmt(Math.floor(cycle))}`).join(' · ')}
-    </span>
+    <ol className="flex flex-wrap gap-x-6 gap-y-3">
+      {steps.map(([label, cycle]) => {
+        const reached = typeof cycle === 'number'
+        return (
+          <li key={label} className="flex items-center gap-2">
+            <span
+              aria-hidden
+              className={
+                reached
+                  ? 'size-3 shrink-0 border border-ink bg-gold'
+                  : 'size-3 shrink-0 border border-border bg-inset'
+              }
+            />
+            <span className="flex flex-col gap-0.5">
+              <span className="type-caption text-muted-foreground">{label}</span>
+              <span className={reached ? 'type-label tabular-nums' : 'type-small text-fg-3'}>
+                {reached ? `cycle ${fmt(Math.floor(cycle))}` : '-'}
+              </span>
+            </span>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
+function StoryCard({ story }: { story: StoryView }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{story.name}</CardTitle>
+        <CardAction>
+          <Badge variant={stateVariant(story.state)}>{STATE_LABELS[story.state]}</Badge>
+        </CardAction>
+        <CardDescription>{story.world ?? 'No asteroid recorded'}</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {(story.activated !== undefined || story.quests.length > 0) && (
+          <div className="well flex flex-col gap-2 p-3">
+            {story.activated !== undefined && (
+              <div className="type-body">
+                Machine {story.activated ? 'activated' : 'not activated'}
+              </div>
+            )}
+            {story.quests.map((quest) => (
+              <div key={quest.id} className="flex flex-wrap items-center gap-2">
+                <span className="type-body">{quest.name}</span>
+                <Badge variant={quest.state === 'completed' ? 'good' : 'outline'}>
+                  {QUEST_LABELS[quest.state]}
+                </Badge>
+                <span className="type-small text-muted-foreground">{quest.goal}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <Timeline cycles={story.cycles} />
+      </CardContent>
+    </Card>
   )
 }
 
@@ -64,58 +121,17 @@ export function StoriesPage({ stories }: { stories: StoryView[] }) {
   }
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Story traits</CardTitle>
-          <CardDescription>Where each story trait stands in this save. Read only.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Story</TableHead>
-                <TableHead>State</TableHead>
-                <TableHead>Asteroid</TableHead>
-                <TableHead>Progress</TableHead>
-                <TableHead>Cycles</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {stories.map((story) => (
-                <TableRow key={story.id}>
-                  <TableCell className="font-medium">{story.name}</TableCell>
-                  <TableCell>
-                    <Badge variant={stateVariant(story.state)}>{STATE_LABELS[story.state]}</Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{story.world ?? '-'}</TableCell>
-                  <TableCell className="space-y-1">
-                    {story.activated !== undefined && (
-                      <div className="text-muted-foreground">
-                        Machine {story.activated ? 'activated' : 'not activated'}
-                      </div>
-                    )}
-                    {story.quests.map((quest) => (
-                      <div key={quest.id} className="flex items-center gap-2">
-                        <span>{quest.name}</span>
-                        <Badge variant={quest.state === 'completed' ? 'default' : 'outline'}>
-                          {QUEST_LABELS[quest.state]}
-                        </Badge>
-                        <span className="text-muted-foreground">{quest.goal}</span>
-                      </div>
-                    ))}
-                    {story.activated === undefined && story.quests.length === 0 && (
-                      <span className="text-muted-foreground">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Timeline cycles={story.cycles} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col gap-1">
+        <h2 className="type-h2">Story traits</h2>
+        <p className="type-small text-muted-foreground">
+          Where each story trait stands in this save. Read only.
+        </p>
+      </div>
+      <div className="grid gap-4 @3xl/main:grid-cols-2 md:gap-6">
+        {stories.map((story) => (
+          <StoryCard key={story.id} story={story} />
+        ))}
+      </div>
     </div>
   )
 }
