@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "fflate": "catalog:",
     "vite-plus": "catalog:"
   },
   "devEngines": {

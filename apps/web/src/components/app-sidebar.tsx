@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   Braces,
   Droplets,
@@ -12,6 +12,7 @@ import {
   Users,
 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/utils'
 
 export type Page =
   | 'overview'
@@ -40,37 +41,98 @@ const PAGES: { id: Page; title: string; icon: ReactNode; color: string }[] = [
 ]
 
 /**
- * The game's top tab strip. Scrolls sideways when the window is too narrow, so every page
- * stays reachable on a phone.
+ * The game's top tab strip, wrapping the page panel (`TabsContent`) so each tab controls a
+ * real panel. `page` is null while no save is open: every tab is disabled and none is active.
+ * The strip scrolls sideways when narrow, with a fade at each edge that has more tabs.
  */
 export function AppTabs({
   page,
   onNavigate,
   counts,
-  disabled,
+  children,
 }: {
-  page: Page
+  page: Page | null
   onNavigate: (page: Page) => void
   counts: Partial<Record<Page, number>>
-  disabled: boolean
+  children: ReactNode
 }) {
+  const list = useRef<HTMLDivElement>(null)
+  const [edges, setEdges] = useState({ start: false, end: false })
+
+  useEffect(() => {
+    const el = list.current
+    if (!el) return
+    const update = () =>
+      setEdges({
+        start: el.scrollLeft > 1,
+        end: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+      })
+    update()
+    el.addEventListener('scroll', update, { passive: true })
+    const observer = new ResizeObserver(update)
+    observer.observe(el)
+    return () => {
+      el.removeEventListener('scroll', update)
+      observer.disconnect()
+    }
+  }, [])
+
   return (
-    <Tabs value={page} onValueChange={(value) => onNavigate(value as Page)} className="gap-0">
-      <TabsList aria-label="Pages" className="w-full pb-px [scrollbar-width:thin]">
-        {PAGES.map((item) => (
-          <TabsTrigger key={item.id} value={item.id} disabled={disabled}>
-            <span className="contents" style={{ color: item.color }}>
-              {item.icon}
-            </span>
-            {item.title}
-            {counts[item.id] !== undefined && (
-              <span data-slot="tab-count" className="tabular-nums">
-                {counts[item.id]}
+    <Tabs
+      value={page ?? ''}
+      onValueChange={(value) => onNavigate(value as Page)}
+      className="flex-1 gap-0"
+    >
+      <nav aria-label="Editor pages" className="relative border-b border-ink bg-ground px-3 pt-2">
+        <TabsList
+          ref={list}
+          aria-label="Pages"
+          className="w-full pb-px [scrollbar-width:thin]"
+          onFocus={(e) => e.target.scrollIntoView({ block: 'nearest', inline: 'nearest' })}
+        >
+          {PAGES.map((item) => (
+            <TabsTrigger
+              key={item.id}
+              value={item.id}
+              disabled={page === null}
+              // The screen-reader count is absolutely positioned; keep it inside the tab.
+              className="relative"
+              // Radix points every tab at its own panel; only the active one is mounted.
+              {...(item.id === page ? {} : { 'aria-controls': undefined })}
+            >
+              <span className="contents" style={{ color: item.color }}>
+                {item.icon}
               </span>
-            )}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+              {item.title}
+              {counts[item.id] !== undefined && (
+                <>
+                  <span className="sr-only">, {counts[item.id]}</span>
+                  <span data-slot="tab-count" aria-hidden className="tabular-nums">
+                    {counts[item.id]}
+                  </span>
+                </>
+              )}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <Fade side="start" show={edges.start} />
+        <Fade side="end" show={edges.end} />
+      </nav>
+      {children}
     </Tabs>
+  )
+}
+
+function Fade({ side, show }: { side: 'start' | 'end'; show: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'pointer-events-none absolute top-2 bottom-0 w-8 transition-opacity',
+        side === 'start' ? 'left-3 bg-gradient-to-r' : 'right-3 bg-gradient-to-l',
+        'from-ground to-transparent',
+        show ? 'opacity-100' : 'opacity-0',
+      )}
+    />
   )
 }

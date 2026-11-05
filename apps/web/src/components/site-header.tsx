@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { ChevronDown, FolderOpen, Orbit, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,22 +44,19 @@ export function SiteHeader({
       {file ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="field-game flex min-w-0 max-w-full items-center gap-3 px-3 py-1 text-left data-[state=open]:bg-tab"
+            <Button
+              variant="outline"
+              className="h-auto max-w-full min-w-0 justify-start gap-3 py-1 text-left font-sans font-normal tracking-normal normal-case"
             >
               <span className="min-w-0 leading-tight">
-                <span className="block truncate font-heading text-h3">{file.colony}</span>
-                <span className="block truncate text-caption text-fg-3">{file.name}</span>
+                <span className="text-h3 block truncate font-heading">{file.colony}</span>
+                <span className="text-caption block truncate text-fg-3">{file.name}</span>
               </span>
-              <span
-                className="chip shrink-0"
-                style={{ '--c': 'var(--gold)' } as React.CSSProperties}
-              >
+              <span className="chip shrink-0" style={{ '--c': 'var(--gold)' } as CSSProperties}>
                 Cycle {file.cycle}
               </span>
               <ChevronDown className="size-4 shrink-0 text-fg-3" />
-            </button>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="min-w-56">
             <DropdownMenuLabel className="truncate">{file.name}</DropdownMenuLabel>
