@@ -119,7 +119,7 @@ function GeyserCard({
           onCommit={(name) => onEdit({ type: 'setGeyserName', id: g.id, name })}
           className="min-w-0 flex-1"
         />
-        <Badge variant={emits ?? 'geyser'}>
+        <Badge role="cell" variant={emits ?? 'geyser'}>
           <Hint desc={g.typeDesc}>
             <span>{g.typeName}</span>
           </Hint>
