@@ -55,7 +55,7 @@ export function SettingsPage({
           </CardHeader>
           <CardContent>
             <FieldGroup>
-              <Field orientation="horizontal">
+              <Field orientation="horizontal" className="well">
                 <FieldContent>
                   <FieldLabel htmlFor="sandbox">Sandbox mode</FieldLabel>
                   <FieldDescription>Unlocks the sandbox tools in game.</FieldDescription>
@@ -66,7 +66,7 @@ export function SettingsPage({
                   onCheckedChange={(enabled) => onEdit({ type: 'setSandbox', enabled })}
                 />
               </Field>
-              <Field orientation="horizontal">
+              <Field orientation="horizontal" className="well">
                 <FieldContent>
                   <FieldLabel htmlFor="debug-used">Debug mode was used</FieldLabel>
                   <FieldDescription>

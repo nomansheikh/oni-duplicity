@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { PageHeader } from '@/components/page-header'
 import { Progress } from '@/components/ui/progress'
 import {
   Select,
@@ -37,28 +38,24 @@ export function SkillPlannerPage({ duplicants }: { duplicants: DuplicantView[] }
   const dupe = duplicants.find((d) => d.id === dupeId) ?? duplicants[0]
   return (
     <div className="flex flex-col gap-4">
-      {/* A local header: swap for PageHeader once components/page-header.tsx has merged. */}
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="type-h1">Skill planner</h1>
-          <p className="type-small max-w-3xl text-muted-foreground">
-            Pick a duplicant, click skills to plan a path, and see the morale expectation and
-            experience it takes. Plans stay in this browser; the save is not changed.
-          </p>
-        </div>
-        <Select value={dupe?.id ?? ''} onValueChange={setDupeId}>
-          <SelectTrigger className="w-56" aria-label="Duplicant">
-            <SelectValue placeholder="Duplicant" />
-          </SelectTrigger>
-          <SelectContent>
-            {duplicants.map((d) => (
-              <SelectItem key={d.id} value={d.id}>
-                {d.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </header>
+      <PageHeader
+        title="Skill planner"
+        description="Pick a duplicant, click skills to plan a path, and see the morale expectation and experience it takes. Plans stay in this browser; the save is not changed."
+        actions={
+          <Select value={dupe?.id ?? ''} onValueChange={setDupeId}>
+            <SelectTrigger className="w-56" aria-label="Duplicant">
+              <SelectValue placeholder="Duplicant" />
+            </SelectTrigger>
+            <SelectContent>
+              {duplicants.map((d) => (
+                <SelectItem key={d.id} value={d.id}>
+                  {d.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        }
+      />
       {dupe ? (
         <Planner key={dupe.id} dupe={dupe} />
       ) : (

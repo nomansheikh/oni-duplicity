@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
-import { fmt } from '@/lib/format'
+import { fmt, humanize } from '@/lib/format'
 import {
   coverRatio,
   coverages,
@@ -15,15 +15,16 @@ import {
 } from '@/lib/tools/geyser-calc'
 import type { GeyserView } from '@/worker/model'
 import { parseDemand } from '@/lib/tools/parse'
-import { Stat, ToolHeader } from './tool-header'
 import { EmptyState } from '@/components/empty-state'
+import { PageHeader } from '@/components/page-header'
 import { Calculator, Flame } from 'lucide-react'
+import { Stat } from './tool-header'
 
 /** Read only: nothing here edits the save. */
 export function GeyserCalculatorPage({ geysers }: { geysers: GeyserView[] }) {
   return (
     <div className="flex flex-col gap-4">
-      <ToolHeader
+      <PageHeader
         title="Geyser calculator"
         description="Average output over each geyser's whole activity cycle, and what it can supply. Enter a demand to see whether it is covered. Geyser Control and Geotuner changes are not counted."
       />
@@ -56,8 +57,10 @@ function GeyserCalcCard({ geyser: g }: { geyser: GeyserView }) {
   return (
     <Card className="gap-0 py-0">
       <CardHeader className="items-center">
-        <CardTitle className="min-w-0 flex-1 truncate">{g.name}</CardTitle>
-        <Badge variant="geyser">{g.typeName}</Badge>
+        <CardTitle className="min-w-0 flex-1">{g.name}</CardTitle>
+        <Badge variant="geyser" className="shrink-0">
+          {g.typeName}
+        </Badge>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 py-4">
         <div className="grid grid-cols-2 gap-2">
@@ -67,7 +70,7 @@ function GeyserCalcCard({ geyser: g }: { geyser: GeyserView }) {
           <Stat
             label="Temperature"
             value={type ? fmtC(type.outputTemperature) : 'Unknown'}
-            hint={type ? type.element : undefined}
+            hint={type ? humanize(type.element) : undefined}
           />
         </div>
         <Progress
