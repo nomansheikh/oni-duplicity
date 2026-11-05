@@ -1,5 +1,4 @@
-import { Monitor, Moon, Settings, Sun } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import { Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,7 +16,6 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Switch } from '@/components/ui/switch'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 export function PreferencesDialog({
   allowUnverified,
@@ -26,7 +24,6 @@ export function PreferencesDialog({
   allowUnverified: boolean
   onAllowUnverified: (value: boolean) => void
 }) {
-  const { theme, setTheme } = useTheme()
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -39,27 +36,7 @@ export function PreferencesDialog({
           <DialogTitle>Preferences</DialogTitle>
           <DialogDescription>Stored in this browser only.</DialogDescription>
         </DialogHeader>
-        <FieldGroup>
-          <Field>
-            <FieldLabel>Theme</FieldLabel>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={theme}
-              onValueChange={(value) => value && setTheme(value)}
-              className="w-fit"
-            >
-              <ToggleGroupItem value="light">
-                <Sun /> Light
-              </ToggleGroupItem>
-              <ToggleGroupItem value="dark">
-                <Moon /> Dark
-              </ToggleGroupItem>
-              <ToggleGroupItem value="system">
-                <Monitor /> System
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </Field>
+        <FieldGroup className="p-4">
           <Field orientation="horizontal">
             <FieldContent>
               <FieldLabel htmlFor="allow-unverified">Allow saving unverified versions</FieldLabel>
