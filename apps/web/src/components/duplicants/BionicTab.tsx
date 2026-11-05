@@ -12,6 +12,7 @@ import {
 import { fmt, humanize } from '@/lib/format'
 import { saveClient } from '@/lib/save-client'
 import type { BionicOverview } from '@/worker/bionic'
+import { Charge } from './BionicCharge'
 import { Nothing, Panel } from './tabs'
 
 // Mirrors `Electrobank.capacity` and `RemoteWorkerCapacitor.CAPACITY_J` (see worker/bionic.ts).
@@ -22,24 +23,6 @@ const boosterName = (prefab: string) => humanize(prefab.replace(/^Booster_/, '')
 
 const bankState = (prefab: string) =>
   prefab === 'EmptyElectrobank' ? 'Empty' : prefab === 'GarbageElectrobank' ? 'Spent' : 'Charged'
-
-function Charge({ joules, capacity }: { joules: number; capacity: number }) {
-  return (
-    <div className="flex items-center gap-3">
-      <Progress
-        variant="gauge"
-        tone="good"
-        value={joules}
-        max={capacity}
-        overflow={Math.max(0, joules - capacity)}
-        className="w-40"
-      />
-      <span className="type-small tabular-nums">
-        {capacity >= 1000 ? `${fmt(joules / 1000, 1)} kJ` : `${fmt(joules, 1)} J`}
-      </span>
-    </div>
-  )
-}
 
 export function BionicTab({ dupeId }: { dupeId: string }) {
   const [overview, setOverview] = useState<BionicOverview | null>(null)
