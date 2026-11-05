@@ -50,6 +50,10 @@ export default defineConfig({
         command: 'node scripts/bench.ts',
         cache: false,
       },
+      differential: {
+        command: 'node scripts/run-differential.ts',
+        cache: false,
+      },
     },
   },
 })

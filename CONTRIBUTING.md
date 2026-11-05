@@ -30,6 +30,8 @@ vp run bench --update   # re-record the baseline after an intended change
 
 `vp run bench` takes about two minutes. Run it on a quiet machine: other busy processes make the timings, and so the comparison, unreliable.
 
+The parser fuzz tests (`packages/save-parser/tests/fuzz`) run in `vp test` with about 500 cases. Tune them with `FUZZ_SCALE` (case-count multiplier, e.g. `FUZZ_SCALE=20`), `FUZZ_SEED`, `FUZZ_DEADLINE_MS` and `FUZZ_ONLY=<category>#<n>` to replay one case (with the same `FUZZ_SEED`; it ignores `FUZZ_SCALE`, and an unknown name fails). A failure prints its seed and mutation.
+
 The pre-commit hook runs `vp check --fix` on staged files.
 
 ## Making a change
