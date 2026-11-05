@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FlaskConical, Info } from 'lucide-react'
+import { FlaskConical, Info, TriangleAlert } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
@@ -57,8 +57,8 @@ export function DlcPage({ revision, onEdit }: { revision: number; onEdit: (edit:
 function Stat({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="text-lg font-medium tabular-nums">{children}</dd>
+      <dt className="type-caption text-muted-foreground">{label}</dt>
+      <dd className="type-h3 tabular-nums">{children}</dd>
     </div>
   )
 }
@@ -75,9 +75,9 @@ function DemoliorCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex flex-wrap items-center gap-2">
           Demolior impact <DlcBadge id="DLC4_ID" />
-          <Badge variant="outline" className="gap-1">
+          <Badge variant="warn" className="gap-1">
             <FlaskConical className="size-3" /> Experimental
           </Badge>
         </CardTitle>
@@ -96,18 +96,27 @@ function DemoliorCard({
           <Stat label="Now">Cycle {fmt(demolior.currentCycle, 1)}</Stat>
           <Stat label="Remaining">{fmt(demolior.remainingCycles, 1)} cycles</Stat>
         </dl>
-        <Progress
-          value={total > 0 ? (elapsed / total) * 100 : 0}
-          aria-label="Time until impact elapsed"
-        />
+        <div className="flex flex-col gap-3 border-l-4 border-bad bg-bad/10 p-3">
+          <div className="flex items-center gap-2 text-bad-text">
+            <TriangleAlert className="size-5 shrink-0" />
+            <span className="type-h3">Impact incoming</span>
+          </div>
+          <Progress
+            variant="task"
+            value={total > 0 ? (elapsed / total) * 100 : 0}
+            label="Countdown to impact"
+            state={`${fmt(elapsed, 1)} / ${fmt(total, 1)} cycles`}
+            aria-label="Time until impact elapsed"
+          />
+        </div>
         {!demolior.arrivalSaved && (
-          <p className="flex items-start gap-2 text-sm text-muted-foreground">
+          <p className="flex items-start gap-2 type-small text-muted-foreground">
             <Info className="mt-0.5 size-4 shrink-0" />
             The impact time is worked out from the difficulty setting. This save does not store it.
           </p>
         )}
         {demolior.durationSource === 'saved' && (
-          <p className="flex items-start gap-2 text-sm text-muted-foreground">
+          <p className="flex items-start gap-2 type-small text-muted-foreground">
             <Info className="mt-0.5 size-4 shrink-0" />
             The impact is {fmt(demolior.durationCycles, 1)} cycles after the event start, which
             differs from the difficulty setting. The game stored this time itself (for example for
@@ -116,23 +125,21 @@ function DemoliorCard({
         )}
         {demolior.health && (
           <div className="flex flex-col gap-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Impactor health (read only)</span>
-              <span className="tabular-nums">
-                {fmt(demolior.health.current, 0)} / {fmt(demolior.health.max, 0)}
-              </span>
-            </div>
             <Progress
+              variant="gauge"
+              tone="bad"
               value={(demolior.health.current / demolior.health.max) * 100}
+              label="Impactor health (read only)"
+              state={`${fmt(demolior.health.current, 0)} / ${fmt(demolior.health.max, 0)}`}
               aria-label="Impactor health"
             />
           </div>
         )}
-        <div className="flex flex-col gap-2 border-t pt-4">
+        <div className="well flex flex-col gap-2 p-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-sm font-medium">Impact cycle</div>
-              <p className="text-sm text-muted-foreground">
+              <div className="type-label">Impact cycle</div>
+              <p className="type-small text-muted-foreground">
                 Postpone or advance the impact. It can't be set sooner than one cycle from now.
               </p>
             </div>
@@ -146,7 +153,7 @@ function DemoliorCard({
               onCommit={(impactCycle) => onEdit({ type: 'setDemoliorImpact', impactCycle })}
             />
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="type-small text-muted-foreground">
             {demolior.readOnlyReason ??
               'Moves the event start, the impactor’s saved arrival time and its flight speed, since the game flies it by those. Not yet confirmed in game.'}
           </p>
@@ -160,12 +167,12 @@ function GeothermalCard({ geothermal }: { geothermal: GeothermalView }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex flex-wrap items-center gap-2">
           Geothermal plant <DlcBadge id="DLC2_ID" />
         </CardTitle>
         <CardDescription>
           The Frosty Planet geothermal quest, read only.{' '}
-          <Badge variant="secondary">{geothermal.state}</Badge>
+          <Badge variant="info">{geothermal.state}</Badge>
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -225,9 +232,11 @@ function MixingCard({ mixing }: { mixing: MixingView }) {
             {mixing.entries.map((entry) => (
               <TableRow key={entry.id}>
                 <TableCell>{entry.name}</TableCell>
-                <TableCell className="text-muted-foreground">{KIND_LABELS[entry.kind]}</TableCell>
+                <TableCell className="type-small text-muted-foreground">
+                  {KIND_LABELS[entry.kind]}
+                </TableCell>
                 <TableCell>
-                  <Badge variant={entry.level === 'Disabled' ? 'outline' : 'secondary'}>
+                  <Badge variant={entry.level === 'Disabled' ? 'outline' : 'dlc'}>
                     {entry.levelName}
                   </Badge>
                 </TableCell>
