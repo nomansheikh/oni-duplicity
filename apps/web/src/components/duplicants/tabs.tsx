@@ -475,7 +475,7 @@ export function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn
           value={shown}
           digits={format.digits ?? 0}
           unit={format.unit}
-          className="w-36"
+          className="w-40"
           min={bounded ? bottom : undefined}
           max={bounded ? top : undefined}
           disabled={readOnly}

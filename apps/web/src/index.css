@@ -547,6 +547,17 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+  /* no native spinners on number fields, in any engine */
+  input[type='number'] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+  }
   button:not(:disabled),
   [role='button']:not(:disabled) {
     cursor: pointer;

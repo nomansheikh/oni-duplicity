@@ -88,7 +88,7 @@ export function NumberField({
 }) {
   const shown = Number(value.toFixed(digits))
   return (
-    <InputGroup className={cn('w-36', className)}>
+    <InputGroup className={cn('w-40', className)}>
       <InputGroupInput
         key={shown}
         type="number"
