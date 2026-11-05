@@ -130,7 +130,7 @@ save(): Uint8Array
 
 The gate fails a phase whose time, divided by a calibration workload timed in the same process, grows more than 30% over its baseline. Baselines live in `test-data/bench-baseline.json` per `<platform>-<arch>` (calibration ratios do not transfer between machines). A phase that looks regressed is re-measured once and fails only if it regresses again. With no baseline for the current platform, the bench prints a warning and the JSON to add, and exits 0; the Linux baseline is committed from the first run on `main`. CI runs it with `--require` only when the full fixture tier is present. After an intended change, run `vp run bench --update` on a quiet machine and commit the new baseline.
 
-**Targets not met.** Parsing the 40 MB save (1.6 s) meets the 5 s target. Saving does not: writing the body takes 2.8 s and `fflate` deflate another 4.0 s, about 6.9 s in all. The browser uses native `CompressionStream`, which `progress.md` measured at about 7 s for this save. Whether the target covers compression is an open question ([open-questions.md](open-questions.md) #14).
+**Targets not met.** Parsing the 40 MB save (1.6 s) meets the 5 s target. Saving does not: writing the body takes 2.8 s and `fflate` deflate another 4.0 s, about 6.9 s in all. The browser uses native `CompressionStream`, which `progress.md` measured at about 7 s for this save. Whether the target covers compression is an open question ([open-questions.md](open-questions.md) #15).
 
 ## Delivery
 
