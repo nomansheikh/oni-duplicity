@@ -1,8 +1,7 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
-import { Download, Moon, Redo2, Sun, Undo2 } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Download, FolderOpen, Redo2, Undo2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { AppSidebar, type Page } from '@/components/app-sidebar'
+import { AppTabs, type Page } from '@/components/app-sidebar'
 import { ChangesPopover } from '@/components/changes-popover'
 import { Badge } from '@/components/ui/badge'
 import { DlcBadges } from '@/components/dlc-badge'
@@ -13,8 +12,8 @@ import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { describeLoadError, type LoadErrorInfo } from '@/lib/load-error'
 import { useAllowUnverified } from '@/lib/preferences'
@@ -62,6 +61,7 @@ interface EditStatus {
 const CrittersPage = lazy(() =>
   import('@/components/critters-page').then((m) => ({ default: m.CrittersPage })),
 )
+const DlcPage = lazy(() => import('@/components/dlc-page').then((m) => ({ default: m.DlcPage })))
 const DuplicantsPage = lazy(() =>
   import('@/components/duplicants/DuplicantsPage').then((m) => ({ default: m.DuplicantsPage })),
 )
@@ -98,21 +98,20 @@ function PageFallback() {
   )
 }
 
-const NO_EDITS: EditStatus = { edits: 0, canUndo: false, canRedo: false }
+const BODY = 'flex flex-1 flex-col gap-4 bg-field p-3 md:gap-6 md:p-5'
 
-const PAGE_TITLES: Record<Page, string> = {
-  overview: 'Overview',
-  map: 'World map',
-  duplicants: 'Duplicants',
-  geysers: 'Geysers',
-  materials: 'Materials',
-  critters: 'Critters',
-  research: 'Research',
-  space: 'Space',
-  stories: 'Stories',
-  settings: 'Game settings',
-  raw: 'Raw data',
+/** Pages sit in the tab panel once a save is open, so each tab names a real panel. */
+function Body({ page, children }: { page: Page | null; children: ReactNode }) {
+  return page ? (
+    <TabsContent value={page} className={BODY}>
+      {children}
+    </TabsContent>
+  ) : (
+    <div className={BODY}>{children}</div>
+  )
 }
+
+const NO_EDITS: EditStatus = { edits: 0, canUndo: false, canRedo: false }
 
 export default function App() {
   const [state, setState] = useState<State>({ status: 'idle' })
@@ -126,7 +125,6 @@ export default function App() {
   const [revision, setRevision] = useState(0)
   const fileInput = useRef<HTMLInputElement>(null)
   const [allowUnverified, setAllowUnverified] = useAllowUnverified()
-  const { resolvedTheme, setTheme } = useTheme()
 
   const refresh = useCallback(async () => {
     const [
@@ -256,26 +254,8 @@ export default function App() {
       ? { summary: state.summary, views, catalogs }
       : null
   const selected = views?.duplicants.find((d) => d.id === selectedDupe) ?? views?.duplicants[0]
-  const crumbs = loaded
-    ? [
-        loaded.summary.baseName,
-        PAGE_TITLES[page],
-        ...(page === 'duplicants' && selected ? [selected.name] : []),
-      ]
-    : ['Duplicity']
-
-  const themeToggle = (
-    <>
-      <Button
-        variant="ghost"
-        size="icon"
-        aria-label="Toggle theme"
-        onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-      >
-        {resolvedTheme === 'dark' ? <Sun /> : <Moon />}
-      </Button>
-      <PreferencesDialog allowUnverified={allowUnverified} onAllowUnverified={setAllowUnverified} />
-    </>
+  const preferences = (
+    <PreferencesDialog allowUnverified={allowUnverified} onAllowUnverified={setAllowUnverified} />
   )
   const saveLocked = loaded?.summary.unverified === true && !allowUnverified
 
@@ -346,24 +326,37 @@ export default function App() {
           </TooltipContent>
         )}
       </Tooltip>
-      {themeToggle}
+      {preferences}
     </>
   ) : (
-    themeToggle
+    <>
+      <Button variant="secondary" onClick={() => fileInput.current?.click()}>
+        <FolderOpen />
+        Open a save
+      </Button>
+      {preferences}
+    </>
   )
 
   return (
-    <SidebarProvider
-      style={
-        {
-          '--sidebar-width': 'calc(var(--spacing) * 64)',
-          '--header-height': 'calc(var(--spacing) * 12)',
-        } as CSSProperties
-      }
-    >
-      <AppSidebar
-        variant="inset"
-        page={page}
+    <div className="flex min-h-svh flex-col bg-ground">
+      <SiteHeader
+        file={
+          loaded
+            ? {
+                name: loaded.summary.fileName,
+                colony: loaded.summary.baseName,
+                cycle: loaded.summary.cycles,
+                version: loaded.summary.version,
+              }
+            : null
+        }
+        actions={actions}
+        onOpen={() => fileInput.current?.click()}
+        onClose={close}
+      />
+      <AppTabs
+        page={loaded ? page : null}
         onNavigate={setPage}
         counts={
           loaded
@@ -377,15 +370,10 @@ export default function App() {
               }
             : {}
         }
-        file={loaded ? { name: loaded.summary.fileName, version: loaded.summary.version } : null}
-        onOpen={() => fileInput.current?.click()}
-        onClose={close}
-      />
-      <SidebarInset>
-        <SiteHeader crumbs={crumbs} actions={actions} />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
+      >
+        <main className="@container/main flex flex-1 flex-col p-2 sm:p-3">
+          <div className="panel flex flex-1 flex-col bg-field p-1">
+            <Body page={loaded ? page : null}>
               {state.status === 'idle' && (
                 <OpenSave onFile={open} onPick={() => fileInput.current?.click()} />
               )}
@@ -396,7 +384,7 @@ export default function App() {
                 <LoadError info={state.info} onPick={() => fileInput.current?.click()} />
               )}
               {loaded?.summary.isAutoSave && (
-                <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
+                <div className="border border-ink bg-warn/15 px-4 py-3 type-small">
                   <p className="font-medium">This is an autosave</p>
                   <p className="text-muted-foreground">
                     The game&apos;s autosave rotation may overwrite an edited autosave
@@ -408,7 +396,7 @@ export default function App() {
                 </div>
               )}
               {loaded && (loaded.summary.unverified || loaded.summary.warnings.length > 0) && (
-                <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
+                <div className="border border-ink bg-warn/15 px-4 py-3 type-small">
                   {loaded.summary.warnings.map((w) => (
                     <p key={w}>{w}</p>
                   ))}
@@ -448,10 +436,12 @@ export default function App() {
                   <SpacePage
                     worlds={loaded.views.worlds}
                     destinations={loaded.views.destinations}
+                    revision={revision}
                     onEdit={edit}
                   />
                 )}
                 {loaded && page === 'stories' && <StoriesPage stories={loaded.views.stories} />}
+                {loaded && page === 'dlc' && <DlcPage revision={revision} onEdit={edit} />}
                 {loaded && page === 'settings' && (
                   <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
                 )}
@@ -467,10 +457,10 @@ export default function App() {
                   />
                 )}
               </Suspense>
-            </div>
+            </Body>
           </div>
-        </div>
-      </SidebarInset>
+        </main>
+      </AppTabs>
       {loaded && (
         <SaveDialog
           open={confirmOpen}
@@ -493,6 +483,6 @@ export default function App() {
           e.target.value = ''
         }}
       />
-    </SidebarProvider>
+    </div>
   )
 }
