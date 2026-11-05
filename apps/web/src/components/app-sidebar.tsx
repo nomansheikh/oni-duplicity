@@ -1,44 +1,20 @@
-import type { ComponentProps, ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
-  EllipsisVertical,
+  Braces,
   Droplets,
   FlaskConical,
   BookOpen,
   Gauge,
-  FolderOpen,
   LayoutDashboard,
   Map as MapIcon,
-  Orbit,
   Package,
   Puzzle,
   Rabbit,
   Rocket,
-  Save,
   Users,
-  Braces,
-  X,
 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuBadge,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@/components/ui/sidebar'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/utils'
 
 export type Page =
   | 'overview'
@@ -54,152 +30,115 @@ export type Page =
   | 'settings'
   | 'raw'
 
-const PAGES: { id: Page; title: string; icon: ReactNode }[] = [
-  { id: 'overview', title: 'Overview', icon: <LayoutDashboard /> },
-  { id: 'map', title: 'World map', icon: <MapIcon /> },
-  { id: 'duplicants', title: 'Duplicants', icon: <Users /> },
-  { id: 'critters', title: 'Critters', icon: <Rabbit /> },
-  { id: 'geysers', title: 'Geysers', icon: <Droplets /> },
-  { id: 'materials', title: 'Materials', icon: <Package /> },
-  { id: 'research', title: 'Research', icon: <FlaskConical /> },
-  { id: 'space', title: 'Space', icon: <Rocket /> },
-  { id: 'stories', title: 'Stories', icon: <BookOpen /> },
-  { id: 'dlc', title: 'DLC', icon: <Puzzle /> },
-  { id: 'settings', title: 'Game settings', icon: <Gauge /> },
+/** Each page keeps one category colour (design.md section 4), shown on its tab icon. */
+const PAGES: { id: Page; title: string; icon: ReactNode; color: string }[] = [
+  { id: 'overview', title: 'Overview', icon: <LayoutDashboard />, color: 'var(--cat-oxygen)' },
+  { id: 'map', title: 'World map', icon: <MapIcon />, color: 'var(--cat-solid)' },
+  { id: 'duplicants', title: 'Duplicants', icon: <Users />, color: 'var(--pink)' },
+  { id: 'critters', title: 'Critters', icon: <Rabbit />, color: 'var(--cat-critter)' },
+  { id: 'geysers', title: 'Geysers', icon: <Droplets />, color: 'var(--cat-geyser)' },
+  { id: 'materials', title: 'Materials', icon: <Package />, color: 'var(--cat-metal)' },
+  { id: 'research', title: 'Research', icon: <FlaskConical />, color: 'var(--cat-plant)' },
+  { id: 'space', title: 'Space', icon: <Rocket />, color: 'var(--cat-liquid)' },
+  { id: 'stories', title: 'Stories', icon: <BookOpen />, color: 'var(--cat-food)' },
+  { id: 'dlc', title: 'DLC', icon: <Puzzle />, color: 'var(--cat-dlc)' },
+  { id: 'settings', title: 'Game settings', icon: <Gauge />, color: 'var(--cat-power)' },
+  { id: 'raw', title: 'Raw data', icon: <Braces />, color: 'var(--cat-vacuum)' },
 ]
 
-const ADVANCED: { id: Page; title: string; icon: ReactNode }[] = [
-  { id: 'raw', title: 'Raw data', icon: <Braces /> },
-]
-
-export interface OpenFile {
-  name: string
-  version: string
-}
-
-export function AppSidebar({
+/**
+ * The game's top tab strip, wrapping the page panel (`TabsContent`) so each tab controls a
+ * real panel. `page` is null while no save is open: every tab is disabled and none is active.
+ * The strip scrolls sideways when narrow, with a fade at each edge that has more tabs.
+ */
+export function AppTabs({
   page,
   onNavigate,
   counts,
-  file,
-  onOpen,
-  onClose,
-  ...props
-}: ComponentProps<typeof Sidebar> & {
-  page: Page
+  children,
+}: {
+  page: Page | null
   onNavigate: (page: Page) => void
   counts: Partial<Record<Page, number>>
-  file: OpenFile | null
-  onOpen: () => void
-  onClose: () => void
+  children: ReactNode
 }) {
+  const list = useRef<HTMLDivElement>(null)
+  const [edges, setEdges] = useState({ start: false, end: false })
+
+  useEffect(() => {
+    const el = list.current
+    if (!el) return
+    const update = () =>
+      setEdges({
+        start: el.scrollLeft > 1,
+        end: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+      })
+    update()
+    el.addEventListener('scroll', update, { passive: true })
+    const observer = new ResizeObserver(update)
+    observer.observe(el)
+    return () => {
+      el.removeEventListener('scroll', update)
+      observer.disconnect()
+    }
+  }, [])
+
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="pointer-events-none">
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <Orbit className="size-4" />
-              </div>
-              <div className="grid flex-1 text-left leading-tight">
-                <span className="truncate font-heading text-base font-semibold">Duplicity</span>
-                <span className="truncate text-xs text-muted-foreground">ONI save editor</span>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavGroup label="Colony" items={PAGES} {...{ page, onNavigate, counts, file }} />
-        <NavGroup label="Advanced" items={ADVANCED} {...{ page, onNavigate, counts, file }} />
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            {file ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent">
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent">
-                      <Save className="size-4" />
-                    </div>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-medium">{file.name}</span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        Save version {file.version}
-                      </span>
-                    </div>
-                    <EllipsisVertical className="ml-auto size-4" />
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="right" align="end" className="min-w-56">
-                  <DropdownMenuLabel className="truncate">{file.name}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={onOpen}>
-                    <FolderOpen /> Open another save
-                  </DropdownMenuItem>
-                  <DropdownMenuItem variant="destructive" onSelect={onClose}>
-                    <X /> Close save
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <SidebarMenuButton size="lg" onClick={onOpen}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent">
-                  <FolderOpen className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="font-medium">Open a save</span>
-                  <span className="text-xs text-muted-foreground">.sav from your ONI folder</span>
-                </div>
-              </SidebarMenuButton>
-            )}
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-    </Sidebar>
+    <Tabs
+      value={page ?? ''}
+      onValueChange={(value) => onNavigate(value as Page)}
+      className="flex-1 gap-0"
+    >
+      <nav aria-label="Editor pages" className="relative border-b border-ink bg-ground px-3 pt-2">
+        <TabsList
+          ref={list}
+          aria-label="Pages"
+          className="w-full pb-px [scrollbar-width:thin]"
+          onFocus={(e) => e.target.scrollIntoView({ block: 'nearest', inline: 'nearest' })}
+        >
+          {PAGES.map((item) => (
+            <TabsTrigger
+              key={item.id}
+              value={item.id}
+              disabled={page === null}
+              // The screen-reader count is absolutely positioned; keep it inside the tab.
+              className="relative"
+              // Radix points every tab at its own panel; only the active one is mounted.
+              {...(item.id === page ? {} : { 'aria-controls': undefined })}
+            >
+              <span className="contents" style={{ color: item.color }}>
+                {item.icon}
+              </span>
+              {item.title}
+              {counts[item.id] !== undefined && (
+                <>
+                  <span className="sr-only">, {counts[item.id]}</span>
+                  <span data-slot="tab-count" aria-hidden className="tabular-nums">
+                    {counts[item.id]}
+                  </span>
+                </>
+              )}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <Fade side="start" show={edges.start} />
+        <Fade side="end" show={edges.end} />
+      </nav>
+      {children}
+    </Tabs>
   )
 }
 
-function NavGroup({
-  label,
-  items,
-  page,
-  onNavigate,
-  counts,
-  file,
-}: {
-  label: string
-  items: { id: Page; title: string; icon: ReactNode }[]
-  page: Page
-  onNavigate: (page: Page) => void
-  counts: Partial<Record<Page, number>>
-  file: OpenFile | null
-}) {
+function Fade({ side, show }: { side: 'start' | 'end'; show: boolean }) {
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>{label}</SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.id}>
-              <SidebarMenuButton
-                tooltip={item.title}
-                isActive={file !== null && page === item.id}
-                disabled={file === null}
-                onClick={() => onNavigate(item.id)}
-              >
-                {item.icon}
-                <span>{item.title}</span>
-              </SidebarMenuButton>
-              {counts[item.id] !== undefined && (
-                <SidebarMenuBadge>{counts[item.id]}</SidebarMenuBadge>
-              )}
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+    <span
+      aria-hidden
+      className={cn(
+        'pointer-events-none absolute top-2 bottom-0 w-8 transition-opacity',
+        side === 'start' ? 'left-3 bg-gradient-to-r' : 'right-3 bg-gradient-to-l',
+        'from-ground to-transparent',
+        show ? 'opacity-100' : 'opacity-0',
+      )}
+    />
   )
 }
