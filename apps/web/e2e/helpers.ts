@@ -53,11 +53,17 @@ export async function editCount(page: Page): Promise<number> {
   return Number((await button.textContent())?.match(/\d+/)?.[0] ?? 0)
 }
 
+/** Opens the pre-save dialog and confirms it. */
+async function confirmDownload(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Download save' }).click()
+  await page.getByRole('button', { name: 'Confirm download' }).click()
+}
+
 /** Downloads the edited save and parses it with the repo's own parser. */
 export async function downloadSave(page: Page): Promise<{ save: SaveGame; fileName: string }> {
   const [download] = await Promise.all([
     page.waitForEvent('download', { timeout: 90_000 }),
-    page.getByRole('button', { name: 'Download save' }).click(),
+    confirmDownload(page),
   ])
   const path = await download.path()
   return { save: parseSave(readFileSync(path)), fileName: download.suggestedFilename() }

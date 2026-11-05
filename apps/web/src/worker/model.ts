@@ -1,3 +1,4 @@
+import { rawCanAdd, rawDefaultItem } from './raw.ts'
 import {
   MinionSkills,
   effects as effectCatalog,
@@ -50,6 +51,8 @@ export interface Summary {
   dlcIds: string[]
   clusterId: string
   isAutoSave: boolean
+  /** The save this was written from (`gameInfo.originalSaveName`); autosaves are named after it. */
+  originalSaveName: string
   sandbox: boolean
   /** Set for good once debug tools are used; blocks achievements. */
   debugWasUsed: boolean
@@ -165,12 +168,16 @@ export interface RawEntry {
   kind: RawKind
   /** Children count for objects, arrays and byte arrays. */
   size?: number
+  /** Arrays only: whether "add item" can build a valid new element (see `rawDefaultItem`). */
+  canAdd?: boolean
   value?: string | number | boolean | null
 }
 
 export interface RawChildren {
   entries: RawEntry[]
   total: number
+  /** Set when the node is an array that accepts a new item. */
+  canAdd?: boolean
 }
 
 export type AccessorySlot = 'hair' | 'headshape' | 'eyes' | 'mouth' | 'torso' | 'skin'
@@ -324,6 +331,7 @@ export type Edit =
   | { type: 'rawSet'; path: RawPath; value: string | number | boolean | null }
   | { type: 'rawRemove'; path: RawPath }
   | { type: 'rawDuplicate'; path: RawPath }
+  | { type: 'rawAdd'; path: RawPath }
   | { type: 'setMaterialTemperature'; elementId: string; kelvin: number }
   | { type: 'scaleMaterialMass'; elementId: string; factor: number }
 
@@ -461,6 +469,7 @@ export function summarize(save: SaveGame, fileName: string): Summary {
     dlcIds: dlcIds(save),
     clusterId: info.clusterId ?? '',
     isAutoSave: info.isAutoSave,
+    originalSaveName: typeof info.originalSaveName === 'string' ? info.originalSaveName : '',
     sandbox: Boolean(sandbox ?? info.sandboxEnabled),
     debugWasUsed: save.gameData.debugWasUsed === true,
     unverified: info.saveMinorVersion > MAX_VERIFIED_MINOR,
@@ -734,6 +743,12 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       const { parent, key } = rawParent(save, edit.path)
       if (!Array.isArray(parent)) throw new Error('Only array items can be duplicated')
       parent.splice(Number(key) + 1, 0, cloneValue(parent[Number(key)]))
+      return
+    }
+    case 'rawAdd': {
+      const item = rawDefaultItem(save, edit.path)
+      if (!item) throw new Error('Items cannot be added to this array')
+      ;(rawGet(save, edit.path) as unknown[]).push(item.value)
       return
     }
     case 'setMaterialTemperature':
@@ -1371,8 +1386,10 @@ export function rawChildren(save: SaveGame, path: RawPath, offset = 0, limit = 5
     const entry: RawEntry = { key, path: [...path, key], kind }
     const label = labelFor(value)
     if (label) entry.label = label
-    if (kind === 'array') entry.size = (value as unknown[]).length
-    else if (kind === 'object') entry.size = Object.keys(value as object).length
+    if (kind === 'array') {
+      entry.size = (value as unknown[]).length
+      entry.canAdd = rawCanAdd(save, entry.path)
+    } else if (kind === 'object') entry.size = Object.keys(value as object).length
     else if (kind === 'bytes') {
       entry.size = (value as Uint8Array).length
       entry.value = hex(value as Uint8Array)
@@ -1381,5 +1398,33 @@ export function rawChildren(save: SaveGame, path: RawPath, offset = 0, limit = 5
     else entry.value = value as string | number | boolean
     return entry
   })
-  return { entries, total: pairs.length }
+  const result: RawChildren = { entries, total: pairs.length }
+  if (Array.isArray(node) && rawCanAdd(save, path)) result.canAdd = true
+  return result
+}
+
+/**
+ * Every ancestor of `path` (the root first) with its children loaded far enough to include the
+ * next step down, so the editor can open the whole route to a search result in one round trip.
+ */
+export function rawReveal(
+  save: SaveGame,
+  path: RawPath,
+  page = 500,
+): { path: RawPath; children: RawChildren }[] {
+  const out: { path: RawPath; children: RawChildren }[] = []
+  for (let depth = 0; depth < path.length; depth++) {
+    const parent = path.slice(0, depth)
+    const node = rawGet(save, parent)
+    const key = path[depth]!
+    const position = Array.isArray(node)
+      ? Number(key)
+      : node && typeof node === 'object'
+        ? Object.keys(node).indexOf(String(key))
+        : -1
+    if (position < 0) throw new Error(`No value at ${path.join('.')}`)
+    const limit = Math.ceil((position + 1) / page) * page
+    out.push({ path: parent, children: rawChildren(save, parent, 0, limit) })
+  }
+  return out
 }
