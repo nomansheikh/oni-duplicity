@@ -84,10 +84,10 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 
 ## UI dialogs and load screen (design v2) — 2026-11-05
 
-- `load-states.tsx`: the drop zone, loading and error states sit in a `panel` with a title bar ("Load game", "Loading", "Load failed" on a red bar), over an inset dashed drop area with a large icon, a `text-h2` title and a large button. Loading uses the `task` progress meter. The drag-over state turns the dashed border orange.
+- `load-states.tsx`: the drop zone, loading and error states sit in a `Card` with a title bar ("Load game", "Loading", "Load failed" on a red bar), over an inset dashed drop area with a large icon, a `text-h2` title and a large button. Loading uses the `task` progress meter. The drag-over state turns the dashed border orange.
 - `save-dialog.tsx`: the backup warning is a `well` block with the title in the warning colour, filenames in code chips, and the edit list in a sunken field. Cancel is the dark secondary button.
 - `preferences-dialog.tsx`: the Theme setting is removed, because the app is dark only (design.md section 1). The shell's own theme toggle button is in `App.tsx`/`site-header` and is left to the shell session.
-- `dlc-badge.tsx`: DLC badges use the badge chip tone (`--c` set from the category tokens) instead of hard-coded Tailwind palette colours.
+- `dlc-badge.tsx`: DLC badges use `Badge` variants (dlc, oxygen, power, plant, water) instead of hard-coded Tailwind palette colours.
 - No other behaviour change; text, roles and names are unchanged. Before and after screenshots are in `docs/screenshots/ui-dialogs`.
 
 ## UI component library (design v2, phase 1) — 2026-11-05

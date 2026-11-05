@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { Check, ChevronRight, Copy, FileUp, LoaderCircle, TriangleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Empty,
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
-  EmptyTitle,
 } from '@/components/ui/empty'
 import { Progress } from '@/components/ui/progress'
 import { loadErrorReport, type LoadErrorInfo } from '@/lib/load-error'
@@ -27,10 +27,14 @@ function LoadPanel({
   children: React.ReactNode
 }) {
   return (
-    <section className="panel mx-auto w-full max-w-3xl">
-      <div className={cn('title-bar', tone === 'error' && 'bg-[#962a28]')}>{title}</div>
-      <div className="p-3">{children}</div>
-    </section>
+    <Card className="mx-auto w-full max-w-3xl">
+      <CardHeader
+        className={cn(tone === 'error' && 'bg-[color-mix(in_oklab,var(--bad)_65%,#000)]')}
+      >
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   )
 }
 
@@ -62,7 +66,9 @@ export function OpenSave({ onFile, onPick }: { onFile: (file: File) => void; onP
           >
             <FileUp />
           </EmptyMedia>
-          <EmptyTitle className="text-h2!">Open an Oxygen Not Included save</EmptyTitle>
+          <div data-slot="empty-title" className="type-h2 uppercase">
+            Open an Oxygen Not Included save
+          </div>
           <EmptyDescription>
             Drop a <code className={code}>.sav</code> file here. Saves live in{' '}
             <code className={code}>Documents/Klei/OxygenNotIncluded</code> on Windows and{' '}
@@ -96,7 +102,9 @@ export function LoadingSave({ fileName, progress }: { fileName: string; progress
           >
             <LoaderCircle className="animate-spin" />
           </EmptyMedia>
-          <EmptyTitle className="text-h2! break-all">Reading {fileName}</EmptyTitle>
+          <div data-slot="empty-title" className="type-h2 uppercase break-all">
+            Reading {fileName}
+          </div>
           <EmptyDescription>Large late-game saves take a few seconds.</EmptyDescription>
         </EmptyHeader>
         <EmptyContent className="max-w-md">
@@ -129,7 +137,9 @@ export function LoadError({ info, onPick }: { info: LoadErrorInfo; onPick: () =>
           >
             <TriangleAlert />
           </EmptyMedia>
-          <EmptyTitle className="text-h2!">{info.title}</EmptyTitle>
+          <div data-slot="empty-title" className="type-h2 uppercase">
+            {info.title}
+          </div>
           <EmptyDescription>{info.hint}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>

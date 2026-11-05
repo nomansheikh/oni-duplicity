@@ -1,33 +1,36 @@
-import { Badge } from '@/components/ui/badge'
+import { Badge, type badgeVariants } from '@/components/ui/badge'
+import type { VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
-const DLCS: Record<string, { name: string; className: string }> = {
+type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>['variant']>
+
+const DLCS: Record<string, { name: string; variant: BadgeVariant }> = {
   EXPANSION1_ID: {
     name: 'Spaced Out!',
-    className: '[--c:var(--cat-dlc)]',
+    variant: 'dlc',
   },
   DLC2_ID: {
     name: 'Frosty Planet',
-    className: '[--c:var(--cat-gas)]',
+    variant: 'oxygen',
   },
   DLC3_ID: {
     name: 'Bionic Booster',
-    className: '[--c:var(--cat-food)]',
+    variant: 'power',
   },
   DLC4_ID: {
     name: 'Prehistoric Planet',
-    className: '[--c:var(--cat-plant)]',
+    variant: 'plant',
   },
   DLC5_ID: {
     name: 'Aquatic Planet',
-    className: '[--c:var(--cat-water)]',
+    variant: 'water',
   },
 }
 
 export function DlcBadge({ id, className }: { id: string; className?: string }) {
   const dlc = DLCS[id]
   return (
-    <Badge variant="outline" className={cn(dlc?.className, className)}>
+    <Badge variant={dlc?.variant ?? 'outline'} className={className}>
       {dlc?.name ?? id}
     </Badge>
   )
