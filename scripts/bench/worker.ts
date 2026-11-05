@@ -52,12 +52,16 @@ function pass(): Pass {
   return { times: { readInflate, parse, write, deflate }, bodyBytes: body.length, heapAfterParse }
 }
 
-// Warm up the JIT and the page cache, then take the calibration before and after the real work.
-calibrate(1)
-const calibrationMs = calibrate(5)
+// Warm up the JIT and the page cache. A calibration sample follows every pass, so it sees the same
+// machine conditions as the phases it normalizes.
+// Peak memory is read after the first pass, before the calibration buffers can add to it.
 pass()
+// Node reports kilobytes on every platform.
+const peakRssBytes = process.resourceUsage().maxRSS * 1024
+calibrate(2)
 
 const phasesMs: Record<Phase, number[]> = { readInflate: [], parse: [], write: [], deflate: [] }
+const calibrationMs: number[] = []
 let bodyBytes = 0
 let heapAfterParseBytes = 0
 for (let i = 0; i < iterations; i++) {
@@ -66,9 +70,9 @@ for (let i = 0; i < iterations; i++) {
   for (const phase of Object.keys(phasesMs) as Phase[]) phasesMs[phase].push(result.times[phase])
   bodyBytes = result.bodyBytes
   heapAfterParseBytes = result.heapAfterParse
+  gc?.()
+  calibrationMs.push(...calibrate(2))
 }
-gc?.()
-calibrationMs.push(...calibrate(5))
 
 const run: FixtureRun = {
   file: basename(path),
@@ -77,8 +81,7 @@ const run: FixtureRun = {
   iterations,
   calibrationMs,
   phasesMs,
-  // Node reports kilobytes on every platform.
-  peakRssBytes: process.resourceUsage().maxRSS * 1024,
+  peakRssBytes,
   heapAfterParseBytes,
   checksum: sink,
 }

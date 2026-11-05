@@ -2,7 +2,9 @@ import { expect, test } from 'vite-plus/test'
 import {
   compare,
   confirmedRegressions,
+  isStale,
   median,
+  missingPlatformExitCode,
   missingPlatformMessage,
   platformKey,
   type BaselineEntry,
@@ -72,6 +74,26 @@ test('a missing platform prints a warning and the JSON to paste', () => {
     fixtures: { 'a.sav': baseline },
   }
   const message = missingPlatformMessage('linux-x64', entry)
-  expect(message).toContain('WARNING no baseline for linux-x64')
+  expect(message).toContain('no baseline for linux-x64')
   expect(JSON.parse(message.slice(message.indexOf('{')))['linux-x64']).toEqual(entry)
+})
+
+test('a missing platform fails under --require and only warns otherwise', () => {
+  expect(missingPlatformExitCode(true)).toBe(1)
+  expect(missingPlatformExitCode(false)).toBe(0)
+})
+
+test('zero, missing or non-finite timings are errors, not passes', () => {
+  const zeroCalibration = { ...baseline, calibrationMs: 0 }
+  expect(() => compare(baseline, zeroCalibration)).toThrow('missing, zero')
+  const zeroPhase = { ...baseline, phasesMs: { ...baseline.phasesMs, parse: 0 } }
+  expect(() => compare(baseline, zeroPhase)).toThrow('missing, zero')
+  const missing = { ...baseline, phasesMs: { readInflate: 1 } } as unknown as BaselineEntry
+  expect(() => compare(missing, baseline)).toThrow('missing, zero')
+  expect(() => compare(baseline, { ...baseline, calibrationMs: NaN })).toThrow('missing, zero')
+})
+
+test('a baseline for a different file size is stale', () => {
+  expect(isStale(baseline, { ...baseline, fileBytes: 2 })).toBe(true)
+  expect(isStale(baseline, baseline)).toBe(false)
 })

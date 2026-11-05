@@ -10,22 +10,22 @@
       "fixtures": {
         "mithro-06-maximum-cycle-4770.sav": {
           "fileBytes": 40031915,
-          "calibrationMs": 242.5,
+          "calibrationMs": 281.8,
           "phasesMs": {
-            "readInflate": 1533.3,
-            "parse": 1586.7,
-            "write": 2914.5,
-            "deflate": 3974.6
+            "readInflate": 1592,
+            "parse": 1596.9,
+            "write": 2695.3,
+            "deflate": 4039.4
           }
         },
         "mithro-03-late-game-cycle-1160.sav": {
           "fileBytes": 13132873,
-          "calibrationMs": 237,
+          "calibrationMs": 280.7,
           "phasesMs": {
-            "readInflate": 440.5,
-            "parse": 412.9,
+            "readInflate": 436.1,
+            "parse": 424.1,
             "write": 581.1,
-            "deflate": 1114
+            "deflate": 1124.5
           }
         }
       }

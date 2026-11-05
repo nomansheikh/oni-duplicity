@@ -7,7 +7,9 @@ import { parseBenchArgs } from './bench/args.ts'
 import {
   compare,
   confirmedRegressions,
+  isStale,
   median,
+  missingPlatformExitCode,
   missingPlatformMessage,
   platformKey,
   PHASE_LABELS,
@@ -59,6 +61,8 @@ if (baseline && baseline.version !== 2) {
 // Without a baseline for this platform the run still measures and prints, but compares nothing.
 const platformBaseline = baseline?.platforms[key]
 
+const WORKER_TIMEOUT_MS = 10 * 60 * 1000
+
 function runFixture(file: string): FixtureRun {
   const result = spawnSync(
     process.execPath,
@@ -68,8 +72,22 @@ function runFixture(file: string): FixtureRun {
       join(fetchedDir, file),
       String(args.iterations),
     ],
-    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'], maxBuffer: 1 << 20 },
+    {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'inherit'],
+      maxBuffer: 1 << 20,
+      timeout: WORKER_TIMEOUT_MS,
+    },
   )
+  if (result.error) {
+    const timedOut = (result.error as NodeJS.ErrnoException).code === 'ETIMEDOUT'
+    throw new Error(
+      timedOut
+        ? `Measuring ${file} took longer than ${WORKER_TIMEOUT_MS / 60000} minutes and was stopped`
+        : `Measuring ${file} could not run: ${result.error.message}`,
+    )
+  }
+  if (result.signal) throw new Error(`Measuring ${file} was killed by ${result.signal}`)
   if (result.status !== 0) throw new Error(`Measuring ${file} failed (exit ${result.status})`)
   return JSON.parse(result.stdout.trim().split('\n').at(-1)!)
 }
@@ -89,7 +107,12 @@ for (const file of FIXTURES) {
   let run = runFixture(file)
   let current = summarize(run)
   const base = platformBaseline?.fixtures[file]
-  const stale = base !== undefined && base.fileBytes !== current.fileBytes
+  const stale = base !== undefined && isStale(current, base)
+  if (stale && args.require && !args.update) {
+    throw new Error(
+      `${file} has a different size from the baseline (${base.fileBytes} bytes, now ${current.fileBytes}). Run "vp run bench --update".`,
+    )
+  }
   const comparing = base !== undefined && !stale && !args.update
   let comparison = comparing ? compare(current, base) : undefined
   let confirmed: string[] = []
@@ -171,7 +194,10 @@ if (args.update) {
   console.log(`bench: baseline for ${key} updated at test-data/bench-baseline.json`)
 } else if (!platformBaseline) {
   // Not a failure: the baseline for a new platform is committed after its first run.
-  console.log(missingPlatformMessage(key, measured))
+  const message = missingPlatformMessage(key, measured)
+  if (missingPlatformExitCode(args.require) === 0) console.log(message)
+  else console.error(message)
+  process.exitCode = missingPlatformExitCode(args.require)
 } else if (regressions > 0) {
   console.error(
     `bench: ${regressions} phase(s) slower than the baseline by more than ${REGRESSION_THRESHOLD * 100}% (calibrated), in two measurements. If the slowdown is intended, run "vp run bench --update".`,

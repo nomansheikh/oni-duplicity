@@ -81,12 +81,33 @@ export function compare(
   baseline: BaselineEntry,
   threshold = REGRESSION_THRESHOLD,
 ): PhaseComparison[] {
+  assertUsable(current, 'measured')
+  assertUsable(baseline, 'baseline')
   return PHASES.map((phase) => {
     const ratio = current.phasesMs[phase] / current.calibrationMs
     const baselineRatio = baseline.phasesMs[phase] / baseline.calibrationMs
     const change = ratio / baselineRatio - 1
+    if (!Number.isFinite(change)) throw new Error(`Non-finite ratio for ${phase}`)
     return { phase, ratio, baselineRatio, change, regressed: change > threshold + 1e-9 }
   })
+}
+
+/** A zero, negative or missing time would make every ratio meaningless, and the gate pass. */
+function assertUsable(entry: BaselineEntry, what: string) {
+  const values = [entry.calibrationMs, ...PHASES.map((phase) => entry.phasesMs?.[phase])]
+  if (!values.every((value) => Number.isFinite(value) && value > 0)) {
+    throw new Error(`The ${what} timings are missing, zero or not numbers`)
+  }
+}
+
+/** Whether a baseline entry belongs to the file that was measured. */
+export function isStale(current: BaselineEntry, baseline: BaselineEntry): boolean {
+  return current.fileBytes !== baseline.fileBytes
+}
+
+/** Without a baseline the gate cannot judge anything: that fails under --require, else warns. */
+export function missingPlatformExitCode(require: boolean): number {
+  return require ? 1 : 0
 }
 
 /**
@@ -101,7 +122,7 @@ export function confirmedRegressions(first: PhaseComparison[], second: PhaseComp
 /** What to print, instead of failing, when the baseline has no entry for this platform. */
 export function missingPlatformMessage(key: string, entry: PlatformBaseline): string {
   return [
-    `bench: WARNING no baseline for ${key} in test-data/bench-baseline.json, so nothing was compared.`,
+    `bench: no baseline for ${key} in test-data/bench-baseline.json, so nothing was compared.`,
     `To add one, put this under "platforms" > "${key}" (or run "vp run bench --update" on this platform):`,
     JSON.stringify({ [key]: entry }, null, 2),
   ].join('\n')

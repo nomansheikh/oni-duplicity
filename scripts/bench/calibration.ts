@@ -1,67 +1,49 @@
-// A fixed CPU workload, timed next to the real phases. It is deliberately independent of the
-// parser and of fflate, so a regression in either cannot hide by slowing the calibration too.
-// It mimics what they do: walk bytes with a DataView, allocate many small objects and strings,
-// and run a deflate-like hash-table match search.
+// A fixed workload, timed next to the real phases. It is deliberately independent of the parser
+// and of fflate, so a regression in either cannot hide by slowing the calibration too.
+// It resembles what they do, which is dominated by memory rather than arithmetic: stream through a
+// buffer far larger than the CPU caches, and allocate many small objects and strings.
 
-const SIZE = 4 << 20
-const HASH_BITS = 15
-const HASH_MASK = (1 << HASH_BITS) - 1
+const BUFFER_BYTES = 256 << 20
+const OBJECTS = 1_500_000
 
-function makeData(): Uint8Array {
-  const data = new Uint8Array(SIZE)
+interface Node {
+  id: number
+  name: string
+  next: Node | null
+}
+
+function streamBuffer(): number {
+  const words = new Uint32Array(BUFFER_BYTES / 4)
   let state = 0x9e3779b9
-  for (let i = 0; i < SIZE; i++) {
+  // Sequential writes.
+  for (let i = 0; i < words.length; i++) {
     state ^= state << 13
     state ^= state >>> 17
     state ^= state << 5
-    // A small alphabet with repeated stretches, so the match search finds matches.
-    data[i] = i % 64 < 24 ? data[i - (i % 64)]! : (state >>> 24) & 0x1f
+    words[i] = state
   }
-  return data
-}
-
-const data = makeData()
-const view = new DataView(data.buffer)
-const decoder = new TextDecoder('utf-8')
-
-function walkRecords(): number {
-  const records: { id: number; name: string; value: number }[] = []
-  for (let pos = 0; pos + 24 <= SIZE && records.length < 300_000; pos += 12 + (data[pos]! & 7)) {
-    const length = data[pos + 1]! & 15
-    records.push({
-      id: view.getUint32(pos, true),
-      name: decoder.decode(data.subarray(pos + 2, pos + 2 + length)),
-      value: view.getInt16(pos + 8, true),
-    })
-  }
+  // Sequential reads, through a typed array and through an unaligned DataView.
   let sum = 0
-  for (const record of records) sum = (sum + record.id + record.name.length + record.value) | 0
+  for (let i = 0; i < words.length; i++) sum = (sum + words[i]!) | 0
+  const view = new DataView(words.buffer)
+  for (let i = 1; i + 4 <= BUFFER_BYTES; i += 16) sum = (sum + view.getUint32(i, true)) | 0
   return sum
 }
 
-function matchSearch(): number {
-  const head = new Int32Array(1 << HASH_BITS).fill(-1)
-  const prev = new Int32Array(SIZE)
-  let matched = 0
-  for (let i = 0; i < SIZE - 3; i++) {
-    const hash = ((data[i]! << 10) ^ (data[i + 1]! << 5) ^ data[i + 2]!) & HASH_MASK
-    const candidate = head[hash]!
-    if (candidate >= 0) {
-      let length = 0
-      while (length < 32 && i + length < SIZE && data[candidate + length] === data[i + length]) {
-        length++
-      }
-      matched += length
-    }
-    prev[i] = candidate
-    head[hash] = i
+function allocateObjects(): number {
+  const nodes: Node[] = []
+  let previous: Node | null = null
+  for (let i = 0; i < OBJECTS; i++) {
+    const node: Node = { id: i, name: `item-${i & 0xfff}-${i}`, next: previous }
+    nodes.push(node)
+    previous = node
   }
-  return matched
+  let sum = 0
+  for (const node of nodes) sum = (sum + node.id + node.name.length) | 0
+  return sum
 }
 
 /** Returns a checksum so the work cannot be optimized away. */
 export function calibrationWorkload(): number {
-  let checksum = 0
-  for (let i = 0; i < 3; i++) checksum = (checksum + walkRecords() + matchSearch()) | 0
-  return checksum
+  return (streamBuffer() + allocateObjects()) | 0
 }
