@@ -32,8 +32,10 @@ export function ensureOracle(root: string): string {
   const head = run('git', ['rev-parse', 'HEAD'], dir)
   if (head !== ORACLE_SHA) throw new Error(`Oracle checkout is ${head}, expected ${ORACLE_SHA}`)
 
-  // `npm ci` runs the package's `prepare` script, which compiles lib/.
-  run('npm', ['ci', '--no-audit', '--no-fund'], dir)
+  // Install scripts of the oracle's dependencies never run, so bumping the pinned commit cannot
+  // run new ones silently. `prepare` is skipped too, hence the explicit build (what it runs).
+  run('npm', ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], dir)
+  run('npm', ['run', 'build'], dir)
   if (!existsSync(join(dir, 'lib', 'index.js')))
     throw new Error('Oracle build produced no lib/index.js')
   writeFileSync(marker, `${ORACLE_SHA}\n`)

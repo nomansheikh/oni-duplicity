@@ -25,6 +25,21 @@ export interface Report {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Loose = any
 
+const SAVE_PARTS = [
+  'header',
+  'templates',
+  'version',
+  'world',
+  'settings',
+  'simData',
+  'gameData',
+  'gameObjects',
+] as const
+const GROUP_KEYS = ['name', 'gameObjects']
+const GAME_OBJECT_KEYS = ['position', 'rotation', 'scale', 'folder', 'behaviors']
+const BEHAVIOR_KEYS = ['name', 'templateData', 'extraData', 'extraRaw']
+const MACHINE_KEYS = ['leading', 'type', 'typeSuffix', 'currentState', 'data']
+
 const KNOWN_SMC = 'StateMachineController decoded by the oracle only; re-encodes to our raw bytes'
 const KNOWN_MODIFIERS = 'Modifiers list is called diseases by the oracle, sicknesses by us'
 
@@ -63,11 +78,14 @@ function longToBigInt(v: { unsigned: boolean; lower: number; upper: number }): b
   return v.unsigned ? BigInt.asUintN(64, raw) : BigInt.asIntN(64, raw)
 }
 
-const isBytes = (v: unknown): v is ArrayBuffer | Uint8Array =>
+const isBytes = (v: unknown): v is ArrayBuffer | ArrayBufferView =>
   v instanceof ArrayBuffer || ArrayBuffer.isView(v)
 
-function toBytes(v: ArrayBuffer | Uint8Array): Uint8Array {
-  return v instanceof Uint8Array ? v : new Uint8Array(v)
+function toBytes(v: ArrayBuffer | ArrayBufferView): Uint8Array {
+  if (v instanceof Uint8Array) return v
+  // A typed array or DataView must be read through its own window, not the whole buffer.
+  if (ArrayBuffer.isView(v)) return new Uint8Array(v.buffer, v.byteOffset, v.byteLength)
+  return new Uint8Array(v)
 }
 
 function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
@@ -139,6 +157,15 @@ export function compareSaves(theirs: Loose, ours: Loose): Report {
   const real = (category: string, path: string, a: unknown, b: unknown) =>
     record('real', category, path, `theirs=${show(a)} ours=${show(b)}`)
 
+  /** Any defined key outside `allowed` is something the comparison would otherwise never look at. */
+  function checkKeys(value: Loose, allowed: readonly string[], side: string, path: string): void {
+    for (const key of Object.keys(value)) {
+      if (value[key] !== undefined && !allowed.includes(key)) {
+        record('real', `unexpected key in ${side}`, `${path}.${key}`, show(value[key]))
+      }
+    }
+  }
+
   function cmp(a: Loose, b: Loose, path: string): void {
     comparedValues++
     a ??= null
@@ -205,6 +232,8 @@ export function compareSaves(theirs: Loose, ours: Loose): Report {
   }
 
   function cmpBehavior(a: Loose, b: Loose, path: string): void {
+    checkKeys(a, BEHAVIOR_KEYS, 'oracle behavior', path)
+    checkKeys(b, BEHAVIOR_KEYS, 'our behavior', path)
     if (a.name !== b.name) return real('behavior name differs', path, a.name, b.name)
     cmp(a.templateData, b.templateData, `${path}.templateData`)
     const rawA = a.extraRaw ? toBytes(a.extraRaw) : new Uint8Array(0)
@@ -222,6 +251,16 @@ export function compareSaves(theirs: Loose, ours: Loose): Report {
           `${rawA.length} bytes`,
           undefined,
         )
+      // The re-encode below reads only these fields, so anything else would go unchecked.
+      checkKeys(
+        a.extraData,
+        ['serializerVersion', 'stateMachines', 'unparsed'],
+        'oracle state machine data',
+        path,
+      )
+      for (const machine of a.extraData.stateMachines ?? []) {
+        checkKeys(machine, MACHINE_KEYS, 'oracle state machine', path)
+      }
       const encoded = encodeStateMachineController(a.extraData)
       if (bytesEqual(new Uint8Array(encoded), rawB))
         record('known', KNOWN_SMC, path, `${rawB.length} bytes`)
@@ -247,6 +286,8 @@ export function compareSaves(theirs: Loose, ours: Loose): Report {
       let theirData = a.extraData
       if (a.name === 'Klei.AI.Modifiers' && 'diseases' in theirData) {
         record('known', KNOWN_MODIFIERS, path, 'renamed')
+        // Rebuilt by hand below, so no other key may be dropped silently.
+        checkKeys(theirData, ['amounts', 'diseases'], 'oracle Modifiers data', path)
         theirData = { amounts: theirData.amounts, sicknesses: theirData.diseases }
       }
       if (a.name === 'Storage') cmpStored(theirData, b.extraData, `${path}.extraData`)
@@ -258,7 +299,10 @@ export function compareSaves(theirs: Loose, ours: Loose): Report {
       real('extraRaw differs', path, `${rawA.length} bytes`, `${rawB.length} bytes`)
   }
 
-  function cmpGameObject(a: Loose, b: Loose, path: string): void {
+  function cmpGameObject(a: Loose, b: Loose, path: string, extraKeys: string[] = []): void {
+    // Items inside a Storage also carry their prefab name.
+    checkKeys(a, [...GAME_OBJECT_KEYS, ...extraKeys], 'oracle game object', path)
+    checkKeys(b, [...GAME_OBJECT_KEYS, ...extraKeys], 'our game object', path)
     cmp(a.position, b.position, `${path}.position`)
     cmp(a.rotation, b.rotation, `${path}.rotation`)
     cmp(a.scale, b.scale, `${path}.scale`)
@@ -275,26 +319,25 @@ export function compareSaves(theirs: Loose, ours: Loose): Report {
     if (a.length !== b.length) return real('storage item count differs', path, a.length, b.length)
     a.forEach((item, i) => {
       cmp(item.name, b[i].name, `${path}[${i}].name`)
-      cmpGameObject(item, b[i], `${path}[${i}]`)
+      cmpGameObject(item, b[i], `${path}[${i}]`, ['name'])
     })
   }
 
-  for (const part of [
-    'header',
-    'templates',
-    'version',
-    'world',
-    'settings',
-    'simData',
-    'gameData',
-  ]) {
-    cmp(theirs[part], ours[part], part)
+  checkKeys(theirs, SAVE_PARTS as readonly string[], 'oracle save', 'save')
+  // `warnings` only exists on our side; the oracle has no equivalent, so ours must be empty.
+  checkKeys(ours, [...SAVE_PARTS, 'warnings'], 'our save', 'save')
+  for (const warning of ours.warnings ?? [])
+    real('our parser warned', 'warnings', undefined, warning)
+  for (const part of SAVE_PARTS) {
+    if (part !== 'gameObjects') cmp(theirs[part], ours[part], part)
   }
   if (theirs.gameObjects.length !== ours.gameObjects.length) {
     real('group count differs', 'gameObjects', theirs.gameObjects.length, ours.gameObjects.length)
   } else {
     theirs.gameObjects.forEach((group: Loose, g: number) => {
       const other = ours.gameObjects[g]
+      checkKeys(group, GROUP_KEYS, 'oracle group', `gameObjects[${g}]`)
+      checkKeys(other, GROUP_KEYS, 'our group', `gameObjects[${g}]`)
       if (group.name !== other.name)
         return real('group name differs', `gameObjects[${g}]`, group.name, other.name)
       if (group.gameObjects.length !== other.gameObjects.length) {

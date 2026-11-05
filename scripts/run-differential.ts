@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { parseTierArg } from './fixtures/args.ts'
 import { loadManifest, selectFixtures } from './fixtures/manifest.ts'
 import type { Entry } from './differential/compare.ts'
+import { missingIsFatal } from './differential/fixtures-missing.ts'
 import { ensureOracle } from './differential/oracle.ts'
 
 const root = join(import.meta.dirname, '..')
@@ -26,12 +27,19 @@ interface Result {
 }
 
 let compared = 0
+let selected = 0
 let failed = 0
 const started = performance.now()
 for (const fixture of selectFixtures(manifest, selection)) {
   const path = join(root, 'test-data', fixture.committed ? 'saves' : 'fetched', fixture.file)
+  selected++
   if (!existsSync(path)) {
-    console.log(`skipped   ${fixture.file} (not fetched; run \`vp run fixtures\`)`)
+    if (missingIsFatal(fixture, process.env)) {
+      failed++
+      console.error(`MISSING   ${fixture.file} (run \`vp run fixtures\`)`)
+    } else {
+      console.log(`skipped   ${fixture.file} (not fetched; run \`vp run fixtures\`)`)
+    }
     continue
   }
   // One child per fixture so the oracle's memory (several GB on the largest saves) is freed.
@@ -61,7 +69,7 @@ for (const fixture of selectFixtures(manifest, selection)) {
 }
 
 console.log(
-  `compared ${compared} fixture(s) in ${Math.round((performance.now() - started) / 1000)} s`,
+  `compared ${compared} of ${selected} fixture(s) in ${Math.round((performance.now() - started) / 1000)} s`,
 )
 if (compared === 0) {
   console.error('No fixtures available to compare')

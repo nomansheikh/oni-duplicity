@@ -1,4 +1,5 @@
 import { expect, test } from 'vite-plus/test'
+import { missingIsFatal } from './fixtures-missing.ts'
 import { compareSaves, encodeStateMachineController } from './compare.ts'
 
 // Synthetic saves in the shape both parsers produce. No oracle build is needed.
@@ -19,6 +20,7 @@ function makeSave(side: 'theirs' | 'ours') {
     settings: { name: 'colony' },
     simData: theirs ? new Uint8Array([9, 9]).buffer : new Uint8Array([9, 9]),
     gameData: null,
+    ...(theirs ? {} : { warnings: [] as string[] }),
     gameObjects: [
       {
         name: 'Minion',
@@ -104,4 +106,57 @@ test.each([
   const ours = makeSave('ours')
   tamper(ours)
   expect(real(makeSave('theirs'), ours).length).toBeGreaterThan(0)
+})
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Loose = any
+const behaviors = (s: Loose) => s.gameObjects[0].gameObjects[0].behaviors
+
+const addKey: [string, 'theirs' | 'ours', (s: Loose) => Loose][] = [
+  ['oracle save', 'theirs', (s) => s],
+  ['our save', 'ours', (s) => s],
+  ['oracle group', 'theirs', (s) => s.gameObjects[0]],
+  ['our group', 'ours', (s) => s.gameObjects[0]],
+  ['oracle game object', 'theirs', (s) => s.gameObjects[0].gameObjects[0]],
+  ['our game object', 'ours', (s) => s.gameObjects[0].gameObjects[0]],
+  ['oracle behavior', 'theirs', (s) => behaviors(s)[0]],
+  ['our behavior', 'ours', (s) => behaviors(s)[0]],
+  ['oracle Modifiers data', 'theirs', (s) => behaviors(s)[1].extraData],
+  ['oracle state machine data', 'theirs', (s) => behaviors(s)[2].extraData],
+  ['oracle state machine', 'theirs', (s) => behaviors(s)[2].extraData.stateMachines[0]],
+]
+
+test.each(addKey)('unexpected key in %s is a real disagreement', (name, side, target) => {
+  const theirs = makeSave('theirs')
+  const ours = makeSave('ours')
+  target(side === 'theirs' ? theirs : ours).unexpected = 1
+  expect(real(theirs, ours).map((e) => e.category)).toContain(`unexpected key in ${name}`)
+})
+
+test('our parser warnings are a real disagreement', () => {
+  const ours = makeSave('ours')
+  ;(ours as Loose).warnings.push('unverified minor version')
+  expect(real(makeSave('theirs'), ours).map((e) => e.category)).toEqual(['our parser warned'])
+})
+
+test('byte views are compared through their own window, not the whole buffer', () => {
+  const whole = new Uint8Array([0, 1, 2, 3, 4, 5]).buffer
+  const theirs = makeSave('theirs')
+  const ours = makeSave('ours')
+  theirs.simData = new Uint8Array([2, 3]).buffer
+  // A view onto bytes 2..3 of a bigger buffer, and a differing one onto bytes 4..5.
+  ours.simData = new Uint8Array(whole, 2, 2)
+  expect(real(theirs, ours)).toEqual([])
+  ours.simData = new Uint8Array(whole, 4, 2)
+  expect(real(theirs, ours).map((e) => e.category)).toEqual(['bytes differ'])
+  // Non-Uint8Array views too.
+  theirs.simData = new Uint8Array([2, 3]).buffer
+  ;(ours as Loose).simData = new DataView(whole, 2, 2)
+  expect(real(theirs, ours)).toEqual([])
+})
+
+test('missing fixtures are fatal when committed or under CI only', () => {
+  expect(missingIsFatal({ committed: true }, {})).toBe(true)
+  expect(missingIsFatal({ committed: false }, { CI: 'true' })).toBe(true)
+  expect(missingIsFatal({ committed: false }, {})).toBe(false)
 })
