@@ -192,11 +192,11 @@ catalogs:
     '@fontsource-variable/jetbrains-mono':
       specifier: ^5.3.0
       version: 5.3.0
-    '@fontsource/barlow':
-      specifier: ^5.3.0
+    '@fontsource-variable/noto-sans':
+      specifier: ^5.2.0
       version: 5.3.0
-    '@fontsource/chakra-petch':
-      specifier: ^5.3.0
+    '@fontsource/rajdhani':
+      specifier: ^5.2.0
       version: 5.3.0
     '@oni-duplicity/game-data':
       specifier: workspace:*
@@ -296,10 +296,10 @@ importers:
       '@fontsource-variable/jetbrains-mono':
         specifier: 'catalog:'
         version: 5.3.0
-      '@fontsource/barlow':
+      '@fontsource-variable/noto-sans':
         specifier: 'catalog:'
         version: 5.3.0
-      '@fontsource/chakra-petch':
+      '@fontsource/rajdhani':
         specifier: 'catalog:'
         version: 5.3.0
       '@oni-duplicity/game-data':
@@ -582,11 +582,11 @@ packages:
   '@fontsource-variable/jetbrains-mono@5.3.0':
     resolution: {integrity: sha512-F32xpS2NsGYoQi2ADSkKTgpJj7ozajsGgDJ8woTnqjmIB+dxDIqImjl4pXZVEExu8UFZ2ndhmX18EBS/hdz3Lw==}
 
-  '@fontsource/barlow@5.3.0':
-    resolution: {integrity: sha512-tGR0y6QObRtKv71MOth44222+mdNFM/ZWFWDV1VLzNbG4oK9PNRlyJzmkck4vHAi9ibHBXgt4SlY51amFP55CA==}
+  '@fontsource-variable/noto-sans@5.3.0':
+    resolution: {integrity: sha512-e3ZuxzY9AL2psXPZlhwhnYrHUHv6PMoyK9MQ7croF0CUgURLqu9EMjW7q2FgVLwij1tjLsIHQrnwQ8aUcg4BiA==}
 
-  '@fontsource/chakra-petch@5.3.0':
-    resolution: {integrity: sha512-QZvbM/q2R6n1pg2x+TJPftZmBNS+ADU37L4Z4L/6UJIz+JZ/SRaEf8usPFRiP7Ht28sIideMu/Bm1SnGlSrwNw==}
+  '@fontsource/rajdhani@5.3.0':
+    resolution: {integrity: sha512-oBJgSIibWJvVBKseme1JczqPLoDHN97LHti4uh0LjfcJqQoVmnQQlRKIpEjTJV559rmVQ6qbVZZwKwk2wkBTtw==}
 
   '@hono/node-server@2.1.1':
     resolution: {integrity: sha512-ELuehkj5VCBdgEw9zs+ivkKwyzzUCSQuE96YmiPvn1ECBoZCczbFXJLeEGMTYjphP6gydh4pHMqEYPVMYUVgQg==}
@@ -4189,9 +4189,9 @@ snapshots:
 
   '@fontsource-variable/jetbrains-mono@5.3.0': {}
 
-  '@fontsource/barlow@5.3.0': {}
+  '@fontsource-variable/noto-sans@5.3.0': {}
 
-  '@fontsource/chakra-petch@5.3.0': {}
+  '@fontsource/rajdhani@5.3.0': {}
 
   '@hono/node-server@2.1.1(hono@4.13.9)':
     dependencies:

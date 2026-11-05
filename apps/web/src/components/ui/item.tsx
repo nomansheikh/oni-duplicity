@@ -31,13 +31,15 @@ function ItemSeparator({ className, ...props }: React.ComponentProps<typeof Sepa
 }
 
 const itemVariants = cva(
-  'group/item flex w-full flex-wrap items-center rounded-lg border text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-muted',
+  'group/item flex w-full flex-wrap items-center rounded-none border text-sm transition-colors duration-100 outline-none focus-visible:outline-2 focus-visible:outline-ring [a]:transition-colors [a]:hover:bg-muted',
   {
     variants: {
       variant: {
         default: 'border-transparent',
-        outline: 'border-border',
+        outline: 'border-ink',
         muted: 'border-transparent bg-muted/50',
+        // vitals row: icon, label and value, trend arrow in ItemActions
+        need: 'grid min-h-8 grid-cols-[1.5rem_1fr_1.2rem] gap-x-[0.6rem] border-transparent px-2 py-1 [&_[data-slot=item-actions]]:justify-self-end [&_[data-slot=item-actions]]:text-[0.7rem] [&_[data-slot=item-actions]]:text-fg-2 [&_[data-slot=item-media]_svg]:size-[1.3rem]',
       },
       size: {
         default: 'gap-2.5 px-3 py-2.5',

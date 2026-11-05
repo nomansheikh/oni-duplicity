@@ -3,18 +3,42 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from 'cn'
 import { Slot } from 'radix-ui'
 
+// Chip look: square, 1px tone border, tinted fill. `--c` carries the tone.
 const badgeVariants = cva(
-  'group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3!',
+  'group/badge chip w-fit shrink-0 justify-center overflow-hidden rounded-none whitespace-nowrap transition-colors focus-visible:outline-2 aria-invalid:border-destructive [&>svg]:pointer-events-none [&>svg]:size-3!',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground [a]:hover:bg-primary/80',
-        secondary: 'bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80',
-        destructive:
-          'bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20',
-        outline: 'border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground',
-        ghost: 'hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50',
-        link: 'text-primary underline-offset-4 hover:underline',
+        default: '[--c:var(--tab-on)]',
+        secondary: '[--c:var(--fg-2)]',
+        destructive: '[--c:var(--bad)]',
+        outline: 'bg-transparent [--c:var(--fg-2)]',
+        ghost: 'border-transparent bg-transparent [--c:var(--fg-2)]',
+        link: 'border-transparent bg-transparent font-sans type-small tracking-normal text-gold normal-case underline-offset-4 hover:underline [--c:var(--gold)]',
+        // status
+        good: '[--c:var(--cat-good)]',
+        warn: '[--c:var(--cat-warn)]',
+        bad: '[--c:var(--cat-bad)]',
+        info: '[--c:var(--cat-info)]',
+        // resources
+        oxygen: '[--c:var(--cat-oxygen)]',
+        water: '[--c:var(--cat-water)]',
+        food: '[--c:var(--cat-food)]',
+        power: '[--c:var(--cat-power)]',
+        metal: '[--c:var(--cat-metal)]',
+        plant: '[--c:var(--cat-plant)]',
+        critter: '[--c:var(--cat-critter)]',
+        geyser: '[--c:var(--cat-geyser)]',
+        dlc: '[--c:var(--cat-dlc)]',
+        // elements
+        gas: '[--c:var(--cat-gas)]',
+        liquid: '[--c:var(--cat-liquid)]',
+        solid: '[--c:var(--cat-solid)]',
+        vacuum: '[--c:var(--cat-vacuum)]',
+        // colony row: icon, number and unit, no border or background
+        bare: 'h-auto min-h-0 gap-1.5 border-transparent bg-transparent px-0 font-sans type-body text-white normal-case [&>svg]:size-5!',
+        // stat pill: dark inset box, numbers in tabular figures
+        stat: 'h-[1.9rem] gap-[0.45rem] border-ink bg-inset px-[0.6rem] font-sans type-small font-semibold tracking-normal text-foreground normal-case tabular-nums',
       },
     },
     defaultVariants: {
