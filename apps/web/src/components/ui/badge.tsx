@@ -14,7 +14,7 @@ const badgeVariants = cva(
         destructive: '[--c:var(--bad)]',
         outline: 'bg-transparent [--c:var(--fg-2)]',
         ghost: 'border-transparent bg-transparent [--c:var(--fg-2)]',
-        link: 'border-transparent bg-transparent font-sans text-[0.85rem] font-normal tracking-normal text-gold normal-case underline-offset-4 hover:underline [--c:var(--gold)]',
+        link: 'border-transparent bg-transparent font-sans type-small tracking-normal text-gold normal-case underline-offset-4 hover:underline [--c:var(--gold)]',
         // status
         good: '[--c:var(--cat-good)]',
         warn: '[--c:var(--cat-warn)]',
@@ -36,9 +36,9 @@ const badgeVariants = cva(
         solid: '[--c:var(--cat-solid)]',
         vacuum: '[--c:var(--cat-vacuum)]',
         // colony row: icon, number and unit, no border or background
-        bare: 'h-auto min-h-0 gap-1.5 border-transparent bg-transparent px-0 font-sans text-base font-normal tracking-normal text-white normal-case [&>svg]:size-5!',
+        bare: 'h-auto min-h-0 gap-1.5 border-transparent bg-transparent px-0 font-sans type-body text-white normal-case [&>svg]:size-5!',
         // stat pill: dark inset box, numbers in tabular figures
-        stat: 'h-[1.9rem] gap-[0.45rem] border-ink bg-inset px-[0.6rem] font-sans text-[0.9rem] font-semibold tracking-normal text-foreground normal-case tabular-nums',
+        stat: 'h-[1.9rem] gap-[0.45rem] border-ink bg-inset px-[0.6rem] font-sans type-small font-semibold tracking-normal text-foreground normal-case tabular-nums',
       },
     },
     defaultVariants: {

@@ -2,28 +2,23 @@ import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from 'cn'
 import { Progress as ProgressPrimitive } from 'radix-ui'
-
-type ProgressTone = 'good' | 'warn' | 'bad'
-type MeterKind = 'amount' | 'health' | 'stress'
-
-/**
- * Tone for a value, by the rules in docs/design.md: amounts are good from 50% and warn from
- * 25%, health 70/35, stress is good up to 40% and warn up to 70% (higher is worse).
- */
-function meterTone(kind: MeterKind, pct: number): ProgressTone {
-  if (kind === 'stress') return pct <= 40 ? 'good' : pct <= 70 ? 'warn' : 'bad'
-  const [good, warn] = kind === 'health' ? [70, 35] : [50, 25]
-  return pct >= good ? 'good' : pct >= warn ? 'warn' : 'bad'
-}
+import {
+  clampProgress,
+  filledCells,
+  meterTone,
+  type MeterKind,
+  type ProgressTone,
+} from '@/lib/meter'
 
 const bevel = (c: string) =>
   `inset 0 1px 0 color-mix(in srgb,${c} 38%,#000),inset 0 -1px 0 color-mix(in srgb,${c} 43%,#000),inset -2px 0 0 color-mix(in srgb,${c} 66%,#000),inset 0 -2px 0 color-mix(in srgb,${c} 66%,#000),inset 0 -3px 0 color-mix(in srgb,${c} 90%,#000)`
 
-// blocks: the morale meter. gauge: the in-world storage gauge. xp: the skill XP bar.
+// bar: the plain thin bar (default). blocks: the morale meter. gauge: the in-world storage gauge. xp: the skill XP bar.
 // task: the in-world task bar (research, geyser). Tone sets --c (blocks) and --gf1/--gf2 (gauge).
 const progressVariants = cva('relative w-full', {
   variants: {
     variant: {
+      bar: 'h-1.5 overflow-hidden rounded-none bg-[#090304] shadow-[inset_0_0_0_1px_rgb(0_0_0/.6)]',
       blocks: 'grid gap-[3px]',
       xp: 'h-[2.2rem] overflow-hidden rounded-none border border-b-2 border-ink bg-[#454545]',
       task: 'h-[0.95rem] overflow-hidden rounded-none border-2 border-[#fffef7] bg-[#090304]',
@@ -36,19 +31,20 @@ const progressVariants = cva('relative w-full', {
       bad: '[--c:#c56660] [--gf1:#d47873] [--gf2:#c56660]',
     },
   },
-  defaultVariants: { variant: 'gauge', tone: 'good' },
+  defaultVariants: { variant: 'bar', tone: 'good' },
 })
 
 const stateColor: Record<ProgressTone, string> = {
-  good: 'text-m-good',
-  warn: 'text-m-warn',
-  bad: 'text-m-bad',
+  good: 'text-m-good-text',
+  warn: 'text-m-warn-text',
+  bad: 'text-m-bad-text',
 }
 
 function Progress({
   className,
   value = 0,
-  variant = 'gauge',
+  max = 100,
+  variant = 'bar',
   tone = 'good',
   segments = 20,
   overflow = 0,
@@ -62,7 +58,7 @@ function Progress({
   VariantProps<typeof progressVariants> & {
     /** blocks: how many cells the track has. */
     segments?: number
-    /** Amount above the maximum. blocks adds 3 amber cells, gauge adds a hatched cap, and `+N` shows in the header. */
+    /** Amount above the maximum. blocks adds 3 red cells, gauge adds a hatched cap, and `+N` shows in the header. */
     overflow?: number
     /** task: width in percent of the dormant part drawn after the fill (geyser). */
     dormant?: number
@@ -75,7 +71,8 @@ function Progress({
     /** xp: the text centred on the bar, such as "14145 / 17545". */
     valueLabel?: React.ReactNode
   }) {
-  const pct = Math.max(0, Math.min(100, value ?? 0))
+  const clamped = clampProgress(value, max)
+  const pct = (clamped / (max > 0 ? max : 100)) * 100
   const extra = overflow > 0 ? 3 : 0
 
   const bar = (
@@ -83,7 +80,8 @@ function Progress({
       data-slot="progress"
       data-variant={variant}
       data-tone={tone}
-      value={value}
+      value={value == null ? null : clamped}
+      max={max}
       className={cn(progressVariants({ variant, tone }), className)}
       style={
         variant === 'blocks'
@@ -95,7 +93,7 @@ function Progress({
       {variant === 'blocks' &&
         Array.from({ length: segments + extra }, (_, i) => {
           const over = i >= segments
-          const filled = over || i < Math.round((pct / 100) * segments)
+          const filled = over || i < filledCells(pct, segments)
           return (
             <span
               key={i}
@@ -108,7 +106,7 @@ function Progress({
               style={
                 filled
                   ? ({
-                      '--c': over ? '#d9a63a' : undefined,
+                      '--c': over ? 'var(--m-bad)' : undefined,
                       boxShadow: bevel('var(--c)'),
                     } as React.CSSProperties)
                   : undefined
@@ -116,6 +114,14 @@ function Progress({
             />
           )
         })}
+
+      {variant === 'bar' && (
+        <ProgressPrimitive.Indicator
+          data-slot="progress-indicator"
+          className="absolute inset-y-0 left-0 bg-(--c)"
+          style={{ width: `${pct}%` }}
+        />
+      )}
 
       {variant === 'gauge' && (
         <>
@@ -145,7 +151,7 @@ function Progress({
             className="absolute inset-y-0 left-0 bg-[#6e4057]"
             style={{ width: `${pct}%` }}
           />
-          <span className="absolute inset-0 grid place-items-center font-heading text-base font-semibold tracking-[0.06em] tabular-nums">
+          <span className="absolute inset-0 grid place-items-center type-label tabular-nums">
             {valueLabel}
           </span>
         </>
@@ -184,17 +190,17 @@ function Progress({
   return (
     <div data-slot="progress-field" className="flex w-full flex-col gap-1">
       <div className="flex items-baseline justify-between gap-2 leading-none">
-        <span className="text-base text-white">{label}</span>
+        <span className="type-body text-white">{label}</span>
         <span className="flex items-baseline gap-2">
           {overflow > 0 && (
-            <span className="text-[0.8rem] font-bold text-warn tabular-nums">
+            <span className="type-caption font-bold text-warn tabular-nums">
               +{overflow.toLocaleString()}
             </span>
           )}
           {state != null && (
             <span
               className={cn(
-                'font-heading text-[0.8rem] font-bold tracking-[0.07em] uppercase',
+                'type-label',
                 variant === 'task' ? 'text-fg-2' : stateColor[tone ?? 'good'],
               )}
             >
