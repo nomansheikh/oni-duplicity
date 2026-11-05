@@ -1,8 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
-import { geyserTypes, unresample } from '@oni-duplicity/game-data'
+import { findGeyser, geyserTypes, unresample } from '@oni-duplicity/game-data'
 import {
   behavior,
   downloadSave,
+  editCount,
   expectOnlyChanged,
   GALAXY,
   goTo,
@@ -96,4 +97,100 @@ test('renames a geyser', async ({ page }) => {
   expectOnlyChanged(before, save, [
     new RegExp(`^objects/${PREFAB}/0/UserNameable/templateData/savedName$`),
   ])
+})
+
+const typeName = (id: string) => findGeyser(id)!.name
+
+/** Opens the edit sheet of the geyser with this type and picks a new type for it. */
+async function changeType(page: Page, from: string, to: string) {
+  await openSave(page)
+  await goTo(page, 'Geysers')
+  await page
+    .getByRole('row')
+    .filter({ has: page.getByRole('cell', { name: typeName(from), exact: true }) })
+    .getByRole('button', { name: 'Edit' })
+    .click()
+  const sheet = page.getByRole('dialog')
+  await expect(sheet.getByText('Experimental', { exact: true })).toBeVisible()
+  // The test colony runs the Geyser Control mod.
+  await expect(sheet.getByText(/uses the Geyser Control mod/)).toBeVisible()
+  await sheet.getByRole('combobox', { name: 'New type' }).click()
+  await page.getByRole('option', { name: typeName(to), exact: true }).click()
+  await sheet.getByRole('button', { name: 'Change type' }).click()
+  await expect(sheet).toBeHidden()
+}
+
+/** The original save with a geyser group renamed, which is where the edit puts the geyser. */
+function withGroupRenamed(from: string, to: string) {
+  const before = original(GALAXY)
+  return {
+    ...before,
+    gameObjects: before.gameObjects.map((g) => (g.name === from ? { ...g, name: to } : g)),
+  }
+}
+
+const NAME = (prefab: string) =>
+  new RegExp(`^objects/${prefab}/0/UserNameable/templateData/savedName$`)
+const CONFIGURATION = (prefab: string, field: string) =>
+  new RegExp(`^objects/${prefab}/0/Geyser/templateData/configuration/${field}$`)
+
+test('changes a geyser to a type with no group yet', async ({ page }) => {
+  await changeType(page, 'hot_po2', 'methane')
+  await expect.poll(() => editCount(page)).toBe(1)
+  await expect(
+    page
+      .getByRole('row')
+      .filter({ hasText: typeName('methane') })
+      .first(),
+  ).toBeVisible()
+
+  const { save } = await downloadSave(page)
+  expect(save.gameObjects.some((g) => g.name === 'GeyserGeneric_hot_po2')).toBe(false)
+  const moved = group(save, 'GeyserGeneric_methane')
+  expect(moved).toHaveLength(1)
+  expect(behavior(moved[0]!, 'UserNameable')!.templateData!.savedName).toMatch(
+    new RegExp(`^${typeName('methane')} `),
+  )
+  // Hot polluted oxygen and methane roll in the same ranges, so only the type and name change.
+  expectOnlyChanged(withGroupRenamed('GeyserGeneric_hot_po2', 'GeyserGeneric_methane'), save, [
+    CONFIGURATION('GeyserGeneric_methane', 'typeId/hash'),
+    NAME('GeyserGeneric_methane'),
+  ])
+})
+
+test('changing type moves the output range and the geyser temperature with it', async ({
+  page,
+}) => {
+  await changeType(page, 'hot_water', 'slush_water')
+
+  const { save } = await downloadSave(page)
+  const prefab = 'GeyserGeneric_slush_water'
+  const config = behavior(group(save, prefab)[0]!, 'Geyser')!.templateData!.configuration as Record<
+    string,
+    number
+  >
+  const range = geyserTypes.find((t) => t.id === 'slush_water')!.rate
+  expect(config.scaledRate).toBeGreaterThanOrEqual(range.min)
+  expect(config.scaledRate).toBeLessThanOrEqual(range.max)
+  expect(behavior(group(save, prefab)[0]!, 'PrimaryElement')!.templateData!._Temperature).toBe(
+    Math.fround(263),
+  )
+  expectOnlyChanged(withGroupRenamed('GeyserGeneric_hot_water', prefab), save, [
+    CONFIGURATION(prefab, 'typeId/hash'),
+    CONFIGURATION(prefab, 'scaledRate'),
+    // The game stored this one a few bits off what its roll gives in double precision.
+    CONFIGURATION(prefab, 'scaledIterationPercent'),
+    new RegExp(`^objects/${prefab}/0/PrimaryElement/templateData/_Temperature$`),
+    NAME(prefab),
+  ])
+})
+
+test('undoing a type change downloads the save unchanged', async ({ page }) => {
+  await changeType(page, 'filthy_water', 'salt_water')
+  await expect.poll(() => editCount(page)).toBe(1)
+  await page.getByRole('button', { name: 'Undo' }).click()
+  await expect.poll(() => editCount(page)).toBe(0)
+
+  const { save } = await downloadSave(page)
+  expectOnlyChanged(original(GALAXY), save, [])
 })
