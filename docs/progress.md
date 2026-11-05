@@ -82,6 +82,15 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
 
+## Stories page — 2026-11-05
+
+- New read-only Stories page lists the six story traits (Mega Brain Tank, Critter Manipulator, Lonely Minion, Fossil Hunt, Morb Rover Maker, Hijacked Headquarters) with state, asteroid and the cycle each state was reached.
+- Source: `StoryManager._stories` (`StoryInstance`: story ID, world ID, state, `StoryTelemetry` cycle stamps), decoded template data on the `SaveGame` object, and `QuestManager` for the Lonely Minion and Fossil Hunt quests. Quest hashes and the story table are transcribed from `Database.Stories` and `Database.Quests` into `packages/game-data/src/stories.ts`.
+- Machine progress that lives in state machine bytes (for example the species the Critter Manipulator has scanned) is not read; the page shows the `Activatable` flag of the Mega Brain Tank, Critter Manipulator and Hijacked Headquarters instead.
+- Only the Lonely Minion quests appear in the test saves. The Fossil Hunt quest is read the same way but is untested against a save that has its quest instance.
+- The machine flag is read only from copies standing inside the story's own asteroid. Quests are shown only when exactly one quest owner holds them; a state value the editor does not know shows as unknown.
+- Editing is not offered; open question 17 records what it would take.
+
 ## Parser benchmark and regression gate — 2026-11-05
 
 - `vp run bench` times read + inflate, parse body, write body and deflate for the 40 MB and 13 MB saves (one warm-up, median of five, each save in its own process) and prints a table with peak RSS. It skips with a message when the saves are not downloaded.
