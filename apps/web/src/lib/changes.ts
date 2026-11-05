@@ -20,6 +20,8 @@ export interface ChangeTarget {
 
 export interface HistoryEntry extends ChangeTarget {
   label: string
+  /** The edit's `type`, so the UI can tell which page shows it. */
+  type: string
 }
 
 export interface ChangeGroup {

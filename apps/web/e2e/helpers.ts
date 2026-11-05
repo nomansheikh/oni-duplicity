@@ -41,9 +41,31 @@ export async function openSave(page: Page, file: string = GALAXY): Promise<void>
   })
 }
 
-/** Opens a page from the top tab strip, e.g. `Geysers` or `Raw data`. */
+/** The sub-tabs of each top-level group, as the tab strip names them. */
+const GROUPS: Record<string, string[]> = {
+  Overview: ['Overview'],
+  Colony: ['Duplicants', 'Critters', 'Resources'],
+  World: ['Map', 'Asteroids', 'Geysers'],
+  Progress: ['Research', 'Stories'],
+  Space: ['Space'],
+  Game: ['Difficulty', 'Content', 'Raw data'],
+  Tools: ['Geyser calculator', 'Ranching calculator', 'Skill planner'],
+}
+
+/**
+ * Opens a page by its tab name, e.g. `Geysers` or `Raw data`: the group tab first, then the
+ * sub-tab when the group has several pages.
+ */
 export async function goTo(page: Page, title: string): Promise<void> {
-  await page.getByRole('tab', { name: title }).first().click()
+  const group = Object.keys(GROUPS).find((g) => GROUPS[g]!.includes(title))
+  if (!group) throw new Error(`${title} is not a page in the tab strip`)
+  const groups = page.getByRole('tablist', { name: 'Groups' })
+  await groups.getByRole('tab', { name: group }).click()
+  if (GROUPS[group]!.length > 1) {
+    const sub = page.getByRole('tablist', { name: `${group} pages` })
+    await sub.getByRole('tab', { name: title }).click()
+  }
+  await expect(page.getByRole('tab', { name: title, selected: true })).toBeVisible()
 }
 
 /** The number of unsaved edits shown in the header (0 when the button is hidden). */

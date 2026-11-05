@@ -10,7 +10,7 @@ test('changes the disease difficulty setting', async ({ page }) => {
   expect(levels(original(GALAXY))[index]).toEqual(['ImmuneSystem', 'Default'])
 
   await openSave(page)
-  await goTo(page, 'Game settings')
+  await goTo(page, 'Difficulty')
   const select = page.getByRole('combobox', { name: 'Disease' })
   await select.click()
   await page.getByRole('option', { name: 'Total Immunity' }).click()

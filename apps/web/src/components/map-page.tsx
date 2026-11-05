@@ -3,14 +3,7 @@ import { Minus, Plus, Scan } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
@@ -36,6 +29,7 @@ import { saveClient } from '@/lib/save-client'
 import { cn } from '@/lib/utils'
 import type { MapMarker, WorldMap } from '@/worker/map'
 import type { WorldView } from '@/worker/model'
+import { PageHeader } from './page-header'
 
 type Mode = 'element' | 'temperature' | 'mass'
 type MarkerKind = MapMarker['kind']
@@ -155,170 +149,174 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
     : []
 
   return (
-    <Card className="gap-4">
-      <CardHeader>
-        <CardTitle>World map</CardTitle>
-        <CardDescription>
-          Every cell of the saved simulation. Read-only; hover a cell for details, click an element
-          to highlight it.
-        </CardDescription>
-        <CardAction className="flex flex-wrap items-center gap-2">
-          {ordered.length > 1 && (
-            <Select value={worldId} onValueChange={setWorldId}>
-              <SelectTrigger size="sm" className="w-56">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ordered.map((w) => (
-                  <SelectItem key={w.id} value={w.id}>
-                    {w.name}
-                    {!w.discovered && <span className="text-muted-foreground">(undiscovered)</span>}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            value={mode}
-            onValueChange={(v) => v && setMode(v as Mode)}
-          >
-            <ToggleGroupItem value="element">Elements</ToggleGroupItem>
-            <ToggleGroupItem value="temperature">Temperature</ToggleGroupItem>
-            <ToggleGroupItem value="mass">Mass</ToggleGroupItem>
-          </ToggleGroup>
-          <ButtonGroup>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              aria-label="Zoom out"
-              onClick={() => changeZoom(-1)}
-            >
-              <Minus />
-            </Button>
-            <Button variant="outline" size="sm" className="w-12 tabular-nums" disabled>
-              {zoom}×
-            </Button>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              aria-label="Zoom in"
-              onClick={() => changeZoom(1)}
-            >
-              <Plus />
-            </Button>
-          </ButtonGroup>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
-        <div
-          ref={scrollRef}
-          className="h-[calc(100svh-15rem)] min-h-96 overflow-auto border border-ink"
-          style={{ background: cssColor(vacuumColor) }}
-        >
-          {map ? (
-            <div
-              className="relative"
-              style={{ width: map.width * zoom, height: map.height * zoom }}
-            >
-              <canvas
-                ref={canvasRef}
-                className="block cursor-crosshair"
-                style={{
-                  width: map.width * zoom,
-                  height: map.height * zoom,
-                  imageRendering: 'pixelated',
-                }}
-                onMouseMove={onMove}
-                onMouseLeave={() => setHover(null)}
-              />
-              {map.markers
-                .filter((m) => shown.includes(m.kind))
-                .map((m, i) => (
-                  <span
-                    key={i}
-                    className={cn(
-                      'pointer-events-none absolute -translate-1/2',
-                      MARKER_STYLES[m.kind],
-                    )}
-                    style={{ left: (m.x + 0.5) * zoom, top: (map.height - m.y - 0.5) * zoom }}
-                  />
-                ))}
-            </div>
-          ) : error?.worldId === worldId ? (
-            <p className="p-4 type-small text-destructive">{error.message}</p>
-          ) : (
-            <Skeleton className="size-full" />
-          )}
-        </div>
-        <div className="flex min-w-0 flex-col gap-4">
-          <CellInfo map={map} hover={hover} />
-          <div className="flex flex-col gap-2">
-            <span className="type-label text-muted-foreground">Markers</span>
+    <>
+      <PageHeader
+        status="read-only"
+        title="Map"
+        description="Every cell of the saved simulation. Read-only; hover a cell for details, click an element to highlight it."
+        actions={
+          <>
+            {ordered.length > 1 && (
+              <Select value={worldId} onValueChange={setWorldId}>
+                <SelectTrigger size="sm" className="w-56">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ordered.map((w) => (
+                    <SelectItem key={w.id} value={w.id}>
+                      {w.name}
+                      {!w.discovered && (
+                        <span className="text-muted-foreground">(undiscovered)</span>
+                      )}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <ToggleGroup
-              type="multiple"
+              type="single"
               variant="outline"
               size="sm"
-              value={shown}
-              onValueChange={(v) => setShown(v as MarkerKind[])}
-              className="w-full *:flex-1"
+              value={mode}
+              onValueChange={(v) => v && setMode(v as Mode)}
             >
-              <ToggleGroupItem value="duplicant">Duplicants</ToggleGroupItem>
-              <ToggleGroupItem value="geyser">Geysers</ToggleGroupItem>
-              <ToggleGroupItem value="critter">Critters</ToggleGroupItem>
+              <ToggleGroupItem value="element">Elements</ToggleGroupItem>
+              <ToggleGroupItem value="temperature">Temperature</ToggleGroupItem>
+              <ToggleGroupItem value="mass">Mass</ToggleGroupItem>
             </ToggleGroup>
-          </div>
-          {mode === 'element' ? (
-            <div className="flex min-h-0 flex-col gap-2">
-              <div className="flex items-center justify-between type-label text-muted-foreground">
-                <span>
-                  {world?.name ?? 'World'} · {legend.length} elements
-                </span>
-                {highlight !== null && (
-                  <Button variant="link" size="xs" onClick={() => setHighlight(null)}>
-                    <Scan /> Show all
-                  </Button>
-                )}
-              </div>
-              <ScrollArea className="h-[calc(100svh-30rem)] min-h-48 border border-ink bg-legend">
-                <div className="flex flex-col p-1">
-                  {legend.map((e) => (
-                    <Button
-                      key={e.index}
-                      variant="ghost"
-                      size="sm"
-                      aria-pressed={highlight === e.index}
-                      onClick={() => setHighlight((h) => (h === e.index ? null : e.index))}
+            <ButtonGroup>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                aria-label="Zoom out"
+                onClick={() => changeZoom(-1)}
+              >
+                <Minus />
+              </Button>
+              <Button variant="outline" size="sm" className="w-12 tabular-nums" disabled>
+                {zoom}×
+              </Button>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                aria-label="Zoom in"
+                onClick={() => changeZoom(1)}
+              >
+                <Plus />
+              </Button>
+            </ButtonGroup>
+          </>
+        }
+      />
+      <Card className="gap-4">
+        <CardContent className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <div
+            ref={scrollRef}
+            className="h-[calc(100svh-15rem)] min-h-96 overflow-auto border border-ink"
+            style={{ background: cssColor(vacuumColor) }}
+          >
+            {map ? (
+              <div
+                className="relative"
+                style={{ width: map.width * zoom, height: map.height * zoom }}
+              >
+                <canvas
+                  ref={canvasRef}
+                  className="block cursor-crosshair"
+                  style={{
+                    width: map.width * zoom,
+                    height: map.height * zoom,
+                    imageRendering: 'pixelated',
+                  }}
+                  onMouseMove={onMove}
+                  onMouseLeave={() => setHover(null)}
+                />
+                {map.markers
+                  .filter((m) => shown.includes(m.kind))
+                  .map((m, i) => (
+                    <span
+                      key={i}
                       className={cn(
-                        'w-full justify-start gap-2 border border-transparent type-small normal-case',
-                        highlight === e.index && 'border-warn',
+                        'pointer-events-none absolute -translate-1/2',
+                        MARKER_STYLES[m.kind],
                       )}
-                    >
-                      <span
-                        className="size-4 shrink-0 ring-1 ring-ink"
-                        style={{
-                          background: cssColor(
-                            e.state === 'Vacuum' ? vacuumColor : elementColor(e.id, e.state),
-                          ),
-                        }}
-                      />
-                      <span className="min-w-0 flex-1 truncate text-left">{e.name}</span>
-                      <span className="type-caption text-muted-foreground tabular-nums">
-                        {fmt((e.cells / totalCells) * 100, 1)}%
-                      </span>
-                    </Button>
+                      style={{ left: (m.x + 0.5) * zoom, top: (map.height - m.y - 0.5) * zoom }}
+                    />
                   ))}
-                </div>
-              </ScrollArea>
+              </div>
+            ) : error?.worldId === worldId ? (
+              <p className="p-4 type-small text-destructive">{error.message}</p>
+            ) : (
+              <Skeleton className="size-full" />
+            )}
+          </div>
+          <div className="flex min-w-0 flex-col gap-4">
+            <CellInfo map={map} hover={hover} />
+            <div className="flex flex-col gap-2">
+              <span className="type-label text-muted-foreground">Markers</span>
+              <ToggleGroup
+                type="multiple"
+                variant="outline"
+                size="sm"
+                value={shown}
+                onValueChange={(v) => setShown(v as MarkerKind[])}
+                className="w-full *:flex-1"
+              >
+                <ToggleGroupItem value="duplicant">Duplicants</ToggleGroupItem>
+                <ToggleGroupItem value="geyser">Geysers</ToggleGroupItem>
+                <ToggleGroupItem value="critter">Critters</ToggleGroupItem>
+              </ToggleGroup>
             </div>
-          ) : (
-            <RampLegend mode={mode} />
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            {mode === 'element' ? (
+              <div className="flex min-h-0 flex-col gap-2">
+                <div className="flex items-center justify-between type-label text-muted-foreground">
+                  <span>
+                    {world?.name ?? 'World'} · {legend.length} elements
+                  </span>
+                  {highlight !== null && (
+                    <Button variant="link" size="xs" onClick={() => setHighlight(null)}>
+                      <Scan /> Show all
+                    </Button>
+                  )}
+                </div>
+                <ScrollArea className="h-[calc(100svh-30rem)] min-h-48 border border-ink bg-legend">
+                  <div className="flex flex-col p-1">
+                    {legend.map((e) => (
+                      <Button
+                        key={e.index}
+                        variant="ghost"
+                        size="sm"
+                        aria-pressed={highlight === e.index}
+                        onClick={() => setHighlight((h) => (h === e.index ? null : e.index))}
+                        className={cn(
+                          'w-full justify-start gap-2 border border-transparent type-small normal-case',
+                          highlight === e.index && 'border-warn',
+                        )}
+                      >
+                        <span
+                          className="size-4 shrink-0 ring-1 ring-ink"
+                          style={{
+                            background: cssColor(
+                              e.state === 'Vacuum' ? vacuumColor : elementColor(e.id, e.state),
+                            ),
+                          }}
+                        />
+                        <span className="min-w-0 flex-1 truncate text-left">{e.name}</span>
+                        <span className="type-caption text-muted-foreground tabular-nums">
+                          {fmt((e.cells / totalCells) * 100, 1)}%
+                        </span>
+                      </Button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            ) : (
+              <RampLegend mode={mode} />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </>
   )
 }
 

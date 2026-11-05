@@ -18,7 +18,7 @@ test('renames an asteroid', async ({ page }) => {
     'Arboroni',
   )
   await openSave(page)
-  await goTo(page, 'Space')
+  await goTo(page, 'Asteroids')
   // Pick the field by position: matching on its value would stop matching once typed into.
   const name = page.getByRole('textbox', { name: 'Asteroid name' }).nth(1)
   await expect(name).toHaveValue('Arboroni')
@@ -44,7 +44,7 @@ test('marks an undiscovered asteroid as discovered', async ({ page }) => {
   )
 
   await openSave(page)
-  await goTo(page, 'Space')
+  await goTo(page, 'Asteroids')
   const row = page.getByRole('row').filter({ has: page.locator('input[value="Phlegmera"]') })
   const discovered = row.getByRole('switch', { name: 'Discovered' })
   await expect(discovered).not.toBeChecked()

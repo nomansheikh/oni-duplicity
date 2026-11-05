@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { FlaskConical, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field'
 import {
@@ -28,37 +28,55 @@ import {
   eruptionRate,
   SECONDS_PER_CYCLE,
 } from '@/lib/geyser'
-import type { Edit, GeyserField, GeyserView } from '@/worker/model'
+import type { Edit, GeyserField, GeyserView, WorldView } from '@/worker/model'
+import { AsteroidFilter } from './asteroid-filter'
+import { asteroidName } from '@/lib/asteroid'
 import { CommitInput, Hint, NumberField } from './common'
+import { PageHeader } from './page-header'
 
 export function GeysersPage({
   geysers,
+  worlds,
   onEdit,
 }: {
   geysers: GeyserView[]
+  worlds: WorldView[]
   onEdit: (edit: Edit) => void
 }) {
   const [openId, setOpenId] = useState<string | null>(null)
+  const [asteroid, setAsteroid] = useState('all')
   const open = geysers.find((g) => g.id === openId) ?? null
+  const visible = geysers.filter((g) => asteroid === 'all' || g.asteroid === asteroid)
 
   return (
     <>
+      <PageHeader
+        title="Geysers, vents and volcanoes"
+        description="Rate is per second while erupting; average spreads a cycle's output over dormancy. Open a geyser to change its output and timing."
+        actions={<AsteroidFilter worlds={worlds} value={asteroid} onChange={setAsteroid} />}
+        summary={[
+          {
+            label: 'Geysers',
+            value: visible.length,
+            hint: visible.length === geysers.length ? undefined : `of ${geysers.length}`,
+          },
+        ]}
+      />
       <Card>
-        <CardHeader>
-          <CardTitle>Geysers, vents and volcanoes</CardTitle>
-          <CardDescription>
-            Rate is per second while erupting; average spreads a cycle&apos;s output over dormancy.
-            Open a geyser to change its output and timing.
-          </CardDescription>
-        </CardHeader>
         <CardContent>
           <div
             role="table"
             aria-label="Geysers"
             className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3"
           >
-            {geysers.map((g) => (
-              <GeyserCard key={g.id} geyser={g} onEdit={onEdit} onOpen={() => setOpenId(g.id)} />
+            {visible.map((g) => (
+              <GeyserCard
+                key={g.id}
+                geyser={g}
+                asteroid={asteroidName(worlds, g.asteroid)}
+                onEdit={onEdit}
+                onOpen={() => setOpenId(g.id)}
+              />
             ))}
           </div>
         </CardContent>
@@ -101,10 +119,12 @@ function emitsOf(prefab: string): Emits | undefined {
 
 function GeyserCard({
   geyser: g,
+  asteroid,
   onEdit,
   onOpen,
 }: {
   geyser: GeyserView
+  asteroid: string
   onEdit: (edit: Edit) => void
   onOpen: () => void
 }) {
@@ -141,6 +161,7 @@ function GeyserCard({
             label="Eruption"
             value={`${fmt(eruptingSeconds(g), 0)} of ${fmt(g.iterationSeconds, 0)} s`}
           />
+          <Stat label="Asteroid" value={asteroid} />
           <Stat label="Position" value={`${g.x}, ${g.y}`} />
         </div>
         <div role="cell" className="flex justify-end">

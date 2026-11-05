@@ -11,14 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -42,6 +35,7 @@ import { fmt, fmtMass, toCelsius } from '@/lib/format'
 import { saveClient } from '@/lib/save-client'
 import type { Edit, MaterialItemView, MaterialView } from '@/worker/model'
 import { Hint, NumberField } from './common'
+import { PageHeader } from './page-header'
 
 // Element states use the game's resource colours: gas cyan, liquid blue, solid tan.
 const STATE_VARIANTS = { Solid: 'solid', Liquid: 'liquid', Gas: 'gas' } as const
@@ -91,14 +85,11 @@ export function MaterialsPage({
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Materials</CardTitle>
-          <CardDescription>
-            Loose debris and stored contents per element. Open an element to edit mass and
-            temperature.
-          </CardDescription>
-          <CardAction className="flex flex-wrap items-center gap-2">
+      <PageHeader
+        title="Resources"
+        description="Loose debris and stored contents per element. Open an element to edit mass and temperature."
+        actions={
+          <>
             <ToggleGroup
               type="single"
               variant="outline"
@@ -122,8 +113,10 @@ export function MaterialsPage({
                 <Search />
               </InputGroupAddon>
             </InputGroup>
-          </CardAction>
-        </CardHeader>
+          </>
+        }
+      />
+      <Card>
         <CardContent>
           <Table>
             <TableHeader>
