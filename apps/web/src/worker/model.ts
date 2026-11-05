@@ -102,6 +102,10 @@ export interface MaterialItemView {
   y: number
   mass: number
   temperature: number
+  /** Loose items a move order points at; deleting one would leave a dangling reference. */
+  protected: boolean
+  /** KPrefabID instance ID of a loose chunk, which is what delete edits are addressed by. */
+  instanceId: number | null
 }
 
 export interface CritterView {
@@ -317,6 +321,7 @@ export type Edit =
   | { type: 'setItemMass'; ref: string; mass: number }
   | { type: 'setItemTemperature'; ref: string; kelvin: number }
   | { type: 'deleteObject'; id: string }
+  | { type: 'deleteDebris'; ids: number[] }
   | { type: 'cloneObject'; id: string }
   | { type: 'setTechResearched'; techId: string; complete: boolean }
   | { type: 'researchAll' }
@@ -699,9 +704,13 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       return
     case 'deleteObject': {
       const { list, index } = locate(save, edit.id)
+      assertNotMarkedForMove(list[index]!, markedForMoveIds(save), edit.id)
       list.splice(index, 1)
       return
     }
+    case 'deleteDebris':
+      deleteDebris(save, edit.ids)
+      return
     case 'cloneObject': {
       const { list, index } = locate(save, edit.id)
       const copy = cloneValue(list[index]!)
@@ -929,14 +938,18 @@ interface MaterialItem {
   loose: boolean
 }
 
+/** A loose chunk: an object in a group named after an element, with its own mass. */
+function isLooseChunk(groupName: string, obj: GameObject): boolean {
+  return ELEMENT_IDS.has(groupName) && !!behavior(obj, 'PrimaryElement')?.templateData
+}
+
 /** Loose chunks (groups named after an element) and items held in storages. */
 function allMaterialItems(save: SaveGame): MaterialItem[] {
   const items: MaterialItem[] = []
   for (const group of save.gameObjects) {
-    const loose = ELEMENT_IDS.has(group.name)
     group.gameObjects.forEach((obj, index) => {
       const id = `${group.name}:${index}`
-      if (loose && behavior(obj, 'PrimaryElement')?.templateData) {
+      if (isLooseChunk(group.name, obj)) {
         items.push({ ref: id, obj, owner: obj, where: 'Loose', loose: true })
       }
       obj.behaviors.forEach((b, bIndex) => {
@@ -1027,6 +1040,7 @@ export function listMaterials(save: SaveGame): MaterialView[] {
 }
 
 export function listMaterialItems(save: SaveGame, elementId: string): MaterialItemView[] {
+  const moving = markedForMoveIds(save)
   return materialItems(save, elementId).map((item) => {
     const pe = primary(item.obj)
     const position = item.loose ? item.obj.position : item.owner.position
@@ -1038,8 +1052,79 @@ export function listMaterialItems(save: SaveGame, elementId: string): MaterialIt
       y: Math.round(position.y),
       mass: Number(pe.Units) || 0,
       temperature: Number(pe._Temperature) || 0,
+      protected: item.loose && isMarkedForMove(item.obj, moving),
+      instanceId: item.loose ? (instanceId(item.obj) ?? null) : null,
     }
   })
+}
+
+// --- Deleting loose debris -------------------------------------------------------
+
+const instanceId = (obj: GameObject): number | undefined =>
+  behavior(obj, 'KPrefabID')?.templateData?.InstanceID as number | undefined
+
+/**
+ * KPrefabID instance IDs that a move order (the "Move here" tool) points at. Each order is a
+ * MovePickupablePlacer whose CancellableMove behavior saves a list of `Ref<Movable>` IDs, and
+ * the game's `CancellableMove.OnCancel` calls `ClearMove()` on whatever the ID resolves to
+ * without a null check, so deleting an item that is still listed there can crash the game.
+ */
+function markedForMoveIds(save: SaveGame): Set<number> {
+  const ids = new Set<number>()
+  for (const group of save.gameObjects) {
+    for (const obj of group.gameObjects) {
+      const movables = behavior(obj, 'CancellableMove')?.templateData?.movables
+      if (!Array.isArray(movables)) continue
+      for (const ref of movables as { id?: unknown }[]) {
+        if (typeof ref?.id === 'number') ids.add(ref.id)
+      }
+    }
+  }
+  return ids
+}
+
+function isMarkedForMove(obj: GameObject, moving: Set<number>): boolean {
+  if (behavior(obj, 'Movable')?.templateData?.isMarkedForMove === true) return true
+  const id = instanceId(obj)
+  return id !== undefined && moving.has(id)
+}
+
+function assertNotMarkedForMove(obj: GameObject, moving: Set<number>, id: string): void {
+  if (isMarkedForMove(obj, moving)) {
+    throw new Error(`${id} is marked for a move order; cancel the move in game first`)
+  }
+}
+
+/**
+ * Removes loose element chunks by KPrefabID instance ID. Positions (`<element>:<index>`) shift
+ * after every delete, so a click made on a list that has since changed could hit a different
+ * chunk; instance IDs do not. Refuses unknown IDs and anything a move order points at, before
+ * changing anything. Stored items, buildings and critters are never loose chunks, so they are
+ * never found.
+ */
+function deleteDebris(save: SaveGame, ids: number[]): void {
+  const wanted = new Set(ids)
+  const found = new Map<number, { list: GameObject[]; index: number }>()
+  const moving = markedForMoveIds(save)
+  for (const group of save.gameObjects) {
+    group.gameObjects.forEach((obj, index) => {
+      if (!isLooseChunk(group.name, obj)) return
+      const id = instanceId(obj)
+      if (id === undefined || !wanted.has(id)) return
+      if (found.has(id)) throw new Error(`Loose item ${id} is ambiguous`)
+      assertNotMarkedForMove(obj, moving, `${group.name}:${index}`)
+      found.set(id, { list: group.gameObjects, index })
+    })
+  }
+  for (const id of wanted) {
+    if (!found.has(id)) throw new Error(`Loose item ${id} no longer exists`)
+  }
+  const byList = new Map<GameObject[], number[]>()
+  for (const { list, index } of found.values())
+    byList.set(list, [...(byList.get(list) ?? []), index])
+  for (const [list, indexes] of byList) {
+    for (const index of indexes.sort((a, b) => b - a)) list.splice(index, 1)
+  }
 }
 
 // --- Structural edits (clone / delete) and critters ----------------------------------
