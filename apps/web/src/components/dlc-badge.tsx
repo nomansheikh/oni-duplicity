@@ -4,23 +4,23 @@ import { cn } from '@/lib/utils'
 const DLCS: Record<string, { name: string; className: string }> = {
   EXPANSION1_ID: {
     name: 'Spaced Out!',
-    className: 'border-violet-500/40 bg-violet-500/15 text-violet-700 dark:text-violet-300',
+    className: '[--c:var(--cat-dlc)]',
   },
   DLC2_ID: {
     name: 'Frosty Planet',
-    className: 'border-sky-500/40 bg-sky-500/15 text-sky-700 dark:text-sky-300',
+    className: '[--c:var(--cat-gas)]',
   },
   DLC3_ID: {
     name: 'Bionic Booster',
-    className: 'border-amber-500/40 bg-amber-500/15 text-amber-700 dark:text-amber-300',
+    className: '[--c:var(--cat-food)]',
   },
   DLC4_ID: {
     name: 'Prehistoric Planet',
-    className: 'border-lime-500/40 bg-lime-500/15 text-lime-700 dark:text-lime-300',
+    className: '[--c:var(--cat-plant)]',
   },
   DLC5_ID: {
     name: 'Aquatic Planet',
-    className: 'border-cyan-500/40 bg-cyan-500/15 text-cyan-700 dark:text-cyan-300',
+    className: '[--c:var(--cat-water)]',
   },
 }
 

@@ -82,6 +82,14 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
 
+## UI dialogs and load screen (design v2) — 2026-11-05
+
+- `load-states.tsx`: the drop zone, loading and error states sit in a `panel` with a title bar ("Load game", "Loading", "Load failed" on a red bar), over an inset dashed drop area with a large icon, a `text-h2` title and a large button. Loading uses the `task` progress meter. The drag-over state turns the dashed border orange.
+- `save-dialog.tsx`: the backup warning is a `well` block with the title in the warning colour, filenames in code chips, and the edit list in a sunken field. Cancel is the dark secondary button.
+- `preferences-dialog.tsx`: the Theme setting is removed, because the app is dark only (design.md section 1). The shell's own theme toggle button is in `App.tsx`/`site-header` and is left to the shell session.
+- `dlc-badge.tsx`: DLC badges use the badge chip tone (`--c` set from the category tokens) instead of hard-coded Tailwind palette colours.
+- No other behaviour change; text, roles and names are unchanged. Before and after screenshots are in `docs/screenshots/ui-dialogs`.
+
 ## UI component library (design v2, phase 1) — 2026-11-05
 
 - Rewrote the theme in `apps/web/src/index.css` from the sampled v2 palette: dark only, radius 0, shadcn variables mapped onto surface, title-bar, tab, button, text-tier, status, meter and category tokens. Added `panel`, `title-bar`, `well`, `inset-layer`, `tip-game`, `btn-game`, `tab`, `chip` and `field-game` utilities.
