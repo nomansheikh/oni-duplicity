@@ -68,11 +68,13 @@ export async function downloadSave(page: Page): Promise<{ save: SaveGame; fileNa
 /**
  * Every leaf that differs between two saves, as readable paths such as
  * `objects/Minion/0/MinionIdentity/templateData/name` or `header/gameInfo/baseName`.
- * Arrays of different lengths report their `length`; extra items are not walked.
+ * Arrays of different lengths report their `length` and every added or removed index
+ * (`path/<i>`), so a test expecting a length change must also account for the items.
  */
 export function diffSaves(before: SaveGame, after: SaveGame): string[] {
   const out: string[] = []
   diff(before.header, after.header, 'header', out)
+  diff(before.templates, after.templates, 'templates', out)
   diff(before.world, after.world, 'world', out)
   diff(before.settings, after.settings, 'settings', out)
   diff(before.gameData, after.gameData, 'gameData', out)
@@ -105,7 +107,12 @@ function diff(a: unknown, b: unknown, path: string, out: string[]): void {
     return
   }
   if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) out.push(`${path}/length`)
+    if (a.length !== b.length) {
+      out.push(`${path}/length`)
+      for (let i = Math.min(a.length, b.length); i < Math.max(a.length, b.length); i++) {
+        out.push(`${path}/${i}`)
+      }
+    }
     for (let i = 0; i < Math.min(a.length, b.length); i++) diff(a[i], b[i], `${path}/${i}`, out)
     return
   }

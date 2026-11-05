@@ -52,7 +52,7 @@ test('removes an array item', async ({ page }) => {
   // The last item went away; the others kept their order.
   expect(mixing(save)).toEqual(before.slice(0, -1))
   expectOnlyChanged(original(GALAXY), save, [
-    /^gameData\/customGameSettings\/CurrentMixingLevelsBySetting\/length$/,
+    /^gameData\/customGameSettings\/CurrentMixingLevelsBySetting\/(length|16)$/,
   ])
 })
 
@@ -68,7 +68,8 @@ test('duplicates an array item', async ({ page }) => {
   const { save } = await downloadSave(page)
   // The copy lands right after the original, which is the last item here.
   expect(mixing(save)).toEqual([...before, before[16]])
+  expect(mixing(save)[17]).toEqual(mixing(save)[16])
   expectOnlyChanged(original(GALAXY), save, [
-    /^gameData\/customGameSettings\/CurrentMixingLevelsBySetting\/length$/,
+    /^gameData\/customGameSettings\/CurrentMixingLevelsBySetting\/(length|17)$/,
   ])
 })

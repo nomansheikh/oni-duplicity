@@ -27,6 +27,8 @@ vp -C apps/web run e2e
 
 If the bundled browser can't be downloaded, set `PLAYWRIGHT_CHROMIUM_PATH` to a local Chromium or Chrome.
 
+The bionic duplicant test needs the 40 MB `mithro-06` save from the full fixture tier. It is skipped unless that save is downloaded, and runs only on full-tier CI (`main` and nightly); there it fails if the save is missing.
+
 The pre-commit hook runs `vp check --fix` on staged files.
 
 ## Making a change
