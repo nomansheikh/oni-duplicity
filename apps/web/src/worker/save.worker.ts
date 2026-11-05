@@ -16,6 +16,7 @@ import {
   summarize,
   type Edit,
 } from './model.ts'
+import { listDlc } from './dlc.ts'
 import { describeEdit } from './describe.ts'
 import { worldMap } from './map.ts'
 import { applyWithRestore } from './snapshot.ts'
@@ -69,6 +70,7 @@ const api = {
   gameSettings: () => listGameSettings(current()),
   worlds: () => listWorlds(current()),
   destinations: () => listDestinations(current()),
+  dlc: () => listDlc(current()),
   materialItems: (elementId: string) => listMaterialItems(current(), elementId),
   rawChildren: (path: RawPath, offset?: number, limit?: number) =>
     rawChildren(current(), path, offset, limit),

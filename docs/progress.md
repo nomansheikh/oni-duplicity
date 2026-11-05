@@ -81,3 +81,22 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - The bionic test needs the 40 MB full-tier fixture, so it is skipped on PRs and runs only on full-tier CI (`main` and nightly). There it fails instead of skipping when the fixture is missing (`CI` set and `FIXTURE_TIER=all`).
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
+
+## DLC page and the Demolior timer — 2026-11-05
+
+- New DLC page (`dlc-page.tsx`, readers in `worker/dlc.ts`). It shows only sections the save has:
+  - Demolior (`DLC4_ID` and an active `LargeImpactor` event): event start, difficulty, impact cycle, now and remaining cycles, impactor health (read only), and an experimental impact-cycle edit.
+  - World mixing (`CurrentMixingLevelsBySetting`), read only. Absent in older saves, which then show nothing.
+  - Geothermal (`DLC2_ID`): controller state and each vent's progress, recent mass and available material, read only.
+- Cycles use `GameUtil.GetCurrentTimeInCycles()`: `GameClock.cycle + timeSinceStartOfCycle / 600 + 1`. The header's `numberOfCycles` is the integer cycle and is not used.
+- The impact time is `eventStartTime × 600 + GetImpactTime()` seconds, but only vanilla reads it. Findings from the decompile (`LargeImpactorStatus`, `LargeImpactorEvent`, `ClusterMapLargeImpactor`, `ClusterTraveler`):
+  - A Spaced Out impactor copies the arrival into the `ClusterMapLargeImpactor.Instance` state machine (`ArrivalTime`, `Speed`) when it is created, and then flies by `ClusterTraveler.TravelETA` (`Speed` and the move potential). Editing `eventStartTime` alone would not postpone it.
+  - The edit therefore rewrites three values: `eventStartTime`, `ArrivalTime`, and `Speed`, which is scaled by old over new time left so the hexes left stay the same. The three values are the only bytes that change; a fixture test pins that.
+  - The save keeps no other copy. `AgeInCycles()` is unused; `largeImpactorLandedCycle` is only written after landing.
+  - The `DemoliorImminentImpact` tag (10 cycles) cannot be seen from the save, so when the saved arrival disagrees with the difficulty, the saved one is shown.
+- The state machine blob (`StateMachineController.extraRaw`) is read by anchoring on the type name and range-checking every length. If it does not read cleanly the edit is disabled. Undo snapshots now keep `extraRaw` too (one line in `snapshot.ts`).
+- Impactor health is shown read only: `LargeImpactorStatus.sm.Health` is an int parameter, max 1000 (`LargeImpactorConfig.HEALTH`).
+- World mixing names come from the ids; the game's string tables are not in the decompile. Level `GuranteeMixing` (sic) is shown as Guaranteed.
+- The edit is clamped to at least one cycle from now.
+- Tests: unit and fixture tests for each reader (Konove for Demolior, mithro-06 for geothermal, every fixture for mixing), the byte-level edit test, undo, a vanilla-shaped save, an unreadable blob; e2e in `dlc.e2e.ts` (Konove is small tier; the geothermal spec follows the bionic full-tier pattern).
+- Risks: the edit is unverified in game (see `verified-in-game.md`). Only one fixture (Konove) has an active impactor, and it is a Spaced Out save, so the vanilla path is tested on a synthetic variant only.

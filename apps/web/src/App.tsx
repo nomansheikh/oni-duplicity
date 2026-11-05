@@ -57,6 +57,7 @@ interface EditStatus {
 const CrittersPage = lazy(() =>
   import('@/components/critters-page').then((m) => ({ default: m.CrittersPage })),
 )
+const DlcPage = lazy(() => import('@/components/dlc-page').then((m) => ({ default: m.DlcPage })))
 const DuplicantsPage = lazy(() =>
   import('@/components/duplicants/DuplicantsPage').then((m) => ({ default: m.DuplicantsPage })),
 )
@@ -101,6 +102,7 @@ const PAGE_TITLES: Record<Page, string> = {
   critters: 'Critters',
   research: 'Research',
   space: 'Space',
+  dlc: 'DLC',
   settings: 'Game settings',
   raw: 'Raw data',
 }
@@ -415,6 +417,7 @@ export default function App() {
                     onEdit={edit}
                   />
                 )}
+                {loaded && page === 'dlc' && <DlcPage revision={revision} onEdit={edit} />}
                 {loaded && page === 'settings' && (
                   <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
                 )}
