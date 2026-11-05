@@ -15,6 +15,7 @@ import {
   findGeyserTypeByHash,
   findPersonality,
   findTrait,
+  geyserTypes,
   hashString,
   stories as storyCatalog,
   storyQuests,
@@ -281,6 +282,12 @@ export interface GeyserView {
    * editor). The game recomputes them from the rolls when it loads the save.
    */
   matchesRolls: boolean
+  /** The type ID, for geysers whose prefab and saved type agree (the only ones that can change type). */
+  typeId?: string
+  /** Types this geyser can change to: same footprint, and every DLC the save has active. */
+  swapTargets: { id: string; name: string }[]
+  /** Whether the Geyser Control mod's behaviors are on it; the mod may reapply its own values. */
+  hasGeyserControl: boolean
 }
 
 /**
@@ -297,7 +304,10 @@ export type GeyserField =
 
 const GEYSER_FIELDS: Record<
   GeyserField,
-  { roll: string; range: keyof Omit<GeyserTypeEntry, 'id'> }
+  {
+    roll: string
+    range: 'rate' | 'iterationLength' | 'iterationPercent' | 'yearLength' | 'yearPercent'
+  }
 > = {
   scaledRate: { roll: 'rateRoll', range: 'rate' },
   scaledIterationLength: { roll: 'iterationLengthRoll', range: 'iterationLength' },
@@ -366,6 +376,7 @@ export type Edit =
   | { type: 'bulkDuplicants'; action: 'setAttributes'; level: number }
   | { type: 'setGeyserName'; id: string; name: string }
   | { type: 'setGeyserValue'; id: string; field: GeyserField; value: number }
+  | { type: 'setGeyserType'; id: string; typeId: string }
   | { type: 'setItemMass'; ref: string; mass: number }
   | { type: 'setItemTemperature'; ref: string; kelvin: number }
   | { type: 'deleteObject'; id: string }
@@ -749,8 +760,96 @@ export function listGeysers(save: SaveGame): GeyserView[] {
           }
         : {}),
       matchesRolls: ranges ? rollsMatch(config, ranges) : true,
+      ...(swappable(prefab, ranges) ? { typeId: ranges!.id } : {}),
+      swapTargets: swappable(prefab, ranges)
+        ? swapTargets(save, ranges!).map((t) => ({
+            id: t.id,
+            name: findGeyser(t.id)?.name ?? humanize(t.id),
+          }))
+        : [],
+      hasGeyserControl: obj.behaviors.some((b) => b.name.startsWith('Geyser_Control.')),
     }
   })
+}
+
+// --- Changing a geyser's type (experimental) ---------------------------------
+
+/**
+ * Only the generic prefabs whose name agrees with the saved type qualify. The deprecated
+ * `NiobiumGeyser` prefab and anything a mod renamed are left alone.
+ */
+function swappable(prefab: string, type: GeyserTypeEntry | undefined): boolean {
+  return type !== undefined && prefab === `GeyserGeneric_${type.id}`
+}
+
+/** Types with the same footprint whose DLCs are all active in the save. */
+function swapTargets(save: SaveGame, from: GeyserTypeEntry): GeyserTypeEntry[] {
+  const active = new Set(dlcIds(save))
+  return geyserTypes.filter(
+    (t) =>
+      t.id !== from.id && t.shape === from.shape && t.requiredDlcIds.every((d) => active.has(d)),
+  )
+}
+
+/**
+ * Moves a geyser to another type of the same shape. The game builds the object from the prefab
+ * named by its group, then recomputes the emitter, codex entry and disease from the saved type
+ * hash, so what has to change is the group, the hash, the `scaled*` values the new ranges give
+ * the same rolls, the object's own temperature and (when it still has the default one) its name.
+ * Everything is checked before anything is touched.
+ */
+function setGeyserType(save: SaveGame, id: string, typeId: string): void {
+  const split = id.lastIndexOf(':')
+  const prefab = id.slice(0, split)
+  const obj = objectById(save, id)
+  const geyser = behavior(obj, 'Geyser')?.templateData
+  const config = geyser?.configuration as GeyserConfig | undefined
+  const element = behavior(obj, 'PrimaryElement')?.templateData
+  if (!config?.typeId || !element) throw new Error('This is not a geyser that can change type')
+  const from = geyserType(config)
+  if (!swappable(prefab, from)) {
+    throw new Error('Only the game’s generic geysers can change type')
+  }
+  const to = geyserTypes.find((t) => t.id === typeId)
+  if (!to) throw new Error(`Unknown geyser type ${typeId}`)
+  if (to.id === from!.id) throw new Error('The geyser already has that type')
+  if (to.shape !== from!.shape) {
+    throw new Error(`A ${from!.shape} geyser can't become a ${to.shape} one: the footprints differ`)
+  }
+  const active = new Set(dlcIds(save))
+  const missing = to.requiredDlcIds.filter((d) => !active.has(d))
+  if (missing.length) {
+    throw new Error(`This save doesn't have ${missing.join(', ')} active, which that type needs`)
+  }
+
+  // Move the object to its new prefab group, creating the group beside the other geysers.
+  const groups = save.gameObjects
+  const source = groups.find((g) => g.name === prefab)!
+  source.gameObjects.splice(source.gameObjects.indexOf(obj), 1)
+  const targetName = `GeyserGeneric_${to.id}`
+  let target = groups.find((g) => g.name === targetName)
+  if (!target) {
+    target = { name: targetName, gameObjects: [] }
+    groups.splice(groups.indexOf(source) + 1, 0, target)
+  }
+  target.gameObjects.push(obj)
+  // The game doesn't write empty groups.
+  if (source.gameObjects.length === 0) groups.splice(groups.indexOf(source), 1)
+
+  config.typeId.hash = hashString(to.id)
+  for (const [field, { roll, range }] of Object.entries(GEYSER_FIELDS)) {
+    config[field] = Math.fround(resample(config[roll] ?? 0, to[range]))
+  }
+  element._Temperature = Math.fround(to.geyserTemperature)
+
+  const nameable = behavior(obj, 'UserNameable')?.templateData
+  const oldName = findGeyser(from!.id)?.name
+  const newName = findGeyser(to.id)?.name
+  if (oldName && newName && typeof nameable?.savedName === 'string') {
+    if (nameable.savedName.startsWith(oldName)) {
+      nameable.savedName = newName + nameable.savedName.slice(oldName.length)
+    }
+  }
 }
 
 // --- Edits -----------------------------------------------------------------
@@ -835,6 +934,9 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       config[edit.field] = Math.fround(resample(roll, type[field.range]))
       return
     }
+    case 'setGeyserType':
+      setGeyserType(save, edit.id, edit.typeId)
+      return
     case 'setItemMass':
       primary(itemByRef(save, edit.ref)).Units = Math.max(0, edit.mass)
       return
