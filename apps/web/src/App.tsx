@@ -379,7 +379,7 @@ export default function App() {
                 <span
                   data-testid="download-count"
                   aria-hidden
-                  className="bg-black/30 px-1.5 text-[0.8rem] tabular-nums"
+                  className="bg-black/30 px-1.5 type-caption tabular-nums"
                 >
                   {editStatus.edits}
                 </span>

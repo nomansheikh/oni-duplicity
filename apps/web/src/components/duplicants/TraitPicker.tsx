@@ -98,10 +98,10 @@ export function TraitPicker({
         {state === 'conflict' && <Ban className="text-destructive" />}
       </span>
       {state === 'conflict' ? (
-        <span className="text-xs text-destructive">{reason}</span>
+        <span className="type-caption text-destructive">{reason}</span>
       ) : (
         trait.desc && (
-          <span className="line-clamp-2 text-xs text-muted-foreground">{trait.desc}</span>
+          <span className="line-clamp-2 type-caption text-muted-foreground">{trait.desc}</span>
         )
       )}
     </CommandItem>
@@ -125,7 +125,9 @@ export function TraitPicker({
           <CommandInput placeholder="Search traits…" value={search} onValueChange={setSearch} />
           <CommandList className="max-h-96">
             {!shown && (
-              <div className="py-6 text-center text-sm text-muted-foreground">Nothing found.</div>
+              <div className="py-6 text-center type-small text-muted-foreground">
+                Nothing found.
+              </div>
             )}
             {groups
               .filter((g) => g.items.length > 0)
@@ -141,7 +143,7 @@ export function TraitPicker({
               ))}
           </CommandList>
           {hidden > 0 && (
-            <p className="border-t px-3 py-2 text-xs text-muted-foreground">
+            <p className="border-t px-3 py-2 type-caption text-muted-foreground">
               {hidden} more traits are hidden: they need DLC this save lacks or belong to{' '}
               {subject.model === 'BionicMinion' ? 'standard' : 'bionic'} duplicants, not{' '}
               {modelLabel(subject.model)} ones.

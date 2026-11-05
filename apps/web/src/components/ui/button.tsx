@@ -13,9 +13,9 @@ const buttonVariants = cva(
         outline: '[--bg:var(--tab)] [--hi:var(--tab-hi)] [--lo:var(--inset)]',
         accent: '[--bg:var(--title)] [--hi:var(--title-hi)] [--lo:var(--title-lo)]',
         ghost:
-          'border-transparent [--bg:transparent] [--hi:var(--tab-hi)] [--lo:var(--inset)] aria-expanded:bg-(--hi)',
+          'border-transparent shadow-none [--bg:transparent] [--hi:var(--tab-hi)] [--lo:var(--inset)] aria-expanded:bg-(--hi) active:shadow-none',
         destructive: '[--bg:#962a28] [--hi:#b0302d] [--lo:#6f1f1e]',
-        link: 'border-transparent [--bg:transparent] [--hi:transparent] [--lo:transparent] font-sans font-normal normal-case tracking-normal text-gold underline-offset-4 hover:underline',
+        link: 'border-transparent shadow-none active:shadow-none [--bg:transparent] [--hi:transparent] [--lo:transparent] font-sans font-normal normal-case tracking-normal text-gold underline-offset-4 hover:underline',
       },
       size: {
         default:

@@ -475,7 +475,7 @@ export function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn
           value={shown}
           digits={format.digits ?? 0}
           unit={format.unit}
-          className="w-36"
+          className="w-40"
           min={bounded ? bottom : undefined}
           max={bounded ? top : undefined}
           disabled={readOnly}
@@ -483,9 +483,9 @@ export function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn
         />
       </div>
       {readOnly && (
-        <p className="text-xs text-muted-foreground">Read only. {amount.readOnlyReason}.</p>
+        <p className="type-caption text-muted-foreground">Read only. {amount.readOnlyReason}.</p>
       )}
-      {amount.warning && <p className="text-xs text-muted-foreground">{amount.warning}</p>}
+      {amount.warning && <p className="type-caption text-muted-foreground">{amount.warning}</p>}
     </Field>
   )
 }
@@ -616,7 +616,7 @@ export function AppearanceTab({ dupe, edit }: { dupe: DuplicantView; edit: EditF
         <div className="flex flex-col gap-6 @3xl/main:flex-row">
           <div className="flex shrink-0 flex-col items-center gap-2">
             <DuplicantAvatar name={dupe.name} parts={portraitParts(dupe.appearance)} size={160} />
-            <span className="text-xs text-muted-foreground">Live preview</span>
+            <span className="type-caption text-muted-foreground">Live preview</span>
           </div>
           <FieldGroup className="grid flex-1 gap-4 @2xl/main:grid-cols-2">
             {dupe.appearance.map((slot) => {
