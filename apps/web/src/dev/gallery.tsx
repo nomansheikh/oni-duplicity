@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ArrowUpIcon, HeartIcon, SearchIcon, SettingsIcon, SkullIcon } from 'lucide-react'
 import { Badge, type badgeVariants } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/page-header'
 import {
   Card,
   CardAction,
@@ -156,6 +157,27 @@ export default function Gallery() {
             </Button>
           </Row>
         ))}
+      </Section>
+
+      <Section title="Page header">
+        <div className="@container/main flex flex-col gap-4">
+          <PageHeader
+            title="Geysers"
+            status="experimental"
+            description="Output per cycle and eruption timing. Open one to change it."
+            actions={<Button>Bulk action</Button>}
+            summary={[
+              { label: 'Geysers', value: 8 },
+              { label: 'Erupting now', value: 6 },
+              { label: 'Avg output', value: '13,025 kg', hint: 'per cycle' },
+            ]}
+          />
+          <PageHeader
+            title="Stories"
+            status="read-only"
+            description="Where each story trait stands in this save."
+          />
+        </div>
       </Section>
 
       <Section title="Card">

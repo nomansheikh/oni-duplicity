@@ -4,6 +4,7 @@ import {
   editCount,
   expectOnlyChanged,
   GALAXY,
+  goTo,
   openSave,
   original,
 } from './helpers.ts'
@@ -25,13 +26,16 @@ test('undo and redo walk the edit history, and only the result is saved', async 
   await expect(undo).toBeDisabled()
 
   await rename(page, 'First', 1)
+  await goTo(page, 'Game settings')
   await page.getByRole('switch', { name: 'Sandbox mode' }).click()
   await expect.poll(() => editCount(page)).toBe(2)
+  await goTo(page, 'Overview')
   await rename(page, 'Second', 3)
 
   // Undo the rename and the sandbox switch, then redo the switch.
   await undo.click()
   await expect(page.getByLabel('Colony name')).toHaveValue('First')
+  await goTo(page, 'Game settings')
   await undo.click()
   await expect(page.getByRole('switch', { name: 'Sandbox mode' })).not.toBeChecked()
   await expect.poll(() => editCount(page)).toBe(1)
@@ -53,9 +57,11 @@ test('undo and redo walk the edit history, and only the result is saved', async 
 test('undoing every edit downloads the save unchanged', async ({ page }) => {
   await openSave(page)
   await rename(page, 'Gone', 1)
+  await goTo(page, 'Game settings')
   await page.getByRole('switch', { name: 'Debug mode was used' }).click()
   await page.keyboard.press('ControlOrMeta+z')
   await page.keyboard.press('ControlOrMeta+z')
+  await goTo(page, 'Overview')
   await expect(page.getByLabel('Colony name')).toHaveValue(
     original(GALAXY).header.gameInfo.baseName,
   )
@@ -68,6 +74,7 @@ test('undoing every edit downloads the save unchanged', async ({ page }) => {
 test('lists unsaved changes newest first', async ({ page }) => {
   await openSave(page)
   await rename(page, 'Listed', 1)
+  await goTo(page, 'Game settings')
   await page.getByRole('switch', { name: 'Sandbox mode' }).click()
 
   await page.getByRole('button', { name: '2 unsaved edits' }).click()

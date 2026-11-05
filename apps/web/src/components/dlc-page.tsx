@@ -17,6 +17,7 @@ import { saveClient } from '@/lib/save-client'
 import type { DlcPageView, GeothermalView, DemoliorView, MixingView } from '@/worker/dlc'
 import type { Edit } from '@/worker/model'
 import { NumberField } from './common'
+import { PageHeader } from './page-header'
 import { DlcBadge } from './dlc-badge'
 
 export function DlcPage({ revision, onEdit }: { revision: number; onEdit: (edit: Edit) => void }) {
@@ -34,19 +35,29 @@ export function DlcPage({ revision, onEdit }: { revision: number; onEdit: (edit:
   const { demolior, mixing, geothermal } = view
   if (!demolior && !geothermal && !(mixing && view.dlcIds.length > 0)) {
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>Nothing DLC-specific in this save</EmptyTitle>
-          <EmptyDescription>
-            Sections appear here for the Prehistoric Planet impactor, the Frosty Planet geothermal
-            quest, and the world mixing chosen at world generation.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <div className="flex flex-col gap-4 md:gap-6">
+        <PageHeader
+          title="Content"
+          description="What this save was generated with: the Prehistoric Planet impactor, the Frosty Planet geothermal quest and the world mixing chosen at world generation."
+        />
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>Nothing DLC-specific in this save</EmptyTitle>
+            <EmptyDescription>
+              Sections appear here for the Prehistoric Planet impactor, the Frosty Planet geothermal
+              quest, and the world mixing chosen at world generation.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </div>
     )
   }
   return (
     <div className="flex flex-col gap-4 md:gap-6">
+      <PageHeader
+        title="Content"
+        description="What this save was generated with: the Prehistoric Planet impactor, the Frosty Planet geothermal quest and the world mixing chosen at world generation."
+      />
       {demolior && <DemoliorCard demolior={demolior} onEdit={onEdit} />}
       {geothermal && <GeothermalCard geothermal={geothermal} />}
       {mixing && view.dlcIds.length > 0 && <MixingCard mixing={mixing} />}
