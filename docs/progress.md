@@ -199,6 +199,15 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - Not tried in game. Undecoded raw bytes were not searched for references.
   - Deleting a chunk deletes its mass from the world; the world grid is untouched.
 
+## Raw data page on the v2 components — 2026-11-05
+
+- `raw-page.tsx` restyled onto the game-native components and the type scale; no behaviour, test id, role or name changed.
+- Tree: dark inset well, 44 px rows, indent guides, key column aligned so values line up, container keys bold white, leaf keys dimmed, values in monospace coloured by kind (string `good`, number `info`, boolean `gold`, bytes `warn`), selection highlight in the game's orange.
+- Search: results panel with a field-coloured header, a `key` / `path` / `value` chip per hit, and the path split into a dimmed route and a bold final key.
+- Warning banner and hints use the `warn` token and `type-small` / `type-caption`.
+- Screenshots: `docs/screenshots/raw-page/before.jpg`, `after.jpg`.
+- The highlighted row keeps the `ring-primary` class because the e2e tests select on it; `ring-warn!` overrides its colour.
+
 ## Change a geyser's type (experimental) — 2026-11-05
 
 - Geysers can change to another type of the same footprint (gas 2×4, liquid 4×2, molten 3×3) when every DLC the type needs is active in the save. The worker refuses anything else, whatever the UI offers.
