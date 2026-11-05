@@ -1,0 +1,63 @@
+{
+  "version": 2,
+  "platforms": {
+    "darwin-arm64": {
+      "recorded": {
+        "date": "2026-11-05",
+        "cpu": "Apple M2 Max",
+        "node": "v26.13.0"
+      },
+      "fixtures": {
+        "mithro-06-maximum-cycle-4770.sav": {
+          "fileBytes": 40031915,
+          "calibrationMs": 281.8,
+          "phasesMs": {
+            "readInflate": 1592,
+            "parse": 1596.9,
+            "write": 2695.3,
+            "deflate": 4039.4
+          }
+        },
+        "mithro-03-late-game-cycle-1160.sav": {
+          "fileBytes": 13132873,
+          "calibrationMs": 280.7,
+          "phasesMs": {
+            "readInflate": 436.1,
+            "parse": 424.1,
+            "write": 581.1,
+            "deflate": 1124.5
+          }
+        }
+      }
+    },
+    "linux-x64": {
+      "recorded": {
+        "date": "2026-11-05",
+        "cpu": "AMD EPYC 9V74 80-Core Processor",
+        "node": "v24.22.2"
+      },
+      "fixtures": {
+        "mithro-06-maximum-cycle-4770.sav": {
+          "fileBytes": 40031915,
+          "calibrationMs": 624,
+          "phasesMs": {
+            "readInflate": 1729.7,
+            "parse": 3320.2,
+            "write": 6602.8,
+            "deflate": 5818
+          }
+        },
+        "mithro-03-late-game-cycle-1160.sav": {
+          "fileBytes": 13132873,
+          "calibrationMs": 580.2,
+          "phasesMs": {
+            "readInflate": 486.7,
+            "parse": 876.3,
+            "write": 1547.3,
+            "deflate": 1627.4
+          }
+        }
+      }
+    }
+  }
+}
