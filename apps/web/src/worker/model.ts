@@ -23,6 +23,8 @@ import {
   skillGroups,
   traits as traitCatalog,
   unresample,
+  traitUnavailable,
+  type DuplicantModel,
   type GeyserTypeEntry,
   type Range,
 } from '@oni-duplicity/game-data'
@@ -35,6 +37,7 @@ import {
   type StoredItem,
   type TemplateData,
 } from '@oni-duplicity/save-parser'
+import { blockedSections, modelLabel, profileModel } from '../lib/profile.ts'
 
 // --- View models (sent to the UI) -----------------------------------------
 
@@ -227,6 +230,12 @@ export interface DuplicantView {
   id: string
   prefab: string
   isBionic: boolean
+  /** The duplicant model, which decides the traits and skills it can have. */
+  model: DuplicantModel
+  /** DLC IDs active in the save. */
+  dlcIds: string[]
+  /** The cycle the duplicant arrived in (`MinionIdentity.arrivalTime`; 0 for the first three). */
+  arrivalTime: number
   name: string
   gender: string
   personality: Named
@@ -312,6 +321,8 @@ function rollsMatch(config: GeyserConfig, type: GeyserTypeEntry): boolean {
 /** A portable copy of a duplicant's editable state (copy/paste and JSON export). */
 export interface DuplicantProfile {
   format: 'duplicity-duplicant@1'
+  /** The model copied from; older exports lack it (read from the traits). */
+  model?: DuplicantModel
   name: string
   gender: string
   traits: string[]
@@ -463,6 +474,38 @@ function dlcIds(save: SaveGame): string[] {
   return info.dlcId ? [info.dlcId] : []
 }
 
+/** The model name a duplicant's identity saves (`Minion`, `BionicMinion`, a mod's), else its prefab. */
+function modelNameOf(obj: GameObject, prefab: string): string {
+  const model = behavior(obj, 'MinionIdentity')?.templateData?.model as
+    | { name?: string }
+    | undefined
+  return model?.name ?? prefab
+}
+
+/** Standard or bionic; the one place that decides it, for the list and for every edit. */
+function modelOf(obj: GameObject, prefab: string): DuplicantModel {
+  return modelNameOf(obj, prefab) === 'BionicMinion' ? 'BionicMinion' : 'Minion'
+}
+
+/** What an edit to one duplicant needs to know about it and the save. */
+interface DuplicantContext {
+  prefab: string
+  dlcIds: string[]
+}
+
+/** Refuses trait IDs the duplicant's model or the save's DLC rule out, before anything changes. */
+function assertTraitsAllowed(ids: readonly string[], obj: GameObject, ctx: DuplicantContext): void {
+  const model = modelOf(obj, ctx.prefab)
+  for (const id of ids) {
+    const reason = traitUnavailable(id, model, ctx.dlcIds)
+    if (reason === 'model') {
+      throw new Error(`${id} is not a trait ${modelLabel(model)} duplicants can have`)
+    }
+    if (reason === 'dlc') throw new Error(`${id} needs a DLC this save does not have`)
+    if (reason === 'inert') throw new Error(`${id} is not a trait the game defines`)
+  }
+}
+
 function named(id: string, entry: { name: string; desc?: string } | undefined): Named {
   return entry
     ? { id, name: entry.name, ...(entry.desc ? { desc: entry.desc } : {}) }
@@ -558,7 +601,7 @@ export function listDuplicants(save: SaveGame): DuplicantView[] {
       id: string
       timeRemaining: number
     }[]
-    const model = (identity.model as { name?: string } | undefined)?.name ?? prefab
+    const model = modelNameOf(obj, prefab)
     const personalityKey = typeof identity.nameStringKey === 'string' ? identity.nameStringKey : ''
 
     const skills: SkillView[] = MinionSkills.filter(
@@ -579,6 +622,9 @@ export function listDuplicants(save: SaveGame): DuplicantView[] {
       id,
       prefab,
       isBionic: prefab === 'BionicMinion',
+      model: modelOf(obj, prefab),
+      dlcIds: [...activeDlcs],
+      arrivalTime: typeof identity.arrivalTime === 'number' ? identity.arrivalTime : 0,
       name: typeof identity.name === 'string' ? identity.name : '',
       gender: typeof identity.gender === 'string' ? identity.gender : '',
       personality: withName(named(personalityKey, findPersonality(personalityKey)), identity.name),
@@ -703,9 +749,9 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
           }
         }
         if (edit.action === 'masterSkills') {
-          const model = (data(obj, 'MinionIdentity').model as { name?: string } | undefined)?.name
+          const model = modelNameOf(obj, prefab)
           for (const skill of MinionSkills) {
-            if ((skill.model ?? 'Minion') !== (model ?? prefab)) continue
+            if ((skill.model ?? 'Minion') !== model) continue
             if (!skill.requiredDlcIds.every((d) => activeDlcs.has(d))) continue
             applyEdit(save, { type: 'setSkillMastered', id, skillId: skill.id, mastered: true })
           }
@@ -796,11 +842,14 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       }
       return
     default:
-      applyObjectEdit(objectById(save, edit.id), edit)
+      applyObjectEdit(objectById(save, edit.id), edit, {
+        prefab: splitId(edit.id).group,
+        dlcIds: dlcIds(save),
+      })
   }
 }
 
-function applyObjectEdit(obj: GameObject, edit: Edit): void {
+function applyObjectEdit(obj: GameObject, edit: Edit, ctx: DuplicantContext): void {
   switch (edit.type) {
     case 'setDuplicantName':
       data(obj, 'MinionIdentity').name = edit.name
@@ -812,6 +861,7 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
       return
     }
     case 'addTrait': {
+      assertTraitsAllowed([edit.traitId], obj, ctx)
       const traits = data(obj, 'Klei.AI.Traits')
       const ids = (traits.TraitIds as string[] | null) ?? []
       if (!ids.includes(edit.traitId)) traits.TraitIds = [...ids, edit.traitId]
@@ -898,7 +948,7 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
       data(obj, 'WorldContainer').isDiscovered = edit.discovered
       return
     case 'applyProfile':
-      applyProfile(obj, edit.profile, new Set(edit.sections))
+      applyProfile(obj, edit.profile, new Set(edit.sections), ctx)
       return
     default:
       throw new Error(`Unhandled edit ${edit.type}`)
@@ -914,9 +964,19 @@ function applyProfile(
   obj: GameObject,
   profile: DuplicantProfile,
   sections: Set<ProfileSection>,
+  ctx: DuplicantContext,
 ): void {
   if (profile.format !== 'duplicity-duplicant@1')
     throw new Error('Not a Duplicity duplicant profile')
+  // A bionic and a standard duplicant do not share traits, interests, skills or body parts.
+  const target = modelOf(obj, ctx.prefab)
+  const blocked = blockedSections(profile, target).filter((s) => sections.has(s))
+  if (blocked.length > 0) {
+    throw new Error(
+      `A ${modelLabel(profileModel(profile))} profile's ${blocked.join(', ')} cannot be applied to a ${modelLabel(target)} duplicant`,
+    )
+  }
+  if (sections.has('traits')) assertTraitsAllowed(profile.traits, obj, ctx)
   const identity = data(obj, 'MinionIdentity')
   if (sections.has('name')) {
     identity.name = profile.name
@@ -946,7 +1006,11 @@ function applyProfile(
   if (sections.has('appearance')) {
     for (const [slot, number] of Object.entries(profile.appearance)) {
       if (number)
-        applyObjectEdit(obj, { type: 'setAccessory', id: '', slot: slot as AccessorySlot, number })
+        applyObjectEdit(
+          obj,
+          { type: 'setAccessory', id: '', slot: slot as AccessorySlot, number },
+          ctx,
+        )
     }
   }
 }
