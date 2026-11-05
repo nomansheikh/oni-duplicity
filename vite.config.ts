@@ -1,6 +1,9 @@
+import { fileURLToPath } from 'node:url'
 import { configDefaults, defineConfig } from 'vite-plus'
 
 export default defineConfig({
+  // Component tests import the web app's `@/` paths.
+  resolve: { alias: { '@': fileURLToPath(new URL('./apps/web/src', import.meta.url)) } },
   defaultPackage: {
     dev: './apps/web',
     build: './apps/web',
