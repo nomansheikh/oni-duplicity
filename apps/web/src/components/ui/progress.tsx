@@ -151,7 +151,7 @@ function Progress({
             className="absolute inset-y-0 left-0 bg-[#6e4057]"
             style={{ width: `${pct}%` }}
           />
-          <span className="absolute inset-0 grid place-items-center font-heading text-base font-semibold tracking-[0.06em] tabular-nums">
+          <span className="absolute inset-0 grid place-items-center type-label tabular-nums">
             {valueLabel}
           </span>
         </>
@@ -190,17 +190,17 @@ function Progress({
   return (
     <div data-slot="progress-field" className="flex w-full flex-col gap-1">
       <div className="flex items-baseline justify-between gap-2 leading-none">
-        <span className="text-base text-white">{label}</span>
+        <span className="type-body text-white">{label}</span>
         <span className="flex items-baseline gap-2">
           {overflow > 0 && (
-            <span className="text-[0.8rem] font-bold text-warn tabular-nums">
+            <span className="type-caption font-bold text-warn tabular-nums">
               +{overflow.toLocaleString()}
             </span>
           )}
           {state != null && (
             <span
               className={cn(
-                'font-heading text-[0.8rem] font-bold tracking-[0.07em] uppercase',
+                'type-label',
                 variant === 'task' ? 'text-fg-2' : stateColor[tone ?? 'good'],
               )}
             >

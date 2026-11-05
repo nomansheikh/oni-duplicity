@@ -113,10 +113,7 @@ function DialogTitle({ className, ...props }: React.ComponentProps<typeof Dialog
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn(
-        'font-heading text-[1.2rem] leading-none font-bold tracking-[0.07em] uppercase',
-        className,
-      )}
+      className={cn('type-title-bar', className)}
       {...props}
     />
   )
@@ -130,7 +127,7 @@ function DialogDescription({
     <DialogPrimitive.Description
       data-slot="dialog-description"
       className={cn(
-        'font-sans text-[0.85rem] font-normal tracking-normal text-white/75 normal-case *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground',
+        'type-small text-white/75 normal-case *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground',
         className,
       )}
       {...props}

@@ -102,7 +102,36 @@ export default function Gallery() {
   const [vol, setVol] = useState([40])
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-8 p-6">
-      <h1 className="text-4xl font-bold uppercase">Component gallery</h1>
+      <h1 className="type-display uppercase">Component gallery</h1>
+
+      <Section title="Type scale">
+        {(
+          [
+            ['type-display', '2.5rem / 40px', 'Display: Oxygen Not Included'],
+            ['type-h1', '2rem / 32px', 'H1: Duplicants'],
+            ['type-h2', '1.5rem / 24px', 'H2: Vitals and stress'],
+            ['type-h3', '1.25rem / 20px', 'H3: Attributes'],
+            ['type-title-bar', '1.375rem / 22px', 'Title bar: Skills'],
+            [
+              'type-body',
+              '1rem / 16px',
+              'Body: Meep is carrying 19 kg of Oxylite to the storage bin.',
+            ],
+            ['type-label', '1rem / 16px', 'Label: Morale'],
+            ['type-small', '0.9375rem / 15px', 'Small: Secondary text and descriptions.'],
+            ['type-caption', '0.8125rem / 13px', 'Caption: 14 / 20 kg, hints and units.'],
+          ] as const
+        ).map(([cls, size, sample]) => (
+          <div
+            key={cls}
+            className="flex w-full flex-wrap items-baseline gap-x-4 border-b border-ink py-1"
+          >
+            <code className="w-40 shrink-0 font-mono text-xs text-fg-3">{cls}</code>
+            <code className="w-36 shrink-0 font-mono text-xs text-fg-3">{size}</code>
+            <span className={cls}>{sample}</span>
+          </div>
+        ))}
+      </Section>
 
       <Section title="Buttons">
         {(
