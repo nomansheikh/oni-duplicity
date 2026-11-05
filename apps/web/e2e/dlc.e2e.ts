@@ -71,6 +71,9 @@ test.describe('Demolior', () => {
     await input.fill('300')
     await input.press('Enter')
     await expect(input).toHaveValue('300')
+    // The field shows the typed value at once; wait until the edit is really applied.
+    await expect(page.getByRole('button', { name: /unsaved edits?$/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Undo' })).toBeEnabled()
     await page.getByRole('button', { name: 'Undo' }).click()
     await expect(input).toHaveValue('201.1')
 
@@ -85,7 +88,8 @@ test('lists world mixing as read only', async ({ page }) => {
   const card = page.locator('[data-slot=card]').filter({ hasText: 'World mixing' })
   await expect(card.getByText("can't be changed after the world exists")).toBeVisible()
   const row = (name: string) => card.getByRole('row').filter({ hasText: name })
-  await expect(row('Prehistoric Planet Pack')).toContainText('Disabled')
+  await expect(row('Prehistoric Planet Pack')).toContainText('Enabled')
+  await expect(row('Aquatic Planet Pack')).toContainText('Disabled')
   await expect(row('Frosty Planet Pack')).toContainText('Enabled')
   await expect(row('Ice Caves')).toContainText('Disabled')
   await expect(card.getByRole('combobox')).toHaveCount(0)
