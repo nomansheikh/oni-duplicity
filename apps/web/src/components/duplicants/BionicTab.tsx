@@ -78,10 +78,7 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
                   <TableCell className="tabular-nums">{slot}</TableCell>
                   <TableCell>
                     {booster ? (
-                      <span className="flex items-center gap-2">
-                        {boosterName(booster.prefab)}
-                        <Badge variant="secondary">{booster.prefab}</Badge>
-                      </span>
+                      boosterName(booster.prefab)
                     ) : (
                       <span className="text-muted-foreground">{locked ? 'Locked' : 'Empty'}</span>
                     )}
@@ -124,7 +121,6 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-20">Place</TableHead>
-                <TableHead>Bank</TableHead>
                 <TableHead>State</TableHead>
                 <TableHead>Charge</TableHead>
               </TableRow>
@@ -137,10 +133,13 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
                   return (
                     <TableRow key={i}>
                       <TableCell className="type-body tabular-nums">{i + 1}</TableCell>
-                      <TableCell className="type-small">
-                        {bank?.prefab ?? <span className="text-muted-foreground">Empty place</span>}
+                      <TableCell>
+                        {bank ? (
+                          bankState(bank.prefab)
+                        ) : (
+                          <span className="text-muted-foreground">Empty place</span>
+                        )}
                       </TableCell>
-                      <TableCell>{bank ? bankState(bank.prefab) : ''}</TableCell>
                       <TableCell>
                         {!bank || bank.charge === null ? (
                           <span className="text-muted-foreground">{bank ? 'None' : ''}</span>

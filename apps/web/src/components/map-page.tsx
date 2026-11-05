@@ -53,7 +53,7 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
   // Which world `map` shows; it lags `worldId` until the new map arrives.
   const [mapWorld, setMapWorld] = useState<string | null>(null)
   const [mode, setMode] = useState<Mode>('element')
-  const [zoom, setZoom] = useState(4)
+  const [zoom, setZoom] = useState(1)
   const [highlight, setHighlight] = useState<number | null>(null)
   const [shown, setShown] = useState<MarkerKind[]>(['duplicant', 'geyser'])
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null)
@@ -84,16 +84,32 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
     }
   }, [worldId, revision])
 
-  // Fit each world into view the first time it shows, then keep the user's zoom.
+  // The zoom that fits the whole map in the pane. It is the lowest zoom, so the map can never
+  // shrink into an empty pane, and it follows the pane when the window resizes.
+  const [fit, setFit] = useState(1)
   const fittedFor = useRef<string | null>(null)
   useEffect(() => {
     const scroller = scrollRef.current
-    if (!map || !scroller || !mapWorld || fittedFor.current === mapWorld) return
-    fittedFor.current = mapWorld
-    const fits = (z: number) =>
-      z * map.width <= scroller.clientWidth - 2 && z * map.height <= scroller.clientHeight - 2
-    setZoom(ZOOMS.filter(fits).pop() ?? 1)
-    scroller.scrollTo(0, 0)
+    if (!map || !scroller || !mapWorld) return
+    const measure = () => {
+      const next =
+        Math.floor(
+          Math.min(scroller.clientWidth / map.width, scroller.clientHeight / map.height) * 100,
+        ) / 100
+      if (next <= 0) return
+      setFit(next)
+      // Fit each world the first time it shows, then keep the user's zoom (never below the fit).
+      if (fittedFor.current !== mapWorld) {
+        fittedFor.current = mapWorld
+        setZoom(next)
+      } else {
+        setZoom((z) => Math.max(z, next))
+      }
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(scroller)
+    return () => observer.disconnect()
   }, [map, mapWorld])
 
   useEffect(() => {
@@ -139,8 +155,13 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
     setHover(x >= 0 && y >= 0 && x < map.width && y < map.height ? { x, y } : null)
   }
 
+  // Zoom steps: the fit, then every preset above it.
+  const levels = useMemo(() => [fit, ...ZOOMS.filter((z) => z > fit)], [fit])
   const changeZoom = (direction: 1 | -1) =>
-    setZoom((z) => ZOOMS[Math.min(ZOOMS.length - 1, Math.max(0, ZOOMS.indexOf(z) + direction))]!)
+    setZoom((z) => {
+      const here = levels.findLastIndex((level) => level <= z + 0.001)
+      return levels[Math.min(levels.length - 1, Math.max(0, here + direction))]!
+    })
 
   const world = ordered.find((w) => w.id === worldId)
   const totalCells = map ? map.width * map.height : 0
@@ -194,7 +215,7 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
                 <Minus />
               </Button>
               <Button variant="outline" size="sm" className="w-12 tabular-nums" disabled>
-                {zoom}×
+                {fmt(zoom, Number.isInteger(zoom) ? 0 : 1)}×
               </Button>
               <Button
                 variant="outline"
@@ -212,12 +233,11 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
         <CardContent className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div
             ref={scrollRef}
-            className="h-[calc(100svh-15rem)] min-h-96 overflow-auto border border-ink"
-            style={{ background: cssColor(vacuumColor) }}
+            className="flex h-[calc(100svh-15rem)] min-h-96 overflow-auto border border-ink bg-legend"
           >
             {map ? (
               <div
-                className="relative"
+                className="relative m-auto shrink-0"
                 style={{ width: map.width * zoom, height: map.height * zoom }}
               >
                 <canvas

@@ -469,22 +469,25 @@ export function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn
       <Hint desc={amount.desc}>
         <FieldLabel className="type-label w-fit">{amount.name}</FieldLabel>
       </Hint>
-      <AmountMeter amount={amount} />
+      {/* No known maximum means no honest gauge or slider range, so just the number. */}
+      {bounded && <AmountMeter amount={amount} />}
       <div className="flex items-center gap-3">
-        <Slider
-          value={[Math.min(Math.max(shown, sliderBottom), Math.max(sliderTop, sliderBottom))]}
-          min={sliderBottom}
-          max={Math.max(sliderTop, shown, sliderBottom)}
-          step={format.digits ? 0.1 : 1}
-          disabled={readOnly}
-          onValueCommit={([v]) => commit(v!)}
-        />
+        {bounded && (
+          <Slider
+            value={[Math.min(Math.max(shown, sliderBottom), Math.max(sliderTop, sliderBottom))]}
+            min={sliderBottom}
+            max={Math.max(sliderTop, shown, sliderBottom)}
+            step={format.digits ? 0.1 : 1}
+            disabled={readOnly}
+            onValueCommit={([v]) => commit(v!)}
+          />
+        )}
         <NumberField
           label={amount.name}
           value={shown}
           digits={format.digits ?? 0}
           unit={format.unit}
-          className="w-40"
+          className={bounded ? 'w-40' : 'w-full'}
           min={bounded ? bottom : undefined}
           max={bounded ? top : undefined}
           disabled={readOnly}

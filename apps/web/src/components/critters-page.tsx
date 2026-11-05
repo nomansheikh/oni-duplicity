@@ -107,7 +107,7 @@ function CellGauge({ critter, id }: { critter: CritterView; id: string }) {
     )
   }
   return (
-    <div className="flex min-w-28 flex-col gap-1">
+    <div className="flex min-w-24 flex-col gap-1">
       <Progress
         variant="gauge"
         tone={m.tone}
@@ -231,21 +231,18 @@ export function CrittersPage({
             <TableHeader>
               <TableRow>
                 <TableHead>Critter</TableHead>
-                <TableHead>Family</TableHead>
                 <TableHead>Asteroid</TableHead>
                 <TableHead>Wildness</TableHead>
                 <TableHead>Age</TableHead>
-                <TableHead>Fertility</TableHead>
                 <TableHead>Calories</TableHead>
                 <TableHead>Health</TableHead>
-                <TableHead className="text-right">Position</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
             <TableBody>
               {visible.length === 0 && (
                 <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={10} className="p-0">
+                  <TableCell colSpan={7} className="p-0">
                     <EmptyState
                       icon={critters.length === 0 ? Rabbit : SearchX}
                       title={critters.length === 0 ? 'No critters' : 'No critters here'}
@@ -278,13 +275,13 @@ export function CrittersPage({
                 return (
                   <TableRow key={c.id}>
                     <TableCell>
-                      <span className="type-h3 flex items-center gap-2 normal-case">
-                        {c.name}
-                        {c.baby && <Badge variant="info">Baby</Badge>}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="critter">{c.family}</Badge>
+                      <div className="flex flex-col items-start gap-1">
+                        <span className="type-h3 flex items-center gap-2 normal-case">
+                          {c.name}
+                          {c.baby && <Badge variant="info">Baby</Badge>}
+                        </span>
+                        <Badge variant="critter">{c.family}</Badge>
+                      </div>
                     </TableCell>
                     <TableCell className="type-small text-muted-foreground">
                       {asteroidName(worlds, c.asteroid)}
@@ -296,16 +293,10 @@ export function CrittersPage({
                       <CellGauge critter={c} id="Age" />
                     </TableCell>
                     <TableCell>
-                      <CellGauge critter={c} id="Fertility" />
-                    </TableCell>
-                    <TableCell>
                       <CellGauge critter={c} id="Calories" />
                     </TableCell>
                     <TableCell>
                       <CellGauge critter={c} id="HitPoints" />
-                    </TableCell>
-                    <TableCell className="type-small text-right text-muted-foreground tabular-nums">
-                      {c.x}, {c.y}
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-0.5">
