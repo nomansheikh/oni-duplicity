@@ -13,7 +13,9 @@ export function ChangesPopover({ count, revision }: { count: number; revision: n
   useEffect(() => {
     if (!open) return
     let cancelled = false
-    void saveClient.history().then((list) => !cancelled && setItems(list.toReversed()))
+    void saveClient
+      .history()
+      .then((list) => !cancelled && setItems(list.map((e) => e.label).toReversed()))
     return () => {
       cancelled = true
     }
