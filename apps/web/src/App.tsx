@@ -192,7 +192,10 @@ export default function App() {
     if (state.status !== 'loaded') return
     setSaving(true)
     try {
-      downloadBytes(await saveClient.save(), `${state.summary.baseName}.sav`)
+      // The worker handles messages in order, so this name includes every edit
+      // already sent, even while the views are still refreshing.
+      const [bytes, { baseName }] = await Promise.all([saveClient.save(), saveClient.summary()])
+      downloadBytes(bytes, `${baseName}.sav`)
       toast.success('Save downloaded', {
         description: 'Back up your original before replacing it.',
       })
