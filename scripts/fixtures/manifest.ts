@@ -65,3 +65,15 @@ export async function loadManifest(path: string): Promise<FixtureManifest> {
 export function selectFixtures(manifest: FixtureManifest, selection: TierSelection): Fixture[] {
   return manifest.fixtures.filter((fixture) => selection === 'all' || fixture.tier === 'small')
 }
+
+/** The named fixtures, in manifest order. A name that is not in the manifest is an error. */
+export function selectFiles(manifest: FixtureManifest, files: string[]): Fixture[] {
+  const unknown = files.filter(
+    (file) => !manifest.fixtures.some((fixture) => fixture.file === file),
+  )
+  if (unknown.length > 0)
+    throw new Error(
+      `Not in the fixture manifest: ${unknown.join(', ')}. Valid names: ${manifest.fixtures.map((fixture) => fixture.file).join(', ')}`,
+    )
+  return manifest.fixtures.filter((fixture) => files.includes(fixture.file))
+}
