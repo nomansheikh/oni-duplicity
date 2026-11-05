@@ -81,3 +81,13 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - The bionic test needs the 40 MB full-tier fixture, so it is skipped on PRs and runs only on full-tier CI (`main` and nightly). There it fails instead of skipping when the fixture is missing (`CI` set and `FIXTURE_TIER=all`).
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
+
+## Change a geyser's type (experimental) — 2026-11-05
+
+- Geysers can change to another type of the same footprint (gas 2×4, liquid 4×2, molten 3×3) when every DLC the type needs is active in the save. The worker refuses anything else, whatever the UI offers.
+- The edit moves the object to the `GeyserGeneric_<type>` group (created beside the old one if the save has none; an emptied group is dropped, as the game does), sets the type hash, recomputes the five `scaled*` values from the unchanged rolls, sets the object's own temperature, and renames it when it still carries the old type's name. The emitter, element, germs and codex entry are rebuilt by the game from the type hash, so nothing is saved for them.
+- Checked against the decompile: `SaveManager.Load` finds groups by name in the prefab map (order does not matter, an unknown prefab drops the group's objects), and no saved field outside the group name mentions the prefab. Checked against the fixtures: every one of the 156 geysers in the ten saves has the temperature and prefab name its type predicts, including the unmodded Mithro saves.
+- The Geyser Control mod's `newconfig` copies are left alone; the sheet warns when a geyser carries them.
+- Undo restores the group list and every object byte for byte.
+- Risks: nothing is verified in game; the state machine keeps its saved phase, which may disagree with the new timings until the next transition; the deprecated `NiobiumGeyser` prefab is excluded.
+- Next: the in-game check in `docs/verified-in-game.md`; retyping unspawned geysers (open question 15).
