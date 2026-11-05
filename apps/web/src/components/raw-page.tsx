@@ -6,8 +6,10 @@ import {
   CopyPlus,
   CornerDownRight,
   EllipsisVertical,
-  Filter,
+  Loader2,
+  Plus,
   Route,
+  Search,
   Trash2,
   TriangleAlert,
 } from 'lucide-react'
@@ -42,6 +44,7 @@ import { Switch } from '@/components/ui/switch'
 import { saveClient } from '@/lib/save-client'
 import { cn } from '@/lib/utils'
 import type { Edit, RawChildren, RawEntry, RawPath } from '@/worker/model'
+import type { RawMatch, RawSearchResult } from '@/worker/raw'
 import { formatPath, parsePath } from '@/lib/raw-path'
 import { CommitInput } from './common'
 
@@ -51,15 +54,28 @@ const keyOf = (path: RawPath) => JSON.stringify(path)
 
 const isContainer = (entry: RawEntry) => entry.kind === 'object' || entry.kind === 'array'
 
+/** Whole-tree search: wait this long after the last keystroke, show at most this many hits. */
+const SEARCH_DEBOUNCE = 350
+const SEARCH_LIMIT = 200
+// Ids never repeat, even across remounts of the page, so a late cancel cannot hit a newer search.
+let nextSearchId = 0
+
 type Row =
-  | { type: 'entry'; entry: RawEntry; depth: number }
+  | { type: 'entry'; entry: RawEntry; depth: number; parentCanAdd: boolean }
   | { type: 'more'; path: RawPath; depth: number; loaded: number; total: number }
 
 export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit: Edit) => void }) {
   const [root, setRoot] = useState<RawPath>([])
   const [nodes, setNodes] = useState<Map<string, RawChildren>>(new Map())
   const [open, setOpen] = useState<Set<string>>(new Set())
-  const [filter, setFilter] = useState('')
+  const [query, setQuery] = useState('')
+  const [searchValues, setSearchValues] = useState(false)
+  const [search, setSearch] = useState<
+    { state: 'idle' } | { state: 'running' } | ({ state: 'done' } & RawSearchResult)
+  >({ state: 'idle' })
+  const [reveal, setReveal] = useState<string | null>(null)
+  const [highlight, setHighlight] = useState<string | null>(null)
+  const searchId = useRef(0)
   const [goto, setGoto] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -102,6 +118,57 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
     })
   }, [revision, root])
 
+  // Search the whole save in the worker, debounced; a newer query cancels the one in flight.
+  useEffect(() => {
+    const text = query.trim()
+    const id = ++nextSearchId
+    searchId.current = id
+    if (text.length < 2) {
+      setSearch({ state: 'idle' })
+      return
+    }
+    setSearch({ state: 'running' })
+    const timer = setTimeout(() => {
+      saveClient
+        .rawSearch(id, { query: text, values: searchValues, limit: SEARCH_LIMIT })
+        .then((result) => {
+          if (id === searchId.current) setSearch({ state: 'done', ...result })
+        })
+        .catch((error: Error) => {
+          // A superseded search rejects with "cancelled"; only the latest one may report.
+          if (id === searchId.current && error.message !== 'cancelled') {
+            setSearch({ state: 'idle' })
+            toast.error(error.message)
+          }
+        })
+    }, SEARCH_DEBOUNCE)
+    return () => {
+      clearTimeout(timer)
+      void saveClient.cancelRawSearch(id)
+    }
+  }, [query, searchValues, revision])
+
+  // Open the whole route to a path (loading each level far enough to include it), then scroll.
+  const revealPath = async (path: RawPath) => {
+    try {
+      const steps = await saveClient.rawReveal(path)
+      setRoot([])
+      setNodes((prev) => {
+        const next = new Map(prev)
+        for (const step of steps) next.set(keyOf(step.path), step.children)
+        return next
+      })
+      setOpen((prev) => {
+        const next = new Set(prev)
+        for (let i = 1; i < path.length; i++) next.add(keyOf(path.slice(0, i)))
+        return next
+      })
+      setReveal(keyOf(path))
+    } catch (error) {
+      toast.error((error as Error).message)
+    }
+  }
+
   const toggle = (path: RawPath) => {
     const key = keyOf(path)
     setOpen((prev) => {
@@ -119,7 +186,7 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
       const children = nodes.get(keyOf(path))
       if (!children) return
       for (const entry of children.entries) {
-        out.push({ type: 'entry', entry, depth })
+        out.push({ type: 'entry', entry, depth, parentCanAdd: children.canAdd === true })
         if (isContainer(entry) && open.has(keyOf(entry.path))) {
           walk(entry.path, depth + 1)
         }
@@ -135,16 +202,8 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
       }
     }
     walk(root, 0)
-    const needle = filter.trim().toLowerCase()
-    if (!needle) return out
-    return out.filter(
-      (row) =>
-        row.type === 'entry' &&
-        `${row.entry.key} ${row.entry.label ?? ''} ${row.entry.value ?? ''}`
-          .toLowerCase()
-          .includes(needle),
-    )
-  }, [nodes, open, root, filter])
+    return out
+  }, [nodes, open, root])
 
   // The virtualizer hands back fresh functions each render; the compiler skips this component.
   // oxlint-disable-next-line react/incompatible-library
@@ -155,11 +214,23 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
     overscan: 16,
   })
 
+  useEffect(() => {
+    if (!reveal) return
+    const index = rows.findIndex((row) => row.type === 'entry' && keyOf(row.entry.path) === reveal)
+    if (index < 0) return
+    virtualizer.scrollToIndex(index, { align: 'center' })
+    setReveal(null)
+    setHighlight(reveal)
+    const timer = setTimeout(() => setHighlight(null), 3000)
+    return () => clearTimeout(timer)
+    // The virtualizer object changes every render; the row list is what matters.
+    // oxlint-disable-next-line react/exhaustive-deps
+  }, [reveal, rows])
+
   const jumpTo = async (path: RawPath) => {
     try {
       await saveClient.rawChildren(path, 0, 1)
       setOpen(new Set())
-      setFilter('')
       setRoot(path)
     } catch (error) {
       toast.error((error as Error).message)
@@ -177,19 +248,9 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
         <CardTitle>Raw data</CardTitle>
         <CardDescription>
           Every value in the save. Changes here skip the safety rails of the other editors, but undo
-          still works.
+          still works. Byte arrays are shown but cannot be edited.
         </CardDescription>
         <CardAction className="flex flex-wrap items-center gap-2">
-          <InputGroup className="w-48">
-            <InputGroupInput
-              placeholder="Filter loaded rows"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            />
-            <InputGroupAddon>
-              <Filter />
-            </InputGroupAddon>
-          </InputGroup>
           <InputGroup className="w-72">
             <InputGroupInput
               placeholder="Go to path, e.g. gameObjects[0]"
@@ -210,6 +271,32 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
         <div className="flex items-center gap-2 rounded-md border border-chart-3/40 bg-chart-3/10 px-3 py-2 text-sm">
           <TriangleAlert className="size-4 shrink-0 text-chart-3" />
           Type names, lengths and IDs are read by the game as-is. Only change values you understand.
+        </div>
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <InputGroup className="max-w-md min-w-60 flex-1">
+              <InputGroupInput
+                placeholder="Search the whole save by key or path"
+                aria-label="Search the whole save"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <InputGroupAddon>
+                {search.state === 'running' ? <Loader2 className="animate-spin" /> : <Search />}
+              </InputGroupAddon>
+            </InputGroup>
+            <label className="flex items-center gap-2 text-sm">
+              <Switch size="sm" checked={searchValues} onCheckedChange={setSearchValues} />
+              Also match values
+            </label>
+            <span className="text-xs text-muted-foreground">
+              Type part of a key (<span className="font-mono">numberOfCycles</span>) or a path (
+              <span className="font-mono">gameInfo.numberOf</span>).
+            </span>
+          </div>
+          {search.state === 'done' && (
+            <SearchResults result={search} onPick={(path) => void revealPath(path)} />
+          )}
         </div>
         <Breadcrumb>
           <BreadcrumbList className="font-mono text-xs">
@@ -260,12 +347,21 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
                         Load {Math.min(PAGE, row.total - row.loaded)} more of{' '}
                         {row.total - row.loaded} remaining
                       </Button>
+                      {row.total - row.loaded > PAGE && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          onClick={() => void load(row.path, row.loaded, row.total - row.loaded)}
+                        >
+                          Load all
+                        </Button>
+                      )}
                     </div>
                   ) : (
                     <RawRow
                       row={row}
                       expanded={open.has(keyOf(row.entry.path))}
-                      showPath={filter.trim() !== ''}
+                      highlighted={highlight === keyOf(row.entry.path)}
                       onToggle={() => toggle(row.entry.path)}
                       onEdit={onEdit}
                       onCopyPath={() => copyPath(row.entry.path)}
@@ -277,9 +373,7 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
             })}
           </div>
           {rows.length === 0 && (
-            <p className="p-6 text-center text-sm text-muted-foreground">
-              {filter ? 'No loaded rows match the filter.' : 'Nothing here.'}
-            </p>
+            <p className="p-6 text-center text-sm text-muted-foreground">Nothing here.</p>
           )}
         </div>
       </CardContent>
@@ -328,7 +422,7 @@ const KIND_STYLES: Record<string, string> = {
 function RawRow({
   row,
   expanded,
-  showPath,
+  highlighted,
   onToggle,
   onEdit,
   onCopyPath,
@@ -336,7 +430,7 @@ function RawRow({
 }: {
   row: Extract<Row, { type: 'entry' }>
   expanded: boolean
-  showPath: boolean
+  highlighted: boolean
   onToggle: () => void
   onEdit: (edit: Edit) => void
   onCopyPath: () => void
@@ -348,7 +442,10 @@ function RawRow({
   const container = isContainer(entry)
   return (
     <div
-      className="group flex h-full items-center gap-2 pr-2 hover:bg-muted/50"
+      className={cn(
+        'group flex h-full items-center gap-2 pr-2 hover:bg-muted/50',
+        highlighted && 'bg-primary/10 ring-1 ring-primary ring-inset',
+      )}
       style={{ paddingLeft: depth * 16 + 8 }}
     >
       {container && (entry.size ?? 0) > 0 ? (
@@ -371,11 +468,7 @@ function RawRow({
         )}
         onClick={container ? onToggle : undefined}
       >
-        {showPath
-          ? formatPath(entry.path)
-          : typeof entry.key === 'number'
-            ? `[${entry.key}]`
-            : entry.key}
+        {typeof entry.key === 'number' ? `[${entry.key}]` : entry.key}
       </button>
       {entry.label && (
         <Badge variant="secondary" className="max-w-72 justify-start font-mono text-[11px]">
@@ -405,12 +498,28 @@ function RawRow({
               <CornerDownRight /> Open here
             </DropdownMenuItem>
           )}
+          {entry.kind === 'array' && (
+            <>
+              <DropdownMenuSeparator />
+              <AddItem
+                enabled={entry.canAdd === true}
+                onSelect={() => onEdit({ type: 'rawAdd', path: entry.path })}
+              />
+            </>
+          )}
           {inArray && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => onEdit({ type: 'rawDuplicate', path: entry.path })}>
                 <CopyPlus /> Duplicate item
               </DropdownMenuItem>
+              {row.parentCanAdd && (
+                <DropdownMenuItem
+                  onSelect={() => onEdit({ type: 'rawAdd', path: entry.path.slice(0, -1) })}
+                >
+                  <Plus /> Add item to this array
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 variant="destructive"
                 onSelect={() => onEdit({ type: 'rawRemove', path: entry.path })}
@@ -421,6 +530,70 @@ function RawRow({
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+    </div>
+  )
+}
+
+function AddItem({ enabled, onSelect }: { enabled: boolean; onSelect: () => void }) {
+  return (
+    <DropdownMenuItem
+      disabled={!enabled}
+      onSelect={onSelect}
+      title={
+        enabled
+          ? 'Appends a zeroed item built from the save\u2019s own type definitions'
+          : 'The item type is only known for data the save describes with a template'
+      }
+    >
+      <Plus /> Add item
+    </DropdownMenuItem>
+  )
+}
+
+const MATCH_LABEL: Record<RawMatch['by'], string> = { key: 'key', path: 'path', value: 'value' }
+
+function SearchResults({
+  result,
+  onPick,
+}: {
+  result: RawSearchResult
+  onPick: (path: RawPath) => void
+}) {
+  return (
+    <div className="rounded-md border">
+      <div className="flex items-center justify-between border-b px-3 py-1.5 text-xs text-muted-foreground">
+        <span>
+          {result.matches.length === 0
+            ? 'No matches in the whole save'
+            : `${result.matches.length}${result.truncated ? '+' : ''} match${result.matches.length === 1 ? '' : 'es'}${result.truncated ? ` (showing the first ${SEARCH_LIMIT}, narrow the search)` : ''}`}
+        </span>
+        <span>
+          {result.scanned.toLocaleString()} values in {(result.ms / 1000).toFixed(1)} s
+        </span>
+      </div>
+      {result.matches.length > 0 && (
+        <ul className="max-h-56 overflow-auto" aria-label="Search results">
+          {result.matches.map((match) => (
+            <li key={keyOf(match.path)}>
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 px-3 py-1 text-left font-mono text-xs hover:bg-muted/50"
+                onClick={() => onPick(match.path)}
+              >
+                <Badge variant="outline" className="shrink-0 text-[10px]">
+                  {MATCH_LABEL[match.by]}
+                </Badge>
+                <span className="min-w-0 flex-1 truncate">{formatPath(match.path)}</span>
+                {match.value !== undefined && (
+                  <span className="max-w-64 shrink-0 truncate text-muted-foreground">
+                    {match.value}
+                  </span>
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
@@ -436,7 +609,14 @@ function RawValue({ entry, onEdit }: { entry: RawEntry; onEdit: (edit: Edit) => 
     case 'bytes':
       return (
         <span className="truncate">
-          {entry.size} bytes <span className="text-muted-foreground">{entry.value}</span>
+          {entry.size} bytes <span className="text-muted-foreground">{entry.value}</span>{' '}
+          <Badge
+            variant="outline"
+            className="text-[10px]"
+            title="Byte arrays cannot be edited here"
+          >
+            read-only
+          </Badge>
         </span>
       )
     case 'boolean':

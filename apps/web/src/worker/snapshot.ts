@@ -12,8 +12,11 @@ export function snapshot(save: SaveGame, edit: Edit): () => void {
       parent[key] = old
     }
   }
-  if (edit.type === 'rawRemove' || edit.type === 'rawDuplicate') {
-    const array = rawGet(save, edit.path.slice(0, -1)) as unknown[]
+  if (edit.type === 'rawRemove' || edit.type === 'rawDuplicate' || edit.type === 'rawAdd') {
+    const array = rawGet(
+      save,
+      edit.type === 'rawAdd' ? edit.path : edit.path.slice(0, -1),
+    ) as unknown[]
     const copy = [...array]
     return () => {
       array.splice(0, array.length, ...copy)
