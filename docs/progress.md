@@ -137,3 +137,36 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - The tab title starts with "• " while there are unsaved edits.
 - Tests: unit tests for the grouping and error classification, and e2e for the dialog (cancel, confirm), grouping, the title, autosave, a truncated file and a non-save file. No fixture is an autosave, so the autosave e2e rewrites the header of `beautiful-galaxy` and loads that.
 - Risk: the "not an ONI save" versus "truncated" split is a heuristic on the parser's message, since the worker boundary drops `ParseError`'s fields.
+
+## Raw editor search and add item — 2026-11-05
+
+- Whole-tree search: the worker walks every value of the save in tree order (`worker/raw.ts`) and returns the first 200 matches with their paths.
+  - Matches by key name; by path substring when the text contains `.`, `[` or `]` (a plain word as a path match would hit everything below a key of that name); optionally by primitive value. Byte arrays are leaves.
+  - It runs in slices of about 20 ms and yields between them, so a newer query cancels the one in flight (the editor also debounces keystrokes by 350 ms).
+  - Timing in Node on the 40 MB `mithro-06-maximum-cycle-4770` save (29 million values): key search 0.5 s, key plus value search 0.7 s, a value search that matches nothing 1.8 s (the worst case: every value visited). A numeric value query that matches nothing converts every number to text and is slower; the browser adds the slice yields on top.
+  - Clicking a result opens every ancestor (each level loaded far enough to include the next step), scrolls to the row and highlights it.
+- Paging: children still load 500 at a time, with an explicit "Load N more" and "Load all" row. The loaded-rows filter is gone, replaced by the search.
+- Add item: appends a zeroed element built from the save's own template definitions (`rawDefaultItem`), offered on the array row and on its items ("Add item to this array").
+  - Only for arrays reached through a template: the world, settings and game data roots and each behavior's template data. The header JSON and hand-decoded extra data have no declared element type, so a guess could write a save the game cannot read; those rows show a disabled "Add item".
+  - Byte arrays and dictionaries are not offered: bytes stay read-only (now shown with a "read-only" badge), and a dictionary entry needs an unused key.
+- Tests:
+  - unit: key, path and value matches, the limit and truncation, cancellation, reveal, add item and undo;
+  - fixture: adding an item to an addable array changes only that array after write and re-parse, for every fixture of the tier;
+  - e2e: search for a deep key, jump to it and edit it; add item to an array of objects and of strings with `expectOnlyChanged`; the disabled state on the header.
+- Review fix: "add item" is now offered only when every template reachable from the element type exists in the save. Types the parser writes by hand (`System.Guid`, `CellEventInstance`, `Spacecraft`, `GameplayEventInstance`, `Ref`1[[...]]`, `UnityEngine.Color32`) have no template, so the first version offered arrays whose new item made `writeSave` throw. A test now adds an item to every distinct addable array shape (world, settings, game data and every behavior's template data) in each fixture, writes and re-parses the body, and checks that undo restores identical bytes. Search ids no longer repeat across page remounts, and a cancel only reaches a running search.
+- Risks:
+  - Arrays that the game keeps in step with another array (parallel arrays such as the conduit flow `serializedIdx` and `versionedSerializedContents`) get out of step when one is extended. The raw editor's warning covers this; nothing here checks it.
+  - Not verified in game.
+
+## Delete loose debris — 2026-11-05
+
+- The Materials sheet could already delete one loose chunk with `deleteObject`. This adds the missing parts:
+  - `deleteDebris { ids }`: one edit for any number of chunks, so one undo step. The ids are `KPrefabID` instance IDs, not `Element:index` positions, because positions shift after every delete and a second click on a list that had not refreshed yet could delete a different chunk. The worker throws if an ID is gone and changes nothing. The sheet also disables every delete control until the list for the latest revision has loaded. Undo restores every chunk at its original position in its group.
+  - "Delete selected" and "Delete all loose" with a confirm dialog that shows the count and mass (and how many were skipped).
+  - Checkboxes on loose rows; stored rows never get a delete control, and the worker refuses stored items, buildings and critters.
+- Safety check (decompile and all ten fixtures): nothing that was checked saves a loose item's `KPrefabID` instance ID except the move-order list in `CancellableMove.movables`. Counts of decoded references to loose element chunks, not counting each chunk's own ID: 0 in `beautiful-galaxy`, `beautiful-galaxy-build-744825`, `apple-park`, `konove` and `mithro-01` to `mithro-04`; 2 (Oxylite) in `mithro-05`; 1 (Liquid Sulfur) in `mithro-06`. The game does not null-check those IDs when a move order is cancelled.
+- So a chunk with `Movable.isMarkedForMove`, or whose ID is in any move-order list, cannot be deleted. The trash button is disabled with a hint, bulk delete skips it, and the worker throws. The same guard now covers `deleteObject`, which previously had none.
+- Tests: model, undo and refusal tests in `tests/debris.test.ts`, run on every fixture (delete three chunks of the busiest element, write, re-read, compare with the raw save minus those objects; undo is byte exact); move-order refusal on `mithro-05` and `mithro-06`; five e2e tests (one, selected, all, cancel, undo, plus the move-order case on the 40 MB save).
+- Risks:
+  - Not tried in game. Undecoded raw bytes were not searched for references.
+  - Deleting a chunk deletes its mass from the world; the world grid is untouched.
