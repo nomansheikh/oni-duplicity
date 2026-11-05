@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/card'
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { fmt } from '@/lib/format'
+import { PageHeader } from './page-header'
 import type { StoryQuestView, StoryState, StoryView } from '@/worker/model'
 
 const STATE_LABELS: Record<StoryState, string> = {
@@ -109,24 +110,34 @@ function StoryCard({ story }: { story: StoryView }) {
 export function StoriesPage({ stories }: { stories: StoryView[] }) {
   if (stories.length === 0) {
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>No story traits</EmptyTitle>
-          <EmptyDescription>
-            This save has no story traits, or was made before they existed.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <div className="flex flex-col gap-4 md:gap-6">
+        <PageHeader
+          title="Stories"
+          status="read-only"
+          description="Where each story trait stands in this save."
+        />
+        <Empty>
+          <EmptyHeader>
+            <EmptyTitle>No story traits</EmptyTitle>
+            <EmptyDescription>
+              This save has no story traits, or was made before they existed.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </div>
     )
   }
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <div className="flex flex-col gap-1">
-        <h2 className="type-h2">Story traits</h2>
-        <p className="type-small text-muted-foreground">
-          Where each story trait stands in this save. Read only.
-        </p>
-      </div>
+      <PageHeader
+        title="Stories"
+        status="read-only"
+        description="Where each story trait stands in this save."
+        summary={[
+          { label: 'Story traits', value: stories.length },
+          { label: 'Completed', value: stories.filter((s) => s.state === 'complete').length },
+        ]}
+      />
       <div className="grid gap-4 @3xl/main:grid-cols-2 md:gap-6">
         {stories.map((story) => (
           <StoryCard key={story.id} story={story} />

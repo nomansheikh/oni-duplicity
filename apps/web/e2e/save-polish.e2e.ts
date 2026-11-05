@@ -13,6 +13,7 @@ async function rename(page: import('@playwright/test').Page, name: string) {
 test('the download waits for the confirm dialog', async ({ page }) => {
   await openSave(page)
   await rename(page, 'Polished')
+  await goTo(page, 'Game settings')
   await page.getByRole('switch', { name: 'Sandbox mode' }).click()
   await expect.poll(() => editCount(page)).toBe(2)
 

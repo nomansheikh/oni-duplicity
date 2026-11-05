@@ -1,22 +1,18 @@
-import type { ReactNode } from 'react'
-import { Activity, Droplets, Timer, Users } from 'lucide-react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Activity, Droplets, Timer, TriangleAlert, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Field,
-  FieldContent,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '@/components/ui/item'
 import { meterTone, Progress } from '@/components/ui/progress'
-import { Switch } from '@/components/ui/switch'
 import { averagePerCycle } from '@/lib/geyser'
 import { fmt } from '@/lib/format'
+import { saveClient } from '@/lib/save-client'
+import type { DemoliorView } from '@/worker/dlc'
 import type { DuplicantView, Edit, GeyserView, Summary } from '@/worker/model'
 import { CommitInput } from './common'
 import { DlcBadges } from './dlc-badge'
+import { PageHeader } from './page-header'
 
 function StatCard({
   label,
@@ -61,6 +57,71 @@ function average(values: number[]): number {
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0
 }
 
+type Attention = { id: string; tone: 'warn' | 'bad' | 'info'; label: string; text: string }
+
+const STRESSED_AT = 60
+const LOW_HEALTH_AT = 35
+const MAX_ATTENTION = 5
+
+/** Things worth a look, derived from data the app already loads. Most urgent first. */
+function attentionItems(
+  summary: Summary,
+  duplicants: DuplicantView[],
+  demolior: DemoliorView | null,
+): Attention[] {
+  const amount = (d: DuplicantView, id: string) => d.amounts.find((a) => a.id === id)?.value
+  const items: Attention[] = []
+  if (demolior && demolior.remainingCycles > 0) {
+    items.push({
+      id: 'demolior',
+      tone: 'bad',
+      label: 'Impact',
+      text: `Demolior hits in ${fmt(demolior.remainingCycles, 1)} cycles (cycle ${fmt(demolior.impactCycle, 1)})`,
+    })
+  }
+  for (const d of duplicants) {
+    const health = amount(d, 'HitPoints')
+    if (health !== undefined && health < LOW_HEALTH_AT) {
+      items.push({
+        id: `health-${d.id}`,
+        tone: 'bad',
+        label: 'Health',
+        text: `${d.name} is at ${fmt(health, 0)}% health`,
+      })
+    }
+  }
+  for (const d of duplicants) {
+    const stress = amount(d, 'Stress')
+    if (stress !== undefined && stress >= STRESSED_AT) {
+      items.push({
+        id: `stress-${d.id}`,
+        tone: 'warn',
+        label: 'Stress',
+        text: `${d.name} is at ${fmt(stress, 0)}% stress`,
+      })
+    }
+  }
+  if (summary.debugWasUsed || summary.sandbox) {
+    items.push({
+      id: 'achievements',
+      tone: 'warn',
+      label: 'Achievements',
+      text: summary.debugWasUsed
+        ? 'Achievements are disabled because debug mode was used'
+        : 'Achievements are disabled while sandbox mode is on',
+    })
+  }
+  if (summary.unverified) {
+    items.push({
+      id: 'unverified',
+      tone: 'info',
+      label: 'Version',
+      text: `Save version ${summary.version} is newer than the versions this editor was checked against`,
+    })
+  }
+  return items
+}
+
 export function OverviewPage({
   summary,
   duplicants,
@@ -72,6 +133,17 @@ export function OverviewPage({
   geysers: GeyserView[]
   onEdit: (edit: Edit) => void
 }) {
+  const [demolior, setDemolior] = useState<DemoliorView | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    void saveClient.dlc().then((view) => !cancelled && setDemolior(view.demolior))
+    return () => {
+      cancelled = true
+    }
+  }, [duplicants]) // the views are rebuilt after every edit, so the countdown is read again
+  const attention = attentionItems(summary, duplicants, demolior)
+  const shown = attention.slice(0, MAX_ATTENTION)
+
   const amount = (d: DuplicantView, id: string) => d.amounts.find((a) => a.id === id)?.value
   const stress = average(duplicants.map((d) => amount(d, 'Stress') ?? 0))
   const stressTone = meterTone('stress', stress)
@@ -80,6 +152,38 @@ export function OverviewPage({
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
+      <PageHeader
+        title="Overview"
+        description="The state of your colony and what is worth a look. Everything else is in the tabs above."
+      />
+      <Card data-testid="needs-attention">
+        <CardHeader>
+          <CardTitle>Needs attention</CardTitle>
+          <CardDescription>
+            {attention.length > shown.length
+              ? `Showing ${shown.length} of ${attention.length}.`
+              : 'Stressed or hurt duplicants, an incoming impact and save-level warnings.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {shown.length === 0 ? (
+            <p className="type-small text-muted-foreground">Nothing needs attention.</p>
+          ) : (
+            <ItemGroup className="gap-2">
+              {shown.map((item) => (
+                <Item key={item.id} variant="outline" size="sm">
+                  <ItemContent className="flex-row items-center gap-3">
+                    <Badge variant={item.tone}>
+                      {item.tone === 'info' ? null : <TriangleAlert />} {item.label}
+                    </Badge>
+                    <ItemDescription className="line-clamp-none">{item.text}</ItemDescription>
+                  </ItemContent>
+                </Item>
+              ))}
+            </ItemGroup>
+          )}
+        </CardContent>
+      </Card>
       <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         <StatCard
           label="Cycles survived"
@@ -133,36 +237,6 @@ export function OverviewPage({
                   id="colony-name"
                   value={summary.baseName}
                   onCommit={(name) => onEdit({ type: 'setColonyName', name })}
-                />
-              </Field>
-              <Field orientation="horizontal">
-                <FieldContent>
-                  <FieldLabel htmlFor="sandbox">Sandbox mode</FieldLabel>
-                  <FieldDescription>Unlocks the sandbox tools in game.</FieldDescription>
-                </FieldContent>
-                <Switch
-                  id="sandbox"
-                  checked={summary.sandbox}
-                  onCheckedChange={(enabled) => onEdit({ type: 'setSandbox', enabled })}
-                />
-              </Field>
-              <Field orientation="horizontal">
-                <FieldContent>
-                  <FieldLabel htmlFor="debug-used">Debug mode was used</FieldLabel>
-                  <FieldDescription>
-                    The game sets this for good once debug tools are used. Achievements need it off,
-                    and sandbox mode off too.{' '}
-                    {summary.debugWasUsed || summary.sandbox ? (
-                      <Badge variant="warn">Achievements blocked</Badge>
-                    ) : (
-                      <Badge variant="good">Achievements on</Badge>
-                    )}
-                  </FieldDescription>
-                </FieldContent>
-                <Switch
-                  id="debug-used"
-                  checked={summary.debugWasUsed}
-                  onCheckedChange={(used) => onEdit({ type: 'setDebugWasUsed', used })}
                 />
               </Field>
             </FieldGroup>

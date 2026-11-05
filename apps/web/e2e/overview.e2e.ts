@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { downloadSave, expectOnlyChanged, GALAXY, openSave, original } from './helpers.ts'
+import { downloadSave, expectOnlyChanged, GALAXY, goTo, openSave, original } from './helpers.ts'
 
 test('renames the colony and downloads under the new name', async ({ page }) => {
   await openSave(page)
@@ -15,6 +15,7 @@ test('renames the colony and downloads under the new name', async ({ page }) => 
 
 test('turns sandbox mode on', async ({ page }) => {
   await openSave(page)
+  await goTo(page, 'Game settings')
   await page.getByRole('switch', { name: 'Sandbox mode' }).click()
 
   const { save } = await downloadSave(page)
@@ -28,6 +29,7 @@ test('turns sandbox mode on', async ({ page }) => {
 
 test('sets the debug flag that blocks achievements', async ({ page }) => {
   await openSave(page)
+  await goTo(page, 'Game settings')
   await expect(page.getByText('Achievements on')).toBeVisible()
   await page.getByRole('switch', { name: 'Debug mode was used' }).click()
   await expect(page.getByText('Achievements blocked')).toBeVisible()

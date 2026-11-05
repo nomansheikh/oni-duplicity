@@ -1,14 +1,7 @@
 import { useState } from 'react'
 import { FlaskConical, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Field,
   FieldContent,
@@ -21,6 +14,7 @@ import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { Edit, TechView } from '@/worker/model'
+import { PageHeader } from './page-header'
 
 export function ResearchPage({
   techs,
@@ -39,75 +33,78 @@ export function ResearchPage({
   )
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Research</CardTitle>
-        <CardDescription>
-          {done} of {techs.length} techs researched. Toggling a tech marks it complete;
-          prerequisites are not checked.
-        </CardDescription>
-        <CardAction>
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title="Research"
+        description="Toggling a tech marks it complete; prerequisites are not checked."
+        actions={
           <Button onClick={() => onEdit({ type: 'researchAll' })} disabled={done === techs.length}>
             <FlaskConical /> Research everything
           </Button>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Progress
-          variant="task"
-          value={(done / Math.max(techs.length, 1)) * 100}
-          label="Researched"
-          state={`${done} / ${techs.length}`}
-          aria-label="Research progress"
-        />
-        <div className="flex flex-wrap items-center gap-2">
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            value={filter}
-            onValueChange={(v) => setFilter(v || 'all')}
-          >
-            <ToggleGroupItem value="all">All</ToggleGroupItem>
-            <ToggleGroupItem value="done">Researched</ToggleGroupItem>
-            <ToggleGroupItem value="todo">Not yet</ToggleGroupItem>
-          </ToggleGroup>
-          <InputGroup className="h-[2.1rem] w-64 rounded-none border-ink bg-inset">
-            <InputGroupInput
-              className="h-full border-0! bg-transparent! shadow-none!"
-              placeholder="Search techs"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <InputGroupAddon>
-              <Search />
-            </InputGroupAddon>
-          </InputGroup>
-        </div>
-        <div className="grid gap-2 @2xl/main:grid-cols-2 @5xl/main:grid-cols-3">
-          {visible.map((tech) => (
-            <FieldLabel key={tech.id} htmlFor={`tech-${tech.id}`}>
-              <Field orientation="horizontal" className="h-full border border-ink bg-well">
-                <FieldContent>
-                  <FieldTitle>{tech.name}</FieldTitle>
-                  {tech.desc && (
-                    <FieldDescription className="line-clamp-2 normal-case">
-                      {tech.desc}
-                    </FieldDescription>
-                  )}
-                </FieldContent>
-                <Switch
-                  id={`tech-${tech.id}`}
-                  checked={tech.complete}
-                  onCheckedChange={(complete) =>
-                    onEdit({ type: 'setTechResearched', techId: tech.id, complete })
-                  }
-                />
-              </Field>
-            </FieldLabel>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+        }
+        summary={[
+          { label: 'Researched', value: `${done} / ${techs.length}` },
+          { label: 'Remaining', value: techs.length - done },
+        ]}
+      />
+      <Card variant="well">
+        <CardContent className="space-y-4">
+          <Progress
+            variant="task"
+            value={(done / Math.max(techs.length, 1)) * 100}
+            label="Researched"
+            state={`${done} / ${techs.length}`}
+            aria-label="Research progress"
+          />
+          <div className="flex flex-wrap items-center gap-2">
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              value={filter}
+              onValueChange={(v) => setFilter(v || 'all')}
+            >
+              <ToggleGroupItem value="all">All</ToggleGroupItem>
+              <ToggleGroupItem value="done">Researched</ToggleGroupItem>
+              <ToggleGroupItem value="todo">Not yet</ToggleGroupItem>
+            </ToggleGroup>
+            <InputGroup className="h-[2.1rem] w-64 rounded-none border-ink bg-inset">
+              <InputGroupInput
+                className="h-full border-0! bg-transparent! shadow-none!"
+                placeholder="Search techs"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <InputGroupAddon>
+                <Search />
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+          <div className="grid gap-2 @2xl/main:grid-cols-2 @5xl/main:grid-cols-3">
+            {visible.map((tech) => (
+              <FieldLabel key={tech.id} htmlFor={`tech-${tech.id}`}>
+                <Field orientation="horizontal" className="h-full border border-ink bg-well">
+                  <FieldContent>
+                    <FieldTitle>{tech.name}</FieldTitle>
+                    {tech.desc && (
+                      <FieldDescription className="line-clamp-2 normal-case">
+                        {tech.desc}
+                      </FieldDescription>
+                    )}
+                  </FieldContent>
+                  <Switch
+                    id={`tech-${tech.id}`}
+                    checked={tech.complete}
+                    onCheckedChange={(complete) =>
+                      onEdit({ type: 'setTechResearched', techId: tech.id, complete })
+                    }
+                  />
+                </Field>
+              </FieldLabel>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

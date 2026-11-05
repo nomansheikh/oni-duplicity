@@ -24,14 +24,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +40,7 @@ import type { Edit, RawChildren, RawEntry, RawPath } from '@/worker/model'
 import type { RawMatch, RawSearchResult } from '@/worker/raw'
 import { formatPath, parsePath } from '@/lib/raw-path'
 import { CommitInput } from './common'
+import { PageHeader } from './page-header'
 
 const PAGE = 500
 /** Pixels of indent per tree level. */
@@ -245,14 +239,11 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
   }
 
   return (
-    <Card className="gap-4">
-      <CardHeader>
-        <CardTitle>Raw data</CardTitle>
-        <CardDescription>
-          Every value in the save. Changes here skip the safety rails of the other editors, but undo
-          still works. Byte arrays are shown but cannot be edited.
-        </CardDescription>
-        <CardAction className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col gap-4">
+      <PageHeader
+        title="Raw data"
+        description="Every value in the save. Changes here skip the safety rails of the other editors, but undo still works. Byte arrays are shown but cannot be edited."
+        actions={
           <InputGroup className="w-72">
             <InputGroupInput
               placeholder="Go to path, e.g. gameObjects[0]"
@@ -267,119 +258,122 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
               <Route />
             </InputGroupAddon>
           </InputGroup>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex items-center gap-3 border border-warn/50 bg-warn/10 px-3 py-2 type-small">
-          <TriangleAlert className="size-5 shrink-0 text-warn" />
-          Type names, lengths and IDs are read by the game as-is. Only change values you understand.
-        </div>
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <InputGroup className="max-w-md min-w-60 flex-1">
-              <InputGroupInput
-                placeholder="Search the whole save by key or path"
-                aria-label="Search the whole save"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              <InputGroupAddon>
-                {search.state === 'running' ? <Loader2 className="animate-spin" /> : <Search />}
-              </InputGroupAddon>
-            </InputGroup>
-            <label className="flex items-center gap-2 type-small">
-              <Switch size="sm" checked={searchValues} onCheckedChange={setSearchValues} />
-              Also match values
-            </label>
-            <span className="type-caption text-fg-2">
-              Type part of a key (<span className="font-mono text-white">numberOfCycles</span>) or a
-              path (<span className="font-mono text-white">gameInfo.numberOf</span>).
-            </span>
+        }
+      />
+      <Card variant="well" className="gap-4">
+        <CardContent className="space-y-3">
+          <div className="flex items-center gap-3 border border-warn/50 bg-warn/10 px-3 py-2 type-small">
+            <TriangleAlert className="size-5 shrink-0 text-warn" />
+            Type names, lengths and IDs are read by the game as-is. Only change values you
+            understand.
           </div>
-          {search.state === 'done' && (
-            <SearchResults result={search} onPick={(path) => void revealPath(path)} />
-          )}
-        </div>
-        <Breadcrumb>
-          <BreadcrumbList className="font-mono type-small">
-            <BreadcrumbItem>
-              {root.length === 0 ? (
-                <BreadcrumbPage>save</BreadcrumbPage>
-              ) : (
-                <BreadcrumbLink asChild>
-                  <button type="button" onClick={() => void jumpTo([])}>
-                    save
-                  </button>
-                </BreadcrumbLink>
-              )}
-            </BreadcrumbItem>
-            {root.map((part, i) => (
-              <RootCrumb
-                key={i}
-                label={typeof part === 'number' ? `[${part}]` : part}
-                current={i === root.length - 1}
-                onClick={() => void jumpTo(root.slice(0, i + 1))}
-              />
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
-        <div
-          ref={scrollRef}
-          className="h-[calc(100svh-19rem)] min-h-80 overflow-auto border border-ink bg-inset"
-        >
-          <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
-            {virtualizer.getVirtualItems().map((item) => {
-              const row = rows[item.index]!
-              return (
-                <div
-                  key={item.key}
-                  className="absolute inset-x-0 top-0 border-b border-ink/70 last:border-b-0"
-                  style={{ transform: `translateY(${item.start}px)`, height: item.size }}
-                >
-                  {row.type === 'more' ? (
-                    <div
-                      className="flex h-full items-center"
-                      style={{ paddingLeft: row.depth * INDENT + 40 }}
-                    >
-                      <Button
-                        variant="link"
-                        size="sm"
-                        onClick={() => void load(row.path, row.loaded)}
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <InputGroup className="max-w-md min-w-60 flex-1">
+                <InputGroupInput
+                  placeholder="Search the whole save by key or path"
+                  aria-label="Search the whole save"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+                <InputGroupAddon>
+                  {search.state === 'running' ? <Loader2 className="animate-spin" /> : <Search />}
+                </InputGroupAddon>
+              </InputGroup>
+              <label className="flex items-center gap-2 type-small">
+                <Switch size="sm" checked={searchValues} onCheckedChange={setSearchValues} />
+                Also match values
+              </label>
+              <span className="type-caption text-fg-2">
+                Type part of a key (<span className="font-mono text-white">numberOfCycles</span>) or
+                a path (<span className="font-mono text-white">gameInfo.numberOf</span>).
+              </span>
+            </div>
+            {search.state === 'done' && (
+              <SearchResults result={search} onPick={(path) => void revealPath(path)} />
+            )}
+          </div>
+          <Breadcrumb>
+            <BreadcrumbList className="font-mono type-small">
+              <BreadcrumbItem>
+                {root.length === 0 ? (
+                  <BreadcrumbPage>save</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink asChild>
+                    <button type="button" onClick={() => void jumpTo([])}>
+                      save
+                    </button>
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+              {root.map((part, i) => (
+                <RootCrumb
+                  key={i}
+                  label={typeof part === 'number' ? `[${part}]` : part}
+                  current={i === root.length - 1}
+                  onClick={() => void jumpTo(root.slice(0, i + 1))}
+                />
+              ))}
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div
+            ref={scrollRef}
+            className="h-[calc(100svh-19rem)] min-h-80 overflow-auto border border-ink bg-inset"
+          >
+            <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
+              {virtualizer.getVirtualItems().map((item) => {
+                const row = rows[item.index]!
+                return (
+                  <div
+                    key={item.key}
+                    className="absolute inset-x-0 top-0 border-b border-ink/70 last:border-b-0"
+                    style={{ transform: `translateY(${item.start}px)`, height: item.size }}
+                  >
+                    {row.type === 'more' ? (
+                      <div
+                        className="flex h-full items-center"
+                        style={{ paddingLeft: row.depth * INDENT + 40 }}
                       >
-                        Load {Math.min(PAGE, row.total - row.loaded)} more of{' '}
-                        {row.total - row.loaded} remaining
-                      </Button>
-                      {row.total - row.loaded > PAGE && (
                         <Button
                           variant="link"
                           size="sm"
-                          onClick={() => void load(row.path, row.loaded, row.total - row.loaded)}
+                          onClick={() => void load(row.path, row.loaded)}
                         >
-                          Load all
+                          Load {Math.min(PAGE, row.total - row.loaded)} more of{' '}
+                          {row.total - row.loaded} remaining
                         </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <RawRow
-                      row={row}
-                      expanded={open.has(keyOf(row.entry.path))}
-                      highlighted={highlight === keyOf(row.entry.path)}
-                      onToggle={() => toggle(row.entry.path)}
-                      onEdit={onEdit}
-                      onCopyPath={() => copyPath(row.entry.path)}
-                      onFocus={() => void jumpTo(row.entry.path)}
-                    />
-                  )}
-                </div>
-              )
-            })}
+                        {row.total - row.loaded > PAGE && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            onClick={() => void load(row.path, row.loaded, row.total - row.loaded)}
+                          >
+                            Load all
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <RawRow
+                        row={row}
+                        expanded={open.has(keyOf(row.entry.path))}
+                        highlighted={highlight === keyOf(row.entry.path)}
+                        onToggle={() => toggle(row.entry.path)}
+                        onEdit={onEdit}
+                        onCopyPath={() => copyPath(row.entry.path)}
+                        onFocus={() => void jumpTo(row.entry.path)}
+                      />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+            {rows.length === 0 && (
+              <p className="p-6 text-center type-small text-fg-2">Nothing here.</p>
+            )}
           </div>
-          {rows.length === 0 && (
-            <p className="p-6 text-center type-small text-fg-2">Nothing here.</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 
