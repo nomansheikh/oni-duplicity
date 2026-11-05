@@ -52,3 +52,7 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Fault injection: removing the bounds check in `Reader` produced grouped `RangeError` failures, an infinite loop in the header reader produced a `timeout` failure, and a body that stops re-parsing produced a `reparse` failure, so the harness does detect bugs. All changes were reverted.
 - Gaps: one fixture, and no well-formed but hostile inputs such as huge valid counts or lengths.
 - Next: the differential test against oni-save-parser.
+
+## Test run — 2026-11-05
+
+- Root `vp test` no longer collects tests under `.claude/`, so agent worktrees can't fail the run. The app and package configs don't set `test.exclude`, so they needed no change.
