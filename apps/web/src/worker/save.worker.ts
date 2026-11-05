@@ -24,6 +24,7 @@ import { listBionics } from './bionic.ts'
 import { worldMap } from './map.ts'
 import type { ChangeCategory, HistoryEntry } from '../lib/changes.ts'
 import { applyWithRestore } from './snapshot.ts'
+import { listPoiOverview } from './pois.ts'
 
 let save: SaveGame | null = null
 let fileName = ''
@@ -83,6 +84,7 @@ const api = {
   worlds: () => listWorlds(current()),
   stories: () => listStories(current()),
   destinations: () => listDestinations(current()),
+  pois: () => listPoiOverview(current()),
   materialItems: (elementId: string) => listMaterialItems(current(), elementId),
   rawChildren: (path: RawPath, offset?: number, limit?: number) =>
     rawChildren(current(), path, offset, limit),
