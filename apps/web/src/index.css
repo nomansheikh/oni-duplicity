@@ -276,7 +276,7 @@
  */
 @theme static {
   /* Readable content width for form and card pages (see PAGE_WIDTH in App.tsx). */
-  --container-content: 1520px;
+  --container-content: 1200px;
   --text-xs: 0.8125rem;
   --text-xs--line-height: 1.35;
   --text-sm: 0.9375rem;

@@ -406,171 +406,173 @@ export default function App() {
   )
 
   return (
-    <div className="flex min-h-svh flex-col bg-ground">
-      <SiteHeader
-        file={
-          loaded
-            ? {
-                name: loaded.summary.fileName,
-                colony: loaded.summary.baseName,
-                cycle: loaded.summary.cycles,
-                version: loaded.summary.version,
-              }
-            : null
-        }
-        actions={actions}
-        onOpen={() => fileInput.current?.click()}
-        onClose={close}
-      />
-      <AppTabs
-        page={loaded ? page : null}
-        onNavigate={navigate}
-        onSelectGroup={selectGroup}
-        dirty={dirty}
-        counts={
-          loaded
-            ? {
-                duplicants: loaded.views.duplicants.length,
-                geysers: loaded.views.geysers.length,
-                resources: loaded.views.materials.length,
-                critters: loaded.views.critters.length,
-                asteroids: loaded.views.worlds.length,
-                stories: loaded.views.stories.length,
-              }
-            : {}
-        }
-      >
-        <main className="@container/main flex flex-1 flex-col p-2 sm:p-3">
-          <div className="panel flex flex-1 flex-col bg-field p-1">
-            <Body page={loaded ? page : null}>
-              {state.status === 'idle' && (
-                <OpenSave onFile={open} onPick={() => fileInput.current?.click()} />
-              )}
-              {state.status === 'loading' && (
-                <LoadingSave fileName={state.fileName} progress={state.progress} />
-              )}
-              {state.status === 'error' && (
-                <LoadError info={state.info} onPick={() => fileInput.current?.click()} />
-              )}
-              {loaded?.summary.isAutoSave && (
-                <div className="border border-ink bg-warn/15 px-4 py-3 type-small">
-                  <p className="font-medium">This is an autosave</p>
-                  <p className="text-muted-foreground">
-                    The game&apos;s autosave rotation may overwrite an edited autosave
-                    {loaded.summary.originalSaveName
-                      ? `. It was written from ${loaded.summary.originalSaveName}, so editing that save is safer`
-                      : ''}
-                    .
-                  </p>
-                </div>
-              )}
-              {loaded && (loaded.summary.unverified || loaded.summary.warnings.length > 0) && (
-                <div className="border border-ink bg-warn/15 px-4 py-3 type-small">
-                  {loaded.summary.warnings.map((w) => (
-                    <p key={w}>{w}</p>
-                  ))}
-                  {loaded.summary.unverified && (
-                    <p>Editing may corrupt this save. Keep a backup.</p>
-                  )}
-                </div>
-              )}
-              <Suspense fallback={<PageFallback />}>
-                {loaded && page === 'overview' && (
-                  <OverviewPage
-                    summary={loaded.summary}
-                    duplicants={loaded.views.duplicants}
-                    geysers={loaded.views.geysers}
-                    onEdit={edit}
-                  />
-                )}
-                {loaded && page === 'duplicants' && (
-                  <DuplicantsPage
-                    duplicants={loaded.views.duplicants}
-                    catalogs={loaded.catalogs}
-                    selectedId={selected?.id}
-                    onSelect={setSelectedDupe}
-                    onEdit={edit}
-                  />
-                )}
-                {loaded && page === 'geysers' && (
-                  <GeysersPage
-                    geysers={loaded.views.geysers}
-                    worlds={loaded.views.worlds}
-                    onEdit={edit}
-                  />
-                )}
-                {loaded && page === 'critters' && (
-                  <CrittersPage
-                    critters={loaded.views.critters}
-                    worlds={loaded.views.worlds}
-                    onEdit={edit}
-                  />
-                )}
-                {loaded && page === 'research' && (
-                  <ResearchPage techs={loaded.views.techs} onEdit={edit} />
-                )}
-                {loaded && page === 'space' && (
-                  <SpacePage
-                    destinations={loaded.views.destinations}
-                    revision={revision}
-                    onEdit={edit}
-                  />
-                )}
-                {loaded && page === 'asteroids' && (
-                  <AsteroidsPage worlds={loaded.views.worlds} onEdit={edit} />
-                )}
-                {loaded && page === 'geyser-calculator' && (
-                  <GeyserCalculatorPage geysers={loaded.views.geysers} />
-                )}
-                {loaded && page === 'ranching-calculator' && (
-                  <RanchingCalculatorPage critters={loaded.views.critters} />
-                )}
-                {loaded && page === 'skill-planner' && (
-                  <SkillPlannerPage duplicants={loaded.views.duplicants} />
-                )}
-                {loaded && page === 'stories' && <StoriesPage stories={loaded.views.stories} />}
-                {loaded && page === 'content' && <DlcPage revision={revision} onEdit={edit} />}
-                {loaded && page === 'difficulty' && (
-                  <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
-                )}
-                {loaded && page === 'map' && (
-                  <MapPage worlds={loaded.views.worlds} revision={revision} />
-                )}
-                {loaded && page === 'raw' && <RawPage revision={revision} onEdit={edit} />}
-                {loaded && page === 'resources' && (
-                  <MaterialsPage
-                    materials={loaded.views.materials}
-                    revision={revision}
-                    onEdit={edit}
-                  />
-                )}
-              </Suspense>
-            </Body>
-          </div>
-        </main>
-      </AppTabs>
-      {loaded && (
-        <SaveDialog
-          open={confirmOpen}
-          onOpenChange={setConfirmOpen}
-          fileName={`${loaded.summary.baseName}.sav`}
-          isAutoSave={loaded.summary.isAutoSave}
-          originalSaveName={loaded.summary.originalSaveName}
-          saving={saving}
-          onConfirm={download}
+    <div className="min-h-svh bg-inset">
+      <div className="mx-auto flex min-h-svh w-full max-w-[100rem] flex-col border-x border-edge/40 bg-ground">
+        <SiteHeader
+          file={
+            loaded
+              ? {
+                  name: loaded.summary.fileName,
+                  colony: loaded.summary.baseName,
+                  cycle: loaded.summary.cycles,
+                  version: loaded.summary.version,
+                }
+              : null
+          }
+          actions={actions}
+          onOpen={() => fileInput.current?.click()}
+          onClose={close}
         />
-      )}
-      <input
-        ref={fileInput}
-        type="file"
-        accept=".sav"
-        hidden
-        onChange={(e) => {
-          const file = e.target.files?.[0]
-          if (file) void open(file)
-          e.target.value = ''
-        }}
-      />
+        <AppTabs
+          page={loaded ? page : null}
+          onNavigate={navigate}
+          onSelectGroup={selectGroup}
+          dirty={dirty}
+          counts={
+            loaded
+              ? {
+                  duplicants: loaded.views.duplicants.length,
+                  geysers: loaded.views.geysers.length,
+                  resources: loaded.views.materials.length,
+                  critters: loaded.views.critters.length,
+                  asteroids: loaded.views.worlds.length,
+                  stories: loaded.views.stories.length,
+                }
+              : {}
+          }
+        >
+          <main className="@container/main flex flex-1 flex-col p-2 sm:p-3">
+            <div className="panel flex flex-1 flex-col bg-field p-1">
+              <Body page={loaded ? page : null}>
+                {state.status === 'idle' && (
+                  <OpenSave onFile={open} onPick={() => fileInput.current?.click()} />
+                )}
+                {state.status === 'loading' && (
+                  <LoadingSave fileName={state.fileName} progress={state.progress} />
+                )}
+                {state.status === 'error' && (
+                  <LoadError info={state.info} onPick={() => fileInput.current?.click()} />
+                )}
+                {loaded?.summary.isAutoSave && (
+                  <div className="border border-ink bg-warn/15 px-4 py-3 type-small">
+                    <p className="font-medium">This is an autosave</p>
+                    <p className="text-muted-foreground">
+                      The game&apos;s autosave rotation may overwrite an edited autosave
+                      {loaded.summary.originalSaveName
+                        ? `. It was written from ${loaded.summary.originalSaveName}, so editing that save is safer`
+                        : ''}
+                      .
+                    </p>
+                  </div>
+                )}
+                {loaded && (loaded.summary.unverified || loaded.summary.warnings.length > 0) && (
+                  <div className="border border-ink bg-warn/15 px-4 py-3 type-small">
+                    {loaded.summary.warnings.map((w) => (
+                      <p key={w}>{w}</p>
+                    ))}
+                    {loaded.summary.unverified && (
+                      <p>Editing may corrupt this save. Keep a backup.</p>
+                    )}
+                  </div>
+                )}
+                <Suspense fallback={<PageFallback />}>
+                  {loaded && page === 'overview' && (
+                    <OverviewPage
+                      summary={loaded.summary}
+                      duplicants={loaded.views.duplicants}
+                      geysers={loaded.views.geysers}
+                      onEdit={edit}
+                    />
+                  )}
+                  {loaded && page === 'duplicants' && (
+                    <DuplicantsPage
+                      duplicants={loaded.views.duplicants}
+                      catalogs={loaded.catalogs}
+                      selectedId={selected?.id}
+                      onSelect={setSelectedDupe}
+                      onEdit={edit}
+                    />
+                  )}
+                  {loaded && page === 'geysers' && (
+                    <GeysersPage
+                      geysers={loaded.views.geysers}
+                      worlds={loaded.views.worlds}
+                      onEdit={edit}
+                    />
+                  )}
+                  {loaded && page === 'critters' && (
+                    <CrittersPage
+                      critters={loaded.views.critters}
+                      worlds={loaded.views.worlds}
+                      onEdit={edit}
+                    />
+                  )}
+                  {loaded && page === 'research' && (
+                    <ResearchPage techs={loaded.views.techs} onEdit={edit} />
+                  )}
+                  {loaded && page === 'space' && (
+                    <SpacePage
+                      destinations={loaded.views.destinations}
+                      revision={revision}
+                      onEdit={edit}
+                    />
+                  )}
+                  {loaded && page === 'asteroids' && (
+                    <AsteroidsPage worlds={loaded.views.worlds} onEdit={edit} />
+                  )}
+                  {loaded && page === 'geyser-calculator' && (
+                    <GeyserCalculatorPage geysers={loaded.views.geysers} />
+                  )}
+                  {loaded && page === 'ranching-calculator' && (
+                    <RanchingCalculatorPage critters={loaded.views.critters} />
+                  )}
+                  {loaded && page === 'skill-planner' && (
+                    <SkillPlannerPage duplicants={loaded.views.duplicants} />
+                  )}
+                  {loaded && page === 'stories' && <StoriesPage stories={loaded.views.stories} />}
+                  {loaded && page === 'content' && <DlcPage revision={revision} onEdit={edit} />}
+                  {loaded && page === 'difficulty' && (
+                    <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
+                  )}
+                  {loaded && page === 'map' && (
+                    <MapPage worlds={loaded.views.worlds} revision={revision} />
+                  )}
+                  {loaded && page === 'raw' && <RawPage revision={revision} onEdit={edit} />}
+                  {loaded && page === 'resources' && (
+                    <MaterialsPage
+                      materials={loaded.views.materials}
+                      revision={revision}
+                      onEdit={edit}
+                    />
+                  )}
+                </Suspense>
+              </Body>
+            </div>
+          </main>
+        </AppTabs>
+        {loaded && (
+          <SaveDialog
+            open={confirmOpen}
+            onOpenChange={setConfirmOpen}
+            fileName={`${loaded.summary.baseName}.sav`}
+            isAutoSave={loaded.summary.isAutoSave}
+            originalSaveName={loaded.summary.originalSaveName}
+            saving={saving}
+            onConfirm={download}
+          />
+        )}
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".sav"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) void open(file)
+            e.target.value = ''
+          }}
+        />
+      </div>
     </div>
   )
 }
