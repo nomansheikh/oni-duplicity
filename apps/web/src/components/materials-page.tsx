@@ -65,7 +65,7 @@ export function MaterialsPage({
 }: {
   materials: MaterialView[]
   revision: number
-  onEdit: (edit: Edit) => void
+  onEdit: (edit: Edit) => Promise<void>
 }) {
   const [query, setQuery] = useState('')
   const [state, setState] = useState('all')
@@ -177,13 +177,15 @@ function MaterialSheet({
   material: MaterialView | null
   revision: number
   onClose: () => void
-  onEdit: (edit: Edit) => void
+  onEdit: (edit: Edit) => Promise<void>
 }) {
   const [items, setItems] = useState<MaterialItemView[]>([])
   const [temperature, setTemperature] = useState('')
   const [factor, setFactor] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [confirm, setConfirm] = useState<'selected' | 'all' | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [loadedRevision, setLoadedRevision] = useState(revision)
 
   useEffect(() => {
     if (!material) return
@@ -191,6 +193,7 @@ function MaterialSheet({
     void saveClient.materialItems(material.id).then((list) => {
       if (cancelled) return
       setItems(list)
+      setLoadedRevision(revision)
       // Deleting shifts item references, so a selection never outlives the list it was made on.
       setSelected(new Set())
     })
@@ -199,11 +202,22 @@ function MaterialSheet({
     }
   }, [material, revision])
 
+  // Until the list for the latest revision has landed, the rows may describe a save that has
+  // already changed, so nothing can be deleted from them.
+  const stale = deleting || loadedRevision !== revision
   const loose = items.filter((i) => i.loose)
-  const deletable = loose.filter((i) => !i.protected)
+  const deletable = loose.filter((i) => !i.protected && i.instanceId !== null)
   const targets = confirm === 'selected' ? deletable.filter((i) => selected.has(i.ref)) : deletable
   const skipped = confirm === 'all' ? loose.length - deletable.length : 0
   const targetMass = targets.reduce((sum, i) => sum + i.mass, 0)
+  const deleteItems = async (chosen: MaterialItemView[]) => {
+    setDeleting(true)
+    try {
+      await onEdit({ type: 'deleteDebris', ids: chosen.map((i) => i.instanceId!) })
+    } finally {
+      setDeleting(false)
+    }
+  }
   const toggle = (ref: string, on: boolean) =>
     setSelected((prev) => {
       const next = new Set(prev)
@@ -246,7 +260,7 @@ function MaterialSheet({
                       variant="outline"
                       disabled={temperature === '' || !Number.isFinite(Number(temperature))}
                       onClick={() => {
-                        onEdit({
+                        void onEdit({
                           type: 'setMaterialTemperature',
                           elementId: material.id,
                           kelvin: Number(temperature) + 273.15,
@@ -277,7 +291,7 @@ function MaterialSheet({
                       variant="outline"
                       disabled={factor === '' || !(Number(factor) >= 0)}
                       onClick={() => {
-                        onEdit({
+                        void onEdit({
                           type: 'scaleMaterialMass',
                           elementId: material.id,
                           factor: Number(factor),
@@ -298,7 +312,7 @@ function MaterialSheet({
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={selected.size === 0}
+                    disabled={stale || selected.size === 0}
                     onClick={() => setConfirm('selected')}
                   >
                     <Trash2 /> Delete selected ({selected.size})
@@ -306,7 +320,7 @@ function MaterialSheet({
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={deletable.length === 0}
+                    disabled={stale || deletable.length === 0}
                     onClick={() => setConfirm('all')}
                   >
                     <Trash2 /> Delete all loose ({deletable.length})
@@ -347,7 +361,7 @@ function MaterialSheet({
                   {items.map((item) => (
                     <TableRow key={item.ref}>
                       <TableCell>
-                        {item.loose && !item.protected && (
+                        {item.loose && item.instanceId !== null && !item.protected && (
                           <Checkbox
                             aria-label={`Select item at ${item.x}, ${item.y}`}
                             checked={selected.has(item.ref)}
@@ -369,7 +383,9 @@ function MaterialSheet({
                           min={0}
                           unit="kg"
                           className="ml-auto w-32"
-                          onCommit={(mass) => onEdit({ type: 'setItemMass', ref: item.ref, mass })}
+                          onCommit={(mass) =>
+                            void onEdit({ type: 'setItemMass', ref: item.ref, mass })
+                          }
                         />
                       </TableCell>
                       <TableCell className="text-right">
@@ -380,7 +396,7 @@ function MaterialSheet({
                           unit="°C"
                           className="ml-auto w-32"
                           onCommit={(c) =>
-                            onEdit({
+                            void onEdit({
                               type: 'setItemTemperature',
                               ref: item.ref,
                               kelvin: c + 273.15,
@@ -402,8 +418,8 @@ function MaterialSheet({
                                 variant="ghost"
                                 size="icon-sm"
                                 aria-label="Delete debris"
-                                disabled={item.protected}
-                                onClick={() => onEdit({ type: 'deleteDebris', ids: [item.ref] })}
+                                disabled={stale || item.protected || item.instanceId === null}
+                                onClick={() => void deleteItems([item])}
                               >
                                 <Trash2 />
                               </Button>
@@ -440,9 +456,9 @@ function MaterialSheet({
             </Button>
             <Button
               variant="destructive"
-              disabled={targets.length === 0}
+              disabled={stale || targets.length === 0}
               onClick={() => {
-                onEdit({ type: 'deleteDebris', ids: targets.map((i) => i.ref) })
+                void deleteItems(targets)
                 setConfirm(null)
               }}
             >

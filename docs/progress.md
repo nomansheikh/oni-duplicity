@@ -85,7 +85,7 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 ## Delete loose debris — 2026-11-05
 
 - The Materials sheet could already delete one loose chunk with `deleteObject`. This adds the missing parts:
-  - `deleteDebris { ids }`: one edit for any number of chunks, so one undo step. Undo restores every chunk at its original position in its group.
+  - `deleteDebris { ids }`: one edit for any number of chunks, so one undo step. The ids are `KPrefabID` instance IDs, not `Element:index` positions, because positions shift after every delete and a second click on a list that had not refreshed yet could delete a different chunk. The worker throws if an ID is gone and changes nothing. The sheet also disables every delete control until the list for the latest revision has loaded. Undo restores every chunk at its original position in its group.
   - "Delete selected" and "Delete all loose" with a confirm dialog that shows the count and mass (and how many were skipped).
   - Checkboxes on loose rows; stored rows never get a delete control, and the worker refuses stored items, buildings and critters.
 - Safety check (decompile and all ten fixtures): nothing that was checked saves a loose item's `KPrefabID` instance ID except the move-order list in `CancellableMove.movables`. Counts of decoded references to loose element chunks, not counting each chunk's own ID: 0 in `beautiful-galaxy`, `beautiful-galaxy-build-744825`, `apple-park`, `konove` and `mithro-01` to `mithro-04`; 2 (Oxylite) in `mithro-05`; 1 (Liquid Sulfur) in `mithro-06`. The game does not null-check those IDs when a move order is cancelled.

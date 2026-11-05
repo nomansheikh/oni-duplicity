@@ -101,6 +101,8 @@ export interface MaterialItemView {
   temperature: number
   /** Loose items a move order points at; deleting one would leave a dangling reference. */
   protected: boolean
+  /** KPrefabID instance ID of a loose chunk, which is what delete edits are addressed by. */
+  instanceId: number | null
 }
 
 export interface CritterView {
@@ -312,7 +314,7 @@ export type Edit =
   | { type: 'setItemMass'; ref: string; mass: number }
   | { type: 'setItemTemperature'; ref: string; kelvin: number }
   | { type: 'deleteObject'; id: string }
-  | { type: 'deleteDebris'; ids: string[] }
+  | { type: 'deleteDebris'; ids: number[] }
   | { type: 'cloneObject'; id: string }
   | { type: 'setTechResearched'; techId: string; complete: boolean }
   | { type: 'researchAll' }
@@ -921,14 +923,18 @@ interface MaterialItem {
   loose: boolean
 }
 
+/** A loose chunk: an object in a group named after an element, with its own mass. */
+function isLooseChunk(groupName: string, obj: GameObject): boolean {
+  return ELEMENT_IDS.has(groupName) && !!behavior(obj, 'PrimaryElement')?.templateData
+}
+
 /** Loose chunks (groups named after an element) and items held in storages. */
 function allMaterialItems(save: SaveGame): MaterialItem[] {
   const items: MaterialItem[] = []
   for (const group of save.gameObjects) {
-    const loose = ELEMENT_IDS.has(group.name)
     group.gameObjects.forEach((obj, index) => {
       const id = `${group.name}:${index}`
-      if (loose && behavior(obj, 'PrimaryElement')?.templateData) {
+      if (isLooseChunk(group.name, obj)) {
         items.push({ ref: id, obj, owner: obj, where: 'Loose', loose: true })
       }
       obj.behaviors.forEach((b, bIndex) => {
@@ -1032,6 +1038,7 @@ export function listMaterialItems(save: SaveGame, elementId: string): MaterialIt
       mass: Number(pe.Units) || 0,
       temperature: Number(pe._Temperature) || 0,
       protected: item.loose && isMarkedForMove(item.obj, moving),
+      instanceId: item.loose ? (instanceId(item.obj) ?? null) : null,
     }
   })
 }
@@ -1074,26 +1081,34 @@ function assertNotMarkedForMove(obj: GameObject, moving: Set<number>, id: string
 }
 
 /**
- * Removes loose element chunks by id (`<element>:<index>`). Refuses anything that is not a
- * loose chunk (stored items, buildings, critters) and anything a move order points at, before
- * changing anything.
+ * Removes loose element chunks by KPrefabID instance ID. Positions (`<element>:<index>`) shift
+ * after every delete, so a click made on a list that has since changed could hit a different
+ * chunk; instance IDs do not. Refuses unknown IDs and anything a move order points at, before
+ * changing anything. Stored items, buildings and critters are never loose chunks, so they are
+ * never found.
  */
-function deleteDebris(save: SaveGame, ids: string[]): void {
+function deleteDebris(save: SaveGame, ids: number[]): void {
+  const wanted = new Set(ids)
+  const found = new Map<number, { list: GameObject[]; index: number }>()
   const moving = markedForMoveIds(save)
-  const byGroup = new Map<GameObject[], Set<number>>()
-  for (const id of new Set(ids)) {
-    const { group, index } = splitId(id)
-    if (!ELEMENT_IDS.has(group)) throw new Error(`${id} is not loose debris`)
-    const { list } = locate(save, id)
-    const obj = list[index]!
-    if (!behavior(obj, 'PrimaryElement')?.templateData) throw new Error(`${id} is not loose debris`)
-    assertNotMarkedForMove(obj, moving, id)
-    const set = byGroup.get(list) ?? new Set<number>()
-    set.add(index)
-    byGroup.set(list, set)
+  for (const group of save.gameObjects) {
+    group.gameObjects.forEach((obj, index) => {
+      if (!isLooseChunk(group.name, obj)) return
+      const id = instanceId(obj)
+      if (id === undefined || !wanted.has(id)) return
+      if (found.has(id)) throw new Error(`Loose item ${id} is ambiguous`)
+      assertNotMarkedForMove(obj, moving, `${group.name}:${index}`)
+      found.set(id, { list: group.gameObjects, index })
+    })
   }
-  for (const [list, indexes] of byGroup) {
-    for (const index of [...indexes].sort((a, b) => b - a)) list.splice(index, 1)
+  for (const id of wanted) {
+    if (!found.has(id)) throw new Error(`Loose item ${id} no longer exists`)
+  }
+  const byList = new Map<GameObject[], number[]>()
+  for (const { list, index } of found.values())
+    byList.set(list, [...(byList.get(list) ?? []), index])
+  for (const [list, indexes] of byList) {
+    for (const index of indexes.sort((a, b) => b - a)) list.splice(index, 1)
   }
 }
 
