@@ -42,3 +42,7 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Checked by hand in Chrome: edit → download → reload for duplicants, critters (clone, tame), materials, research, game settings, asteroids and raw edits; undo and redo after each.
 - A production build served from `/oni-duplicity/` loads saves and portraits. Lazy-loading the pages cut the main chunk from 688 kB to 399 kB (122 kB gzipped).
 - Nothing is verified in the game yet.
+
+## Test run — 2026-11-05
+
+- Root `vp test` no longer collects tests under `.claude/`, so agent worktrees can't fail the run. The app and package configs don't set `test.exclude`, so they needed no change.

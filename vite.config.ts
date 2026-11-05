@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite-plus'
+import { configDefaults, defineConfig } from 'vite-plus'
 
 export default defineConfig({
   defaultPackage: {
@@ -8,6 +8,10 @@ export default defineConfig({
   },
   staged: {
     '*': 'vp check --fix',
+  },
+  test: {
+    // Agent worktrees live under .claude/ and contain their own copies of the tests.
+    exclude: [...configDefaults.exclude, '.claude/**'],
   },
   fmt: {
     semi: false,
