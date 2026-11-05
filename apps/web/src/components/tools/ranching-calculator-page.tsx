@@ -26,7 +26,8 @@ import {
 import { ranchSpecies } from '@/lib/tools/ranching-data'
 import type { CritterView } from '@/worker/model'
 import { parseDemand } from '@/lib/tools/parse'
-import { Stat, ToolHeader } from './tool-header'
+import { PageHeader } from '@/components/page-header'
+import { Stat } from './tool-header'
 
 const FAMILIES = [...new Set(ranchSpecies.map((s) => s.family))]
 
@@ -48,7 +49,7 @@ export function RanchingCalculatorPage({ critters }: { critters: CritterView[] }
 
   return (
     <div className="flex flex-col gap-4">
-      <ToolHeader
+      <PageHeader
         title="Ranching calculator"
         description="Pick a species and herd size to see the stable space, feed, output and rancher time it takes. Figures are at the game's standard rates for a healthy herd."
       />
@@ -79,10 +80,10 @@ export function RanchingCalculatorPage({ critters }: { critters: CritterView[] }
         <CardHeader>
           <CardTitle>Herd</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-4">
+        <CardContent className="grid items-end gap-4 md:grid-cols-4">
           <Labelled label="Species and morph">
             <Select value={speciesId} onValueChange={setSpeciesId}>
-              <SelectTrigger aria-label="Species and morph">
+              <SelectTrigger className="w-full" aria-label="Species and morph">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -111,7 +112,7 @@ export function RanchingCalculatorPage({ critters }: { critters: CritterView[] }
               className="tabular-nums"
             />
           </Labelled>
-          <Labelled label="Ranching attribute of the rancher">
+          <Labelled label="Rancher's ranching skill" title="Ranching attribute of the rancher">
             <Input
               type="number"
               min={0}
@@ -243,9 +244,17 @@ export function RanchingCalculatorPage({ critters }: { critters: CritterView[] }
   )
 }
 
-function Labelled({ label, children }: { label: string; children: React.ReactNode }) {
+function Labelled({
+  label,
+  title,
+  children,
+}: {
+  label: string
+  title?: string
+  children: React.ReactNode
+}) {
   return (
-    <label className="flex flex-col gap-1">
+    <label className="flex flex-col gap-1" title={title}>
       <span className="type-label">{label}</span>
       {children}
     </label>
@@ -254,7 +263,9 @@ function Labelled({ label, children }: { label: string; children: React.ReactNod
 
 function FeedRow({ line }: { line: FeedLine }) {
   const eats =
-    line.eats.length > 4 ? `${line.eats.slice(0, 4).join(', ')} and more` : line.eats.join(', ')
+    line.eats.length > 4
+      ? `${line.eats.slice(0, 4).map(humanize).join(', ')} and more`
+      : line.eats.map(humanize).join(', ')
   return (
     <div className="border border-ink bg-well p-3">
       <div className="type-small">{eats}</div>
