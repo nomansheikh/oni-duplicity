@@ -53,7 +53,13 @@ export function ResearchPage({
         </CardAction>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Progress value={(done / Math.max(techs.length, 1)) * 100} />
+        <Progress
+          variant="task"
+          value={(done / Math.max(techs.length, 1)) * 100}
+          label="Researched"
+          state={`${done} / ${techs.length}`}
+          aria-label="Research progress"
+        />
         <div className="flex flex-wrap items-center gap-2">
           <ToggleGroup
             type="single"
@@ -77,10 +83,10 @@ export function ResearchPage({
             </InputGroupAddon>
           </InputGroup>
         </div>
-        <div className="grid gap-3 @2xl/main:grid-cols-2 @5xl/main:grid-cols-3">
+        <div className="grid gap-px border border-ink bg-ink @2xl/main:grid-cols-2 @5xl/main:grid-cols-3">
           {visible.map((tech) => (
             <FieldLabel key={tech.id} htmlFor={`tech-${tech.id}`}>
-              <Field orientation="horizontal">
+              <Field orientation="horizontal" className="h-full bg-well">
                 <FieldContent>
                   <FieldTitle>{tech.name}</FieldTitle>
                   {tech.desc && (

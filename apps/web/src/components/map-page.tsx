@@ -215,7 +215,7 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
       <CardContent className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div
           ref={scrollRef}
-          className="h-[calc(100svh-15rem)] min-h-96 overflow-auto rounded-md border"
+          className="h-[calc(100svh-15rem)] min-h-96 overflow-auto border border-ink"
           style={{ background: cssColor(vacuumColor) }}
         >
           {map ? (
@@ -256,7 +256,9 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
         <div className="flex min-w-0 flex-col gap-4">
           <CellInfo map={map} hover={hover} />
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-medium text-muted-foreground">Markers</span>
+            <span className="font-heading text-sm font-bold tracking-[0.09em] text-muted-foreground uppercase">
+              Markers
+            </span>
             <ToggleGroup
               type="multiple"
               variant="outline"
@@ -272,7 +274,7 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
           </div>
           {mode === 'element' ? (
             <div className="flex min-h-0 flex-col gap-2">
-              <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
+              <div className="flex items-center justify-between font-heading text-sm font-bold tracking-[0.09em] text-muted-foreground uppercase">
                 <span>
                   {world?.name ?? 'World'} · {legend.length} elements
                 </span>
@@ -282,7 +284,7 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
                   </Button>
                 )}
               </div>
-              <ScrollArea className="h-[calc(100svh-30rem)] min-h-48 rounded-md border">
+              <ScrollArea className="h-[calc(100svh-30rem)] min-h-48 border border-ink bg-legend">
                 <div className="flex flex-col p-1">
                   {legend.map((e) => (
                     <button
@@ -290,12 +292,12 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
                       type="button"
                       onClick={() => setHighlight((h) => (h === e.index ? null : e.index))}
                       className={cn(
-                        'flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted',
-                        highlight === e.index && 'bg-muted',
+                        'flex items-center gap-2 border border-transparent px-2 py-1.5 text-left text-sm hover:bg-white/10',
+                        highlight === e.index && 'border-warn bg-white/10',
                       )}
                     >
                       <span
-                        className="size-3 shrink-0 rounded-sm ring-1 ring-foreground/20"
+                        className="size-4 shrink-0 ring-1 ring-ink"
                         style={{
                           background: cssColor(
                             e.state === 'Vacuum' ? vacuumColor : elementColor(e.id, e.state),
@@ -329,7 +331,7 @@ function CellInfo({
 }) {
   if (!map || !hover) {
     return (
-      <div className="rounded-lg border border-dashed px-3 py-4 text-sm text-muted-foreground">
+      <div className="well px-3 py-4 text-sm text-muted-foreground">
         Hover the map to inspect a cell.
       </div>
     )
@@ -340,7 +342,7 @@ function CellInfo({
     (m) => m.x === hover.x && hover.y - m.y >= 0 && hover.y - m.y <= 1,
   )
   return (
-    <div className="flex flex-col gap-1.5 rounded-lg border bg-muted/30 px-3 py-2.5">
+    <div className="well flex flex-col gap-1.5">
       <div className="flex items-center justify-between gap-2">
         <span className="truncate font-heading font-semibold">{element.name}</span>
         <Badge variant="secondary">{element.state}</Badge>
@@ -372,13 +374,13 @@ function RampLegend({ mode }: { mode: 'temperature' | 'mass' }) {
     cssColor(mode === 'temperature' ? temperatureColor(value) : massColor(10 ** value))
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-medium text-muted-foreground">
+      <span className="font-heading text-sm font-bold tracking-[0.09em] text-muted-foreground uppercase">
         {mode === 'temperature' ? 'Temperature' : 'Mass per cell (log scale)'}
       </span>
-      <div className="flex flex-col overflow-hidden rounded-md border">
+      <div className="flex flex-col border border-ink bg-legend">
         {stops.map(([value]) => (
           <div key={value} className="flex items-center gap-2 px-2 py-1 text-sm tabular-nums">
-            <span className="size-3 rounded-sm" style={{ background: colorAt(value) }} />
+            <span className="size-4 ring-1 ring-ink" style={{ background: colorAt(value) }} />
             {label(value)}
           </div>
         ))}

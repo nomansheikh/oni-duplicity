@@ -1,15 +1,7 @@
 import type { ReactNode } from 'react'
 import { Activity, Droplets, Timer, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Field,
   FieldContent,
@@ -18,6 +10,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '@/components/ui/item'
+import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { averagePerCycle } from '@/lib/geyser'
 import { fmt } from '@/lib/format'
@@ -31,28 +24,29 @@ function StatCard({
   icon,
   footer,
   detail,
+  meter,
 }: {
   label: string
   value: ReactNode
   icon: ReactNode
   footer: ReactNode
   detail: ReactNode
+  meter?: ReactNode
 }) {
   return (
-    <Card className="@container/card">
+    <Card size="sm" className="@container/card">
       <CardHeader>
-        <CardDescription>{label}</CardDescription>
-        <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-          {value}
-        </CardTitle>
-        <CardAction>
-          <Badge variant="outline">{icon}</Badge>
-        </CardAction>
+        <CardTitle>{label}</CardTitle>
       </CardHeader>
-      <CardFooter className="flex-col items-start gap-1.5 text-sm">
-        <div className="line-clamp-1 font-medium">{footer}</div>
-        <div className="text-muted-foreground">{detail}</div>
-      </CardFooter>
+      <CardContent className="flex flex-col gap-2">
+        <Badge variant="bare" className="text-3xl font-semibold tabular-nums [&>svg]:size-6!">
+          {icon}
+          {value}
+        </Badge>
+        {meter}
+        <div className="line-clamp-1 text-sm font-medium">{footer}</div>
+        <div className="text-sm text-muted-foreground">{detail}</div>
+      </CardContent>
     </Card>
   )
 }
@@ -79,7 +73,7 @@ export function OverviewPage({
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
+      <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
         <StatCard
           label="Cycles survived"
           value={summary.cycles}
@@ -98,6 +92,14 @@ export function OverviewPage({
           label="Average stress"
           value={`${fmt(stress, 0)}%`}
           icon={<Activity />}
+          meter={
+            <Progress
+              variant="blocks"
+              value={stress}
+              tone={stress <= 40 ? 'good' : stress <= 70 ? 'warn' : 'bad'}
+              aria-label="Average stress"
+            />
+          }
           footer={
             stress > 60
               ? 'Colony is struggling'
@@ -150,13 +152,9 @@ export function OverviewPage({
                     The game sets this for good once debug tools are used. Achievements need it off,
                     and sandbox mode off too.{' '}
                     {summary.debugWasUsed || summary.sandbox ? (
-                      <Badge variant="outline" className="border-chart-3/50 text-chart-3">
-                        Achievements blocked
-                      </Badge>
+                      <Badge variant="warn">Achievements blocked</Badge>
                     ) : (
-                      <Badge variant="outline" className="border-primary/50 text-primary">
-                        Achievements on
-                      </Badge>
+                      <Badge variant="good">Achievements on</Badge>
                     )}
                   </FieldDescription>
                 </FieldContent>

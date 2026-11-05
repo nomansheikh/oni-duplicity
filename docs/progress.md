@@ -92,3 +92,13 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - No behaviour change. The e2e specs select by role, name, label and `data-sidebar`, none of which changed. Screenshots of the gallery, Overview and Geysers are in `docs/screenshots/ui-library/`.
 - Known: `apps/web/tests/geysers.test.ts` (fixture geyser ranges) fails locally because the fetched fixtures are absent; it does not touch the UI.
 - Next: the app shell and page layouts.
+
+## UI pages, batch A: Overview, Research, Settings, Map (design v2, phase 3) — 2026-11-05
+
+- Overview: the four stat cards are framed `Card`s with a title bar and an icon-plus-number `Badge variant="bare"`; average stress adds a `Progress variant="blocks"` meter. The achievements state uses `Badge` `good` and `warn`.
+- Research: progress is a `Progress variant="task"` with a `64 / 112` readout; tech tiles sit on `well` colour in a 1px ink grid.
+- Game settings: every setting is a `well` block; the locked state is a `stat` badge.
+- World map: the element list and ramp legend use the grey `legend` colour with square swatches, the cell info is a `well` block and the map frame is square with an ink outline.
+- Only the four page files changed. No behaviour change: every role, name, label and test id is kept. Before and after screenshots are in `docs/screenshots/ui-pages-a/`.
+- Known: `apps/web/tests/geysers.test.ts` still fails locally without the fetched fixtures.
+- Next: batch B pages once their feature PRs land.

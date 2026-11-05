@@ -35,11 +35,11 @@ export function SettingsPage({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <FieldGroup className="grid gap-x-8 gap-y-6 @3xl/main:grid-cols-2">
+        <FieldGroup className="grid gap-3 @3xl/main:grid-cols-2">
           {settings.map((setting) => {
             const current = setting.levels.find((l) => l.id === setting.current)
             return (
-              <Field key={setting.id} orientation="responsive">
+              <Field key={setting.id} orientation="responsive" className="well">
                 <FieldContent>
                   <FieldLabel htmlFor={`setting-${setting.id}`}>{setting.name}</FieldLabel>
                   <FieldDescription className="line-clamp-2">
@@ -65,7 +65,7 @@ export function SettingsPage({
                     </SelectContent>
                   </Select>
                 ) : (
-                  <Badge variant="outline" className="h-8 gap-1.5 px-3">
+                  <Badge variant="stat">
                     <Lock /> {humanize(setting.current)}
                   </Badge>
                 )}
