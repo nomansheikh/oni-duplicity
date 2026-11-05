@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Progress, meterTone, type MeterKind } from '@/components/ui/progress'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import {
   Select,
@@ -35,28 +36,118 @@ import {
 } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { fmt } from '@/lib/format'
-import type { CritterView, DuplicantEdit, Edit } from '@/worker/model'
+import type { AmountView, CritterView, DuplicantEdit, Edit } from '@/worker/model'
 import { AmountGroup } from './duplicants/tabs'
 
 const amount = (c: CritterView, id: string) => c.amounts.find((a) => a.id === id)?.value
+
+/** What each amount measures, how its tone is judged, and the fallback maximum when the save has none. */
+const METERS: Record<
+  string,
+  {
+    label: string
+    kind: MeterKind
+    fallback?: number
+    unit: string
+    scale?: number
+    digits?: number
+  }
+> = {
+  // Age and wildness are worse the higher they are, so they use the stress rule.
+  Age: { label: 'Age', kind: 'stress', fallback: undefined, unit: 'cycles', digits: 1 },
+  Wildness: { label: 'Wildness', kind: 'stress', fallback: 100, unit: '%' },
+  Fertility: { label: 'Fertility', kind: 'amount', fallback: 100, unit: '%' },
+  Calories: { label: 'Calories', kind: 'amount', unit: 'kcal', scale: 1 / 1000, digits: 1 },
+  HitPoints: { label: 'Health', kind: 'health', unit: 'HP' },
+}
+
+const STATE_WORDS: Record<MeterKind, [string, string, string]> = {
+  amount: ['Good', 'Low', 'Critical'],
+  health: ['Healthy', 'Hurt', 'Critical'],
+  stress: ['Calm', 'Rising', 'High'],
+}
+
+function meterOf(a: AmountView | undefined) {
+  if (!a) return null
+  const spec = METERS[a.id]
+  if (!spec) return null
+  const max = a.max ?? spec.fallback
+  if (max === undefined || max <= 0) return null
+  const pct = Math.min(100, Math.max(0, (a.value / max) * 100))
+  const tone = meterTone(spec.kind, pct)
+  const state = STATE_WORDS[spec.kind][tone === 'good' ? 0 : tone === 'warn' ? 1 : 2]
+  const scale = spec.scale ?? 1
+  return {
+    spec,
+    tone,
+    state,
+    pct,
+    value: a.value * scale,
+    max: max * scale,
+    text: `${fmt(a.value * scale, spec.digits ?? 0)} / ${fmt(max * scale, spec.digits ?? 0)} ${spec.unit}`,
+  }
+}
 
 function WildnessBadge({ critter }: { critter: CritterView }) {
   const wildness = amount(critter, 'Wildness')
   if (wildness === undefined) return <span className="text-muted-foreground">—</span>
   return wildness > 0 ? (
-    <Badge
-      variant="outline"
-      className="border-orange-500/40 bg-orange-500/15 text-orange-700 dark:text-orange-300"
-    >
-      Wild {fmt(wildness, 0)}%
-    </Badge>
+    <Badge variant="warn">Wild {fmt(wildness, 0)}%</Badge>
   ) : (
-    <Badge
-      variant="outline"
-      className="border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-    >
-      Tame
-    </Badge>
+    <Badge variant="good">Tame</Badge>
+  )
+}
+
+/** A gauge with its number beneath, sized for a table cell. */
+function CellGauge({ critter, id }: { critter: CritterView; id: string }) {
+  const m = meterOf(critter.amounts.find((a) => a.id === id))
+  if (!m) {
+    const raw = amount(critter, id)
+    return (
+      <span className="type-small text-muted-foreground tabular-nums">
+        {raw === undefined ? '—' : fmt(raw * (METERS[id]?.scale ?? 1), METERS[id]?.digits ?? 0)}
+      </span>
+    )
+  }
+  return (
+    <div className="flex min-w-28 flex-col gap-1">
+      <Progress
+        variant="gauge"
+        tone={m.tone}
+        value={m.value}
+        max={m.max}
+        aria-label={`${critter.name} ${m.spec.label}`}
+        className="h-4"
+      />
+      <span className="type-small text-right text-foreground tabular-nums">{m.text}</span>
+    </div>
+  )
+}
+
+/** The critter's vitals as the game's storage gauges, above the editable fields. */
+function VitalsPanel({ critter }: { critter: CritterView }) {
+  const rows = critter.amounts.map((a) => ({ a, m: meterOf(a) })).filter((r) => r.m)
+  if (rows.length === 0) return null
+  return (
+    <Card variant="well" size="sm">
+      <CardHeader>
+        <CardTitle>Vitals</CardTitle>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        {rows.map(({ a, m }) => (
+          <Progress
+            key={a.id}
+            variant="gauge"
+            tone={m!.tone}
+            value={m!.value}
+            max={m!.max}
+            label={`${m!.spec.label}: ${m!.text}`}
+            state={m!.state}
+            aria-label={`${m!.spec.label} gauge`}
+          />
+        ))}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -141,10 +232,10 @@ export function CrittersPage({
                 <TableHead>Critter</TableHead>
                 <TableHead>Family</TableHead>
                 <TableHead>Wildness</TableHead>
-                <TableHead className="text-right">Age</TableHead>
-                <TableHead className="text-right">Fertility</TableHead>
-                <TableHead className="text-right">Calories</TableHead>
-                <TableHead className="text-right">Health</TableHead>
+                <TableHead>Age</TableHead>
+                <TableHead>Fertility</TableHead>
+                <TableHead>Calories</TableHead>
+                <TableHead>Health</TableHead>
                 <TableHead className="text-right">Position</TableHead>
                 <TableHead />
               </TableRow>
@@ -154,33 +245,31 @@ export function CrittersPage({
                 const wild = (amount(c, 'Wildness') ?? 0) > 0
                 return (
                   <TableRow key={c.id}>
-                    <TableCell className="font-medium">
-                      <span className="flex items-center gap-2">
+                    <TableCell>
+                      <span className="type-h3 flex items-center gap-2 normal-case">
                         {c.name}
-                        {c.baby && <Badge variant="secondary">Baby</Badge>}
+                        {c.baby && <Badge variant="info">Baby</Badge>}
                       </span>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{c.family}</TableCell>
+                    <TableCell>
+                      <Badge variant="critter">{c.family}</Badge>
+                    </TableCell>
                     <TableCell>
                       <WildnessBadge critter={c} />
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {amount(c, 'Age') !== undefined ? `${fmt(amount(c, 'Age')!, 1)} cycles` : '—'}
+                    <TableCell>
+                      <CellGauge critter={c} id="Age" />
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {amount(c, 'Fertility') !== undefined
-                        ? `${fmt(amount(c, 'Fertility')!, 0)}%`
-                        : '—'}
+                    <TableCell>
+                      <CellGauge critter={c} id="Fertility" />
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {amount(c, 'Calories') !== undefined
-                        ? `${fmt(amount(c, 'Calories')! / 1000, 1)} kcal`
-                        : '—'}
+                    <TableCell>
+                      <CellGauge critter={c} id="Calories" />
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {fmt(amount(c, 'HitPoints') ?? 0, 0)}
+                    <TableCell>
+                      <CellGauge critter={c} id="HitPoints" />
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground tabular-nums">
+                    <TableCell className="type-small text-right text-muted-foreground tabular-nums">
                       {c.x}, {c.y}
                     </TableCell>
                     <TableCell>
@@ -230,12 +319,13 @@ export function CrittersPage({
           {open && (
             <>
               <SheetHeader>
-                <SheetTitle>{open.name}</SheetTitle>
+                <SheetTitle className="type-h2">{open.name}</SheetTitle>
                 <SheetDescription>
                   {open.family} · at {open.x}, {open.y}
                 </SheetDescription>
               </SheetHeader>
-              <div className="@container/main px-4">
+              <div className="@container/main flex flex-col gap-5 px-4 pb-4">
+                <VitalsPanel critter={open} />
                 <AmountGroup
                   amounts={open.amounts}
                   edit={(change: DuplicantEdit) => onEdit({ ...change, id: open.id } as Edit)}

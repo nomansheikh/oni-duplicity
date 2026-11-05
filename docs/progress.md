@@ -121,6 +121,16 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - The machine flag is read only from copies standing inside the story's own asteroid. Quests are shown only when exactly one quest owner holds them; a state value the editor does not know shows as unknown.
 - Editing is not offered; open question 17 records what it would take.
 
+## Critter amounts from the DLCs — 2026-11-05
+
+- The critter editor now bounds every amount by the game's own maximum, read from the decompile (`packages/game-data/src/critter-amounts.ts`), instead of a guessed 0 to 100:
+  - **Constants** in `Database/Amounts.cs`: wildness, fertility, incubation, viability, scale growth, milk production, quill growth, beckoning (all 100), moisture (100), mucus (10) and temperature (10,000 K).
+  - **Trait modifiers** in each prefab's config: age (the lifespan), calories (the stomach size) and hit points, for 58 critters; babies use their adult's. A robot's battery (sweep bot 9,000, scout 180,000, Morb 180,000, Fetch Drone 120,000) comes the same way.
+- The Frosty Planet, Prehistoric Planet, Bionic Booster and Spaced Out critters now show scale growth, milk, beckoning, moisture, mucus and robot batteries with proper names. An amount is editable only when the save has the DLC its prefab needs.
+- The worker refuses a value that is not finite, clamps to `0..max`, and refuses an amount whose maximum is not confirmed. Undo restores the same bytes.
+- Unconfirmed amounts are shown read only with the reason. Hit points of six critter families are in that group (question 22).
+- Tests: every critter in every fixture sits at or below its confirmed maximum, the DLC amounts of the colony and of `apple-park` show their maxima, clamping and non-finite values, and byte-exact undo. Beckoning and the robot batteries are checked against the full-tier fixture (`FIXTURE_TIER=all`). One end-to-end spec edits scale growth through the stats sheet.
+
 ## Parser benchmark and regression gate — 2026-11-05
 
 - `vp run bench` times read + inflate, parse body, write body and deflate for the 40 MB and 13 MB saves (one warm-up, median of five, each save in its own process) and prints a table with peak RSS. It skips with a message when the saves are not downloaded.
