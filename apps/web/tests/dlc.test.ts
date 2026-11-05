@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { hashString } from '@oni-duplicity/game-data'
 import { parseSave, writeSaveParts, type SaveGame } from '@oni-duplicity/save-parser'
 import { describe, expect, test } from 'vite-plus/test'
 import {
@@ -48,8 +49,9 @@ describe.skipIf(!konove)('Demolior (Konove, Spaced Out)', () => {
     expect(view.impactCycle).toBeCloseTo(1.0834444761276245 + 200, 4)
     expect(view.remainingCycles).toBeCloseTo(view.impactCycle - view.currentCycle, 6)
     expect(view.health).toEqual({ current: 960, max: 1000 })
-    expect(view.travels).toBe(true)
+    expect(view.arrivalSaved).toBe(true)
     expect(view.editable).toBe(true)
+    expect(view.readOnlyReason).toBeNull()
     expect(view.minImpactCycle).toBeCloseTo(view.currentCycle + MIN_CYCLES_BEFORE_IMPACT, 6)
   })
 
@@ -122,18 +124,16 @@ describe.skipIf(!konove)('Demolior (Konove, Spaced Out)', () => {
     expect(sameBytes(body(s), before)).toBe(true)
   })
 
-  test('without a ClusterTraveler (vanilla) only eventStartTime changes', () => {
-    const before = save()
-    const after = save()
-    const obj = impactor(after).gameObjects[0]!
+  test('without a ClusterTraveler the edit is refused and nothing changes', () => {
+    const s = save()
+    const obj = impactor(s).gameObjects[0]!
     obj.behaviors = obj.behaviors.filter((b) => b.name !== 'ClusterTraveler')
-    const vanilla = readDemolior(after)!
-    expect(vanilla.travels).toBe(false)
-    const copy = after
-    const raw = machine(copy).extraRaw.slice()
-    applyEdit(after, { type: 'setDemoliorImpact', impactCycle: vanilla.impactCycle + 10 })
-    expect(machine(after).extraRaw).toEqual(raw)
-    expect(event(after).eventStartTime).toBeCloseTo(event(before).eventStartTime + 10, 4)
+    const view = readDemolior(s)!
+    expect(view.editable).toBe(false)
+    expect(view.readOnlyReason).toMatch(/cluster traveler/)
+    const before = body(s)
+    expect(() => applyEdit(s, { type: 'setDemoliorImpact', impactCycle: 400 })).toThrow()
+    expect(sameBytes(body(s), before)).toBe(true)
   })
 })
 
@@ -217,4 +217,199 @@ describe('geothermal on every fixture', () => {
       }
     }
   }, 120_000)
+})
+
+// --- Synthetic saves: the layout logic without any fixture ---------------------------------
+
+const enc = new TextEncoder()
+const i32 = (n: number) => {
+  const b = new Uint8Array(4)
+  new DataView(b.buffer).setInt32(0, n, true)
+  return b
+}
+const f32 = (n: number) => {
+  const b = new Uint8Array(4)
+  new DataView(b.buffer).setFloat32(0, n, true)
+  return b
+}
+const cat = (...parts: Uint8Array[]) => {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0))
+  let at = 0
+  for (const p of parts) {
+    out.set(p, at)
+    at += p.length
+  }
+  return out
+}
+const str = (text: string) => cat(i32(text.length), enc.encode(text))
+
+/** `[name][-1][state][dataLen]` then the machine's own fields, then its parameters. */
+function machineBytes(type: string, fields: Uint8Array, params: Uint8Array[]): Uint8Array {
+  return cat(str(type), i32(-1), str('root.state'), i32(0), fields, i32(params.length), ...params)
+}
+function intParam(name: string, value: number): Uint8Array {
+  const type = str('StateMachine`4+IntParameter+Context[[X]]')
+  const inner = cat(type, str(name), i32(value))
+  return cat(i32(inner.length), inner)
+}
+
+interface Synthetic {
+  dlcIds?: string[]
+  now?: { cycle: number; progress: number }
+  start?: number
+  difficulty?: string
+  event?: boolean
+  impactor?: boolean
+  traveler?: boolean
+  /** Saved arrival in seconds; null leaves the flight machine out. */
+  arrival?: number | null
+  speed?: number
+  health?: number
+}
+
+function synthetic(o: Synthetic = {}): SaveGame {
+  const {
+    dlcIds = ['EXPANSION1_ID', 'DLC4_ID'],
+    now = { cycle: 10, progress: 300 },
+    start = 2,
+    difficulty = 'Default',
+    event = true,
+    impactor = true,
+    traveler = true,
+    arrival = (start + 200) * 600,
+    speed = 0.05,
+    health = 900,
+  } = o
+  const behaviors = [
+    {
+      name: 'GameplayEventManager',
+      templateData: {
+        activeEvents: event
+          ? [{ eventID: { hash: hashString('LargeImpactor') }, eventStartTime: start }]
+          : [],
+      },
+      extraRaw: new Uint8Array(),
+    },
+    {
+      name: 'GameClock',
+      templateData: { cycle: now.cycle, timeSinceStartOfCycle: now.progress },
+      extraRaw: new Uint8Array(),
+    },
+  ]
+  const flight =
+    arrival === null
+      ? []
+      : [
+          machineBytes(
+            'ClusterMapLargeImpactor+Instance',
+            cat(i32(0), f32(arrival), f32(speed)),
+            [],
+          ),
+        ]
+  const blob = cat(
+    machineBytes('LargeImpactorStatus+Instance', new Uint8Array(), [intParam('Health', health)]),
+    ...flight,
+  )
+  const object = {
+    behaviors: [
+      { name: 'StateMachineController', templateData: {}, extraRaw: blob },
+      ...(traveler
+        ? [{ name: 'ClusterTraveler', templateData: {}, extraRaw: new Uint8Array() }]
+        : []),
+    ],
+  }
+  return {
+    header: { gameInfo: { dlcIds } },
+    gameData: {
+      customGameSettings: {
+        CurrentQualityLevelsBySetting: [['DemoliorDifficulty', difficulty]],
+      },
+    },
+    gameObjects: [
+      { name: 'SaveGame', gameObjects: [{ behaviors }] },
+      ...(impactor ? [{ name: 'LargeImpactor', gameObjects: [object] }] : []),
+    ],
+  } as unknown as SaveGame
+}
+
+describe('Demolior layouts (synthetic saves)', () => {
+  test('a healthy Spaced Out impactor reads and edits', () => {
+    const s = synthetic()
+    const view = readDemolior(s)!
+    expect(view).toMatchObject({
+      eventStartCycle: 2,
+      durationCycles: 200,
+      impactCycle: 202,
+      durationSource: 'difficulty',
+      arrivalSaved: true,
+      editable: true,
+      health: { current: 900, max: 1000 },
+    })
+    expect(view.currentCycle).toBeCloseTo(10 + 0.5 + 1, 6)
+    applyEdit(s, { type: 'setDemoliorImpact', impactCycle: 252 })
+    const next = readDemolior(s)!
+    expect(next.impactCycle).toBeCloseTo(252, 4)
+    expect(demoliorTravel(s)!.arrivalTime).toBeCloseTo(252 * 600, -1)
+    // Speed scales by old over new time left: (202 - 11.5) / (252 - 11.5).
+    expect(demoliorTravel(s)!.speed).toBeCloseTo((0.05 * (202 - 11.5)) / (252 - 11.5), 5)
+  })
+
+  test('no Demolior without DLC4 or without an active event (destroyed or never created)', () => {
+    expect(readDemolior(synthetic({ dlcIds: ['EXPANSION1_ID'] }))).toBeNull()
+    expect(readDemolior(synthetic({ event: false }))).toBeNull()
+  })
+
+  test('Spaced Out without the impactor object is read only with a reason', () => {
+    const s = synthetic({ impactor: false })
+    const view = readDemolior(s)!
+    expect(view.editable).toBe(false)
+    expect(view.readOnlyReason).toMatch(/no readable flight data/)
+    expect(view.health).toBeNull()
+    expect(() => applyEdit(s, { type: 'setDemoliorImpact', impactCycle: 300 })).toThrow(/flight/)
+  })
+
+  test('Spaced Out without a traveler or flight machine is read only', () => {
+    const noTraveler = readDemolior(synthetic({ traveler: false }))!
+    expect(noTraveler.editable).toBe(false)
+    expect(noTraveler.readOnlyReason).toMatch(/cluster traveler/)
+    const noFlight = readDemolior(synthetic({ arrival: null }))!
+    expect(noFlight.editable).toBe(false)
+    expect(noFlight.arrivalSaved).toBe(false)
+    expect(noFlight.health).toEqual({ current: 900, max: 1000 })
+  })
+
+  test('an impactor that already arrived is read only and has no time left', () => {
+    const s = synthetic({ arrival: 5 * 600 })
+    const view = readDemolior(s)!
+    expect(view.editable).toBe(false)
+    expect(view.readOnlyReason).toMatch(/already arrived/)
+    expect(view.remainingCycles).toBeLessThan(view.durationCycles)
+    expect(() => applyEdit(s, { type: 'setDemoliorImpact', impactCycle: 300 })).toThrow(/arrived/)
+  })
+
+  test('a vanilla save only shows the difficulty time and refuses the edit', () => {
+    const s = synthetic({ dlcIds: ['DLC4_ID'], arrival: null, difficulty: 'VeryHard' })
+    const view = readDemolior(s)!
+    expect(view.durationCycles).toBe(100)
+    expect(view.arrivalSaved).toBe(false)
+    expect(view.editable).toBe(false)
+    expect(view.readOnlyReason).toMatch(/imminent-impact tag/)
+    expect(() => applyEdit(s, { type: 'setDemoliorImpact', impactCycle: 300 })).toThrow()
+  })
+
+  test('a saved arrival that differs from the difficulty (imminent cluster) wins', () => {
+    const view = readDemolior(synthetic({ arrival: (2 + 10) * 600 }))!
+    expect(view.durationSource).toBe('saved')
+    expect(view.durationCycles).toBeCloseTo(10, 4)
+    expect(view.impactCycle).toBeCloseTo(12, 4)
+  })
+
+  test('an unfamiliar state machine blob reads as unknown, not wrong', () => {
+    const s = synthetic()
+    const behavior = impactor(s).gameObjects[0]!.behaviors[0]!
+    behavior.extraRaw = enc.encode('not a state machine blob')
+    const view = readDemolior(s)!
+    expect(view.health).toBeNull()
+    expect(view.editable).toBe(false)
+  })
 })

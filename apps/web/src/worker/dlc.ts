@@ -61,10 +61,11 @@ export interface DemoliorView {
   remainingCycles: number
   /** Hit points left on the impactor, when the state machine blob reads cleanly. */
   health: { current: number; max: number } | null
-  /** Spaced Out saves move the impactor with a ClusterTraveler; the edit rewrites that too. */
-  travels: boolean
-  /** False when the saved state could not be read safely; the page then shows no edit. */
+  /** True when the impact time comes from the saved flight data, not from the difficulty formula. */
+  arrivalSaved: boolean
+  /** False when the impact time can't be changed safely; `readOnlyReason` says why. */
   editable: boolean
+  readOnlyReason: string | null
   /** The earliest impact cycle the edit accepts. */
   minImpactCycle: number
 }
@@ -224,6 +225,29 @@ function difficultyOf(save: SaveGame): { id: string; name: string } | null {
   return { id: level, name: name ?? humanize(level) }
 }
 
+/**
+ * The edit needs the impactor's saved flight data: that is what Spaced Out flies by, and it is
+ * the only place that records the real impact time. Without it the time would be a guess,
+ * because `GetImpactTime()` also depends on the `DemoliorImminentImpact` cluster tag, which sits
+ * in the cluster layout's definition and is not stored in the save.
+ */
+function readOnlyReasonOf(input: {
+  spacedOut: boolean
+  travels: boolean
+  travel: TravelFields | null
+  secondsLeft: number
+}): string | null {
+  const { spacedOut, travels, travel, secondsLeft } = input
+  if (travel === null) {
+    return spacedOut
+      ? 'This Spaced Out save has no readable flight data for the impactor, and the game flies it by that, so editing the event start would change nothing.'
+      : 'This save does not store when the impactor arrives, and the cluster’s imminent-impact tag that can shorten it is not saved either, so the shown time is only the difficulty setting’s.'
+  }
+  if (!travels) return 'The impactor has no cluster traveler, so its flight data is not in use.'
+  if (!(secondsLeft > 0)) return 'The impactor has already arrived.'
+  return null
+}
+
 export function readDemolior(save: SaveGame): DemoliorView | null {
   if (!dlcIdsOf(save).includes('DLC4_ID')) return null
   const found = activeImpactor(save)
@@ -235,6 +259,7 @@ export function readDemolior(save: SaveGame): DemoliorView | null {
   const bytes = stateMachineBytes(found.object)
   const travel = found.object && bytes ? readTravel(bytes) : null
   const travels = found.object ? behaviorOf(found.object, 'ClusterTraveler') !== undefined : false
+  const spacedOut = dlcIdsOf(save).includes('EXPANSION1_ID')
 
   // The formula can't see the `DemoliorImminentImpact` cluster tag (10 cycles), but the arrival
   // time the game stored already includes it, so prefer that when it disagrees.
@@ -245,8 +270,12 @@ export function readDemolior(save: SaveGame): DemoliorView | null {
   const impactCycle = start + durationCycles
 
   const health = bytes ? readHealth(bytes) : null
-  // Spaced Out impactors are driven by the ClusterTraveler, so the edit needs the travel fields.
-  const editable = !travels || travel !== null
+  const readOnlyReason = readOnlyReasonOf({
+    spacedOut,
+    travels,
+    travel,
+    secondsLeft: travel ? travel.arrivalTime - now * SECONDS_PER_CYCLE : 0,
+  })
   return {
     eventStartCycle: start,
     difficulty,
@@ -256,8 +285,9 @@ export function readDemolior(save: SaveGame): DemoliorView | null {
     currentCycle: now,
     remainingCycles: Math.max(0, impactCycle - now),
     health: health === null ? null : { current: health, max: IMPACTOR_MAX_HEALTH },
-    travels,
-    editable,
+    arrivalSaved: travel !== null,
+    editable: readOnlyReason === null,
+    readOnlyReason,
     minImpactCycle: now + MIN_CYCLES_BEFORE_IMPACT,
   }
 }
@@ -272,23 +302,23 @@ export function clampImpact(save: SaveGame, impactCycle: number): number {
  * Moves the impact to `impactCycle` (game cycles, as `GetCurrentTimeInCycles`), clamped to at
  * least one cycle from now.
  *
- * Vanilla reads the impact time from `eventStartTime` alone (`LargeImpactorStatus.ArrivalTime_Vanilla`).
- * A Spaced Out impactor ignores it after creation and flies by its saved `ArrivalTime` and `Speed`
- * (`ClusterMapLargeImpactor.Instance`, ETA in `ClusterTraveler.TravelETA`), so those move too. The
- * hexes left stay the same, hence `Speed` scales by the old over the new time left.
+ * A Spaced Out impactor ignores `eventStartTime` after creation and flies by its saved `ArrivalTime`
+ * and `Speed` (`ClusterMapLargeImpactor.Instance`, ETA in `ClusterTraveler.TravelETA`), so those
+ * move with it. The hexes left stay the same, hence `Speed` scales by the old over the new time
+ * left. Saves without that flight data are refused (see `readOnlyReasonOf`).
  */
 export function setDemoliorImpact(save: SaveGame, impactCycle: number): void {
   const view = readDemolior(save)
   const found = activeImpactor(save)
   if (!view || !found) throw new Error('This save has no active Demolior impact')
-  if (!view.editable) throw new Error('The Demolior state in this save could not be read safely')
+  if (!view.editable) throw new Error(view.readOnlyReason ?? 'This impact can’t be edited')
   if (!Number.isFinite(impactCycle)) throw new Error('The impact cycle must be a number')
 
   const target = clampImpact(save, impactCycle)
   const delta = target - view.impactCycle
   if (delta === 0) return
 
-  if (view.travels) {
+  {
     const behavior = behaviorOf(found.object!, 'StateMachineController')!
     const bytes = behavior.extraRaw
     const travel = readTravel(bytes)!

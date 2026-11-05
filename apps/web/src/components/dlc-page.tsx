@@ -100,6 +100,12 @@ function DemoliorCard({
           value={total > 0 ? (elapsed / total) * 100 : 0}
           aria-label="Time until impact elapsed"
         />
+        {!demolior.arrivalSaved && (
+          <p className="flex items-start gap-2 text-sm text-muted-foreground">
+            <Info className="mt-0.5 size-4 shrink-0" />
+            The impact time is worked out from the difficulty setting. This save does not store it.
+          </p>
+        )}
         {demolior.durationSource === 'saved' && (
           <p className="flex items-start gap-2 text-sm text-muted-foreground">
             <Info className="mt-0.5 size-4 shrink-0" />
@@ -141,11 +147,8 @@ function DemoliorCard({
             />
           </div>
           <p className="text-sm text-muted-foreground">
-            {demolior.editable
-              ? demolior.travels
-                ? 'Moves the event start, the impactor’s saved arrival time and its flight speed, since the game flies it by those. Not yet confirmed in game.'
-                : 'Moves the event start, which sets the impact time in this save. Not yet confirmed in game.'
-              : 'The impactor’s saved flight data could not be read safely, so it can’t be edited.'}
+            {demolior.readOnlyReason ??
+              'Moves the event start, the impactor’s saved arrival time and its flight speed, since the game flies it by those. Not yet confirmed in game.'}
           </p>
         </div>
       </CardContent>
