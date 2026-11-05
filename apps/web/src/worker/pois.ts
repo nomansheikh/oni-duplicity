@@ -138,7 +138,8 @@ export function readHarvestState(bytes: Uint8Array): HarvestState | null {
     const r = readInstance(bytes, 'HarvestablePOIStates+Instance')
     if (!r) return null
     r.string() // state name
-    r.int() // instance length
+    const instanceLength = r.int()
+    const instanceStart = r.pos
     const c = configuration(r, 16, 2)
     if (!c) return null
     const capacityAt = r.pos
@@ -149,6 +150,12 @@ export function readHarvestState(bytes: Uint8Array): HarvestState | null {
     if (parameterAt < 0) return null
     const copy = new Reader(bytes, parameterAt)
     if (copy.float() !== capacity) return null
+    // The parameter must sit inside the instance the length prefix describes, so two unrelated
+    // equal floats in a layout we do not know cannot pass.
+    const instanceEnd = instanceStart + instanceLength
+    if (instanceLength <= 0 || instanceEnd > bytes.length || parameterAt + 4 > instanceEnd) {
+      return null
+    }
     return { hash: c.hash, capacityRoll, rechargeRoll, capacity, capacityAt, parameterAt }
   } catch {
     return null
@@ -220,6 +227,7 @@ export function readFog(bytes: Uint8Array): FogLayout | null {
     const instanceLength = r.int()
     const length = r.int()
     const count = r.int()
+    if (count < 0 || count > 1_000_000) return null
     if (length !== count * 16 || instanceLength !== length + 8) return null
     const valuesAt = r.pos
     const values = Array.from({ length: count }, () => r.float())
