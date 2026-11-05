@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "catalog:",
-    "@fontsource/barlow": "catalog:",
-    "@fontsource/chakra-petch": "catalog:",
+    "@fontsource-variable/noto-sans": "catalog:",
+    "@fontsource/rajdhani": "catalog:",
     "@oni-duplicity/game-data": "catalog:",
     "@oni-duplicity/save-parser": "catalog:",
     "@tanstack/react-virtual": "catalog:",

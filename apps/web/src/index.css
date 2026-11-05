@@ -1,54 +1,148 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
-@import '@fontsource/barlow/400.css';
-@import '@fontsource/barlow/500.css';
-@import '@fontsource/barlow/600.css';
-@import '@fontsource/chakra-petch/500.css';
-@import '@fontsource/chakra-petch/600.css';
+@import '@fontsource/rajdhani/500.css';
+@import '@fontsource/rajdhani/600.css';
+@import '@fontsource/rajdhani/700.css';
+@import '@fontsource-variable/noto-sans';
 @import '@fontsource-variable/jetbrains-mono';
 
-@custom-variant dark (&:is(.dark *));
+/* Dark only. The `dark:` variant always applies so shadcn's dark classes never fall away. */
+@custom-variant dark (&);
 
+/*
+ * Design v2 tokens (docs/design.md). Hex values marked "sampled" were measured from in-game
+ * screenshots; "derived" ones are ours (hover, pressed, disabled, status text).
+ */
 :root {
-  color-scheme: light;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.52 0.12 200);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.62 0.12 200);
-  --chart-1: oklch(0.62 0.12 200);
-  --chart-2: oklch(0.7 0.15 150);
-  --chart-3: oklch(0.75 0.15 75);
-  --chart-4: oklch(0.6 0.2 25);
-  --chart-5: oklch(0.55 0.15 280);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.52 0.12 200);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  color-scheme: dark;
+
+  /* surfaces */
+  --ink: #020103; /* sampled: 1px outline */
+  --ground: #2a2d39; /* sampled: app background, panel rim */
+  --field: #3c4152; /* sampled: work area, table head */
+  --panel: #404559; /* sampled: panel body */
+  --well: #303443; /* sampled: section block */
+  --inset: #1f222b; /* sampled: lowest layer, inputs, meter track */
+  --legend: #474747; /* sampled: overlay legend body */
+  --tip: #242c3c; /* sampled: tooltip body */
+  --tip-rim: #3a4358; /* derived */
+  --edge: #8f97b5; /* outer ring on controls so edges reach 3:1 */
+
+  /* title bar (mauve) */
+  --title: #7f3d5e;
+  --title-hi: #874566;
+  --title-lo: #602e47;
+
+  /* tabs, buttons, rows */
+  --tab: #3e4357;
+  --tab-hi: #4b5169; /* derived */
+  --tab-on: #808bb2;
+  --on-tab: #14161e;
+  --btn: #4f5261;
+  --btn-hi: #5f6478; /* derived */
+  --btn-lo: #3e4357; /* derived */
+  --btn-grey: #6a6966;
+  --btn-grey-hi: #747370;
+  --btn-grey-lo: #4f4e4b;
+  --btn-off: #2d303d; /* derived */
+  --btn-off-fg: #8e92a3; /* derived */
+  --row: #686978;
+  --row-hi: #767788;
+  --alt: #2b2f3c; /* derived: table alternate row */
+  --hover-row: #383d50; /* derived */
+
+  /* text tiers */
+  --fg: #ffffff;
+  --fg-2: #bcbcbc;
+  --fg-3: #a9adbd;
+
+  /* accents and status */
+  --good: #52c079;
+  --good-hi: #80ff80;
+  --bad: #f44a47;
+  --bad-text: #ff7673;
+  --warn: #ffa649;
+  --gold: #f2c14a;
+  --pink: #e07aa5;
+  --love: #d8547c;
+  --info: #69a7e8; /* derived */
+  --holo: #3d80c3;
+  --holo-line: #b2e8f4;
+
+  /* meters */
+  --m-good: #51ad52;
+  --m-bad: #c56660;
+  --m-warn: #e3a03d;
+  --m-xp: #b8598a;
+  --m-geyser: #3fb6b0;
+  --m-dormant: #6a7188;
+
+  /* group header fills */
+  --olive: #807c58;
+  --teal: #588074;
+  --green: #608058;
+
+  /* category colours. resources (R5 overlay swatches + derived), elements, status */
+  --cat-oxygen: #69cde5;
+  --cat-water: #4f8fe0;
+  --cat-food: #d9a24b;
+  --cat-power: #e6c53f;
+  --cat-metal: #9aa3bd;
+  --cat-plant: #5cc844;
+  --cat-critter: #d8547c;
+  --cat-geyser: #3fb6b0;
+  --cat-dlc: #b24a89;
+  --cat-gas: #69cde5;
+  --cat-liquid: #6a70e8;
+  --cat-solid: #b59d78;
+  --cat-vacuum: #8c90a0;
+  --cat-good: var(--good);
+  --cat-warn: var(--warn);
+  --cat-bad: var(--bad);
+  --cat-info: var(--info);
+
+  --radius: 0px;
+  --font-heading: 'Rajdhani', 'Arial Narrow', sans-serif;
+  --font-body: 'Noto Sans Variable', 'Noto Sans', system-ui, sans-serif;
+
+  /* shadcn mapping */
+  --background: var(--ground);
+  --foreground: var(--fg);
+  --card: var(--panel);
+  --card-foreground: var(--fg);
+  --popover: var(--tip);
+  --popover-foreground: var(--fg);
+  --primary: var(--btn-grey);
+  --primary-foreground: var(--fg);
+  --secondary: var(--btn);
+  --secondary-foreground: var(--fg);
+  --muted: var(--well);
+  --muted-foreground: var(--fg-2);
+  --accent: var(--tab-on);
+  --accent-foreground: var(--on-tab);
+  --destructive: var(--bad);
+  --border: var(--ink);
+  --input: var(--inset);
+  --ring: var(--warn);
+  --chart-1: var(--cat-oxygen);
+  --chart-2: var(--good);
+  --chart-3: var(--gold);
+  --chart-4: var(--bad);
+  --chart-5: var(--cat-dlc);
+  --sidebar: var(--ground);
+  --sidebar-foreground: var(--fg);
+  --sidebar-primary: var(--title);
+  --sidebar-primary-foreground: var(--fg);
+  --sidebar-accent: var(--tab);
+  --sidebar-accent-foreground: var(--fg);
+  --sidebar-border: var(--ink);
+  --sidebar-ring: var(--warn);
 }
 
 @theme inline {
-  --font-heading: 'Chakra Petch', sans-serif;
-  --font-sans: 'Barlow', sans-serif;
+  --font-heading: var(--font-heading);
+  --font-sans: var(--font-body);
   --font-mono: 'JetBrains Mono Variable', monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -88,46 +182,196 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* added tokens, usable as bg-ink, text-fg-2, border-edge, ... */
+  --color-ink: var(--ink);
+  --color-ground: var(--ground);
+  --color-field: var(--field);
+  --color-panel: var(--panel);
+  --color-well: var(--well);
+  --color-inset: var(--inset);
+  --color-legend: var(--legend);
+  --color-tip: var(--tip);
+  --color-edge: var(--edge);
+  --color-title: var(--title);
+  --color-title-hi: var(--title-hi);
+  --color-title-lo: var(--title-lo);
+  --color-tab: var(--tab);
+  --color-tab-hi: var(--tab-hi);
+  --color-tab-on: var(--tab-on);
+  --color-on-tab: var(--on-tab);
+  --color-btn: var(--btn);
+  --color-btn-grey: var(--btn-grey);
+  --color-btn-off: var(--btn-off);
+  --color-btn-off-fg: var(--btn-off-fg);
+  --color-row: var(--row);
+  --color-alt: var(--alt);
+  --color-hover-row: var(--hover-row);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-good: var(--good);
+  --color-good-hi: var(--good-hi);
+  --color-bad: var(--bad);
+  --color-bad-text: var(--bad-text);
+  --color-warn: var(--warn);
+  --color-gold: var(--gold);
+  --color-pink: var(--pink);
+  --color-love: var(--love);
+  --color-info: var(--info);
+  --color-m-good: var(--m-good);
+  --color-m-bad: var(--m-bad);
+  --color-m-warn: var(--m-warn);
+  --color-m-xp: var(--m-xp);
+  --color-m-geyser: var(--m-geyser);
+  --color-m-dormant: var(--m-dormant);
+  --color-olive: var(--olive);
+  --color-teal: var(--teal);
+  --color-green: var(--green);
 }
 
-.dark {
-  color-scheme: dark;
-  --background: oklch(0.16 0.012 240);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.2 0.014 240);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.2 0.014 240);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.8 0.12 195);
-  --primary-foreground: oklch(0.2 0.03 220);
-  --secondary: oklch(0.27 0.016 240);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.27 0.016 240);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.28 0.02 230);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.7 0.1 195);
-  --chart-1: oklch(0.8 0.12 195);
-  --chart-2: oklch(0.75 0.15 150);
-  --chart-3: oklch(0.8 0.14 75);
-  --chart-4: oklch(0.68 0.19 25);
-  --chart-5: oklch(0.65 0.15 280);
-  --sidebar: oklch(0.13 0.01 240);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.8 0.12 195);
-  --sidebar-primary-foreground: oklch(0.2 0.03 220);
-  --sidebar-accent: oklch(0.24 0.016 240);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* ---- surfaces ---------------------------------------------------------------------------- */
+
+@utility panel {
+  background: var(--panel);
+  border: 1px solid var(--ink);
+  box-shadow: inset 0 0 0 2px var(--ground);
 }
+
+@utility title-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.2rem;
+  padding-inline: 0.75rem;
+  background: var(--title);
+  border-bottom: 2px solid var(--title-lo);
+  box-shadow: inset 0 1px 0 var(--title-hi);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.2rem;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+@utility well {
+  background: var(--well);
+  border: 1px solid var(--ink);
+  padding: 0.625rem 0.75rem;
+}
+
+@utility inset-layer {
+  background: var(--inset);
+  border: 1px solid var(--ink);
+}
+
+/* tooltip and popover bodies */
+@utility tip-game {
+  background: var(--tip);
+  border: 1px solid var(--ink);
+  box-shadow: inset 0 0 0 1px var(--tip-rim);
+  color: var(--fg);
+}
+
+/* ---- controls ---------------------------------------------------------------------------- */
+
+@utility btn-game {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 1.9rem;
+  padding-inline: 1rem;
+  background: var(--bg, var(--btn));
+  border: 1px solid var(--ink);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+@utility tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 1.9rem;
+  padding-inline: 0.9rem;
+  background: var(--tab);
+  border: 1px solid var(--ink);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+/* chip: coloured category label. --c sets the tone */
+@utility chip {
+  --c: var(--fg-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.25rem;
+  padding-inline: 0.45rem;
+  background: color-mix(in oklab, var(--c) 22%, var(--inset));
+  border: 1px solid var(--c);
+  color: color-mix(in oklab, var(--c) 70%, #fff);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.8rem;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+/* sunken field (input, select trigger, number box) */
+@utility field-game {
+  background: var(--inset);
+  border: 1px solid var(--ink);
+  box-shadow:
+    0 0 0 1px var(--edge),
+    inset 0 1px 0 rgb(0 0 0 / 0.4);
+  color: var(--fg);
+}
+
+/* holographic portrait background */
+@utility holo {
+  background:
+    linear-gradient(var(--holo-line) 0 0) 0 0 / 100% 1.5px,
+    linear-gradient(90deg, var(--holo-line) 0 0) 0 0 / 1.5px 100%,
+    radial-gradient(circle at 50% 40%, #4f95d8, var(--holo));
+  background-size:
+    58px 58px,
+    58px 58px,
+    100% 100%;
+  background-blend-mode: soft-light, soft-light, normal;
+}
+
+/* ---- base -------------------------------------------------------------------------------- */
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 1px;
+  }
+  html {
+    @apply font-sans;
+    font-size: 14px;
+    scrollbar-color: #cccccc var(--inset);
+  }
+  @media (max-width: 420px) {
+    html {
+      font-size: 13px;
+    }
   }
   body {
     @apply bg-background text-foreground antialiased;
@@ -136,13 +380,37 @@
   [role='button']:not(:disabled) {
     cursor: pointer;
   }
-  html {
-    @apply font-sans;
-  }
   h1,
   h2,
   h3,
   [data-slot='card-title'] {
     font-family: var(--font-heading);
+    letter-spacing: 0.05em;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--inset);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cccccc;
+    border: 1px solid var(--ink);
+  }
+  @media (pointer: coarse) {
+    button,
+    [role='button'],
+    [role='tab'],
+    [role='option'],
+    [role='menuitem'] {
+      min-height: 44px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='switch-thumb'] {
+    transition: none;
   }
 }
