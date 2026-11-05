@@ -82,6 +82,28 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
 
+## UI component library (design v2, phase 1) — 2026-11-05
+
+- Rewrote the theme in `apps/web/src/index.css` from the sampled v2 palette: dark only, radius 0, shadcn variables mapped onto surface, title-bar, tab, button, text-tier, status, meter and category tokens. Added `panel`, `title-bar`, `well`, `inset-layer`, `tip-game`, `btn-game`, `tab`, `chip` and `field-game` utilities.
+- Fonts are now Rajdhani (headings) and Noto Sans (body) through `@fontsource`; Barlow and Chakra Petch are removed. The `dark:` variant always applies, so the existing theme switch no longer changes anything.
+- Restyled the primitives the app uses, keeping them shadcn and `cva`: button (new `accent` variant), card (`panel` and `well` variants, header is the mauve title bar), tabs, badge (status, resource and element colour variants, `stat`), input, select, checkbox, switch, slider, table, dialog, tooltip, dropdown, popover, sheet, separator, scroll area, kbd, empty and toggle group.
+- `Progress` has `variant="blocks" | "xp" | "task" | "gauge"` and `tone="good" | "warn" | "bad"`, built to the meter spec (20 beveled cells, XP bar, in-world task bar with dormant and now marker, storage gauge with ticks and over-max cap). `meterTone(kind, pct)` returns the tone for amounts, health and stress. The slider matches the gauge. Also added `Item variant="need"` (vitals row) and `Badge variant="bare"` (colony stat), a bottom-shade bevel on tabs, buttons and toggles, and a flat `#272c3d` tooltip.
+- Dev gallery at `/?gallery`. It is imported only when `import.meta.env.DEV` is true, so the production build contains no gallery code.
+- No behaviour change. The e2e specs select by role, name, label and `data-sidebar`, none of which changed. Screenshots of the gallery, Overview and Geysers are in `docs/screenshots/ui-library/`.
+- Known: `apps/web/tests/geysers.test.ts` (fixture geyser ranges) fails locally because the fetched fixtures are absent; it does not touch the UI.
+- Next: the app shell and page layouts.
+
+## UI pages, batch A: Overview, Research, Settings, Map (design v2, phase 3) — 2026-11-05
+
+- Overview: the four stat cards are framed `Card`s with a title bar and an icon-plus-number `Badge variant="bare"`; average stress adds a `Progress variant="blocks"` meter. The achievements state uses `Badge` `good` and `warn`.
+- Research: progress is a `Progress variant="task"` with a `64 / 112` readout; tech tiles sit on `well` colour in a 1px ink grid.
+- Game settings: every setting is a `well` block; the locked state is a `stat` badge.
+- World map: the element list and ramp legend use the grey `legend` colour with square swatches, the cell info is a `well` block and the map frame is square with an ink outline.
+- Text uses the shared type scale (`type-h1` for the stat numbers, `type-label`, `type-small`, `type-caption`).
+- Only the four page files changed. No behaviour change: every role, name, label and test id is kept. Before and after screenshots are in `docs/screenshots/ui-pages-a/`.
+- Known: `apps/web/tests/geysers.test.ts` still fails locally without the fetched fixtures.
+- Next: batch B pages once their feature PRs land.
+
 ## Stories page — 2026-11-05
 
 - New read-only Stories page lists the six story traits (Mega Brain Tank, Critter Manipulator, Lonely Minion, Fossil Hunt, Morb Rover Maker, Hijacked Headquarters) with state, asteroid and the cycle each state was reached.
