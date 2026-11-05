@@ -19,7 +19,13 @@ vp test         # tests; saves that aren't downloaded are skipped
 
 # every test save (about 120 MB) and the slow round trips
 vp run fixtures --tier all && FIXTURE_TIER=all vp test
+
+# parser benchmark and regression gate (needs the full tier)
+vp run bench            # compare against test-data/bench-baseline.json
+vp run bench --update   # re-record the baseline after an intended change
 ```
+
+`vp run bench` takes about two minutes. Run it on a quiet machine: other busy processes make the timings, and so the comparison, unreliable.
 
 The pre-commit hook runs `vp check --fix` on staged files.
 

@@ -42,3 +42,12 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Checked by hand in Chrome: edit → download → reload for duplicants, critters (clone, tame), materials, research, game settings, asteroids and raw edits; undo and redo after each.
 - A production build served from `/oni-duplicity/` loads saves and portraits. Lazy-loading the pages cut the main chunk from 688 kB to 399 kB (122 kB gzipped).
 - Nothing is verified in the game yet.
+
+## Parser benchmark and regression gate — 2026-11-05
+
+- `vp run bench` times read + inflate, parse body, write body and deflate for the 40 MB and 13 MB saves (one warm-up, median of five, each save in its own process) and prints a table with peak RSS. It skips with a message when the saves are not downloaded.
+- The regression gate compares each phase's time divided by a fixed CPU calibration workload against `test-data/bench-baseline.json`, keyed per `<platform>-<arch>`, and fails above +30%. A phase that looks regressed is measured again and fails only if it regresses twice. `vp run bench --update` rewrites the baseline for the current platform. CI runs `vp run bench --require` when `FIXTURE_TIER` is `all`.
+- Measured on an Apple M2 Max, 12 cores, 32 GB, Node 26.13.0, quiet machine (median, 40 MB save): read + inflate 1.5 s, parse body 1.6 s, write body 2.8 s, deflate 4.0 s with `fflate`; peak RSS 4.1 GB. The 13 MB save: 0.44 s, 0.42 s, 0.58 s, 1.1 s; peak RSS 1.3 GB.
+- Parse meets the 5 s target. **Saving does not:** write body plus deflate is about 6.9 s with `fflate`, over 5 s. The browser's native `CompressionStream` was measured at about 7 s for this save above, so it does not close the gap. Whether the target covers compression is open question #14; the assumption is "not met".
+- Next: commit the `linux-x64` baseline from the first `main` run (until then CI prints the JSON and passes), and decide how to reach the save target.
+- Risks: the calibration only partly tracks the parser, so the first Linux baseline may need a wider threshold. A noisy machine can still fail twice in a row. A slowdown that also slows the calibration is invisible. Peak RSS of 4.1 GB is a real constraint for browser tabs.
