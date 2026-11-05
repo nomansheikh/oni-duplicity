@@ -99,6 +99,8 @@ export interface MaterialItemView {
   y: number
   mass: number
   temperature: number
+  /** Loose items a move order points at; deleting one would leave a dangling reference. */
+  protected: boolean
 }
 
 export interface CritterView {
@@ -310,6 +312,7 @@ export type Edit =
   | { type: 'setItemMass'; ref: string; mass: number }
   | { type: 'setItemTemperature'; ref: string; kelvin: number }
   | { type: 'deleteObject'; id: string }
+  | { type: 'deleteDebris'; ids: string[] }
   | { type: 'cloneObject'; id: string }
   | { type: 'setTechResearched'; techId: string; complete: boolean }
   | { type: 'researchAll' }
@@ -690,9 +693,13 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       return
     case 'deleteObject': {
       const { list, index } = locate(save, edit.id)
+      assertNotMarkedForMove(list[index]!, markedForMoveIds(save), edit.id)
       list.splice(index, 1)
       return
     }
+    case 'deleteDebris':
+      deleteDebris(save, edit.ids)
+      return
     case 'cloneObject': {
       const { list, index } = locate(save, edit.id)
       const copy = cloneValue(list[index]!)
@@ -1012,6 +1019,7 @@ export function listMaterials(save: SaveGame): MaterialView[] {
 }
 
 export function listMaterialItems(save: SaveGame, elementId: string): MaterialItemView[] {
+  const moving = markedForMoveIds(save)
   return materialItems(save, elementId).map((item) => {
     const pe = primary(item.obj)
     const position = item.loose ? item.obj.position : item.owner.position
@@ -1023,8 +1031,70 @@ export function listMaterialItems(save: SaveGame, elementId: string): MaterialIt
       y: Math.round(position.y),
       mass: Number(pe.Units) || 0,
       temperature: Number(pe._Temperature) || 0,
+      protected: item.loose && isMarkedForMove(item.obj, moving),
     }
   })
+}
+
+// --- Deleting loose debris -------------------------------------------------------
+
+const instanceId = (obj: GameObject): number | undefined =>
+  behavior(obj, 'KPrefabID')?.templateData?.InstanceID as number | undefined
+
+/**
+ * KPrefabID instance IDs that a move order (the "Move here" tool) points at. Each order is a
+ * MovePickupablePlacer whose CancellableMove behavior saves a list of `Ref<Movable>` IDs, and
+ * the game's `CancellableMove.OnCancel` calls `ClearMove()` on whatever the ID resolves to
+ * without a null check, so deleting an item that is still listed there can crash the game.
+ */
+function markedForMoveIds(save: SaveGame): Set<number> {
+  const ids = new Set<number>()
+  for (const group of save.gameObjects) {
+    for (const obj of group.gameObjects) {
+      const movables = behavior(obj, 'CancellableMove')?.templateData?.movables
+      if (!Array.isArray(movables)) continue
+      for (const ref of movables as { id?: unknown }[]) {
+        if (typeof ref?.id === 'number') ids.add(ref.id)
+      }
+    }
+  }
+  return ids
+}
+
+function isMarkedForMove(obj: GameObject, moving: Set<number>): boolean {
+  if (behavior(obj, 'Movable')?.templateData?.isMarkedForMove === true) return true
+  const id = instanceId(obj)
+  return id !== undefined && moving.has(id)
+}
+
+function assertNotMarkedForMove(obj: GameObject, moving: Set<number>, id: string): void {
+  if (isMarkedForMove(obj, moving)) {
+    throw new Error(`${id} is marked for a move order; cancel the move in game first`)
+  }
+}
+
+/**
+ * Removes loose element chunks by id (`<element>:<index>`). Refuses anything that is not a
+ * loose chunk (stored items, buildings, critters) and anything a move order points at, before
+ * changing anything.
+ */
+function deleteDebris(save: SaveGame, ids: string[]): void {
+  const moving = markedForMoveIds(save)
+  const byGroup = new Map<GameObject[], Set<number>>()
+  for (const id of new Set(ids)) {
+    const { group, index } = splitId(id)
+    if (!ELEMENT_IDS.has(group)) throw new Error(`${id} is not loose debris`)
+    const { list } = locate(save, id)
+    const obj = list[index]!
+    if (!behavior(obj, 'PrimaryElement')?.templateData) throw new Error(`${id} is not loose debris`)
+    assertNotMarkedForMove(obj, moving, id)
+    const set = byGroup.get(list) ?? new Set<number>()
+    set.add(index)
+    byGroup.set(list, set)
+  }
+  for (const [list, indexes] of byGroup) {
+    for (const index of [...indexes].sort((a, b) => b - a)) list.splice(index, 1)
+  }
 }
 
 // --- Structural edits (clone / delete) and critters ----------------------------------

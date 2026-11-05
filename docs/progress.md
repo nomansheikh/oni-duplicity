@@ -81,3 +81,16 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - The bionic test needs the 40 MB full-tier fixture, so it is skipped on PRs and runs only on full-tier CI (`main` and nightly). There it fails instead of skipping when the fixture is missing (`CI` set and `FIXTURE_TIER=all`).
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
+
+## Delete loose debris — 2026-11-05
+
+- The Materials sheet could already delete one loose chunk with `deleteObject`. This adds the missing parts:
+  - `deleteDebris { ids }`: one edit for any number of chunks, so one undo step. Undo restores every chunk at its original position in its group.
+  - "Delete selected" and "Delete all loose" with a confirm dialog that shows the count and mass (and how many were skipped).
+  - Checkboxes on loose rows; stored rows never get a delete control, and the worker refuses stored items, buildings and critters.
+- Safety check (decompile and all ten fixtures): nothing that was checked saves a loose item's `KPrefabID` instance ID except the move-order list in `CancellableMove.movables`. Counts of decoded references to loose element chunks, not counting each chunk's own ID: 0 in `beautiful-galaxy`, `beautiful-galaxy-build-744825`, `apple-park`, `konove` and `mithro-01` to `mithro-04`; 2 (Oxylite) in `mithro-05`; 1 (Liquid Sulfur) in `mithro-06`. The game does not null-check those IDs when a move order is cancelled.
+- So a chunk with `Movable.isMarkedForMove`, or whose ID is in any move-order list, cannot be deleted. The trash button is disabled with a hint, bulk delete skips it, and the worker throws. The same guard now covers `deleteObject`, which previously had none.
+- Tests: model, undo and refusal tests in `tests/debris.test.ts`, run on every fixture (delete three chunks of the busiest element, write, re-read, compare with the raw save minus those objects; undo is byte exact); move-order refusal on `mithro-05` and `mithro-06`; five e2e tests (one, selected, all, cancel, undo, plus the move-order case on the 40 MB save).
+- Risks:
+  - Not tried in game. Undecoded raw bytes were not searched for references.
+  - Deleting a chunk deletes its mass from the world; the world grid is untouched.

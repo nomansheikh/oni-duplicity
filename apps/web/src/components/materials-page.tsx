@@ -2,6 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { Search, SlidersHorizontal, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Card,
   CardAction,
@@ -33,7 +42,7 @@ import { fmt, fmtMass, toCelsius } from '@/lib/format'
 import { saveClient } from '@/lib/save-client'
 import { cn } from '@/lib/utils'
 import type { Edit, MaterialItemView, MaterialView } from '@/worker/model'
-import { NumberField } from './common'
+import { Hint, NumberField } from './common'
 
 const STATE_STYLES: Record<string, string> = {
   Solid: 'border-amber-500/40 bg-amber-500/15 text-amber-700 dark:text-amber-300',
@@ -173,15 +182,35 @@ function MaterialSheet({
   const [items, setItems] = useState<MaterialItemView[]>([])
   const [temperature, setTemperature] = useState('')
   const [factor, setFactor] = useState('')
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [confirm, setConfirm] = useState<'selected' | 'all' | null>(null)
 
   useEffect(() => {
     if (!material) return
     let cancelled = false
-    void saveClient.materialItems(material.id).then((list) => !cancelled && setItems(list))
+    void saveClient.materialItems(material.id).then((list) => {
+      if (cancelled) return
+      setItems(list)
+      // Deleting shifts item references, so a selection never outlives the list it was made on.
+      setSelected(new Set())
+    })
     return () => {
       cancelled = true
     }
   }, [material, revision])
+
+  const loose = items.filter((i) => i.loose)
+  const deletable = loose.filter((i) => !i.protected)
+  const targets = confirm === 'selected' ? deletable.filter((i) => selected.has(i.ref)) : deletable
+  const skipped = confirm === 'all' ? loose.length - deletable.length : 0
+  const targetMass = targets.reduce((sum, i) => sum + i.mass, 0)
+  const toggle = (ref: string, on: boolean) =>
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (on) next.add(ref)
+      else next.delete(ref)
+      return next
+    })
 
   return (
     <Sheet open={material !== null} onOpenChange={(open) => !open && onClose()}>
@@ -264,11 +293,49 @@ function MaterialSheet({
               <FieldDescription>
                 Stored items keep their container; loose debris can be deleted.
               </FieldDescription>
+              {loose.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={selected.size === 0}
+                    onClick={() => setConfirm('selected')}
+                  >
+                    <Trash2 /> Delete selected ({selected.size})
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={deletable.length === 0}
+                    onClick={() => setConfirm('all')}
+                  >
+                    <Trash2 /> Delete all loose ({deletable.length})
+                  </Button>
+                </div>
+              )}
             </div>
             <ScrollArea className="mt-4 min-h-0 flex-1 px-4 pb-4">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-8">
+                      <Checkbox
+                        aria-label="Select all loose items"
+                        disabled={deletable.length === 0}
+                        checked={
+                          deletable.length > 0 && deletable.every((i) => selected.has(i.ref))
+                            ? true
+                            : selected.size > 0
+                              ? 'indeterminate'
+                              : false
+                        }
+                        onCheckedChange={(on) =>
+                          setSelected(
+                            on === true ? new Set(deletable.map((i) => i.ref)) : new Set(),
+                          )
+                        }
+                      />
+                    </TableHead>
                     <TableHead>Where</TableHead>
                     <TableHead className="text-right">Position</TableHead>
                     <TableHead className="text-right">Mass</TableHead>
@@ -279,6 +346,15 @@ function MaterialSheet({
                 <TableBody>
                   {items.map((item) => (
                     <TableRow key={item.ref}>
+                      <TableCell>
+                        {item.loose && !item.protected && (
+                          <Checkbox
+                            aria-label={`Select item at ${item.x}, ${item.y}`}
+                            checked={selected.has(item.ref)}
+                            onCheckedChange={(on) => toggle(item.ref, on === true)}
+                          />
+                        )}
+                      </TableCell>
                       <TableCell>
                         {item.loose ? <Badge variant="secondary">Loose</Badge> : item.where}
                       </TableCell>
@@ -314,14 +390,25 @@ function MaterialSheet({
                       </TableCell>
                       <TableCell className="w-10">
                         {item.loose && (
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label="Delete debris"
-                            onClick={() => onEdit({ type: 'deleteObject', id: item.ref })}
+                          <Hint
+                            desc={
+                              item.protected
+                                ? 'Marked for a move order — cancel the move in game first'
+                                : undefined
+                            }
                           >
-                            <Trash2 />
-                          </Button>
+                            <span className="inline-flex">
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label="Delete debris"
+                                disabled={item.protected}
+                                onClick={() => onEdit({ type: 'deleteDebris', ids: [item.ref] })}
+                              >
+                                <Trash2 />
+                              </Button>
+                            </span>
+                          </Hint>
                         )}
                       </TableCell>
                     </TableRow>
@@ -332,6 +419,38 @@ function MaterialSheet({
           </>
         )}
       </SheetContent>
+      <Dialog open={confirm !== null} onOpenChange={(open) => !open && setConfirm(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Delete {targets.length} loose {targets.length === 1 ? 'item' : 'items'}?
+            </DialogTitle>
+            <DialogDescription>
+              This removes {fmtMass(targetMass)} of {material?.name} lying on the ground. Stored
+              items are not touched. You can undo it from the header.
+              {skipped > 0 &&
+                ` ${skipped} ${skipped === 1 ? 'item is' : 'items are'} skipped because ${
+                  skipped === 1 ? 'it is' : 'they are'
+                } marked for a move order.`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirm(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={targets.length === 0}
+              onClick={() => {
+                onEdit({ type: 'deleteDebris', ids: targets.map((i) => i.ref) })
+                setConfirm(null)
+              }}
+            >
+              Delete {targets.length}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Sheet>
   )
 }
