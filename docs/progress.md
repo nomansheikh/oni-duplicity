@@ -99,6 +99,7 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Research: progress is a `Progress variant="task"` with a `64 / 112` readout; tech tiles sit on `well` colour in a 1px ink grid.
 - Game settings: every setting is a `well` block; the locked state is a `stat` badge.
 - World map: the element list and ramp legend use the grey `legend` colour with square swatches, the cell info is a `well` block and the map frame is square with an ink outline.
+- Text uses the shared type scale (`type-h1` for the stat numbers, `type-label`, `type-small`, `type-caption`).
 - Only the four page files changed. No behaviour change: every role, name, label and test id is kept. Before and after screenshots are in `docs/screenshots/ui-pages-a/`.
 - Known: `apps/web/tests/geysers.test.ts` still fails locally without the fetched fixtures.
 - Next: batch B pages once their feature PRs land.

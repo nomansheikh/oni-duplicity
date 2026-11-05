@@ -39,13 +39,13 @@ function StatCard({
         <CardTitle>{label}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        <Badge variant="bare" className="text-3xl font-semibold tabular-nums [&>svg]:size-6!">
+        <Badge variant="bare" className="type-h1 tabular-nums [&>svg]:size-6!">
           {icon}
           {value}
         </Badge>
         {meter}
-        <div className="line-clamp-1 text-sm font-medium">{footer}</div>
-        <div className="text-sm text-muted-foreground">{detail}</div>
+        <div className="line-clamp-1 type-small font-medium">{footer}</div>
+        <div className="type-small text-muted-foreground">{detail}</div>
       </CardContent>
     </Card>
   )
@@ -185,7 +185,7 @@ export function OverviewPage({
               <Item variant="outline" size="sm">
                 <ItemContent>
                   <ItemTitle>Cluster</ItemTitle>
-                  <ItemDescription className="font-mono text-xs">
+                  <ItemDescription className="type-caption font-mono">
                     {summary.clusterId || '—'}
                   </ItemDescription>
                 </ItemContent>
