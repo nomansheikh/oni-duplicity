@@ -40,6 +40,7 @@ import {
   type StoredItem,
   type TemplateData,
 } from '@oni-duplicity/save-parser'
+import { demoliorObjects, setDemoliorImpact } from './dlc.ts'
 import {
   applySpaceEdit,
   destinationState,
@@ -402,6 +403,7 @@ export type Edit =
   | { type: 'rawAdd'; path: RawPath }
   | { type: 'setMaterialTemperature'; elementId: string; kelvin: number }
   | { type: 'scaleMaterialMass'; elementId: string; factor: number }
+  | { type: 'setDemoliorImpact'; impactCycle: number }
   | SpaceEdit
 
 // --- Helpers ---------------------------------------------------------------
@@ -1011,6 +1013,9 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
         pe.Units = Math.max(0, Number(pe.Units) * edit.factor)
       }
       return
+    case 'setDemoliorImpact':
+      setDemoliorImpact(save, edit.impactCycle)
+      return
     case 'setAmount': {
       if (!Number.isFinite(edit.value)) throw new Error('An amount must be a finite number')
       const obj = objectById(save, edit.id)
@@ -1298,6 +1303,7 @@ export function itemByRef(save: SaveGame, ref: string): GameObject {
 
 /** The game objects an edit may change, for undo snapshots. */
 export function touchedBy(save: SaveGame, edit: Edit): GameObject[] {
+  if (edit.type === 'setDemoliorImpact') return demoliorObjects(save)
   if (edit.type === 'bulkDuplicants') {
     return objectsWith(save, 'MinionIdentity').map(({ obj }) => obj)
   }

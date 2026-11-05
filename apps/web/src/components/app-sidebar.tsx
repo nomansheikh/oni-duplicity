@@ -10,6 +10,7 @@ import {
   Map as MapIcon,
   Orbit,
   Package,
+  Puzzle,
   Rabbit,
   Rocket,
   Save,
@@ -49,6 +50,7 @@ export type Page =
   | 'research'
   | 'space'
   | 'stories'
+  | 'dlc'
   | 'settings'
   | 'raw'
 
@@ -62,6 +64,7 @@ const PAGES: { id: Page; title: string; icon: ReactNode }[] = [
   { id: 'research', title: 'Research', icon: <FlaskConical /> },
   { id: 'space', title: 'Space', icon: <Rocket /> },
   { id: 'stories', title: 'Stories', icon: <BookOpen /> },
+  { id: 'dlc', title: 'DLC', icon: <Puzzle /> },
   { id: 'settings', title: 'Game settings', icon: <Gauge /> },
 ]
 

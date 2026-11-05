@@ -13,6 +13,7 @@ import {
 } from '@oni-duplicity/game-data'
 import type { SaveGame } from '@oni-duplicity/save-parser'
 import type { ChangeTarget } from '../lib/changes.ts'
+import { clampImpact } from './dlc.ts'
 import { listGeysers, objectById, type Edit, type GeyserField } from './model.ts'
 import { harvestableByPrefab } from './pois.ts'
 
@@ -131,6 +132,8 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       return `${harvestableByPrefab.get(edit.id.slice(0, edit.id.lastIndexOf(':')))?.name ?? 'POI'}: set stock to ${round(edit.kg)} kg (experimental)`
     case 'setWorldDiscovered':
       return `${who}mark ${edit.discovered ? 'discovered' : 'undiscovered'}`
+    case 'setDemoliorImpact':
+      return `Demolior: impact at cycle ${round(clampImpact(save, edit.impactCycle))}`
     case 'rawSet':
       return `Raw: set ${edit.path.join('.')} to ${String(edit.value)}`
     case 'rawRemove':
@@ -189,6 +192,8 @@ export function editTarget(edit: Edit): ChangeTarget {
     case 'rawDuplicate':
     case 'rawAdd':
       return { category: 'raw', key: edit.path.join('.') }
+    case 'setDemoliorImpact':
+      return { category: 'colony', key: 'demolior' }
     case 'setDestinationMass':
     case 'setDestinationAnalysis':
       return { category: 'asteroid', key: `destination:${edit.destination}` }

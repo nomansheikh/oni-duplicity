@@ -17,6 +17,7 @@ Edits that are built but not yet loaded in the real game. Tick one, and move it 
   4. Check that the vent now reads Steam Vent, keeps its generated suffix (for example `24‑3`), emits steam at 500 °C, and that its output per cycle sits in the Steam Vent range (500 to 1000 kg).
   5. Let it erupt through one cycle, then save and reload once more to see that nothing reverts.
   6. Repeat with one swap that the game itself had to rebuild: a Polluted Water Vent to a Salt Water Geyser (its germs should be gone) and a Carbon Dioxide Geyser to a Cool Slush Geyser (the geyser's own temperature drops from -55 °C to -10 °C).
+- [ ] **Demolior impact cycle** (DLC page, experimental). Edit a Spaced Out save with `DLC4_ID`, postpone the impact by 50 cycles, load it, and check that the impactor's timer on the clusters map and the notification clock show the new time, that it still arrives and lands, and that it can still be shot down. Also check the impact cycle when advancing it to a few cycles from now. The edit rewrites `eventStartTime` plus the impactor's saved `ArrivalTime` and `Speed`.
 
 ## Not yet checked in game
 
