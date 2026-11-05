@@ -170,3 +170,10 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Risks:
   - Not tried in game. Undecoded raw bytes were not searched for references.
   - Deleting a chunk deletes its mass from the world; the world grid is untouched.
+
+## Materials page on the v2 components — 2026-11-05
+
+- The Materials table and the element sheet use the v2 components and type scale. State badges take the game's element colours (gas cyan, liquid blue, solid tan). Loose and stored amounts are `bare` badges with the unit and the place count in a caption, and the total is in the good green. The element name uses the label type.
+- Deleting loose debris looks dangerous: a red "Loose debris" strip holds the destructive "Delete selected" and "Delete all loose" buttons, each row's trash button is destructive, and the confirm dialog has a warning icon with the mass in red. Behaviour, labels and roles are unchanged.
+- The sheet was only about 280px wide because the sheet primitive's side width rule beat the page's width class, which pushed the mass and temperature columns off screen. The page now overrides it on the same variant.
+- Not run: the Playwright e2e suite (CI runs it). `geysers.test.ts` fails on this branch (8 matches, 20 expected); it is untouched by this change.
