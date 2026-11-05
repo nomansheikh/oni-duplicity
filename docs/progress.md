@@ -82,8 +82,6 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
 
-<<<<<<< HEAD
-
 ## UI component library (design v2, phase 1) — 2026-11-05
 
 - Rewrote the theme in `apps/web/src/index.css` from the sampled v2 palette: dark only, radius 0, shadcn variables mapped onto surface, title-bar, tab, button, text-tier, status, meter and category tokens. Added `panel`, `title-bar`, `well`, `inset-layer`, `tip-game`, `btn-game`, `tab`, `chip` and `field-game` utilities.
@@ -94,8 +92,6 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - No behaviour change. The e2e specs select by role, name, label and `data-sidebar`, none of which changed. Screenshots of the gallery, Overview and Geysers are in `docs/screenshots/ui-library/`.
 - Known: `apps/web/tests/geysers.test.ts` (fixture geyser ranges) fails locally because the fetched fixtures are absent; it does not touch the UI.
 - Next: the app shell and page layouts.
-  \=======
-
 ## Stories page — 2026-11-05
 
 - New read-only Stories page lists the six story traits (Mega Brain Tank, Critter Manipulator, Lonely Minion, Fossil Hunt, Morb Rover Maker, Hijacked Headquarters) with state, asteroid and the cycle each state was reached.
@@ -104,8 +100,6 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Only the Lonely Minion quests appear in the test saves. The Fossil Hunt quest is read the same way but is untested against a save that has its quest instance.
 - The machine flag is read only from copies standing inside the story's own asteroid. Quests are shown only when exactly one quest owner holds them; a state value the editor does not know shows as unknown.
 - Editing is not offered; open question 17 records what it would take.
-
-> > > > > > > origin/main
 
 ## Parser benchmark and regression gate — 2026-11-05
 
