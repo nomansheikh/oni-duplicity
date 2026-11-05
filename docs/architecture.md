@@ -34,7 +34,7 @@ Packages are scoped `@oni-duplicity/*` and `private`; npm publishing is decided 
 
 ## `packages/save-parser`
 
-Our own reader and writer. [oni-save-parser](https://github.com/RoboPhred/oni-save-parser) and its forks were used as references for the format; no code is shared and there is no differential test against them.
+Our own reader and writer. [oni-save-parser](https://github.com/RoboPhred/oni-save-parser) and its forks were used as references for the format; no code is shared. `vp run differential` compares every fixture against konove's fork, built from source at a pinned commit (see [save-format.md](save-format.md)).
 
 **Model.** Header (build version, JSON game info), type templates, the `world` and `Game+Settings` sections, raw sim data, the `KSAV` version, game objects grouped by prefab, and `Game+GameSaveData`. Every object keeps its position, rotation, scale and behaviors; each behavior holds its template data and any trailing "extra" bytes.
 
@@ -60,8 +60,6 @@ readSaveParts / parseBody / writeBody                          // lower-level pi
 MIN_MINOR, MAX_VERIFIED_MINOR, ParseError
 ```
 
-**Sim grid.** `readSimGrid(save.simData)` decodes the cell grid: a `SIMSAVE\0` header with version (14 or 15), width and height, 9 bytes not decoded yet, then 16 bytes per cell (element SimHash, temperature in K, mass in kg, 4 bytes not decoded yet). The grid has a one-cell border, so game cell (x, y) is grid cell (x + 1, y + 1); duplicant positions confirm it. Disease and later sections are not read. The grid is only read, never written, so the round trip is unaffected.
-
 **Version policy.** Major 7, minors 31–38 are supported. A newer minor parses with a warning in `save.warnings` (with `strictVersion` it throws). An older minor throws a `ParseError` telling the user to re-save in the current game. 7.33 saves store the header DLC as `dlcId` (a string); 7.34+ store a `dlcIds` array.
 
 ## `packages/game-data`
@@ -74,7 +72,7 @@ Generated, never hand-typed. `vp run extract-game-data` reads a local game insta
 | `Managed/Assembly-CSharp.dll`                  | Exact IDs (for example `BingeEater`), read from the assembly's UTF-16 string literals |
 | `StreamingAssets/elements/*.yaml`              | Elements and their SimHashes                                                          |
 
-Coverage: traits, attributes, skill groups, amounts, effects, personalities, geysers, elements, critters, techs and game settings. Geyser types and their ranges (output, eruption and activity timing) are floats in code, which the extractor cannot read, so `src/geyser-types.ts` transcribes them from `GeyserGenericConfig`; a test checks them against every geyser in the fixtures. Skills come from [konove/oni-save-parser](https://github.com/konove/oni-save-parser) (MIT, attributed in `src/skills.ts`). The assembly is only read locally; decompiled code is never committed.
+Coverage: traits, attributes, skill groups, amounts, effects, personalities, geysers, elements, critters, techs and game settings. Skills come from [konove/oni-save-parser](https://github.com/konove/oni-save-parser) (MIT, attributed in `src/skills.ts`). The assembly is only read locally; decompiled code is never committed.
 
 ## `apps/web`
 
@@ -94,12 +92,6 @@ save(): Uint8Array
 
 **Data flow.** After every edit, undo or redo, the app refetches its view models from the worker and bumps a `revision` that open panels use to reload. Only the page state (current page, selection, preferences) lives on the main thread.
 
-**World map.** The worker decodes the sim grid once per save, crops one asteroid using its `WorldContainer` offset and size, and transfers element indices, temperatures and masses; the page colors them on a canvas, so switching between element, temperature and mass views needs no worker call.
-
-**Geysers.** The game saves each geyser's rolls and the values they give (`scaled*`), but recomputes the values from the rolls and the type's range when it loads a save. An edit sets the roll and writes the matching value, clamped to the type's range; geysers of unknown types can only be renamed.
-
-**Unsaved changes.** The worker describes each edit in plain words as it is applied (before a delete removes the name it needs) and keeps the label with its undo entry; the header lists them.
-
 **Game data** is imported only by the worker. View models arrive with names resolved, so game data stays out of the main bundle. Pages are lazy-loaded.
 
 **Portraits.** Duplicant portraits are drawn from the sprites and layout data in the [react-oni-duplicant](https://www.npmjs.com/package/react-oni-duplicant) package, which the build imports; no art is committed here. It covers the older accessories (hair 1–33, heads 1–4, eyes 1–5), so newer ones fall back to initials.
@@ -116,19 +108,18 @@ save(): Uint8Array
 
 ## Testing
 
-| Layer      | What                                                                                                     | Where                              |
-| ---------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| Round trip | Header and decompressed body byte-equal after writing a parsed save back                                 | every fixture                      |
-| Fixtures   | Manifest parsing, tiers and checksum verification                                                        | `scripts/`                         |
-| Unit       | Edit models, e.g. geyser rolls and ranges                                                                | `apps/web/tests`, package `tests/` |
-| End to end | Load a fixture in Chromium → edit through the UI → download → re-parse → only the intended paths changed | `apps/web/e2e`                     |
-| Manual     | Load → edit → download → reload, in Chrome                                                               | before each PR                     |
+| Layer      | What                                                                     | Where          |
+| ---------- | ------------------------------------------------------------------------ | -------------- |
+| Round trip | Header and decompressed body byte-equal after writing a parsed save back | every fixture  |
+| Fuzz       | Corrupt or truncated saves end in a `ParseError`, never a hang or crash  | `apple-park`   |
+| Fixtures   | Manifest parsing, tiers and checksum verification                        | `scripts/`     |
+| Manual     | Load → edit → download → reload, in Chrome                               | before each PR |
 
 **In-game verification.** Edited saves are loaded in the real game before a feature is called verified; [verified-in-game.md](verified-in-game.md) records the edit, game version, DLCs, date and verifier.
 
 ## CI, fixtures and releases
 
-- **CI** (`voidzero-dev/setup-vp`, pinned): `vp install`, `vp check`, `vp test`, `vp run -r build` and the Playwright suite on every push and PR, plus a nightly run.
+- **CI** (`voidzero-dev/setup-vp`, pinned): `vp install`, `vp check`, `vp test`, `vp run -r build` on every push and PR, plus a nightly run.
 - **Fixtures:** the owner's saves are committed in `test-data/saves/` (CC0-1.0). The konove save and the six mithro saves are mirrored to the `fixtures-v1` prerelease with their licenses; `test-data/fixtures.json` pins every file by SHA-256. `vp run fixtures [--tier small|all]` downloads into the git-ignored `test-data/fetched/` and verifies checksums; CI caches that folder by manifest hash. PRs run the small tier unless they change `fixtures.json`; pushes to `main`, manifest changes and the nightly job run all of them.
 - **Repository rules:** `main` requires a PR and green CI (admin bypass allowed); squash merge only; a CI check requires a conventional PR title.
 - **Dependabot** for npm and GitHub Actions.
@@ -138,17 +129,16 @@ save(): Uint8Array
 
 1. **Toolchain:** CI, repository rules, fixtures, Dependabot. Done.
 2. **Parser and game data.** Done.
-3. **Editor:** app shell, overview, duplicants (including bionic, portraits and colony-wide actions), critters, geysers (including output and timing), materials, research, space, game settings, world map, raw editor, preferences. Done; not yet verified in game.
+3. **Editor:** app shell, overview, duplicants (including bionic and portraits), critters, geysers, materials, research, space, game settings, raw editor, preferences. Done; not yet verified in game.
 4. **v0.1:** in-game verification of the main edits, then the first release.
-5. **Later:** changing a geyser's type, more languages, editing tiles on the map, duplicant cloning.
+5. **Later:** geyser type and output editing (needs per-type ranges), more languages, map view, duplicant cloning.
 
 ## Deviations from the original plan
 
 - **Smaller stack.** No TanStack Router, Query, Table or Zustand, and no i18n library: plain React state and a worker call per view were enough.
-- **No differential test** against oni-save-parser, no fuzzing and no component tests yet. The round-trip test over every fixture is the parser's safety net.
+- **No fuzzing, end-to-end or component tests yet.** The round-trip test over every fixture and the differential test against konove's oni-save-parser (a clone-on-demand script, not a dev dependency, so the lockfile stays untouched) are the parser's safety net.
 - **No dump mod.** IDs come from string literals in `Assembly-CSharp.dll` instead of a mod that dumps the live `Db` registries.
 - **No typed behaviors.** Template data is decoded generically; only the extra data the editors need has codecs.
 - **Portraits are shown**, using react-oni-duplicant's sprites instead of committing any art.
 - **Newer minor versions open editable**, but downloading them needs the "allow unverified versions" preference.
 - **No bench gate** in CI yet.
-- **Geyser ranges are transcribed**, not generated: see `packages/game-data`.
