@@ -10,12 +10,14 @@ import {
   listTechs,
   listWorlds,
   rawChildren,
+  rawReveal,
   type RawPath,
   listMaterialItems,
   listMaterials,
   summarize,
   type Edit,
 } from './model.ts'
+import { createSearchRunner, type RawSearchOptions } from './raw.ts'
 import { describeEdit, editTarget } from './describe.ts'
 import { worldMap } from './map.ts'
 import type { ChangeCategory, HistoryEntry } from '../lib/changes.ts'
@@ -31,6 +33,7 @@ let undoStack: {
   key: string
 }[] = []
 let redoStack: Edit[] = []
+const searches = createSearchRunner(() => new Promise((resolve) => setTimeout(resolve, 0)))
 
 function current(): SaveGame {
   if (!save) throw new Error('No save loaded')
@@ -79,6 +82,10 @@ const api = {
   materialItems: (elementId: string) => listMaterialItems(current(), elementId),
   rawChildren: (path: RawPath, offset?: number, limit?: number) =>
     rawChildren(current(), path, offset, limit),
+  rawReveal: (path: RawPath) => rawReveal(current(), path),
+  /** Searches the whole save; `cancelRawSearch(id)` stops it, which makes this reject. */
+  rawSearch: (id: number, options: RawSearchOptions) => searches.run(current(), id, options),
+  cancelRawSearch: (id: number) => searches.cancel(id),
   worldMap(worldId: string) {
     const map = worldMap(current(), worldId)
     return transfer(map, [map.cells.buffer, map.temperature.buffer, map.mass.buffer])
