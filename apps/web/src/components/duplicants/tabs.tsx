@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Sparkles, X, type LucideIcon } from 'lucide-react'
+import { Minus, Plus, Sparkles, X, type LucideIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -205,37 +205,48 @@ export function InterestsTab({ dupe, edit }: { dupe: DuplicantView; edit: EditFn
 // --- Attributes -----------------------------------------------------------------------
 
 export function AttributesTab({ dupe, edit }: { dupe: DuplicantView; edit: EditFn }) {
+  const set = (attributeId: string, level: number) =>
+    edit({ type: 'setAttributeLevel', attributeId, level: Math.max(0, Math.round(level)) })
   return (
     <Panel title="Attributes" description="Base levels before traits and effects. There is no cap.">
-      <FieldGroup className="grid gap-x-8 gap-y-5 @3xl/main:grid-cols-2">
+      <div className="grid gap-2 @2xl/main:grid-cols-2 @6xl/main:grid-cols-3">
         {dupe.attributes.map((attribute) => (
-          <Field key={attribute.id}>
+          <div
+            key={attribute.id}
+            className="well grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 py-1.5 pr-1.5 pl-3"
+          >
             <Hint desc={attribute.desc}>
-              <FieldLabel className="w-fit">{attribute.name}</FieldLabel>
+              <span className="type-label min-w-0 leading-tight">{attribute.name}</span>
             </Hint>
-            <div className="flex items-center gap-3">
-              <Slider
-                value={[attribute.level]}
-                min={0}
-                max={Math.max(30, attribute.level)}
-                step={1}
-                onValueCommit={([level]) =>
-                  edit({ type: 'setAttributeLevel', attributeId: attribute.id, level: level! })
-                }
-              />
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label={`Lower ${attribute.name}`}
+                disabled={attribute.level <= 0}
+                onClick={() => set(attribute.id, attribute.level - 1)}
+              >
+                <Minus />
+              </Button>
               <NumberField
                 label={attribute.name}
                 value={attribute.level}
                 min={0}
-                className="w-24"
-                onCommit={(level) =>
-                  edit({ type: 'setAttributeLevel', attributeId: attribute.id, level })
-                }
+                className="w-16"
+                onCommit={(level) => set(attribute.id, level)}
               />
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label={`Raise ${attribute.name}`}
+                onClick={() => set(attribute.id, attribute.level + 1)}
+              >
+                <Plus />
+              </Button>
             </div>
-          </Field>
+          </div>
         ))}
-      </FieldGroup>
+      </div>
     </Panel>
   )
 }
