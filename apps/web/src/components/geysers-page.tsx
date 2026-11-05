@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { FlaskConical, SlidersHorizontal } from 'lucide-react'
+import { FlaskConical, SlidersHorizontal, TriangleAlert } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field'
 import {
   Select,
@@ -18,14 +19,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { fmt } from '@/lib/format'
 import {
   activeCycles,
@@ -59,63 +52,104 @@ export function GeysersPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="text-right">While erupting</TableHead>
-                <TableHead className="text-right">Eruption</TableHead>
-                <TableHead className="text-right">Active / dormant</TableHead>
-                <TableHead className="text-right">Average</TableHead>
-                <TableHead className="text-right">Position</TableHead>
-                <TableHead />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {geysers.map((g) => (
-                <TableRow key={g.id}>
-                  <TableCell>
-                    <CommitInput
-                      value={g.name}
-                      aria-label="Geyser name"
-                      onCommit={(name) => onEdit({ type: 'setGeyserName', id: g.id, name })}
-                      className="w-56"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Hint desc={g.typeDesc}>
-                      <span className="font-medium">{g.typeName}</span>
-                    </Hint>
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {fmt(eruptionRate(g), 2)} kg/s
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {fmt(eruptingSeconds(g), 0)} of {fmt(g.iterationSeconds, 0)} s
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {fmt(activeCycles(g))} / {fmt(dormantCycles(g))} cycles
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {fmt(averagePerCycle(g), 0)} kg/cycle
-                  </TableCell>
-                  <TableCell className="text-right text-muted-foreground tabular-nums">
-                    {g.x}, {g.y}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => setOpenId(g.id)}>
-                      <SlidersHorizontal /> Edit
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div
+            role="table"
+            aria-label="Geysers"
+            className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3"
+          >
+            {geysers.map((g) => (
+              <GeyserCard key={g.id} geyser={g} onEdit={onEdit} onOpen={() => setOpenId(g.id)} />
+            ))}
+          </div>
         </CardContent>
       </Card>
       <GeyserSheet geyser={open} onClose={() => setOpenId(null)} onEdit={onEdit} />
     </>
+  )
+}
+
+/** What a geyser emits, for the category colour. Types the editor doesn't know get none. */
+type Emits = 'gas' | 'liquid' | 'metal' | 'solid'
+
+const EMITS: Record<string, Emits> = {
+  steam: 'gas',
+  hot_steam: 'gas',
+  hot_co2: 'gas',
+  hot_hydrogen: 'gas',
+  hot_po2: 'gas',
+  slimy_po2: 'gas',
+  chlorine_gas: 'gas',
+  chlorine_gas_cool: 'gas',
+  methane: 'gas',
+  hot_water: 'liquid',
+  slush_water: 'liquid',
+  filthy_water: 'liquid',
+  slush_salt_water: 'liquid',
+  salt_water: 'liquid',
+  liquid_co2: 'liquid',
+  liquid_sulfur: 'liquid',
+  murky_brine: 'liquid',
+  oil_drip: 'liquid',
+  small_volcano: 'solid',
+  big_volcano: 'solid',
+}
+
+function emitsOf(prefab: string): Emits | undefined {
+  const id = prefab.replace(/^GeyserGeneric_/, '')
+  return EMITS[id] ?? (id.startsWith('molten_') ? 'metal' : undefined)
+}
+
+function GeyserCard({
+  geyser: g,
+  onEdit,
+  onOpen,
+}: {
+  geyser: GeyserView
+  onEdit: (edit: Edit) => void
+  onOpen: () => void
+}) {
+  const emits = emitsOf(g.prefab)
+  const active = Math.round(g.yearPercent * 100)
+  return (
+    <Card role="row" className="gap-0 py-0">
+      <CardHeader className="items-center">
+        <CommitInput
+          value={g.name}
+          aria-label="Geyser name"
+          onCommit={(name) => onEdit({ type: 'setGeyserName', id: g.id, name })}
+          className="min-w-0 flex-1"
+        />
+        <Badge role="cell" variant={emits ?? 'geyser'}>
+          <Hint desc={g.typeDesc}>
+            <span>{g.typeName}</span>
+          </Hint>
+        </Badge>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4 py-4">
+        <Progress
+          variant="task"
+          value={active}
+          dormant={100 - active}
+          label="Activity cycle"
+          state={`${fmt(activeCycles(g))} active / ${fmt(dormantCycles(g))} dormant cycles`}
+          aria-label="Activity cycle"
+        />
+        <div role="cell" className="grid grid-cols-2 gap-2">
+          <Stat label="While erupting" value={`${fmt(eruptionRate(g), 2)} kg/s`} />
+          <Stat label="Average" value={`${fmt(averagePerCycle(g), 0)} kg/cycle`} />
+          <Stat
+            label="Eruption"
+            value={`${fmt(eruptingSeconds(g), 0)} of ${fmt(g.iterationSeconds, 0)} s`}
+          />
+          <Stat label="Position" value={`${g.x}, ${g.y}`} />
+        </div>
+        <div role="cell" className="flex justify-end">
+          <Button variant="ghost" size="sm" onClick={onOpen}>
+            <SlidersHorizontal /> Edit
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -163,10 +197,13 @@ function GeyserSheet({
                 />
               )}
               {!geyser.matchesRolls && (
-                <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
-                  The saved values don&apos;t match this geyser&apos;s rolls, so something other
-                  than the game changed them, probably a mod. Without that mod the game works them
-                  out from the rolls again when it loads the save. Editing a value fixes its roll.
+                <div className="flex gap-3 border border-warn bg-warn/10 px-4 py-3 type-small text-white">
+                  <TriangleAlert className="mt-0.5 size-5 shrink-0 text-warn" />
+                  <span>
+                    The saved values don&apos;t match this geyser&apos;s rolls, so something other
+                    than the game changed them, probably a mod. Without that mod the game works them
+                    out from the rolls again when it loads the save. Editing a value fixes its roll.
+                  </span>
                 </div>
               )}
               {geyser.ranges ? (
@@ -223,7 +260,7 @@ function GeyserSheet({
                   </FieldDescription>
                 </FieldGroup>
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="type-small text-muted-foreground">
                   This geyser type isn&apos;t known to Duplicity, so only its name can be changed.
                 </p>
               )}
@@ -245,39 +282,42 @@ function TypeChanger({
   const [typeId, setTypeId] = useState('')
   return (
     <Field>
-      <FieldLabel>
-        Type
-        <Badge variant="outline" className="gap-1">
-          <FlaskConical /> Experimental
-        </Badge>
-      </FieldLabel>
-      <div className="flex gap-2">
-        <Select value={typeId} onValueChange={setTypeId}>
-          <SelectTrigger className="flex-1" aria-label="New type">
-            <SelectValue placeholder={`Change from ${geyser.typeName}`} />
-          </SelectTrigger>
-          <SelectContent>
-            {geyser.swapTargets.map((t) => (
-              <SelectItem key={t.id} value={t.id}>
-                {t.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button variant="outline" disabled={!typeId} onClick={() => onChange(typeId)}>
-          Change type
-        </Button>
-      </div>
-      <FieldDescription>
-        Only types of the same size that your save&apos;s DLCs allow are listed. Output, temperature
-        and germs follow the new type and the rolls are kept. Experimental: not yet verified in
-        game, so keep a backup.
-      </FieldDescription>
-      {geyser.hasGeyserControl && (
-        <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
-          This save uses the Geyser Control mod; it may reapply its own values after the swap.
+      <div className="flex flex-col gap-2 border-2 border-warn bg-warn/10 p-3">
+        <FieldLabel>
+          Type
+          <Badge variant="warn" className="gap-1">
+            <FlaskConical /> Experimental
+          </Badge>
+        </FieldLabel>
+        <div className="flex gap-2">
+          <Select value={typeId} onValueChange={setTypeId}>
+            <SelectTrigger className="min-w-0 flex-1 basis-48" aria-label="New type">
+              <SelectValue placeholder={`Change from ${geyser.typeName}`} />
+            </SelectTrigger>
+            <SelectContent>
+              {geyser.swapTargets.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button variant="outline" disabled={!typeId} onClick={() => onChange(typeId)}>
+            Change type
+          </Button>
         </div>
-      )}
+        <FieldDescription>
+          Only types of the same size that your save&apos;s DLCs allow are listed. Output,
+          temperature and germs follow the new type and the rolls are kept. Experimental: not yet
+          verified in game, so keep a backup.
+        </FieldDescription>
+        {geyser.hasGeyserControl && (
+          <div className="flex gap-2 type-small text-white">
+            <TriangleAlert className="mt-0.5 size-5 shrink-0 text-warn" />
+            This save uses the Geyser Control mod; it may reapply its own values after the swap.
+          </div>
+        )}
+      </div>
     </Field>
   )
 }
@@ -339,9 +379,9 @@ function GeyserInput({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border bg-muted/30 px-3 py-2">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="font-heading text-base font-semibold tabular-nums">{value}</div>
+    <div className="border border-ink bg-inset px-3 py-2">
+      <div className="type-caption text-muted-foreground">{label}</div>
+      <div className="type-h3 tabular-nums">{value}</div>
     </div>
   )
 }
