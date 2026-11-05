@@ -82,6 +82,36 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
 
+## UI dialogs and load screen (design v2) — 2026-11-05
+
+- `load-states.tsx`: the drop zone, loading and error states sit in a `Card` with a title bar ("Load game", "Loading", "Load failed" on a red bar), over an inset dashed drop area with a large icon, a `text-h2` title and a large button. Loading uses the `task` progress meter. The drag-over state turns the dashed border orange.
+- `save-dialog.tsx`: the backup warning is a `well` block with the title in the warning colour, filenames in code chips, and the edit list in a sunken field. Cancel is the dark secondary button.
+- `preferences-dialog.tsx`: the Theme setting is removed, because the app is dark only (design.md section 1). The shell's own theme toggle button is in `App.tsx`/`site-header` and is left to the shell session.
+- `dlc-badge.tsx`: DLC badges use `Badge` variants (dlc, oxygen, power, plant, water) instead of hard-coded Tailwind palette colours.
+- No other behaviour change; text, roles and names are unchanged. Before and after screenshots are in `docs/screenshots/ui-dialogs`.
+
+## UI component library (design v2, phase 1) — 2026-11-05
+
+- Rewrote the theme in `apps/web/src/index.css` from the sampled v2 palette: dark only, radius 0, shadcn variables mapped onto surface, title-bar, tab, button, text-tier, status, meter and category tokens. Added `panel`, `title-bar`, `well`, `inset-layer`, `tip-game`, `btn-game`, `tab`, `chip` and `field-game` utilities.
+- Fonts are now Rajdhani (headings) and Noto Sans (body) through `@fontsource`; Barlow and Chakra Petch are removed. The `dark:` variant always applies, so the existing theme switch no longer changes anything.
+- Restyled the primitives the app uses, keeping them shadcn and `cva`: button (new `accent` variant), card (`panel` and `well` variants, header is the mauve title bar), tabs, badge (status, resource and element colour variants, `stat`), input, select, checkbox, switch, slider, table, dialog, tooltip, dropdown, popover, sheet, separator, scroll area, kbd, empty and toggle group.
+- `Progress` has `variant="blocks" | "xp" | "task" | "gauge"` and `tone="good" | "warn" | "bad"`, built to the meter spec (20 beveled cells, XP bar, in-world task bar with dormant and now marker, storage gauge with ticks and over-max cap). `meterTone(kind, pct)` returns the tone for amounts, health and stress. The slider matches the gauge. Also added `Item variant="need"` (vitals row) and `Badge variant="bare"` (colony stat), a bottom-shade bevel on tabs, buttons and toggles, and a flat `#272c3d` tooltip.
+- Dev gallery at `/?gallery`. It is imported only when `import.meta.env.DEV` is true, so the production build contains no gallery code.
+- No behaviour change. The e2e specs select by role, name, label and `data-sidebar`, none of which changed. Screenshots of the gallery, Overview and Geysers are in `docs/screenshots/ui-library/`.
+- Known: `apps/web/tests/geysers.test.ts` (fixture geyser ranges) fails locally because the fetched fixtures are absent; it does not touch the UI.
+- Next: the app shell and page layouts.
+
+## UI pages, batch A: Overview, Research, Settings, Map (design v2, phase 3) — 2026-11-05
+
+- Overview: the four stat cards are framed `Card`s with a title bar and an icon-plus-number `Badge variant="bare"`; average stress adds a `Progress variant="blocks"` meter. The achievements state uses `Badge` `good` and `warn`.
+- Research: progress is a `Progress variant="task"` with a `64 / 112` readout; tech tiles sit on `well` colour in a 1px ink grid.
+- Game settings: every setting is a `well` block; the locked state is a `stat` badge.
+- World map: the element list and ramp legend use the grey `legend` colour with square swatches, the cell info is a `well` block and the map frame is square with an ink outline.
+- Text uses the shared type scale (`type-h1` for the stat numbers, `type-label`, `type-small`, `type-caption`).
+- Only the four page files changed. No behaviour change: every role, name, label and test id is kept. Before and after screenshots are in `docs/screenshots/ui-pages-a/`.
+- Known: `apps/web/tests/geysers.test.ts` still fails locally without the fetched fixtures.
+- Next: batch B pages once their feature PRs land.
+
 ## Stories page — 2026-11-05
 
 - New read-only Stories page lists the six story traits (Mega Brain Tank, Critter Manipulator, Lonely Minion, Fossil Hunt, Morb Rover Maker, Hijacked Headquarters) with state, asteroid and the cycle each state was reached.
@@ -90,6 +120,16 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Only the Lonely Minion quests appear in the test saves. The Fossil Hunt quest is read the same way but is untested against a save that has its quest instance.
 - The machine flag is read only from copies standing inside the story's own asteroid. Quests are shown only when exactly one quest owner holds them; a state value the editor does not know shows as unknown.
 - Editing is not offered; open question 17 records what it would take.
+
+## Critter amounts from the DLCs — 2026-11-05
+
+- The critter editor now bounds every amount by the game's own maximum, read from the decompile (`packages/game-data/src/critter-amounts.ts`), instead of a guessed 0 to 100:
+  - **Constants** in `Database/Amounts.cs`: wildness, fertility, incubation, viability, scale growth, milk production, quill growth, beckoning (all 100), moisture (100), mucus (10) and temperature (10,000 K).
+  - **Trait modifiers** in each prefab's config: age (the lifespan), calories (the stomach size) and hit points, for 58 critters; babies use their adult's. A robot's battery (sweep bot 9,000, scout 180,000, Morb 180,000, Fetch Drone 120,000) comes the same way.
+- The Frosty Planet, Prehistoric Planet, Bionic Booster and Spaced Out critters now show scale growth, milk, beckoning, moisture, mucus and robot batteries with proper names. An amount is editable only when the save has the DLC its prefab needs.
+- The worker refuses a value that is not finite, clamps to `0..max`, and refuses an amount whose maximum is not confirmed. Undo restores the same bytes.
+- Unconfirmed amounts are shown read only with the reason. Hit points of six critter families are in that group (question 22).
+- Tests: every critter in every fixture sits at or below its confirmed maximum, the DLC amounts of the colony and of `apple-park` show their maxima, clamping and non-finite values, and byte-exact undo. Beckoning and the robot batteries are checked against the full-tier fixture (`FIXTURE_TIER=all`). One end-to-end spec edits scale growth through the stats sheet.
 
 ## Parser benchmark and regression gate — 2026-11-05
 
@@ -168,6 +208,22 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Risks:
   - Not tried in game. Undecoded raw bytes were not searched for references.
   - Deleting a chunk deletes its mass from the world; the world grid is untouched.
+
+## Materials page on the v2 components — 2026-11-05
+
+- The Materials table and the element sheet use the v2 components and type scale. State badges take the game's element colours (gas cyan, liquid blue, solid tan). Loose and stored amounts are `bare` badges with the unit and the place count in a caption, and the total is in the good green. The element name uses the label type.
+- Deleting loose debris looks dangerous: a red "Loose debris" strip holds the destructive "Delete selected" and "Delete all loose" buttons, each row's trash button is destructive, and the confirm dialog has a warning icon with the mass in red. Behaviour, labels and roles are unchanged.
+- The sheet was only about 280px wide because the sheet primitive's side width rule beat the page's width class, which pushed the mass and temperature columns off screen. The page now overrides it on the same variant.
+- Not run: the Playwright e2e suite (CI runs it). `geysers.test.ts` fails on this branch (8 matches, 20 expected); it is untouched by this change.
+
+## Raw data page on the v2 components — 2026-11-05
+
+- `raw-page.tsx` restyled onto the game-native components and the type scale; no behaviour, test id, role or name changed.
+- Tree: dark inset well, 44 px rows, indent guides, key column aligned so values line up, container keys bold white, leaf keys dimmed, values in monospace coloured by kind (string `good`, number `info`, boolean `gold`, bytes `warn`), selection highlight in the game's orange.
+- Search: results panel with a field-coloured header, a `key` / `path` / `value` chip per hit, and the path split into a dimmed route and a bold final key.
+- Warning banner and hints use the `warn` token and `type-small` / `type-caption`.
+- Screenshots: `docs/screenshots/raw-page/before.jpg`, `after.jpg`.
+- The highlighted row keeps the `ring-primary` class because the e2e tests select on it; `ring-warn!` overrides its colour.
 
 ## Change a geyser's type (experimental) — 2026-11-05
 
