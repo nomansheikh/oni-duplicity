@@ -422,7 +422,7 @@ Not found in any capture: bionic oil and battery bars, a Vitals-screen table, a 
 
 Accessibility, measured: XP fill on empty track is 1.16:1 in the game's own colours, so the centred numerals carry the value; the light-track gauge fails 3:1 against its fill, so the dark slot is used; the game's empty grey on the task bar interior is 2.1:1, so dormant uses `#6b6b6b` (3.8:1).
 
-Shadcn: `Progress` keeps Radix for XP, task and gauge (restyle `Root` and `Indicator`). Blocks and Needs rows are plain markup with `role="meter"`. Class strings are in the gallery.
+Shadcn rule (owner): every item stays a shadcn primitive, restyled with CSS variables, Tailwind and `cva`. The game look is added as variants on the existing component, never as a new component. Meters are `Progress` with `variant="blocks" | "xp" | "task" | "gauge"` and `tone="good" | "warn" | "bad"`; vitals rows are `Item variant="need"`; the colony row is `Badge variant="bare"`. The gallery has the full primitive and variant map and the cva block.
 
 ### Game checks on other elements
 
