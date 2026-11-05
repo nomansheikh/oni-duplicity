@@ -34,11 +34,11 @@ Packages are scoped `@oni-duplicity/*` and `private`; npm publishing is decided 
 
 ## `packages/save-parser`
 
-Our own reader and writer. [oni-save-parser](https://github.com/RoboPhred/oni-save-parser) and its forks were used as references for the format; no code is shared and there is no differential test against them.
+Our own reader and writer. [oni-save-parser](https://github.com/RoboPhred/oni-save-parser) and its forks were used as references for the format; no code is shared. `vp run differential` compares every fixture against konove's fork, built from source at a pinned commit (see [save-format.md](save-format.md)).
 
 **Model.** Header (build version, JSON game info), type templates, the `world` and `Game+Settings` sections, raw sim data, the `KSAV` version, game objects grouped by prefab, and `Game+GameSaveData`. Every object keeps its position, rotation, scale and behaviors; each behavior holds its template data and any trailing "extra" bytes.
 
-**Decoding.** Eager: the whole body is decoded at load. The 40 MB fixture (451 MB decompressed) parses in about 2.4 s in Node and about 6 s in the browser.
+**Decoding.** Eager: the whole body is decoded at load. The 40 MB fixture (451 MB decompressed) parses in about 1.6 s in Node and about 6 s in the browser. `vp run bench` measures each phase (see Performance below).
 
 **Readers and writers.**
 
@@ -98,6 +98,8 @@ save(): Uint8Array
 
 **Geysers.** The game saves each geyser's rolls and the values they give (`scaled*`), but recomputes the values from the rolls and the type's range when it loads a save. An edit sets the roll and writes the matching value, clamped to the type's range; geysers of unknown types can only be renamed.
 
+**Deleting loose debris.** Loose debris is an element chunk saved in a group named after its element (`Wolframite:0`); stored items live inside a `Storage` behavior and are never offered for deletion. `deleteDebris` removes several chunks as one edit (one undo step), addressed by `KPrefabID` instance ID rather than by `Element:index` (indexes shift after each delete, so a click on a stale list could hit another chunk), and refuses anything that is not a loose chunk or no longer exists. It also refuses items that a move order points at. The "Move here" tool saves a `MovePickupablePlacer` whose `CancellableMove` behavior lists the `KPrefabID` instance IDs of the marked items, and the item's own `Movable` behavior has `isMarkedForMove`. In the decompiled `CancellableMove.OnCancel` the ID is resolved with `Ref<Movable>.Get()` and `ClearMove()` is called on the result without a null check, so a leftover ID can throw when the order is cancelled. Nothing else that was checked saves a reference to a loose item's ID: `Pickupable` saves only `deleteOffGrid`, `Clearable` saves a flag on the item itself, and reservations and fetch errands are not saved. Across the ten fixtures, no decoded value refers to a loose chunk except those lists (3 chunks in `mithro-05` and `mithro-06`). Undecoded raw bytes were not checked.
+
 **Unsaved changes.** The worker describes each edit in plain words as it is applied (before a delete removes the name it needs) and keeps the label with its undo entry; the header lists them.
 
 **Game data** is imported only by the worker. View models arrive with names resolved, so game data stays out of the main bundle. Pages are lazy-loaded.
@@ -119,6 +121,7 @@ save(): Uint8Array
 | Layer      | What                                                                                                     | Where                              |
 | ---------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | Round trip | Header and decompressed body byte-equal after writing a parsed save back                                 | every fixture                      |
+| Fuzz       | Corrupt or truncated saves end in a `ParseError`, never a hang or crash                                  | `apple-park`                       |
 | Fixtures   | Manifest parsing, tiers and checksum verification                                                        | `scripts/`                         |
 | Unit       | Edit models, e.g. geyser rolls and ranges                                                                | `apps/web/tests`, package `tests/` |
 | End to end | Load a fixture in Chromium → edit through the UI → download → re-parse → only the intended paths changed | `apps/web/e2e`                     |
@@ -134,6 +137,24 @@ save(): Uint8Array
 - **Dependabot** for npm and GitHub Actions.
 - **Releases:** release-please keeps a release PR and CHANGELOG on `main` (`feat` bumps the minor version below 1.0). Publishing a release builds the tagged commit and deploys `apps/web` to GitHub Pages; merges alone do not deploy. The build uses relative asset paths (`base: './'`), so it works under `/oni-duplicity/`. The release PR is opened with the default `GITHUB_TOKEN`, which does not trigger other workflows, so its required checks never run; merge it with the admin bypass.
 
+## Performance
+
+`vp run bench` (`scripts/bench.ts`) parses and writes the 40 MB and 13 MB saves, each in its own Node process: one warm-up, then the median of five iterations of four phases (read + inflate, parse body, write body, deflate at level 1). It also reports peak RSS, read before the calibration buffers are allocated.
+
+| 40 MB save (median) | Apple M2 Max, Node 26 | GitHub runner (4-core EPYC), Node 24 |
+| ------------------- | --------------------- | ------------------------------------ |
+| read + inflate      | 1.6 s                 | 1.7 s                                |
+| parse body          | 1.6 s                 | 3.3 s                                |
+| write body          | 2.7 s                 | 6.6 s                                |
+| deflate (`fflate`)  | 4.0 s                 | 5.8 s                                |
+| peak RSS            | 3.3 to 4.1 GB         | 2.6 GB                               |
+
+The 13 MB save peaks at about 1.0 to 1.5 GB on the Mac and 0.9 GB on the runner. Memory is dominated by the 451 MB decompressed body, the copy the writer builds and the decoded object graph (947 MB of live heap after parse). Peak RSS on macOS varies by about 20% between runs with GC timing.
+
+The gate fails a phase whose time, divided by a calibration workload timed in the same process, grows more than 30% over its baseline. The calibration streams a 256 MB buffer and allocates many small objects, so it tracks memory speed the way the parser does, and a sample is taken after every pass. Baselines live in `test-data/bench-baseline.json` per `<platform>-<arch>` (ratios do not transfer between machines): `darwin-arm64` is the median of 5 local runs, `linux-x64` the median of 3 runs of the CI runner. Run-to-run spread of the normalized phase times was at most ±5.7% locally and ±5.3% on three runners (two CPU models), so the 30% threshold leaves wide headroom and raw times were not needed. A phase that looks regressed is re-measured once and fails only if it regresses again. A stale file size, a zero or missing baseline time, a worker that times out (10 minutes) or is killed, or a missing baseline for the platform under `--require` are errors, not passes. CI runs `vp run bench --require` on pushes to `main`, nightly, on manifest changes, and on PRs that touch the parser or the bench, which add about 2.7 minutes. To record a baseline for a new runner, dispatch the CI workflow with `bench_baseline` set and commit the uploaded artifact. After an intended change, run `vp run bench --update` on a quiet machine and commit the new baseline.
+
+**Targets not met.** Parsing the 40 MB save meets the 5 s target on the Mac (1.6 s) and on the CI runner (3.3 s). Saving does not: on the Mac, writing the body takes 2.7 s and `fflate` deflate another 4.0 s, about 6.7 s in all; on the runner, 6.6 s and 5.8 s, about 12 s. The browser uses native `CompressionStream`, which `progress.md` measured at about 7 s for this save. Whether the target covers compression is an open question ([open-questions.md](open-questions.md) #15).
+
 ## Delivery
 
 1. **Toolchain:** CI, repository rules, fixtures, Dependabot. Done.
@@ -145,10 +166,11 @@ save(): Uint8Array
 ## Deviations from the original plan
 
 - **Smaller stack.** No TanStack Router, Query, Table or Zustand, and no i18n library: plain React state and a worker call per view were enough.
-- **No differential test** against oni-save-parser, no fuzzing and no component tests yet. The round-trip test over every fixture is the parser's safety net.
+- **No component tests yet.** The round-trip test over every fixture, the fuzz tests and the differential test against konove's oni-save-parser (a clone-on-demand script, not a dev dependency, so the lockfile stays untouched) are the parser's safety net; Playwright covers the editor end to end.
 - **No dump mod.** IDs come from string literals in `Assembly-CSharp.dll` instead of a mod that dumps the live `Db` registries.
 - **No typed behaviors.** Template data is decoded generically; only the extra data the editors need has codecs.
 - **Portraits are shown**, using react-oni-duplicant's sprites instead of committing any art.
 - **Newer minor versions open editable**, but downloading them needs the "allow unverified versions" preference.
-- **No bench gate** in CI yet.
+- **Geyser ranges are transcribed**, not generated: see `packages/game-data`.
+- **The bench gate is calibrated, not absolute.** It compares each phase against a per-platform committed baseline, scaled by a fixed memory-bound workload timed in the same run. It cannot catch a slowdown that also slows the calibration, and the save-time target is not met. See Performance.
 - **Geyser ranges are transcribed**, not generated: see `packages/game-data`.

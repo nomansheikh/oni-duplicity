@@ -82,21 +82,89 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
 
-## Space points of interest and starmap edits — 2026-11-05
+## Stories page — 2026-11-05
 
-- The Space page lists every Spaced Out point of interest: type, starmap location, stock and capacity, time to refill, artifact state and whether the colony has found it.
-- Four edits, each with undo and a line in the unsaved-changes list:
-  - destination recoverable mass (base game), clamped to the destination type's range (`availableMass`, 0 to max minus min);
-  - destination analysis: discovered writes a score of 50, analyzed writes 100 and clears `analyzeDestinationID` when that destination was the scan target;
-  - reveal the known starmap: every existing `m_revealPointsByCell` value below 100 becomes 100. Cells missing from the dictionary stay hidden, because adding one would change the length;
-  - POI stock refill, labelled experimental in the UI: the same float is written to the instance field and the `poiCapacity` parameter inside the state machine bytes.
-- Where the data lives: a POI's location is plain template data (`m_location`); its type hash, two rolls, stock and artifact charge are inside the `StateMachineController` bytes, one serialized state machine instance each for `HarvestablePOIStates` and `ArtifactPOIStates`. Reveal state is `ClusterFogOfWarManager`'s `m_revealPointsByCell` in the save game object's state machine bytes. A spawned artifact waits in a `StarmapHexCellInventory` object on its tile (7.37 and later).
-- Byte edits go through one function that works on a copy, throws if the length changed or any byte outside the expected floats differs, and reads the result back before swapping it in. Undo puts the old array back by reference (`snapshot.ts` now keeps `extraRaw`).
-- Not done on purpose: artifact recharge, artifact string and harvest count, the POI state name, research opportunities, and revealing cells that are not in the dictionary (see open question 21).
-- The type tables (`apps/web/src/lib/space-pois.ts`, `space-destinations.ts`) are transcribed from the decompile and live in `apps/web`, not `packages/game-data`. Every saved POI type hash matches a transcribed id.
-- Tests: reader checks over every fixture; edit tests for each edit (value, clamping, only the intended fields or bytes change, undo restores the body byte for byte); Playwright specs for the table and each edit (run by CI).
+- New read-only Stories page lists the six story traits (Mega Brain Tank, Critter Manipulator, Lonely Minion, Fossil Hunt, Morb Rover Maker, Hijacked Headquarters) with state, asteroid and the cycle each state was reached.
+- Source: `StoryManager._stories` (`StoryInstance`: story ID, world ID, state, `StoryTelemetry` cycle stamps), decoded template data on the `SaveGame` object, and `QuestManager` for the Lonely Minion and Fossil Hunt quests. Quest hashes and the story table are transcribed from `Database.Stories` and `Database.Quests` into `packages/game-data/src/stories.ts`.
+- Machine progress that lives in state machine bytes (for example the species the Critter Manipulator has scanned) is not read; the page shows the `Activatable` flag of the Mega Brain Tank, Critter Manipulator and Hijacked Headquarters instead.
+- Only the Lonely Minion quests appear in the test saves. The Fossil Hunt quest is read the same way but is untested against a save that has its quest instance.
+- The machine flag is read only from copies standing inside the story's own asteroid. Quests are shown only when exactly one quest owner holds them; a state value the editor does not know shows as unknown.
+- Editing is not offered; open question 17 records what it would take.
+
+## Parser benchmark and regression gate — 2026-11-05
+
+- `vp run bench` times read + inflate, parse body, write body and deflate for the 40 MB and 13 MB saves (one warm-up, median of five, each save in its own process) and prints a table with peak RSS. It skips with a message when the saves are not downloaded.
+- The gate compares each phase's time divided by a memory-bound calibration workload (256 MB buffer stream plus many small allocations, sampled after every pass) against `test-data/bench-baseline.json`, keyed per `<platform>-<arch>`, and fails above +30%. A phase that looks regressed is measured again and fails only if it regresses twice. Stale sizes, zero or non-finite baseline times, a worker timeout or kill, and a missing platform baseline under `--require` are errors. `vp run bench --update` rewrites the baseline for the current platform.
+- CI runs `vp run bench --require` on pushes to `main`, nightly, on manifest changes, and on PRs touching the parser or the bench (about 2.7 minutes, fetching just the two saves). Dispatching the CI workflow with `bench_baseline` records a baseline on the runner and uploads it as an artifact; the `linux-x64` baseline was recorded that way.
+- Measured, 40 MB save, median: Apple M2 Max (12 cores, 32 GB, Node 26.13.0, quiet machine) read + inflate 1.6 s, parse 1.6 s, write 2.7 s, deflate 4.0 s, peak RSS 3.3 to 4.1 GB. GitHub runner (4-core AMD EPYC, 16 GB, Node 24.22.2): 1.7 s, 3.3 s, 6.6 s, 5.8 s, peak RSS 2.6 GB. The 13 MB save: Mac 0.44, 0.43, 0.59, 1.1 s; runner 0.49, 0.88, 1.5, 1.6 s.
+- Spread of the normalized phase times across runs: at most ±5.7% over 5 local runs and ±5.3% over 3 CI runs on two CPU models (raw times: ±4.5% and ±3.5%). Both are far below 30%, so the gate uses the calibrated ratio, which also halved the noise on a loaded Mac (raw ±27 to 42%, normalized ±17 to 21%).
+- Parse meets the 5 s target on both machines. **Saving does not:** write body plus deflate is about 6.7 s on the Mac and about 12 s on the runner with `fflate` at level 1. Whether the target covers compression is open question #15; the assumption is "not met".
+- The older "28 s with `fflate`" figure above was measured in the browser and is not reproduced here; its settings are not recorded. In Node on the Mac, `fflate` takes 3.7 s at level 1 and 5.1 s at level 6 (the default) for the 40 MB body, so the level alone does not explain 28 s; the gap to the browser is unexplained.
+- Next: decide how to meet the save target (see #15), and look at the 2.6 to 4.1 GB peak, since the browser tab limit is the real constraint.
+- Risks: the calibration only partly tracks the parser, so a change that slows both is invisible. Runner hardware varies (two EPYC models in three runs, with little effect so far). The Linux baseline reflects 3 runs, so refresh it if the gate flaps. A noisy machine can still fail twice in a row.
+
+## Differential test against oni-save-parser — 2026-11-05
+
+- `vp run differential` compares every fixture with konove's oni-save-parser (`3bb6076`, built from source into `.cache/oracle`, not a dependency) on Node 24: 0 real disagreements across all 10 fixtures (7.33–7.38). Differences and the oracle's `Klei.AI.Modifiers` `DiseaseInstance` defect are in [save-format.md](save-format.md); open question 1 is resolved.
+- Each fixture runs in its own child process (oracle peak memory up to 3.7 GB on the largest save; capped at 6 GB).
+- Time on this machine, oracle / ours: apple-park 0.2 / 0.06 s; beautiful-galaxy ×2 1.1 / 0.2 s; konove-save-game 1.1 / 0.2 s; mithro-01 0.2 / 0.06 s; mithro-02 1.2 / 0.2 s; mithro-03 7.8 / 1.2 s; mithro-04 16.6 / 2.7 s; mithro-05 16.8 / 2.7 s; mithro-06 27.8 / 4.1 s.
+- Whole run: small tier about 8 s warm and 12 s with a cold oracle build (about 4 s); all tiers 97 s.
+- CI: the step runs after the tests, with the same tier as the fixtures, and caches `.cache/oracle` by the hash of `scripts/differential/oracle.ts`.
+- Gaps: no fixture has a non-empty sickness list on `Klei.AI.Modifiers` (and only two on `MinionModifiers`); 7.28–7.32 are not covered; the oracle cannot confirm anything against the game.
+- A unit test (`scripts/differential/compare.test.ts`) checks that normalized equal values pass and tampered values fail, using synthetic objects.
+
+## Parser fuzz tests — 2026-11-05
+
+- `packages/save-parser/tests/fuzz` mutates `apple-park.sav` with a seeded PRNG and requires every case to end in a `ParseError`, or in a parse that writes back, re-parses its own output and writes the same bytes again. A `ParseError` from the writer or from re-parsing our own output is a bug, as is anything else (`TypeError`, `RangeError`, a raw zlib error, a hang, out of memory) counts as a bug.
+- Seven regions: whole-file truncation, header flips, template flips, compressed-body flips, and, on the decompressed body, truncation, flips in the world and settings data, and flips in the game objects and game data. Body flips mostly avoid opaque payloads such as sim data.
+- Cases run in `node:worker_threads` workers with a 5 s deadline; a hung worker is terminated and the case is retried once in a fresh worker before it counts as a hang; a crash or out-of-memory (256 MB old-generation cap, which does not cover typed arrays) also counts as a failure. Failures are grouped by error and print the seed and mutation, and `FUZZ_ONLY` replays one case regardless of scale.
+- The default run is about 500 cases in roughly 12 s. At `FUZZ_SCALE=20` (10,000 cases, 3 to 4.5 minutes) one case failed: a flipped type byte in the templates leaves a collection type without its element type, and `readCollection` throws a `TypeError` instead of a `ParseError` (`FUZZ_SEED=big2 FUZZ_ONLY=templates#105`). It is not fixed in this change.
+- Fault injection: removing the bounds check in `Reader` produced grouped `RangeError` failures, an infinite loop in the header reader produced a `timeout` failure, and a body that stops re-parsing produced a `reparse` failure, so the harness does detect bugs. All changes were reverted.
+- Gaps: one fixture, and no well-formed but hostile inputs such as huge valid counts or lengths.
+- Next: the differential test against oni-save-parser.
+
+## Test run — 2026-11-05
+
+- Root `vp test` no longer collects tests under `.claude/`, so agent worktrees can't fail the run. The app and package configs don't set `test.exclude`, so they needed no change.
+
+## Load/save polish — 2026-11-05
+
+- Autosave: saves whose header says `isAutoSave` get an "Autosave" badge in the header and a note that the game's autosave rotation may overwrite an edited autosave. The note names `gameInfo.originalSaveName` (a field of `SaveGame.GameInfo` in the decompile, present in the fixtures) and `Summary` now carries it. The download name is unchanged.
+- Load errors: a friendly title (not an ONI save, unsupported version, truncated or corrupted, or unknown) picked from the parser's message, plus a collapsible "Details" section with the message, byte offset and stack, and a copy button. Errors cross the worker as plain `Error`s, so the offset is read back from the message.
+- "Download save" now opens a confirm dialog: distinct changed targets ("3 duplicants, 1 geyser, colony settings"), the edit labels, and a "Back up your original save first" warning. Each history entry in the worker carries a category and key (`editTarget` in `describe.ts`). The post-download toast no longer repeats the backup advice.
+- The tab title starts with "• " while there are unsaved edits.
+- Tests: unit tests for the grouping and error classification, and e2e for the dialog (cancel, confirm), grouping, the title, autosave, a truncated file and a non-save file. No fixture is an autosave, so the autosave e2e rewrites the header of `beautiful-galaxy` and loads that.
+- Risk: the "not an ONI save" versus "truncated" split is a heuristic on the parser's message, since the worker boundary drops `ParseError`'s fields.
+
+## Raw editor search and add item — 2026-11-05
+
+- Whole-tree search: the worker walks every value of the save in tree order (`worker/raw.ts`) and returns the first 200 matches with their paths.
+  - Matches by key name; by path substring when the text contains `.`, `[` or `]` (a plain word as a path match would hit everything below a key of that name); optionally by primitive value. Byte arrays are leaves.
+  - It runs in slices of about 20 ms and yields between them, so a newer query cancels the one in flight (the editor also debounces keystrokes by 350 ms).
+  - Timing in Node on the 40 MB `mithro-06-maximum-cycle-4770` save (29 million values): key search 0.5 s, key plus value search 0.7 s, a value search that matches nothing 1.8 s (the worst case: every value visited). A numeric value query that matches nothing converts every number to text and is slower; the browser adds the slice yields on top.
+  - Clicking a result opens every ancestor (each level loaded far enough to include the next step), scrolls to the row and highlights it.
+- Paging: children still load 500 at a time, with an explicit "Load N more" and "Load all" row. The loaded-rows filter is gone, replaced by the search.
+- Add item: appends a zeroed element built from the save's own template definitions (`rawDefaultItem`), offered on the array row and on its items ("Add item to this array").
+  - Only for arrays reached through a template: the world, settings and game data roots and each behavior's template data. The header JSON and hand-decoded extra data have no declared element type, so a guess could write a save the game cannot read; those rows show a disabled "Add item".
+  - Byte arrays and dictionaries are not offered: bytes stay read-only (now shown with a "read-only" badge), and a dictionary entry needs an unused key.
+- Tests:
+  - unit: key, path and value matches, the limit and truncation, cancellation, reveal, add item and undo;
+  - fixture: adding an item to an addable array changes only that array after write and re-parse, for every fixture of the tier;
+  - e2e: search for a deep key, jump to it and edit it; add item to an array of objects and of strings with `expectOnlyChanged`; the disabled state on the header.
+- Review fix: "add item" is now offered only when every template reachable from the element type exists in the save. Types the parser writes by hand (`System.Guid`, `CellEventInstance`, `Spacecraft`, `GameplayEventInstance`, `Ref`1[[...]]`, `UnityEngine.Color32`) have no template, so the first version offered arrays whose new item made `writeSave` throw. A test now adds an item to every distinct addable array shape (world, settings, game data and every behavior's template data) in each fixture, writes and re-parses the body, and checks that undo restores identical bytes. Search ids no longer repeat across page remounts, and a cancel only reaches a running search.
 - Risks:
-  - Nothing here has been loaded in the game. The POI stock edit is the riskiest: the game may rebuild the state from the state machine parameter or the field, and both are written, but whether it moves between `idle` and `recharging` on load is unchecked.
-  - The artifact fields moved between versions (see open question 20); the reader accepts both layouts, but only 7.33, 7.36, 7.37 and 7.38 saves were checked.
-  - Stock is shown against a capacity worked out from the saved roll and the transcribed range. A wrong range would show a wrong capacity; the fixtures never exceed it.
-  - The base-game destination edits use the `SpaceDestinationType` masses of this decompile; a type the table does not know cannot be edited.
+  - Arrays that the game keeps in step with another array (parallel arrays such as the conduit flow `serializedIdx` and `versionedSerializedContents`) get out of step when one is extended. The raw editor's warning covers this; nothing here checks it.
+  - Not verified in game.
+
+## Delete loose debris — 2026-11-05
+
+- The Materials sheet could already delete one loose chunk with `deleteObject`. This adds the missing parts:
+  - `deleteDebris { ids }`: one edit for any number of chunks, so one undo step. The ids are `KPrefabID` instance IDs, not `Element:index` positions, because positions shift after every delete and a second click on a list that had not refreshed yet could delete a different chunk. The worker throws if an ID is gone and changes nothing. The sheet also disables every delete control until the list for the latest revision has loaded. Undo restores every chunk at its original position in its group.
+  - "Delete selected" and "Delete all loose" with a confirm dialog that shows the count and mass (and how many were skipped).
+  - Checkboxes on loose rows; stored rows never get a delete control, and the worker refuses stored items, buildings and critters.
+- Safety check (decompile and all ten fixtures): nothing that was checked saves a loose item's `KPrefabID` instance ID except the move-order list in `CancellableMove.movables`. Counts of decoded references to loose element chunks, not counting each chunk's own ID: 0 in `beautiful-galaxy`, `beautiful-galaxy-build-744825`, `apple-park`, `konove` and `mithro-01` to `mithro-04`; 2 (Oxylite) in `mithro-05`; 1 (Liquid Sulfur) in `mithro-06`. The game does not null-check those IDs when a move order is cancelled.
+- So a chunk with `Movable.isMarkedForMove`, or whose ID is in any move-order list, cannot be deleted. The trash button is disabled with a hint, bulk delete skips it, and the worker throws. The same guard now covers `deleteObject`, which previously had none.
+- Tests: model, undo and refusal tests in `tests/debris.test.ts`, run on every fixture (delete three chunks of the busiest element, write, re-read, compare with the raw save minus those objects; undo is byte exact); move-order refusal on `mithro-05` and `mithro-06`; five e2e tests (one, selected, all, cancel, undo, plus the move-order case on the 40 MB save).
+- Risks:
+  - Not tried in game. Undecoded raw bytes were not searched for references.
+  - Deleting a chunk deletes its mass from the world; the world grid is untouched.
