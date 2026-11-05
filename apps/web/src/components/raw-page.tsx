@@ -244,9 +244,9 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
         title="Raw data"
         description="Every value in the save. Changes here skip the safety rails of the other editors, but undo still works. Byte arrays are shown but cannot be edited."
         actions={
-          <InputGroup className="w-72">
+          <InputGroup className="w-80">
             <InputGroupInput
-              placeholder="Go to path, e.g. gameObjects[0]"
+              placeholder="Go to path, e.g. header"
               className="font-mono"
               value={goto}
               onChange={(e) => setGoto(e.target.value)}

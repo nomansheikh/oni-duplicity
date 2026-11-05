@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Progress } from '@/components/ui/progress'
 import {
   Select,
   SelectContent,
@@ -12,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { fmt, fmtMass, humanize } from '@/lib/format'
+import { humanize } from '@/lib/format'
 import {
   STABLE,
   findSpecies,
@@ -20,13 +19,12 @@ import {
   maxCritters,
   planRanch,
   swims,
-  type FeedLine,
-  type ProductLine,
 } from '@/lib/tools/ranching-calc'
 import { ranchSpecies } from '@/lib/tools/ranching-data'
 import type { CritterView } from '@/worker/model'
 import { parseDemand } from '@/lib/tools/parse'
-import { Stat, ToolHeader } from './tool-header'
+import { PageHeader } from '@/components/page-header'
+import { RanchFlow } from './ranching-flow'
 
 const FAMILIES = [...new Set(ranchSpecies.map((s) => s.family))]
 
@@ -48,7 +46,7 @@ export function RanchingCalculatorPage({ critters }: { critters: CritterView[] }
 
   return (
     <div className="flex flex-col gap-4">
-      <ToolHeader
+      <PageHeader
         title="Ranching calculator"
         description="Pick a species and herd size to see the stable space, feed, output and rancher time it takes. Figures are at the game's standard rates for a healthy herd."
       />
@@ -79,10 +77,10 @@ export function RanchingCalculatorPage({ critters }: { critters: CritterView[] }
         <CardHeader>
           <CardTitle>Herd</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-4">
+        <CardContent className="grid items-end gap-4 md:grid-cols-4">
           <Labelled label="Species and morph">
             <Select value={speciesId} onValueChange={setSpeciesId}>
-              <SelectTrigger aria-label="Species and morph">
+              <SelectTrigger className="w-full" aria-label="Species and morph">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -111,7 +109,7 @@ export function RanchingCalculatorPage({ critters }: { critters: CritterView[] }
               className="tabular-nums"
             />
           </Labelled>
-          <Labelled label="Ranching attribute of the rancher">
+          <Labelled label="Rancher's ranching skill" title="Ranching attribute of the rancher">
             <Input
               type="number"
               min={0}
@@ -134,157 +132,37 @@ export function RanchingCalculatorPage({ critters }: { critters: CritterView[] }
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>{fish ? 'Pond space' : 'Stable space'}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            <div className="grid grid-cols-2 gap-2">
-              <Stat label="Space per critter" value={`${species.spacePerCritter} cells`} />
-              {fish ? (
-                <Stat label="Pond cells needed" value={fmt(plan.space.needed, 0)} />
-              ) : (
-                <>
-                  <Stat
-                    label={`Most in one stable (${STABLE.maxCells} cells)`}
-                    value={String(capacity)}
-                  />
-                  <Stat label="Cells needed" value={fmt(plan.space.needed, 0)} />
-                  <Stat label="Stables" value={String(plan.space.stables)} />
-                </>
-              )}
-            </div>
-            {!fish && (
-              <Progress
-                variant="bar"
-                tone={plan.space.fitsOneStable ? 'good' : 'bad'}
-                value={Math.min(100, (plan.space.needed / STABLE.maxCells) * 100)}
-                label={plan.space.fitsOneStable ? 'Fits one stable' : 'Needs more than one stable'}
-                state={`${fmt(plan.space.needed, 0)} of ${STABLE.maxCells} cells`}
-                aria-label="Share of a full stable used"
-              />
-            )}
-            <p className="type-caption text-muted-foreground">
-              {fish
-                ? 'Fish count against the water they swim in, not a stable: the pond needs this many cells (FishOvercrowingManager, BasePacuConfig.cs). Each fish, baby or adult, takes its own space.'
-                : `Each critter, baby or adult, takes its own space in the room. A stable is ${STABLE.minCells} to ${STABLE.maxCells} cells and needs a ranching building. Over capacity, every critter beyond it costs 1 happiness; eggs that would overfill the room stop egg laying. Source: ${STABLE.cite.join(', ')}, OvercrowdingMonitor.cs.`}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Rancher time</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3">
-            {fish ? (
-              <p className="type-small">
-                The grooming station skips swimming critters, so there is no rancher time to plan
-                for fish. Source: RanchStationConfig.cs.
-              </p>
-            ) : (
-              <>
-                <div className="grid grid-cols-2 gap-2">
-                  <Stat label="Work per cycle" value={`${fmt(plan.rancherSeconds, 0)} s`} />
-                  <Stat label="Ranchers" value={String(plan.ranchers)} />
-                </div>
-                <p className="type-caption text-muted-foreground">
-                  A visit takes 12 s per critter and lasts 600 s, plus 10 % per Ranching point.
-                  Walking and the schedule are not counted, so treat it as a minimum. Source:
-                  RanchStationConfig.cs, ModifierSet.cs.
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Feed per cycle</CardTitle>
-            <CardDescription>
-              {fmt(species.caloriesPerCycle / 1000, 0)} kcal per critter per cycle
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            {plan.feed.map((line, i) => (
-              <FeedRow key={i} line={line} />
-            ))}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Output</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-2">
-            {plan.eggsPerCycle !== undefined && (
-              <div className="grid grid-cols-2 gap-2">
-                <Stat
-                  label="Eggs per cycle"
-                  value={fmt(plan.eggsPerCycle, 2)}
-                  hint={`one per ${species.egg?.fertilityCycles} cycles each`}
-                />
-                {plan.shellKgPerCycle !== undefined && (
-                  <Stat label="Shell per cycle" value={fmtMass(plan.shellKgPerCycle)} />
-                )}
-              </div>
-            )}
-            {plan.products.map((p, i) => (
-              <ProductRow key={i} product={p} />
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-      <p className="type-caption text-muted-foreground">
-        Sources: {species.cite.join(', ')}, TUNING/CREATURES.cs.
-      </p>
+      <RanchFlow
+        species={species}
+        plan={plan}
+        fish={fish}
+        capacity={capacity}
+        secondsPerRancher={parseDemand(seconds)}
+      />
+      <details className="type-caption text-muted-foreground">
+        <summary className="cursor-pointer">Sources</summary>
+        <p className="mt-1">
+          Figures come from the game's own files: {species.cite.join(', ')},{' '}
+          {STABLE.cite.join(', ')}, OvercrowdingMonitor.cs, ModifierSet.cs, TUNING/CREATURES.cs.
+        </p>
+      </details>
     </div>
   )
 }
 
-function Labelled({ label, children }: { label: string; children: React.ReactNode }) {
+function Labelled({
+  label,
+  title,
+  children,
+}: {
+  label: string
+  title?: string
+  children: React.ReactNode
+}) {
   return (
-    <label className="flex flex-col gap-1">
+    <label className="flex flex-col gap-1" title={title}>
       <span className="type-label">{label}</span>
       {children}
     </label>
-  )
-}
-
-function FeedRow({ line }: { line: FeedLine }) {
-  const eats =
-    line.eats.length > 4 ? `${line.eats.slice(0, 4).join(', ')} and more` : line.eats.join(', ')
-  return (
-    <div className="border border-ink bg-well p-3">
-      <div className="type-small">{eats}</div>
-      <div className="type-h3 tabular-nums">
-        {line.kgPerCycle !== undefined
-          ? fmtMass(line.kgPerCycle)
-          : `${fmt(line.caloriesPerCycle / 1000, 0)} kcal`}
-      </div>
-      {line.produces && (
-        <div className="type-caption text-muted-foreground">
-          Leaves {fmtMass(line.produces.kgPerCycle)} of {humanize(line.produces.item)}
-        </div>
-      )}
-      {line.note && <div className="type-caption text-muted-foreground">{line.note}</div>}
-    </div>
-  )
-}
-
-function ProductRow({ product }: { product: ProductLine }) {
-  return (
-    <div className="border border-ink bg-well p-3">
-      <div className="type-label">{humanize(product.item)}</div>
-      <div className="type-h3 tabular-nums">
-        {product.perCycle !== undefined
-          ? `${fmt(product.perCycle, product.perCycle < 1 ? 3 : 1)} per cycle`
-          : product.onDeathKg !== undefined
-            ? `${fmtMass(product.onDeathKg)} per critter on death`
-            : ''}
-      </div>
-      <div className="type-caption text-muted-foreground">{product.note}</div>
-    </div>
   )
 }
