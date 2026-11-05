@@ -54,3 +54,7 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - The older "28 s with `fflate`" figure above was measured in the browser and is not reproduced here; its settings are not recorded. In Node on the Mac, `fflate` takes 3.7 s at level 1 and 5.1 s at level 6 (the default) for the 40 MB body, so the level alone does not explain 28 s; the gap to the browser is unexplained.
 - Next: decide how to meet the save target (see #15), and look at the 2.6 to 4.1 GB peak, since the browser tab limit is the real constraint.
 - Risks: the calibration only partly tracks the parser, so a change that slows both is invisible. Runner hardware varies (two EPYC models in three runs, with little effect so far). The Linux baseline reflects 3 runs, so refresh it if the gate flaps. A noisy machine can still fail twice in a row.
+
+## Test run — 2026-11-05
+
+- Root `vp test` no longer collects tests under `.claude/`, so agent worktrees can't fail the run. The app and package configs don't set `test.exclude`, so they needed no change.
