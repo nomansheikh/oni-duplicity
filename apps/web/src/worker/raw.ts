@@ -247,14 +247,26 @@ function typeAt(save: SaveGame, path: RawPath): TypeInfo | null {
   return type
 }
 
-/** A zero value of a declared type: what the game writes for a freshly constructed one. */
+/** The type has no value we can construct (a template the save does not define). */
+class NoDefault extends Error {}
+
+/**
+ * A zero value of a declared type: what the game writes for a freshly constructed one.
+ * Throws `NoDefault` when any type reachable from it has no template in the save (`System.Guid`,
+ * `Ref`1[[...]]`, `CellEventInstance` and others are written by hand, not from a template), since
+ * the writer would fail on the new item and the whole save could no longer be written.
+ */
 function defaultOf(save: SaveGame, type: TypeInfo, depth = 0): unknown {
   const code = codeOf(type)
   switch (code) {
     case TypeCode.UserDefined: {
       const template = templatesOf(save).get(type.templateName!)
-      // A reference type that nests itself forever is stored as null (length -1) instead.
-      if (!template || depth > 6) return depth > 6 && !(type.info & IS_VALUE_TYPE) ? null : {}
+      if (!template) throw new NoDefault(type.templateName)
+      if (depth > 6) {
+        // A reference type that nests itself forever is stored as null (length -1) instead.
+        if (type.info & IS_VALUE_TYPE) throw new NoDefault(type.templateName)
+        return null
+      }
       const out: Record<string, unknown> = {}
       for (const m of [...template.fields, ...template.properties]) {
         out[m.name] = defaultOf(save, m.type, depth + 1)
@@ -293,7 +305,8 @@ function defaultOf(save: SaveGame, type: TypeInfo, depth = 0): unknown {
 
 /**
  * The value "add item" appends to the array at `path`, taken from the save's own template
- * definitions, or null when the array's element type cannot be known.
+ * definitions, or null when the array's element type cannot be known or any type reachable from
+ * it has no template in the save (the writer could not write the new item then).
  *
  * Only arrays reached through a template are offered: the world, settings and game data roots
  * and each behavior's template data. Elsewhere (the header JSON, extra data the parser decodes
@@ -302,6 +315,33 @@ function defaultOf(save: SaveGame, type: TypeInfo, depth = 0): unknown {
  * the editor, and a dictionary entry needs a key that is not already used.
  */
 export function rawDefaultItem(save: SaveGame, arrayPath: RawPath): { value: unknown } | null {
+  const element = elementTypeOf(save, arrayPath)
+  if (!element) return null
+  try {
+    return { value: defaultOf(save, element) }
+  } catch (error) {
+    if (error instanceof NoDefault) return null
+    throw error
+  }
+}
+
+// Whether a type can be defaulted depends only on the templates, so it is worth remembering:
+// the editor asks once per array row it draws.
+const feasible = new WeakMap<TypeInfo, boolean>()
+
+/** Whether `rawDefaultItem` would offer an item, without building it. */
+export function rawCanAdd(save: SaveGame, arrayPath: RawPath): boolean {
+  const element = elementTypeOf(save, arrayPath)
+  if (!element) return false
+  let ok = feasible.get(element)
+  if (ok === undefined) {
+    ok = rawDefaultItem(save, arrayPath) !== null
+    feasible.set(element, ok)
+  }
+  return ok
+}
+
+function elementTypeOf(save: SaveGame, arrayPath: RawPath): TypeInfo | null {
   let node: unknown = save
   for (const key of arrayPath) {
     if (node === null || typeof node !== 'object') return null
@@ -311,6 +351,39 @@ export function rawDefaultItem(save: SaveGame, arrayPath: RawPath): { value: unk
   const type = typeAt(save, arrayPath)
   if (!type || !COLLECTIONS.includes(codeOf(type))) return null
   const element = type.subTypes![0]!
-  if (codeOf(element) === TypeCode.Byte) return null
-  return { value: defaultOf(save, element) }
+  return codeOf(element) === TypeCode.Byte ? null : element
+}
+
+// --- Cancellable searches ---------------------------------------------------------------
+
+/**
+ * Runs searches by id and cancels them by id. Only a search that is running can be cancelled: a
+ * cancel for an id that has not started, or has finished, does nothing, so it cannot leak into a
+ * later search that happens to reuse the id.
+ */
+export function createSearchRunner(yieldToLoop: () => Promise<void>) {
+  const running = new Map<number, { cancelled: boolean }>()
+  return {
+    async run(save: SaveGame, id: number, options: RawSearchOptions): Promise<RawSearchResult> {
+      const state = { cancelled: false }
+      running.set(id, state)
+      try {
+        return await rawSearch(save, options, {
+          cancelled: () => state.cancelled,
+          yield: yieldToLoop,
+        })
+      } finally {
+        // A newer search may have taken over this id.
+        if (running.get(id) === state) running.delete(id)
+      }
+    },
+    cancel(id: number): void {
+      const state = running.get(id)
+      if (state) state.cancelled = true
+    },
+    /** Searches still running (for tests). */
+    get active() {
+      return running.size
+    },
+  }
 }

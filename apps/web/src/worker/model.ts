@@ -1,4 +1,4 @@
-import { rawDefaultItem } from './raw.ts'
+import { rawCanAdd, rawDefaultItem } from './raw.ts'
 import {
   MinionSkills,
   effects as effectCatalog,
@@ -1300,7 +1300,7 @@ export function rawChildren(save: SaveGame, path: RawPath, offset = 0, limit = 5
     if (label) entry.label = label
     if (kind === 'array') {
       entry.size = (value as unknown[]).length
-      entry.canAdd = rawDefaultItem(save, entry.path) !== null
+      entry.canAdd = rawCanAdd(save, entry.path)
     } else if (kind === 'object') entry.size = Object.keys(value as object).length
     else if (kind === 'bytes') {
       entry.size = (value as Uint8Array).length
@@ -1311,7 +1311,7 @@ export function rawChildren(save: SaveGame, path: RawPath, offset = 0, limit = 5
     return entry
   })
   const result: RawChildren = { entries, total: pairs.length }
-  if (Array.isArray(node) && rawDefaultItem(save, path)) result.canAdd = true
+  if (Array.isArray(node) && rawCanAdd(save, path)) result.canAdd = true
   return result
 }
 

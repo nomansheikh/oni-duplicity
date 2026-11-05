@@ -57,6 +57,8 @@ const isContainer = (entry: RawEntry) => entry.kind === 'object' || entry.kind =
 /** Whole-tree search: wait this long after the last keystroke, show at most this many hits. */
 const SEARCH_DEBOUNCE = 350
 const SEARCH_LIMIT = 200
+// Ids never repeat, even across remounts of the page, so a late cancel cannot hit a newer search.
+let nextSearchId = 0
 
 type Row =
   | { type: 'entry'; entry: RawEntry; depth: number; parentCanAdd: boolean }
@@ -119,8 +121,8 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
   // Search the whole save in the worker, debounced; a newer query cancels the one in flight.
   useEffect(() => {
     const text = query.trim()
-    const id = ++searchId.current
-    void saveClient.cancelRawSearch(id - 1)
+    const id = ++nextSearchId
+    searchId.current = id
     if (text.length < 2) {
       setSearch({ state: 'idle' })
       return

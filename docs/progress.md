@@ -97,6 +97,7 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - unit: key, path and value matches, the limit and truncation, cancellation, reveal, add item and undo;
   - fixture: adding an item to an addable array changes only that array after write and re-parse, for every fixture of the tier;
   - e2e: search for a deep key, jump to it and edit it; add item to an array of objects and of strings with `expectOnlyChanged`; the disabled state on the header.
+- Review fix: "add item" is now offered only when every template reachable from the element type exists in the save. Types the parser writes by hand (`System.Guid`, `CellEventInstance`, `Spacecraft`, `GameplayEventInstance`, `Ref`1[[...]]`, `UnityEngine.Color32`) have no template, so the first version offered arrays whose new item made `writeSave` throw. A test now adds an item to every distinct addable array shape (world, settings, game data and every behavior's template data) in each fixture, writes and re-parses the body, and checks that undo restores identical bytes. Search ids no longer repeat across page remounts, and a cancel only reaches a running search.
 - Risks:
   - Arrays that the game keeps in step with another array (parallel arrays such as the conduit flow `serializedIdx` and `versionedSerializedContents`) get out of step when one is extended. The raw editor's warning covers this; nothing here checks it.
   - Not verified in game.

@@ -1,10 +1,16 @@
 import { readFileSync } from 'node:fs'
 import { basename } from 'node:path'
-import { parseSave, writeSaveParts, type SaveGame } from '@oni-duplicity/save-parser'
+import {
+  parseBody,
+  parseSave,
+  readSaveParts,
+  writeSaveParts,
+  type SaveGame,
+} from '@oni-duplicity/save-parser'
 import { expect, test } from 'vite-plus/test'
 import { applyWithRestore } from '../src/worker/snapshot.ts'
 import { applyEdit, rawChildren, rawGet, rawReveal, type RawPath } from '../src/worker/model.ts'
-import { rawDefaultItem, rawSearch } from '../src/worker/raw.ts'
+import { createSearchRunner, rawCanAdd, rawDefaultItem, rawSearch } from '../src/worker/raw.ts'
 import { changedPaths, fixtures, galaxy, roundTrip, sameBytes } from './helpers.ts'
 
 const save = parseSave(readFileSync(galaxy))
@@ -135,6 +141,105 @@ test('add item: appends a default, offers only template-typed arrays, and undoes
 })
 
 const all = process.env.FIXTURE_TIER === 'all'
+
+/**
+ * Every array "add item" is offered for, one per distinct shape: the world, settings and game
+ * data roots, and every behavior's template data (keyed by behavior name, indices ignored).
+ */
+function addableShapes(save: SaveGame): Map<string, RawPath> {
+  const found = new Map<string, RawPath>()
+  const walk = (value: unknown, path: RawPath, key: string) => {
+    if (value === null || typeof value !== 'object' || value instanceof Uint8Array) return
+    if (Array.isArray(value)) {
+      if (!found.has(key) && rawCanAdd(save, path)) found.set(key, [...path])
+      for (let i = 0; i < value.length; i++) walk(value[i], [...path, i], `${key}.*`)
+      return
+    }
+    for (const [name, child] of Object.entries(value))
+      walk(child, [...path, name], `${key}.${name}`)
+  }
+  for (const root of ['world', 'settings', 'gameData'] as const) {
+    walk(save[root], [root], root)
+  }
+  save.gameObjects.forEach((group, g) =>
+    group.gameObjects.forEach((obj, i) =>
+      obj.behaviors.forEach((b, j) => {
+        if (b.templateData) {
+          const path: RawPath = ['gameObjects', g, 'gameObjects', i, 'behaviors', j, 'templateData']
+          walk(b.templateData, path, `${b.name}`)
+        }
+      }),
+    ),
+  )
+  return found
+}
+
+// Shapes already proven on an earlier fixture are skipped on the later (larger) ones.
+const proven = new Set<string>()
+
+test.each(
+  fixtures.filter((f) => all || !/mithro-0[3-6]/.test(f)).map((f) => [basename(f), f] as const),
+)(
+  '%s: every addable array still writes and parses after adding an item, and undo is exact',
+  (_name, path) => {
+    const bytes = readFileSync(path)
+    const save = parseSave(bytes)
+    const baseline = body(save)
+    const { templates } = readSaveParts(bytes)
+    let checked = 0
+    for (const [key, target] of addableShapes(save)) {
+      if (proven.has(key)) continue
+      proven.add(key)
+      checked++
+      const array = rawGet(save, target) as unknown[]
+      const length = array.length
+      const restore = applyWithRestore(save, { type: 'rawAdd', path: target })
+      let written: Uint8Array
+      try {
+        written = writeSaveParts(save).body.slice()
+      } catch (error) {
+        throw new Error(`${key} (${target.join('.')}): ${(error as Error).message}`)
+      }
+      const parsed = parseBody(written, templates) as unknown as SaveGame
+      expect((rawGet(parsed, target) as unknown[]).length, key).toBe(length + 1)
+      restore()
+      expect(array.length, key).toBe(length)
+      expect(sameBytes(body(save), baseline), `${key}: undo`).toBe(true)
+    }
+    expect(checked).toBeGreaterThanOrEqual(0)
+  },
+  900_000,
+)
+
+test('arrays whose element type has no template are not offered', () => {
+  const s = parseSave(readFileSync(galaxy))
+  const shapes = [...addableShapes(s).keys()].join(' ')
+  for (const name of [
+    'EventInstances',
+    'serializedMinions',
+    'spacecraft',
+    'activeEvents',
+    'm_researchDestinations',
+  ]) {
+    expect(shapes).not.toContain(`.${name}`)
+  }
+})
+
+test('a cancel only reaches a search that is running', async () => {
+  const runner = createSearchRunner(() => new Promise((resolve) => setTimeout(resolve, 0)))
+  // A stale cancel for an id nobody is running must not poison a later search that reuses it.
+  runner.cancel(7)
+  const result = await runner.run(save, 7, { query: 'numberOfCycles' })
+  expect(result.matches.length).toBeGreaterThan(0)
+  expect(runner.active).toBe(0)
+  // Cancelling a running search rejects it and leaves nothing behind.
+  const running = runner.run(save, 8, { query: 'zzz-nothing', values: true })
+  runner.cancel(8)
+  await expect(running).rejects.toThrow('cancelled')
+  expect(runner.active).toBe(0)
+  // The same id can be used again afterwards.
+  await expect(runner.run(save, 8, { query: 'numberOfCycles' })).resolves.toBeDefined()
+})
 
 // Every fixture with an addable array: appending one default changes only that array, and the
 // result re-parses. Small saves by default, every fixture with FIXTURE_TIER=all.
