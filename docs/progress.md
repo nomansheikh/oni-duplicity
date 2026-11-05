@@ -81,3 +81,13 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - The bionic test needs the 40 MB full-tier fixture, so it is skipped on PRs and runs only on full-tier CI (`main` and nightly). There it fails instead of skipping when the fixture is missing (`CI` set and `FIXTURE_TIER=all`).
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
+
+## Duplicant traits and list — 2026-11-05
+
+- `packages/game-data/src/trait-info.ts` holds the trait lists of `DUPLICANTSTATS` (rarity, DLC, excluded traits and interests, model) and the pure rules `traitConflicts` and `traitUnavailable`. Counts: positive 42, negative 28, congenital 6 (with `None`), genetic 4, bionic 17 (7 bugs, 10 booster traits), stress 6, joy 7, need 7, special 24.
+- Traits tab: colour-coded category badges; the add-trait list leaves out traits the save's DLC or the duplicant's model rules out, and shows clashing traits blocked with the reason; conflicts already in a save are flagged and left alone.
+- `RoboDancer` was `Robodancer` in the generated catalog, and the congenital and booster traits were missing; `game-data` now corrects and adds them.
+- Duplicant list: search by name, trait or interest; sort by save order, name, arrival, experience, skills mastered, stress and model.
+- Profile paste: a bionic profile onto a standard duplicant (or the reverse) is refused for traits, interests, skills and appearance, in the dialog and in the worker. Profiles now record their model.
+- Tests: unit tests for the rules, a fixture test that adding an allowed trait changes only that duplicant's traits (standard and bionic), a test that every fixture trait is in the table, and Playwright tests for adding, blocked traits, the bionic list, paste, search and sort.
+- Risks: no exclusion rule is verified in game; the model rules for stress, joy and special traits are inferred from the decompile and fixtures (see open questions).

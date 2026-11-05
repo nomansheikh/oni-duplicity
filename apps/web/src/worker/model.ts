@@ -19,6 +19,7 @@ import {
   skillGroups,
   traits as traitCatalog,
   unresample,
+  type DuplicantModel,
   type GeyserTypeEntry,
   type Range,
 } from '@oni-duplicity/game-data'
@@ -31,6 +32,7 @@ import {
   type StoredItem,
   type TemplateData,
 } from '@oni-duplicity/save-parser'
+import { blockedSections, modelLabel, profileModel } from '../lib/profile.ts'
 
 // --- View models (sent to the UI) -----------------------------------------
 
@@ -182,6 +184,12 @@ export interface DuplicantView {
   id: string
   prefab: string
   isBionic: boolean
+  /** The duplicant model, which decides the traits and skills it can have. */
+  model: DuplicantModel
+  /** DLC IDs active in the save. */
+  dlcIds: string[]
+  /** The cycle the duplicant arrived in (`MinionIdentity.arrivalTime`; 0 for the first three). */
+  arrivalTime: number
   name: string
   gender: string
   personality: Named
@@ -267,6 +275,8 @@ function rollsMatch(config: GeyserConfig, type: GeyserTypeEntry): boolean {
 /** A portable copy of a duplicant's editable state (copy/paste and JSON export). */
 export interface DuplicantProfile {
   format: 'duplicity-duplicant@1'
+  /** The model copied from; older exports lack it (read from the traits). */
+  model?: DuplicantModel
   name: string
   gender: string
   traits: string[]
@@ -531,6 +541,9 @@ export function listDuplicants(save: SaveGame): DuplicantView[] {
       id,
       prefab,
       isBionic: prefab === 'BionicMinion',
+      model: prefab === 'BionicMinion' ? 'BionicMinion' : 'Minion',
+      dlcIds: [...activeDlcs],
+      arrivalTime: typeof identity.arrivalTime === 'number' ? identity.arrivalTime : 0,
       name: typeof identity.name === 'string' ? identity.name : '',
       gender: typeof identity.gender === 'string' ? identity.gender : '',
       personality: withName(named(personalityKey, findPersonality(personalityKey)), identity.name),
@@ -859,6 +872,15 @@ function applyProfile(
 ): void {
   if (profile.format !== 'duplicity-duplicant@1')
     throw new Error('Not a Duplicity duplicant profile')
+  // A bionic and a standard duplicant do not share traits, interests, skills or body parts.
+  const modelName = (data(obj, 'MinionIdentity').model as { name?: string } | undefined)?.name
+  const target: DuplicantModel = modelName === 'BionicMinion' ? 'BionicMinion' : 'Minion'
+  const blocked = blockedSections(profile, target).filter((s) => sections.has(s))
+  if (blocked.length > 0) {
+    throw new Error(
+      `A ${modelLabel(profileModel(profile))} profile's ${blocked.join(', ')} cannot be applied to a ${modelLabel(target)} duplicant`,
+    )
+  }
   const identity = data(obj, 'MinionIdentity')
   if (sections.has('name')) {
     identity.name = profile.name

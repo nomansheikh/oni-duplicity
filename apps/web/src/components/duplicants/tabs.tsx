@@ -37,9 +37,12 @@ import {
 } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
+import { findTraitInfo } from '@oni-duplicity/game-data'
 import { humanize, portraitParts } from '@/lib/format'
+import { heldConflicts } from '@/lib/traits'
 import type { AmountView, DuplicantEdit, DuplicantView, Named } from '@/worker/model'
 import { DuplicantAvatar, Hint, NumberField, SearchPicker } from '../common'
+import { TraitCategoryBadge, TraitPicker } from './TraitPicker'
 
 type EditFn = (change: DuplicantEdit) => void
 
@@ -91,16 +94,15 @@ export function TraitsTab({
   catalog: Named[]
   edit: EditFn
 }) {
+  const conflicts = heldConflicts(dupe, catalog)
   return (
     <Panel
       title="Traits"
-      description="Traits are applied when the game loads the save."
+      description="Traits are applied when the game loads the save. Traits the model or the save's DLC rule out are not offered, and clashing ones are blocked."
       action={
-        <SearchPicker
-          label="Add trait"
-          heading="Traits"
-          items={catalog}
-          exclude={dupe.traits.map((t) => t.id)}
+        <TraitPicker
+          subject={dupe}
+          catalog={catalog}
           onSelect={(traitId) => edit({ type: 'addTrait', traitId })}
         />
       }
@@ -110,11 +112,19 @@ export function TraitsTab({
       ) : (
         <ItemGroup className="grid gap-2 @3xl/main:grid-cols-2">
           {dupe.traits.map((trait) => (
-            <Item key={trait.id} variant="outline">
+            <Item key={trait.id} variant="outline" data-trait={trait.id}>
               <ItemContent>
-                <ItemTitle>{trait.name}</ItemTitle>
+                <ItemTitle>
+                  {trait.name}
+                  <TraitCategoryBadge category={findTraitInfo(trait.id)?.category} />
+                </ItemTitle>
                 {trait.desc && (
                   <ItemDescription className="whitespace-pre-line">{trait.desc}</ItemDescription>
+                )}
+                {conflicts.has(trait.id) && (
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    {conflicts.get(trait.id)} The save has it, so it is kept.
+                  </p>
                 )}
               </ItemContent>
               <ItemActions>
