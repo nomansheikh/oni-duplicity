@@ -183,7 +183,7 @@ export function ProfileActions({
                     )
                   }
                 />
-                <FieldLabel htmlFor={`section-${section.id}`} className="font-normal">
+                <FieldLabel htmlFor={`section-${section.id}`} className="type-body">
                   {section.label}
                 </FieldLabel>
               </Field>

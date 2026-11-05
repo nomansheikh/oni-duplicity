@@ -31,7 +31,7 @@ export function ColonyActions({ onEdit }: { onEdit: (edit: Edit) => void }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
+          <Button variant="accent" size="sm">
             <Wand2 /> Everyone
           </Button>
         </DropdownMenuTrigger>
