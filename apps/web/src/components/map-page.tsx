@@ -55,6 +55,7 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
   )
   const [worldId, setWorldId] = useState(ordered[0]?.id ?? '')
   const [map, setMap] = useState<WorldMap | null>(null)
+  const [error, setError] = useState<{ worldId: string; message: string } | null>(null)
   // Which world `map` shows; it lags `worldId` until the new map arrives.
   const [mapWorld, setMapWorld] = useState<string | null>(null)
   const [mode, setMode] = useState<Mode>('element')
@@ -67,12 +68,23 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
 
   useEffect(() => {
     let cancelled = false
-    void saveClient.worldMap(worldId).then((next) => {
-      if (cancelled) return
-      setMap(next)
-      setMapWorld(worldId)
-      setHighlight(null)
-    })
+    saveClient
+      .worldMap(worldId)
+      .then((next) => {
+        if (cancelled) return
+        setMap(next)
+        setMapWorld(worldId)
+        setError(null)
+        setHighlight(null)
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return
+        setMap(null)
+        setError({
+          worldId,
+          message: e instanceof Error ? e.message : 'Could not read this map',
+        })
+      })
     return () => {
       cancelled = true
     }
@@ -235,6 +247,8 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
                   />
                 ))}
             </div>
+          ) : error?.worldId === worldId ? (
+            <p className="p-4 text-sm text-destructive">{error.message}</p>
           ) : (
             <Skeleton className="size-full" />
           )}

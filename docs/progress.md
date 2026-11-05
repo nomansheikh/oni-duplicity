@@ -51,6 +51,13 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Next: in-game check of a geyser edit; e2e tests.
 - Risk: the decompile's game build is unknown. If a build keeps the saved values instead, the edits still hold, since both are written.
 
+## Review fixes for the save editor — 2026-11-05
+
+- A bulk edit that fails partway is now rolled back before the error surfaces, so a half-applied change can no longer reach a download without an undo entry. The undo snapshot already covered everything the bulk actions touch (duplicant behaviour data and extra data).
+- Undoing a debug-flag edit no longer adds a `debugWasUsed` key to a save that lacked one.
+- The map refuses a world whose offset or size falls outside the saved grid, and the map page shows the reason.
+- New tests cover the rollback, the debug flag, each bulk action (write, parse, compare which paths changed) and the map on every fixture.
+
 ## End-to-end tests — 2026-11-05
 
 - Playwright suite in `apps/web/e2e/`: each test loads a fixture, edits through the UI, downloads the save and re-parses it with the save-parser. `expectOnlyChanged` then asserts that the diff against the original is exactly the intended paths and nothing else.

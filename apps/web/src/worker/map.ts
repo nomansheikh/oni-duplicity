@@ -56,12 +56,24 @@ function boundsOf(save: SaveGame, grid: SimGrid, worldId: string): Bounds {
     | { worldOffset?: { x: number; y: number }; worldSize?: { x: number; y: number } }
     | undefined
   if (world?.worldOffset && world.worldSize) {
-    return {
+    const bounds = {
       x: world.worldOffset.x,
       y: world.worldOffset.y,
       width: world.worldSize.x,
       height: world.worldSize.y,
     }
+    // Game cell (x, y) is grid cell (x + 1, y + 1), inside a one-cell border.
+    const { x, y, width, height } = bounds
+    const whole = [x, y, width, height].every(Number.isInteger)
+    if (!whole || x < 0 || y < 0 || width < 1 || height < 1) {
+      throw new Error('This world has an invalid size or position, so its map cannot be shown')
+    }
+    if (x + width > grid.width - 2 || y + height > grid.height - 2) {
+      throw new Error(
+        `This world lies outside the saved grid (${grid.width - 2} by ${grid.height - 2} cells), so its map cannot be shown`,
+      )
+    }
+    return bounds
   }
   // Saves without world containers: the whole grid inside its border.
   return { x: 0, y: 0, width: grid.width - 2, height: grid.height - 2 }

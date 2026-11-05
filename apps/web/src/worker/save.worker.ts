@@ -1,77 +1,24 @@
 import { expose, transfer } from 'comlink'
+import { parseSave, writeSaveParts, type SaveGame } from '@oni-duplicity/save-parser'
 import {
-  parseSave,
-  writeSaveParts,
-  type GameObject,
-  type SaveGame,
-} from '@oni-duplicity/save-parser'
-import {
-  applyEdit,
   catalogs,
   listDuplicants,
   listGeysers,
-  cloneValue,
   listCritters,
   listDestinations,
   listGameSettings,
   listTechs,
   listWorlds,
   rawChildren,
-  rawGet,
   type RawPath,
   listMaterialItems,
   listMaterials,
-  touchedBy,
   summarize,
   type Edit,
 } from './model.ts'
 import { describeEdit } from './describe.ts'
 import { worldMap } from './map.ts'
-
-/** Captures the state an edit can touch, so undo can put it back. */
-function snapshot(save: SaveGame, edit: Edit): () => void {
-  // Raw edits restore just the value (or array) they touched; walking the tree is cheap.
-  if (edit.type === 'rawSet') {
-    const old = rawGet(save, edit.path)
-    const parent = rawGet(save, edit.path.slice(0, -1)) as Record<string | number, unknown>
-    const key = edit.path[edit.path.length - 1]!
-    return () => {
-      parent[key] = old
-    }
-  }
-  if (edit.type === 'rawRemove' || edit.type === 'rawDuplicate') {
-    const array = rawGet(save, edit.path.slice(0, -1)) as unknown[]
-    const copy = [...array]
-    return () => {
-      array.splice(0, array.length, ...copy)
-    }
-  }
-  const gameInfo = cloneValue(save.header.gameInfo)
-  const customGameSettings = cloneValue(save.gameData.customGameSettings)
-  const debugWasUsed = save.gameData.debugWasUsed
-  const behaviors = touchedBy(save, edit).flatMap((obj: GameObject) =>
-    obj.behaviors.map((b) => ({
-      b,
-      templateData: cloneValue(b.templateData),
-      extraData: cloneValue(b.extraData),
-    })),
-  )
-  // Cloning or deleting changes group lists and the unique ID counter, not just behaviors.
-  const structural = edit.type === 'deleteObject' || edit.type === 'cloneObject'
-  const groups = structural ? save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] })) : []
-  const settings = structural ? cloneValue(save.settings) : null
-  return () => {
-    save.header.gameInfo = gameInfo
-    save.gameData.customGameSettings = customGameSettings
-    save.gameData.debugWasUsed = debugWasUsed
-    for (const s of behaviors) {
-      s.b.templateData = s.templateData
-      if (s.extraData !== undefined) s.b.extraData = s.extraData
-    }
-    for (const { g, list } of groups) g.gameObjects = list
-    if (settings) save.settings = settings
-  }
-}
+import { applyWithRestore } from './snapshot.ts'
 
 let save: SaveGame | null = null
 let fileName = ''
@@ -91,8 +38,7 @@ function apply(edit: Edit) {
   const s = current()
   // Describe first: a delete can remove the name the label needs.
   const label = describeEdit(s, edit)
-  const restore = snapshot(s, edit)
-  applyEdit(s, edit)
+  const restore = applyWithRestore(s, edit)
   undoStack.push({ edit, restore, label })
 }
 
