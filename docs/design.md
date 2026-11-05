@@ -6,6 +6,7 @@ Mockups, each with the game screenshot next to it at the same scale and a blend 
 
 - [Duplicants (list, editor card, dialog)](https://claude.ai/artifact/YT11RnP97xQbzpLaVKgrAu)
 - [Overview (screen, top bar and legend panel, cycle badge)](https://claude.ai/artifact/QL8k3UGD6KqGuMHe1D2TPN)
+- [Component gallery (meters, buttons, tabs, inputs, tooltip, table, alerts)](https://claude.ai/artifact/31h5BGhkwmWk6uH5DLw4qi)
 
 Two earlier directions were rejected: a generic "Colony Control Panel" and a "game-native" pass that described the game from memory. This one starts from the screenshots.
 
@@ -359,6 +360,87 @@ Chips are the one place we depart from the game, which colours plain text. They 
 - **Alert banner:** `#a52a31` bar with `!`, followed by `well` bullet lines. `#a52a31` is derived from the red swatch and the R5 banner, not sampled cleanly.
 - **Portrait frame:** `holo` class: `--holo` radial base with 1.5px `--holo-line` grid at 58px. A CSS approximation of R2/R3, not an extracted asset.
 - **Input:** `background: var(--inset); border: 1px solid var(--ink); height: 1.9rem; padding-inline: .6rem`.
+
+## 5a. Components (gallery pass)
+
+Feedback on v2 was that the progress bars and other elements were weaker than the game's. This pass restyles each element on its own, beside a crop of the game where one exists. Gallery with every state, three meter variants and the contrast table: [Component gallery](https://claude.ai/artifact/31h5BGhkwmWk6uH5DLw4qi). Where this section and section 5 disagree, this section wins.
+
+**Chosen meter variant: TBD (owner picks)**
+
+### New and changed tokens
+
+| Token                       | Value                | Why                                                                                                              |
+| --------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `--m-good`                  | `#51ad52`            | Sampled: morale block fill (R1, R12). Replaces `--meter-ok` `#4ca44c`.                                           |
+| `--m-bad`                   | `#c56660`            | Sampled: morale need blocks (R1, R12). Replaces `--meter-bad`.                                                   |
+| `--m-warn`                  | `#e3a03d`            | Derived: between the sampled green and red, matching the `warn` text hue.                                        |
+| `--m-xp`                    | `#b8598a`            | Lifted from the game's XP fill `#6e4057`, which is 1.92:1 on our track and fails 3:1.                            |
+| `--m-geyser`, `--m-dormant` | `#3fb6b0`, `#6a7188` | Derived: active teal, dormant slate with a hatch.                                                                |
+| `--edge`                    | `#8f97b5`            | Outer 1px ring on inputs, checkboxes, switches and slider tracks so their edges reach 3:1 on `well` and `panel`. |
+| `--on-tab`                  | `#14161e`            | Label colour on the active tab. White on `#808bb2` is 3.36:1.                                                    |
+| `--fg-2`, `--fg-3`          | `#bcbcbc`, `#a9adbd` | Lightened from `#b2b2b2` and `#8c90a0`, which fall under 4.5:1 on `panel`.                                       |
+| `--bad-text`                | `#ff7673`            | `#f44a47` is 3.48:1 on `well`; keep it for fills and borders only.                                               |
+| `--row`                     | `#686978`            | Roster rows. The sampled `#7e7e89` with white text is 4.01:1.                                                    |
+| `--btn-grey-hi`             | `#747370`            | Hover for the grey default button (4.74:1).                                                                      |
+| `--ring`                    | `--warn`             | Focus ring, 2px, 1px offset.                                                                                     |
+
+### Recipes
+
+All square, 1px `--ink`, no radius. Full CSS is in the gallery source; these are the rules a shadcn component needs.
+
+| Element      | shadcn component | Recipe                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Button       | `Button`         | Base `btn-game rounded-none hover:bg-[var(--hi)] active:bg-[var(--lo)] active:pt-[2px] active:shadow-[inset_0_2px_0_rgb(0_0_0/.4)] disabled:bg-[#2d303d] disabled:text-[#8e92a3]`. Variants set `--bg --hi --lo`: default `#6a6966 #747370 #4f4e4b`, secondary `#4f5261 #5f6478 #3e4357`, outline `#3e4357 #4a5068 #1f222b`, accent `#7f3d5e #904f70 #602e47`, destructive `#962a28 #ad3432 #6f1f1d`. Hover, pressed and disabled are derived. |
+| Tabs         | `Tabs`           | `TabsList` `flex gap-[3px] bg-transparent p-0 overflow-x-auto`; `TabsTrigger` `tab rounded-none data-[state=active]:bg-[var(--tab-on)] data-[state=active]:text-[var(--on-tab)] hover:bg-[var(--tab-hi)]`; count slot `bg-black/30 px-1.5 text-[.8rem]`.                                                                                                                                                                                       |
+| Checkbox     | `Checkbox`       | `size-[1.4rem] rounded-none border-ink bg-inset shadow-[0_0_0_1px_var(--edge),inset_0_0_0_1px_#3a3f52]`; indicator is an L-shaped tick, `border-b-[3px] border-l-[3px] border-[#5cc844] -rotate-45`.                                                                                                                                                                                                                                           |
+| Switch       | `Switch`         | Track `h-[1.55rem] w-12 rounded-none bg-inset data-[state=checked]:bg-[#1d3a26]`; thumb `rounded-none w-[1.1rem] bg-[#9a9eb0] data-[state=checked]:translate-x-[1.35rem] data-[state=checked]:bg-[var(--m-good)]`.                                                                                                                                                                                                                             |
+| Slider       | `Slider`         | Track is the meter track plus 10% ticks and `shadow-[0_0_0_1px_var(--edge)]`; range `bg-[var(--m-good)]`; thumb `h-6 w-[.8rem] rounded-none bg-[var(--tab-on)] border-ink`.                                                                                                                                                                                                                                                                    |
+| Number input | `Input`          | `h-[2.1rem] rounded-none border-ink bg-inset px-[.6rem] tabular-nums shadow-[0_0_0_1px_var(--edge),inset_0_1px_0_rgb(0_0_0/.4)] aria-invalid:border-bad`. Stepper: two icon `Button`s in an `InputGroup`.                                                                                                                                                                                                                                      |
+| Dropdown     | `Select`         | Trigger as `Input` with a 5px caret; content `tip-game p-0`; item `min-h-8 focus:bg-[var(--tab-on)] focus:text-[var(--on-tab)]`; tick as the checkbox tick.                                                                                                                                                                                                                                                                                    |
+| Tooltip      | `Tooltip`        | `bg-[#242c3c] border-ink shadow-[inset_0_0_0_1px_#3a4358] text-[.93rem] px-3 py-2 max-w-[21rem]`, no arrow, `sideOffset={6}`. Keywords `#f2c14a`, names `#e07aa5`, good `#52c079`, bad `#ff7673`.                                                                                                                                                                                                                                              |
+| Table        | `Table`          | Head `bg-[var(--field)] border-ink font-heading uppercase tracking-[.09em]` with a sort `<button>` and `aria-sort`; cell `bg-[var(--well)] border-ink`; even rows `#2b2f3c`; hover `#383d50`; selected `var(--title)`. Wrap in `overflow-x-auto`.                                                                                                                                                                                              |
+| Alert        | `Alert`          | Title bar `bg-[var(--t)]` with a `bg-black/35` "!" square; tones `--t`: `#962a28` critical, `#8a5a10` warning, `#33507a` info, `#2f6b3e` success. Body `pl-[1.9rem] text-[var(--fg-2)]`.                                                                                                                                                                                                                                                       |
+| Stat pill    | `Badge`          | `bg-inset border-ink h-[1.9rem] px-[.6rem] gap-[.45rem] font-semibold tabular-nums`; icon and value take the tone colour (`good-hi`, `warn`, `bad-text`).                                                                                                                                                                                                                                                                                      |
+
+### Meters (shadcn `Progress`)
+
+Shared rules: track `--inset` with a 1px ink border; fill sits inside a 1px inset and has a dark band across its bottom fifth (`inset 0 -4px 0 rgb(0 0 0/.25)`), copied from the morale block. Tone is chosen by the value, and every meter also prints the value and a state word, so colour is never the only cue.
+
+| Kind                                            | Tone rule                                                                                                                                       |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Amount with max (calories, stamina, bionic oil) | `>= 50%` good, `>= 25%` warn, else bad                                                                                                          |
+| Health                                          | `>= 70%` good, `>= 35%` warn, else bad                                                                                                          |
+| Stress (higher is worse)                        | `<= 40%` good, `<= 70%` warn, else bad. Blocks and the gauge colour by position along the track, not by the current value. Thresholds are ours. |
+| XP to next level                                | `--m-xp` throughout. At max the word is "Ready"; surplus shows as over-max.                                                                     |
+| Geyser activity                                 | Two parts on one scale: active teal, dormant hatched slate, a white marker for now. Readout "N cycles left" or "wakes in N".                    |
+
+Over-max: the fill stays full and the readout adds `+N` in `warn`. A adds four hatched amber blocks after a gap. B stretches the track by 25%, draws a white flag at the maximum and hatches the tail. C adds an amber end cap.
+
+| Variant     | Pitch                                                                                                                                        |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| A · Blocks  | The game's morale meter. Outlined cells are countable at a glance and crisp at any width. Best in the Vitals table and roster.               |
+| B · Gauge   | Continuous fill in an inset track with 10% ticks, threshold flags and a hatched over-max tail. Most precise. Best where the value is edited. |
+| C · Readout | Icon chip, value spelled out, thin bar under it, state word at the right. Densest and most scannable. Best on the duplicant card and phones. |
+
+### Contrast (WCAG 2.1, from the hex values above)
+
+Text pairs all reach 4.5:1 and bars and control edges reach 3:1. Lowest text results: white on the grey button hover 4.74:1, black on the teal group header 4.75:1, `--bad-text` on `well` 4.77:1, warn text on `panel` 4.88:1, `--fg-2` on `panel` 5.00:1, `--fg-3` on `well` 5.54:1. Lowest non-text: control edge on `panel` 3.28:1, bad fill on track 4.12:1, XP fill on track 3.66:1. Where the game's own pair fails, the gallery lists both: white on the active tab 3.36:1, `#b2b2b2` on `panel` 4.47:1, `#f44a47` on `well` 3.48:1, white on the `#7e7e89` roster row 4.01:1, `#6e4057` XP fill on track 1.92:1. Focus ring `#ffa649` is 4.88:1 on `panel`.
+
+Other rules: base 14px (13px under 420px) and all sizes in `rem`; 44px minimum height for buttons and options on coarse pointers; tab strips and tables scroll sideways inside their own box; `prefers-reduced-motion` removes the switch slide.
+
+### Added references
+
+Collected 2026-11-05. Used for comparison and colour sampling only.
+
+| #   | Screen                                                    | Source                                                                                                                |
+| --- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| R8  | In-world task progress bar                                | [wiki.gg File:Skill_up.jpg](https://oxygennotincluded.wiki.gg/wiki/File:Skill_up.jpg)                                 |
+| R9  | Daily Reports (table, Prev/Next, close)                   | [wiki.gg File:Daily_Reports.png](https://oxygennotincluded.wiki.gg/wiki/File:Daily_Reports.png)                       |
+| R10 | HUD warning lines                                         | Steam store screenshot 6                                                                                              |
+| R11 | Notification Designer (inputs, checkboxes; Klei dev tool) | [wiki.gg File:Notification_Designer_UI.png](https://oxygennotincluded.wiki.gg/wiki/File:Notification_Designer_UI.png) |
+| R12 | Morale meter preview (block colours, bevel)               | [wiki.gg File:Morale_preview.png](https://oxygennotincluded.wiki.gg/wiki/File:Morale_preview.png)                     |
+
+Still not captured: stress, health, calorie, stamina, research and geyser bars, slider, stepper, dropdown list, and hover, pressed and disabled states. All are marked derived in the gallery. Direct `/images/` URLs on wiki.gg download with plain `curl`; only the `api.php` endpoint blocked scripted requests.
 
 ## 6. Fonts
 
