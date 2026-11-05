@@ -13,7 +13,7 @@ const showGallery = Gallery !== null && new URLSearchParams(location.search).has
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark" enableSystem={false}>
       <TooltipProvider delayDuration={300}>
         {showGallery && Gallery ? (
           <Suspense fallback={null}>
