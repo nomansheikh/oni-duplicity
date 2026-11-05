@@ -30,5 +30,10 @@ dist-ssr
 # Fixtures downloaded by `vp run fixtures`
 test-data/fetched/
 
+# Playwright output
+playwright-report
+test-results
+blob-report
+
 # Oracle parser built by `vp run differential`
 .cache/

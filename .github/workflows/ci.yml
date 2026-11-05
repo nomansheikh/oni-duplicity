@@ -7,6 +7,11 @@ on:
   schedule:
     - cron: '0 3 * * *'
   workflow_dispatch:
+    inputs:
+      bench_baseline:
+        description: Record a benchmark baseline for this runner and upload it as an artifact
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -25,7 +30,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      - uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
+      - uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
         with:
           node-version: '24'
           cache: true
@@ -33,30 +38,62 @@ jobs:
       - run: vp install
 
       # PRs fetch the small tier unless they change the manifest; everything else fetches all.
+      # The parser benchmark also runs on PRs that touch the parser or the benchmark itself, and
+      # then fetches just the two saves it measures.
       - name: Choose fixture tier
         run: |
-          if [ "$GITHUB_EVENT_NAME" = pull_request ] && git diff --quiet HEAD^1 HEAD -- test-data/fixtures.json; then
-            tier=small
+          tier=all
+          bench=no
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            if git diff --quiet HEAD^1 HEAD -- test-data/fixtures.json; then
+              tier=small
+            fi
+            if ! git diff --quiet HEAD^1 HEAD -- packages/save-parser scripts/bench.ts scripts/bench test-data/bench-baseline.json; then
+              bench=yes
+            fi
           else
-            tier=all
+            bench=yes
           fi
-          echo "Fixture tier: $tier"
+          echo "Fixture tier: $tier, benchmark: $bench"
           echo "FIXTURE_TIER=$tier" >> "$GITHUB_ENV"
+          echo "RUN_BENCH=$bench" >> "$GITHUB_ENV"
+          if [ "$tier" = small ] && [ "$bench" = yes ]; then
+            echo "FIXTURE_SUFFIX=-bench" >> "$GITHUB_ENV"
+          fi
 
       - name: Restore fetched fixtures
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: test-data/fetched
-          key: fixtures-${{ env.FIXTURE_TIER }}-${{ hashFiles('test-data/fixtures.json') }}
+          key: fixtures-${{ env.FIXTURE_TIER }}${{ env.FIXTURE_SUFFIX }}-${{ hashFiles('test-data/fixtures.json') }}
           restore-keys: |
             fixtures-all-${{ hashFiles('test-data/fixtures.json') }}
 
       - name: Fetch and verify fixtures
         run: vp run fixtures --tier "$FIXTURE_TIER"
 
+      - name: Fetch benchmark fixtures
+        if: env.FIXTURE_TIER == 'small' && env.RUN_BENCH == 'yes'
+        run: vp run fixtures --file mithro-06-maximum-cycle-4770.sav --file mithro-03-late-game-cycle-1160.sav
+
       - run: vp check
 
       - run: vp test
+
+      - name: Check parser performance
+        if: env.RUN_BENCH == 'yes' && !inputs.bench_baseline
+        run: vp run bench --require
+
+      - name: Record benchmark baseline
+        if: inputs.bench_baseline
+        run: vp run bench --update
+
+      - name: Upload benchmark baseline
+        if: inputs.bench_baseline
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bench-baseline-${{ github.run_id }}
+          path: test-data/bench-baseline.json
 
       - name: Restore differential oracle
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
