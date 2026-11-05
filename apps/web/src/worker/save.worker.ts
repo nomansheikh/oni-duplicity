@@ -4,6 +4,7 @@ import {
   catalogs,
   listDuplicants,
   listGeysers,
+  listStories,
   listCritters,
   listDestinations,
   listGameSettings,
@@ -68,6 +69,7 @@ const api = {
   techs: () => listTechs(current()),
   gameSettings: () => listGameSettings(current()),
   worlds: () => listWorlds(current()),
+  stories: () => listStories(current()),
   destinations: () => listDestinations(current()),
   materialItems: (elementId: string) => listMaterialItems(current(), elementId),
   rawChildren: (path: RawPath, offset?: number, limit?: number) =>

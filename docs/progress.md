@@ -81,3 +81,11 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - The bionic test needs the 40 MB full-tier fixture, so it is skipped on PRs and runs only on full-tier CI (`main` and nightly). There it fails instead of skipping when the fixture is missing (`CI` set and `FIXTURE_TIER=all`).
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
+
+## Stories page — 2026-11-05
+
+- New read-only Stories page lists the six story traits (Mega Brain Tank, Critter Manipulator, Lonely Minion, Fossil Hunt, Morb Rover Maker, Hijacked Headquarters) with state, asteroid and the cycle each state was reached.
+- Source: `StoryManager._stories` (`StoryInstance`: story ID, world ID, state, `StoryTelemetry` cycle stamps), decoded template data on the `SaveGame` object, and `QuestManager` for the Lonely Minion and Fossil Hunt quests. Quest hashes and the story table are transcribed from `Database.Stories` and `Database.Quests` into `packages/game-data/src/stories.ts`.
+- Machine progress that lives in state machine bytes (for example the species the Critter Manipulator has scanned) is not read; the page shows the `Activatable` flag of the Mega Brain Tank, Critter Manipulator and Hijacked Headquarters instead.
+- Only the Lonely Minion quests appear in the test saves. The Fossil Hunt quest is read the same way but is untested against a save that has its quest instance.
+- Editing is not offered; open question 15 records what it would take.
