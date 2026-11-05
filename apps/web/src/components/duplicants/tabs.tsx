@@ -299,6 +299,16 @@ const AMOUNT_FORMATS: Record<string, AmountFormat> = {
   Incubation: { max: 100, unit: '%' },
   Viability: { max: 100, unit: '%' },
   CritterTemperature: { max: 100, unit: '°C', offset: -273.15, digits: 1 },
+  ScaleGrowth: { max: 100, unit: '%' },
+  MilkProduction: { max: 100, unit: '%' },
+  ElementGrowth: { max: 100, unit: '%' },
+  Beckoning: { max: 100, unit: '%' },
+  Moisture: { max: 100, unit: '%' },
+  Mucus: { max: 10, unit: '', digits: 1 },
+  InternalBattery: { max: 9000, unit: '' },
+  InternalChemicalBattery: { max: 180000, unit: '' },
+  InternalBioBattery: { max: 180000, unit: '' },
+  InternalElectroBank: { max: 120000, unit: '' },
 }
 
 const NEEDS = [
@@ -318,19 +328,25 @@ function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
   const scale = format.scale ?? 1
   const offset = format.offset ?? 0
   const shown = amount.value * scale + offset
+  // Critter amounts carry the game's own maximum; duplicants fall back to a typical range.
+  const bounded = amount.max !== undefined
+  const readOnly = amount.readOnlyReason !== undefined
+  const top = bounded ? amount.max! * scale + offset : Math.max(format.max, shown)
+  const bottom = bounded ? offset : Math.min(0, shown)
   const commit = (next: number) =>
     edit({ type: 'setAmount', amountId: amount.id, value: (next - offset) / scale })
   return (
-    <Field>
+    <Field data-disabled={readOnly || undefined}>
       <Hint desc={amount.desc}>
         <FieldLabel className="w-fit">{amount.name}</FieldLabel>
       </Hint>
       <div className="flex items-center gap-3">
         <Slider
-          value={[shown]}
-          min={Math.min(0, shown)}
-          max={Math.max(format.max, shown)}
+          value={[Math.min(Math.max(shown, bottom), Math.max(top, bottom))]}
+          min={bottom}
+          max={Math.max(top, shown, bottom)}
           step={format.digits ? 0.1 : 1}
+          disabled={readOnly}
           onValueCommit={([v]) => commit(v!)}
         />
         <NumberField
@@ -339,9 +355,15 @@ function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
           digits={format.digits ?? 0}
           unit={format.unit}
           className="w-36"
+          min={bounded ? bottom : undefined}
+          max={bounded ? top : undefined}
+          disabled={readOnly}
           onCommit={commit}
         />
       </div>
+      {readOnly && (
+        <p className="text-xs text-muted-foreground">Read only. {amount.readOnlyReason}.</p>
+      )}
     </Field>
   )
 }

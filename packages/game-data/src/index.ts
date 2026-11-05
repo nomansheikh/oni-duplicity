@@ -1,5 +1,13 @@
 import data from './generated/game-data.json' with { type: 'json' }
 
+export {
+  critterAmountMax,
+  critterAmountNames,
+  critterLimits,
+  fixedAmountMax,
+  type CritterAmountMax,
+  type CritterLimits,
+} from './critter-amounts.ts'
 export { MinionSkills, type MinionSkill } from './skills.ts'
 export {
   geyserTypes,

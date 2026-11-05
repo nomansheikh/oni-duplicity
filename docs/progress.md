@@ -81,3 +81,13 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - The bionic test needs the 40 MB full-tier fixture, so it is skipped on PRs and runs only on full-tier CI (`main` and nightly). There it fails instead of skipping when the fixture is missing (`CI` set and `FIXTURE_TIER=all`).
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
+
+## Critter amounts from the DLCs — 2026-11-05
+
+- The critter editor now bounds every amount by the game's own maximum, read from the decompile (`packages/game-data/src/critter-amounts.ts`), instead of a guessed 0 to 100:
+  - **Constants** in `Database/Amounts.cs`: wildness, fertility, incubation, viability, scale growth, milk production, quill growth, beckoning (all 100), moisture (100), mucus (10) and temperature (10,000 K).
+  - **Trait modifiers** in each prefab's config: age (the lifespan), calories (the stomach size) and hit points, for 58 critters; babies use their adult's. A robot's battery (sweep bot 9,000, scout 180,000, Morb 180,000, Fetch Drone 120,000) comes the same way.
+- The Frosty Planet, Prehistoric Planet, Bionic Booster and Spaced Out critters now show scale growth, milk, beckoning, moisture, mucus and robot batteries with proper names. An amount is editable only when the save has the DLC its prefab needs.
+- The worker refuses a value that is not finite, clamps to `0..max`, and refuses an amount whose maximum is not confirmed. Undo restores the same bytes.
+- Unconfirmed amounts are shown read only with the reason. Hit points of six critter families are in that group (question 15).
+- Tests: every critter in every fixture sits at or below its confirmed maximum, the DLC amounts of the colony and of `apple-park` show their maxima, clamping and non-finite values, and byte-exact undo. Beckoning and the robot batteries are checked against the full-tier fixture (`FIXTURE_TIER=all`). One end-to-end spec edits scale growth through the stats sheet.
