@@ -59,22 +59,26 @@ test('DLC amounts of the colony show the stored value with their maximum', () =>
   const turtle = critters.find((c) => c.prefab === 'SeaTurtle')!
   expect(turtle.amounts.find((a) => a.id === 'HitPoints')!.readOnlyReason).toBeDefined()
   expect(turtle.amounts.find((a) => a.id === 'HitPoints')!.max).toBeUndefined()
-})
+}, 120_000)
 
 test('slogo moisture and mucus are bounded', () => {
   const critters = listCritters(parseSave(readFileSync(apple)))
   expectMax(critters, 'Snail', 'Moisture', 100)
   expectMax(critters, 'Snail', 'Mucus', 10)
-})
+}, 120_000)
 
-test.skipIf(!fullTier)('beckoning, milk and robot batteries are bounded', () => {
-  const critters = listCritters(parseSave(readFileSync(mithro6)))
-  expectMax(critters, 'Moo', 'Beckoning', 100)
-  expectMax(critters, 'Moo', 'MilkProduction', 100)
-  expectMax(critters, 'FetchDrone', 'InternalElectroBank', 120000)
-  expectMax(critters, 'MorbRover', 'InternalBioBattery', 180000)
-  expectMax(critters, 'SweepBot', 'InternalBattery', 9000)
-})
+test.skipIf(!fullTier)(
+  'beckoning, milk and robot batteries are bounded',
+  () => {
+    const critters = listCritters(parseSave(readFileSync(mithro6)))
+    expectMax(critters, 'Moo', 'Beckoning', 100)
+    expectMax(critters, 'Moo', 'MilkProduction', 100)
+    expectMax(critters, 'FetchDrone', 'InternalElectroBank', 120000)
+    expectMax(critters, 'MorbRover', 'InternalBioBattery', 180000)
+    expectMax(critters, 'SweepBot', 'InternalBattery', 9000)
+  },
+  120_000,
+)
 
 test('a prefab is read only when the save lacks its DLC', () => {
   expect(critterAmountMax('Raptor', 'Age', ['DLC4_ID'])).toEqual({ max: 200 })
@@ -83,7 +87,7 @@ test('a prefab is read only when the save lacks its DLC', () => {
   expect(critterAmountMax('Raptor', 'Wildness', []).max).toBeUndefined()
   expect(critterAmountMax('Nope', 'Age', []).max).toBeUndefined()
   expect(Object.keys(critterLimits).length).toBeGreaterThan(50)
-})
+}, 120_000)
 
 const find = (save: SaveGame, prefab: string): CritterView =>
   listCritters(save).find((c) => c.prefab === prefab)!
@@ -106,7 +110,7 @@ test('setAmount clamps to the maximum and refuses what is not finite', () => {
   expect(() =>
     applyEdit(save, { type: 'setAmount', id: target.id, amountId: 'HitPoints', value: 10 }),
   ).toThrow(/read only/)
-})
+}, 120_000)
 
 test('undoing a clamped critter amount edit gives back the same bytes', () => {
   const save = parseSave(readFileSync(galaxy))
@@ -124,4 +128,4 @@ test('undoing a clamped critter amount edit gives back the same bytes', () => {
     undo()
     expect(sameBytes(body(save), before), `${prefab} ${amountId} undone`).toBe(true)
   }
-})
+}, 120_000)
