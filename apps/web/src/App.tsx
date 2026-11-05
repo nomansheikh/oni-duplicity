@@ -4,8 +4,10 @@ import { useTheme } from 'next-themes'
 import { toast } from 'sonner'
 import { AppSidebar, type Page } from '@/components/app-sidebar'
 import { ChangesPopover } from '@/components/changes-popover'
+import { Badge } from '@/components/ui/badge'
 import { DlcBadges } from '@/components/dlc-badge'
 import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
+import { SaveDialog } from '@/components/save-dialog'
 import { PreferencesDialog } from '@/components/preferences-dialog'
 import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
@@ -14,6 +16,7 @@ import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { describeLoadError, type LoadErrorInfo } from '@/lib/load-error'
 import { useAllowUnverified } from '@/lib/preferences'
 import { downloadBytes, loadSave, saveClient } from '@/lib/save-client'
 import type {
@@ -34,7 +37,7 @@ import type {
 type State =
   | { status: 'idle' }
   | { status: 'loading'; fileName: string; progress: number }
-  | { status: 'error'; message: string }
+  | { status: 'error'; info: LoadErrorInfo }
   | { status: 'loaded'; summary: Summary }
 
 interface Views {
@@ -119,6 +122,7 @@ export default function App() {
   const [page, setPage] = useState<Page>('overview')
   const [selectedDupe, setSelectedDupe] = useState<string>()
   const [saving, setSaving] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [revision, setRevision] = useState(0)
   const fileInput = useRef<HTMLInputElement>(null)
   const [allowUnverified, setAllowUnverified] = useAllowUnverified()
@@ -177,7 +181,7 @@ export default function App() {
       await refresh()
       setPage('overview')
     } catch (error) {
-      setState({ status: 'error', message: (error as Error).message })
+      setState({ status: 'error', info: describeLoadError(error) })
     }
   }
 
@@ -198,16 +202,15 @@ export default function App() {
   const redo = useCallback(() => run(() => saveClient.redo()), [run])
 
   const download = async () => {
-    if (state.status !== 'loaded') return
+    if (state.status !== 'loaded' || saving) return
+    setConfirmOpen(false)
     setSaving(true)
     try {
       // The worker handles messages in order, so this name includes every edit
       // already sent, even while the views are still refreshing.
       const [bytes, { baseName }] = await Promise.all([saveClient.save(), saveClient.summary()])
       downloadBytes(bytes, `${baseName}.sav`)
-      toast.success('Save downloaded', {
-        description: 'Back up your original before replacing it.',
-      })
+      toast.success('Save downloaded')
     } catch (error) {
       toast.error((error as Error).message)
     } finally {
@@ -227,13 +230,19 @@ export default function App() {
     if (state.status !== 'loaded') return
     const onKey = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z') return
+      // The save dialog lists the edits as they are; changing them under it would make it stale.
+      if (confirmOpen) return
       if (e.target instanceof HTMLInputElement) return
       e.preventDefault()
       void (e.shiftKey ? redo() : undo())
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [state.status, undo, redo])
+  }, [state.status, confirmOpen, undo, redo])
+
+  useEffect(() => {
+    document.title = `${editStatus.edits > 0 ? '• ' : ''}Duplicity · ONI save editor`
+  }, [editStatus.edits])
 
   useEffect(() => {
     if (editStatus.edits === 0) return
@@ -272,6 +281,11 @@ export default function App() {
 
   const actions = loaded ? (
     <>
+      {loaded.summary.isAutoSave && (
+        <Badge variant="outline" className="border-chart-3/50 bg-chart-3/10">
+          Autosave
+        </Badge>
+      )}
       <DlcBadges ids={loaded.summary.dlcIds} className="hidden xl:flex" />
       {editStatus.edits > 0 && <ChangesPopover count={editStatus.edits} revision={revision} />}
       <ButtonGroup>
@@ -320,7 +334,7 @@ export default function App() {
       <Tooltip>
         <TooltipTrigger asChild>
           <span>
-            <Button onClick={download} disabled={saving || saveLocked}>
+            <Button onClick={() => setConfirmOpen(true)} disabled={saving || saveLocked}>
               <Download />
               <span className="hidden sm:inline">{saving ? 'Saving…' : 'Download save'}</span>
             </Button>
@@ -379,7 +393,19 @@ export default function App() {
                 <LoadingSave fileName={state.fileName} progress={state.progress} />
               )}
               {state.status === 'error' && (
-                <LoadError message={state.message} onPick={() => fileInput.current?.click()} />
+                <LoadError info={state.info} onPick={() => fileInput.current?.click()} />
+              )}
+              {loaded?.summary.isAutoSave && (
+                <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
+                  <p className="font-medium">This is an autosave</p>
+                  <p className="text-muted-foreground">
+                    The game&apos;s autosave rotation may overwrite an edited autosave
+                    {loaded.summary.originalSaveName
+                      ? `. It was written from ${loaded.summary.originalSaveName}, so editing that save is safer`
+                      : ''}
+                    .
+                  </p>
+                </div>
               )}
               {loaded && (loaded.summary.unverified || loaded.summary.warnings.length > 0) && (
                 <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
@@ -445,6 +471,17 @@ export default function App() {
           </div>
         </div>
       </SidebarInset>
+      {loaded && (
+        <SaveDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          fileName={`${loaded.summary.baseName}.sav`}
+          isAutoSave={loaded.summary.isAutoSave}
+          originalSaveName={loaded.summary.originalSaveName}
+          saving={saving}
+          onConfirm={download}
+        />
+      )}
       <input
         ref={fileInput}
         type="file"

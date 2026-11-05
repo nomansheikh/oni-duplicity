@@ -89,7 +89,7 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Machine progress that lives in state machine bytes (for example the species the Critter Manipulator has scanned) is not read; the page shows the `Activatable` flag of the Mega Brain Tank, Critter Manipulator and Hijacked Headquarters instead.
 - Only the Lonely Minion quests appear in the test saves. The Fossil Hunt quest is read the same way but is untested against a save that has its quest instance.
 - The machine flag is read only from copies standing inside the story's own asteroid. Quests are shown only when exactly one quest owner holds them; a state value the editor does not know shows as unknown.
-- Editing is not offered; open question 16 records what it would take.
+- Editing is not offered; open question 17 records what it would take.
 
 ## Parser benchmark and regression gate — 2026-11-05
 
@@ -126,3 +126,12 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 ## Test run — 2026-11-05
 
 - Root `vp test` no longer collects tests under `.claude/`, so agent worktrees can't fail the run. The app and package configs don't set `test.exclude`, so they needed no change.
+
+## Load/save polish — 2026-11-05
+
+- Autosave: saves whose header says `isAutoSave` get an "Autosave" badge in the header and a note that the game's autosave rotation may overwrite an edited autosave. The note names `gameInfo.originalSaveName` (a field of `SaveGame.GameInfo` in the decompile, present in the fixtures) and `Summary` now carries it. The download name is unchanged.
+- Load errors: a friendly title (not an ONI save, unsupported version, truncated or corrupted, or unknown) picked from the parser's message, plus a collapsible "Details" section with the message, byte offset and stack, and a copy button. Errors cross the worker as plain `Error`s, so the offset is read back from the message.
+- "Download save" now opens a confirm dialog: distinct changed targets ("3 duplicants, 1 geyser, colony settings"), the edit labels, and a "Back up your original save first" warning. Each history entry in the worker carries a category and key (`editTarget` in `describe.ts`). The post-download toast no longer repeats the backup advice.
+- The tab title starts with "• " while there are unsaved edits.
+- Tests: unit tests for the grouping and error classification, and e2e for the dialog (cancel, confirm), grouping, the title, autosave, a truncated file and a non-save file. No fixture is an autosave, so the autosave e2e rewrites the header of `beautiful-galaxy` and loads that.
+- Risk: the "not an ONI save" versus "truncated" split is a heuristic on the parser's message, since the worker boundary drops `ParseError`'s fields.
