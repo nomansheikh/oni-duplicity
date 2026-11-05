@@ -13,7 +13,9 @@ import {
 } from '@oni-duplicity/game-data'
 import type { SaveGame } from '@oni-duplicity/save-parser'
 import type { ChangeTarget } from '../lib/changes.ts'
+import { clampImpact } from './dlc.ts'
 import { listGeysers, objectById, type Edit, type GeyserField } from './model.ts'
+import { harvestableByPrefab } from './pois.ts'
 
 const GEYSER_FIELDS: Record<GeyserField, string> = {
   scaledRate: 'output per active cycle',
@@ -102,6 +104,8 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       const value = range ? Math.min(range.max, Math.max(range.min, edit.value)) : edit.value
       return `${who}${GEYSER_FIELDS[edit.field]} to ${round(value)}`
     }
+    case 'setGeyserType':
+      return `${who}change type to ${findGeyser(edit.typeId)?.name ?? humanize(edit.typeId)}`
     case 'setItemMass':
       return `Set an item's mass to ${round(edit.mass)} kg`
     case 'setItemTemperature':
@@ -110,20 +114,34 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       return `${who}delete`
     case 'cloneObject':
       return `${who}clone`
+    case 'deleteDebris':
+      return `Delete ${edit.ids.length} loose ${edit.ids.length === 1 ? 'item' : 'items'}`
     case 'setTechResearched':
       return `${edit.complete ? 'Research' : 'Unresearch'} ${findTech(edit.techId)?.name ?? edit.techId}`
     case 'researchAll':
       return 'Research everything'
     case 'setGameSetting':
       return `${findGameSetting(edit.settingId)?.name ?? edit.settingId} to ${humanize(edit.level)}`
+    case 'setDestinationMass':
+      return `Destination ${edit.destination}: set recoverable mass to ${round(edit.mass)} kg`
+    case 'setDestinationAnalysis':
+      return `Destination ${edit.destination}: mark ${edit.level === 'complete' ? 'fully analyzed' : 'discovered'}`
+    case 'revealStarmap':
+      return 'Reveal the known starmap'
+    case 'setPoiStock':
+      return `${harvestableByPrefab.get(edit.id.slice(0, edit.id.lastIndexOf(':')))?.name ?? 'POI'}: set stock to ${round(edit.kg)} kg (experimental)`
     case 'setWorldDiscovered':
       return `${who}mark ${edit.discovered ? 'discovered' : 'undiscovered'}`
+    case 'setDemoliorImpact':
+      return `Demolior: impact at cycle ${round(clampImpact(save, edit.impactCycle))}`
     case 'rawSet':
       return `Raw: set ${edit.path.join('.')} to ${String(edit.value)}`
     case 'rawRemove':
       return `Raw: remove ${edit.path.join('.')}`
     case 'rawDuplicate':
       return `Raw: duplicate ${edit.path.join('.')}`
+    case 'rawAdd':
+      return `Raw: add an item to ${edit.path.join('.')}`
     case 'setMaterialTemperature':
       return `${findElement(edit.elementId)?.name ?? edit.elementId}: every temperature to ${round(edit.kelvin - 273.15)} °C`
     case 'scaleMaterialMass':
@@ -172,7 +190,19 @@ export function editTarget(edit: Edit): ChangeTarget {
     case 'rawSet':
     case 'rawRemove':
     case 'rawDuplicate':
+    case 'rawAdd':
       return { category: 'raw', key: edit.path.join('.') }
+    case 'setDemoliorImpact':
+      return { category: 'colony', key: 'demolior' }
+    case 'setDestinationMass':
+    case 'setDestinationAnalysis':
+      return { category: 'asteroid', key: `destination:${edit.destination}` }
+    case 'revealStarmap':
+      return { category: 'asteroid', key: 'starmap' }
+    case 'setPoiStock':
+      return targetOfObject(edit.id)
+    case 'deleteDebris':
+      return { category: 'item', key: `debris:${edit.ids.join(',')}` }
     case 'deleteObject':
     case 'cloneObject':
       return targetOfObject(edit.id)

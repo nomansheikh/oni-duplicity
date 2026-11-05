@@ -3,12 +3,14 @@ import {
   EllipsisVertical,
   Droplets,
   FlaskConical,
+  BookOpen,
   Gauge,
   FolderOpen,
   LayoutDashboard,
   Map as MapIcon,
   Orbit,
   Package,
+  Puzzle,
   Rabbit,
   Rocket,
   Save,
@@ -47,6 +49,8 @@ export type Page =
   | 'materials'
   | 'research'
   | 'space'
+  | 'stories'
+  | 'dlc'
   | 'settings'
   | 'raw'
 
@@ -59,6 +63,8 @@ const PAGES: { id: Page; title: string; icon: ReactNode }[] = [
   { id: 'materials', title: 'Materials', icon: <Package /> },
   { id: 'research', title: 'Research', icon: <FlaskConical /> },
   { id: 'space', title: 'Space', icon: <Rocket /> },
+  { id: 'stories', title: 'Stories', icon: <BookOpen /> },
+  { id: 'dlc', title: 'DLC', icon: <Puzzle /> },
   { id: 'settings', title: 'Game settings', icon: <Gauge /> },
 ]
 

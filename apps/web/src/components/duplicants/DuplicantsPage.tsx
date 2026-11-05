@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react'
+import { ArrowDownNarrowWide, ArrowUpNarrowWide, Search } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -20,9 +20,27 @@ import {
 } from '@/components/ui/item'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import type { Catalogs, DuplicantProfile, DuplicantView, Edit } from '@/worker/model'
-import { portraitParts } from '@/lib/format'
+import {
+  SORT_OPTIONS,
+  arrivalCycle,
+  defaultDescending,
+  masteredOf,
+  searchDuplicants,
+  sortDuplicants,
+  stressOf,
+  type SortKey,
+} from '@/lib/duplicants'
+import { fmt, portraitParts } from '@/lib/format'
 import { DuplicantAvatar } from '../common'
 import { ColonyActions } from './ColonyActions'
 import { DuplicantEditor } from './DuplicantEditor'
@@ -41,17 +59,36 @@ export function DuplicantsPage({
   onEdit: (edit: Edit) => void
 }) {
   const [query, setQuery] = useState('')
+  const [sortKey, setSortKey] = useState<SortKey>('save')
+  const [descending, setDescending] = useState(false)
   const [clipboard, setClipboard] = useState<DuplicantProfile | null>(null)
   const selected = duplicants.find((d) => d.id === selectedId) ?? duplicants[0]
-  const visible = duplicants.filter((d) => d.name.toLowerCase().includes(query.toLowerCase()))
-  const stressOf = (d: DuplicantView) => d.amounts.find((a) => a.id === 'Stress')?.value ?? 0
+  const visible = sortDuplicants(searchDuplicants(duplicants, query), sortKey, descending)
+  const metric = (d: DuplicantView): string | null => {
+    switch (sortKey) {
+      case 'arrival':
+        return `Cycle ${arrivalCycle(d)}`
+      case 'experience':
+        return `${fmt(d.experience, 0)} XP`
+      case 'skills':
+        return `${masteredOf(d)} skills`
+      case 'stress':
+        return `${fmt(stressOf(d), 0)}%`
+      default:
+        return null
+    }
+  }
 
   return (
     <div className="grid gap-4 @4xl/main:grid-cols-[18rem_1fr] md:gap-6">
       <Card className="self-start">
         <CardHeader>
           <CardTitle>Duplicants</CardTitle>
-          <CardDescription>{duplicants.length} in this colony</CardDescription>
+          <CardDescription>
+            {visible.length === duplicants.length
+              ? `${duplicants.length} in this colony`
+              : `${visible.length} of ${duplicants.length} in this colony`}
+          </CardDescription>
           <CardAction>
             <ColonyActions onEdit={onEdit} />
           </CardAction>
@@ -59,7 +96,8 @@ export function DuplicantsPage({
         <CardContent className="space-y-3">
           <InputGroup>
             <InputGroupInput
-              placeholder="Search by name"
+              placeholder="Search name, trait or interest"
+              aria-label="Search duplicants"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -67,6 +105,34 @@ export function DuplicantsPage({
               <Search />
             </InputGroupAddon>
           </InputGroup>
+          <div className="flex items-center gap-2">
+            <Select
+              value={sortKey}
+              onValueChange={(value) => {
+                setSortKey(value as SortKey)
+                setDescending(defaultDescending(value as SortKey))
+              }}
+            >
+              <SelectTrigger className="flex-1" aria-label="Sort duplicants">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SORT_OPTIONS.map((o) => (
+                  <SelectItem key={o.key} value={o.key}>
+                    Sort: {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label={descending ? 'Descending order' : 'Ascending order'}
+              onClick={() => setDescending((d) => !d)}
+            >
+              {descending ? <ArrowDownNarrowWide /> : <ArrowUpNarrowWide />}
+            </Button>
+          </div>
           <ScrollArea className="h-[calc(100svh-19rem)]">
             <ItemGroup className="gap-1 pr-3">
               {visible.map((d) => (
@@ -92,14 +158,22 @@ export function DuplicantsPage({
                         <Progress value={stressOf(d)} className="h-1 w-16" />
                       </ItemDescription>
                     </ItemContent>
-                    {d.isBionic && (
-                      <ItemActions>
-                        <Badge variant="secondary">Bionic</Badge>
-                      </ItemActions>
-                    )}
+                    <ItemActions>
+                      {metric(d) && (
+                        <span className="text-xs text-muted-foreground tabular-nums">
+                          {metric(d)}
+                        </span>
+                      )}
+                      {d.isBionic && <Badge variant="secondary">Bionic</Badge>}
+                    </ItemActions>
                   </button>
                 </Item>
               ))}
+              {visible.length === 0 && (
+                <p className="px-2 py-6 text-center text-sm text-muted-foreground">
+                  No duplicants match.
+                </p>
+              )}
             </ItemGroup>
           </ScrollArea>
         </CardContent>

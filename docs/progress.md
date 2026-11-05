@@ -104,6 +104,15 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Known: `apps/web/tests/geysers.test.ts` still fails locally without the fetched fixtures.
 - Next: batch B pages once their feature PRs land.
 
+## Stories page — 2026-11-05
+
+- New read-only Stories page lists the six story traits (Mega Brain Tank, Critter Manipulator, Lonely Minion, Fossil Hunt, Morb Rover Maker, Hijacked Headquarters) with state, asteroid and the cycle each state was reached.
+- Source: `StoryManager._stories` (`StoryInstance`: story ID, world ID, state, `StoryTelemetry` cycle stamps), decoded template data on the `SaveGame` object, and `QuestManager` for the Lonely Minion and Fossil Hunt quests. Quest hashes and the story table are transcribed from `Database.Stories` and `Database.Quests` into `packages/game-data/src/stories.ts`.
+- Machine progress that lives in state machine bytes (for example the species the Critter Manipulator has scanned) is not read; the page shows the `Activatable` flag of the Mega Brain Tank, Critter Manipulator and Hijacked Headquarters instead.
+- Only the Lonely Minion quests appear in the test saves. The Fossil Hunt quest is read the same way but is untested against a save that has its quest instance.
+- The machine flag is read only from copies standing inside the story's own asteroid. Quests are shown only when exactly one quest owner holds them; a state value the editor does not know shows as unknown.
+- Editing is not offered; open question 17 records what it would take.
+
 ## Parser benchmark and regression gate — 2026-11-05
 
 - `vp run bench` times read + inflate, parse body, write body and deflate for the 40 MB and 13 MB saves (one warm-up, median of five, each save in its own process) and prints a table with peak RSS. It skips with a message when the saves are not downloaded.
@@ -148,3 +157,117 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - The tab title starts with "• " while there are unsaved edits.
 - Tests: unit tests for the grouping and error classification, and e2e for the dialog (cancel, confirm), grouping, the title, autosave, a truncated file and a non-save file. No fixture is an autosave, so the autosave e2e rewrites the header of `beautiful-galaxy` and loads that.
 - Risk: the "not an ONI save" versus "truncated" split is a heuristic on the parser's message, since the worker boundary drops `ParseError`'s fields.
+
+## Raw editor search and add item — 2026-11-05
+
+- Whole-tree search: the worker walks every value of the save in tree order (`worker/raw.ts`) and returns the first 200 matches with their paths.
+  - Matches by key name; by path substring when the text contains `.`, `[` or `]` (a plain word as a path match would hit everything below a key of that name); optionally by primitive value. Byte arrays are leaves.
+  - It runs in slices of about 20 ms and yields between them, so a newer query cancels the one in flight (the editor also debounces keystrokes by 350 ms).
+  - Timing in Node on the 40 MB `mithro-06-maximum-cycle-4770` save (29 million values): key search 0.5 s, key plus value search 0.7 s, a value search that matches nothing 1.8 s (the worst case: every value visited). A numeric value query that matches nothing converts every number to text and is slower; the browser adds the slice yields on top.
+  - Clicking a result opens every ancestor (each level loaded far enough to include the next step), scrolls to the row and highlights it.
+- Paging: children still load 500 at a time, with an explicit "Load N more" and "Load all" row. The loaded-rows filter is gone, replaced by the search.
+- Add item: appends a zeroed element built from the save's own template definitions (`rawDefaultItem`), offered on the array row and on its items ("Add item to this array").
+  - Only for arrays reached through a template: the world, settings and game data roots and each behavior's template data. The header JSON and hand-decoded extra data have no declared element type, so a guess could write a save the game cannot read; those rows show a disabled "Add item".
+  - Byte arrays and dictionaries are not offered: bytes stay read-only (now shown with a "read-only" badge), and a dictionary entry needs an unused key.
+- Tests:
+  - unit: key, path and value matches, the limit and truncation, cancellation, reveal, add item and undo;
+  - fixture: adding an item to an addable array changes only that array after write and re-parse, for every fixture of the tier;
+  - e2e: search for a deep key, jump to it and edit it; add item to an array of objects and of strings with `expectOnlyChanged`; the disabled state on the header.
+- Review fix: "add item" is now offered only when every template reachable from the element type exists in the save. Types the parser writes by hand (`System.Guid`, `CellEventInstance`, `Spacecraft`, `GameplayEventInstance`, `Ref`1[[...]]`, `UnityEngine.Color32`) have no template, so the first version offered arrays whose new item made `writeSave` throw. A test now adds an item to every distinct addable array shape (world, settings, game data and every behavior's template data) in each fixture, writes and re-parses the body, and checks that undo restores identical bytes. Search ids no longer repeat across page remounts, and a cancel only reaches a running search.
+- Risks:
+  - Arrays that the game keeps in step with another array (parallel arrays such as the conduit flow `serializedIdx` and `versionedSerializedContents`) get out of step when one is extended. The raw editor's warning covers this; nothing here checks it.
+  - Not verified in game.
+
+## Delete loose debris — 2026-11-05
+
+- The Materials sheet could already delete one loose chunk with `deleteObject`. This adds the missing parts:
+  - `deleteDebris { ids }`: one edit for any number of chunks, so one undo step. The ids are `KPrefabID` instance IDs, not `Element:index` positions, because positions shift after every delete and a second click on a list that had not refreshed yet could delete a different chunk. The worker throws if an ID is gone and changes nothing. The sheet also disables every delete control until the list for the latest revision has loaded. Undo restores every chunk at its original position in its group.
+  - "Delete selected" and "Delete all loose" with a confirm dialog that shows the count and mass (and how many were skipped).
+  - Checkboxes on loose rows; stored rows never get a delete control, and the worker refuses stored items, buildings and critters.
+- Safety check (decompile and all ten fixtures): nothing that was checked saves a loose item's `KPrefabID` instance ID except the move-order list in `CancellableMove.movables`. Counts of decoded references to loose element chunks, not counting each chunk's own ID: 0 in `beautiful-galaxy`, `beautiful-galaxy-build-744825`, `apple-park`, `konove` and `mithro-01` to `mithro-04`; 2 (Oxylite) in `mithro-05`; 1 (Liquid Sulfur) in `mithro-06`. The game does not null-check those IDs when a move order is cancelled.
+- So a chunk with `Movable.isMarkedForMove`, or whose ID is in any move-order list, cannot be deleted. The trash button is disabled with a hint, bulk delete skips it, and the worker throws. The same guard now covers `deleteObject`, which previously had none.
+- Tests: model, undo and refusal tests in `tests/debris.test.ts`, run on every fixture (delete three chunks of the busiest element, write, re-read, compare with the raw save minus those objects; undo is byte exact); move-order refusal on `mithro-05` and `mithro-06`; five e2e tests (one, selected, all, cancel, undo, plus the move-order case on the 40 MB save).
+- Risks:
+  - Not tried in game. Undecoded raw bytes were not searched for references.
+  - Deleting a chunk deletes its mass from the world; the world grid is untouched.
+
+## Change a geyser's type (experimental) — 2026-11-05
+
+- Geysers can change to another type of the same footprint (gas 2×4, liquid 4×2, molten 3×3) when every DLC the type needs is active in the save. The worker refuses anything else, whatever the UI offers.
+- The edit moves the object to the `GeyserGeneric_<type>` group (created beside the old one if the save has none; an emptied group is dropped, as the game does), sets the type hash, recomputes the five `scaled*` values from the unchanged rolls, sets the object's own temperature, and renames it when it still carries the old type's name. The emitter, element, germs and codex entry are rebuilt by the game from the type hash, so nothing is saved for them.
+- Checked against the decompile: `SaveManager.Load` finds groups by name in the prefab map (order does not matter, an unknown prefab drops the group's objects), and no saved field outside the group name mentions the prefab. Checked against the fixtures: every one of the 156 geysers in the ten saves has the temperature and prefab name its type predicts, including the unmodded Mithro saves.
+- The Geyser Control mod's `newconfig` copies are left alone; the sheet warns when a geyser carries them.
+- Undo restores the group list and every object byte for byte.
+- Risks: nothing is verified in game; the state machine keeps its saved phase, which may disagree with the new timings until the next transition; the deprecated `NiobiumGeyser` prefab is excluded.
+- Next: the in-game check in `docs/verified-in-game.md`; retyping unspawned geysers (open question 15).
+
+## Space points of interest and starmap edits — 2026-11-05
+
+- The Space page lists every Spaced Out point of interest: type, starmap location, stock and capacity, time to refill, artifact state and whether the colony has found it.
+- Four edits, each with undo and a line in the unsaved-changes list:
+  - destination recoverable mass (base game), clamped to the destination type's range (`availableMass`, 0 to max minus min);
+  - destination analysis: discovered writes a score of 50, analyzed writes 100 and clears `analyzeDestinationID` when that destination was the scan target;
+  - reveal the known starmap: every existing `m_revealPointsByCell` value below 100 becomes 100. Cells missing from the dictionary stay hidden, because adding one would change the length;
+  - POI stock refill, labelled experimental in the UI: the same float is written to the instance field and the `poiCapacity` parameter inside the state machine bytes.
+- Where the data lives: a POI's location is plain template data (`m_location`); its type hash, two rolls, stock and artifact charge are inside the `StateMachineController` bytes, one serialized state machine instance each for `HarvestablePOIStates` and `ArtifactPOIStates`. Reveal state is `ClusterFogOfWarManager`'s `m_revealPointsByCell` in the save game object's state machine bytes. A spawned artifact waits in a `StarmapHexCellInventory` object on its tile (7.37 and later).
+- Byte edits go through one function that works on a copy, throws if the length changed or any byte outside the expected floats differs, and reads the result back before swapping it in. Undo puts the old array back by reference (`snapshot.ts` now keeps `extraRaw`).
+- Not done on purpose: artifact recharge, artifact string and harvest count, the POI state name, research opportunities, and revealing cells that are not in the dictionary (see open question 21).
+- The type tables (`apps/web/src/lib/space-pois.ts`, `space-destinations.ts`) are transcribed from the decompile and live in `apps/web`, not `packages/game-data`. Every saved POI type hash matches a transcribed id.
+- Tests: reader checks over every fixture; edit tests for each edit (value, clamping, only the intended fields or bytes change, undo restores the body byte for byte); Playwright specs for the table and each edit (run by CI).
+- Risks:
+  - Nothing here has been loaded in the game. The POI stock edit is the riskiest: the game may rebuild the state from the state machine parameter or the field, and both are written, but whether it moves between `idle` and `recharging` on load is unchecked.
+  - The artifact fields moved between versions (see open question 20); the reader accepts both layouts, but only 7.33, 7.36, 7.37 and 7.38 saves were checked.
+  - Stock is shown against a capacity worked out from the saved roll and the transcribed range. A wrong range would show a wrong capacity; the fixtures never exceed it.
+  - The base-game destination edits use the `SpaceDestinationType` masses of this decompile; a type the table does not know cannot be edited.
+
+## Duplicant traits and list — 2026-11-05
+
+- `packages/game-data/src/trait-info.ts` holds the trait lists of `DUPLICANTSTATS` (rarity, DLC, excluded traits and interests, model) and the pure rules `traitConflicts` and `traitUnavailable`. Counts: positive 42, negative 28, congenital 6 (with `None`), genetic 4, bionic 17 (7 bugs, 10 booster traits), stress 6, joy 7, need 7, special 24.
+- Traits tab: colour-coded category badges; the add-trait list leaves out traits the save's DLC or the duplicant's model rules out, and shows clashing traits blocked with the reason; conflicts already in a save are flagged and left alone.
+- `RoboDancer` was `Robodancer` in the generated catalog, and the congenital and booster traits were missing; `game-data` now corrects and adds them.
+- Duplicant list: search by name, trait or interest; sort by save order, name, arrival, experience, skills mastered, stress and model.
+- Profile paste: a bionic profile onto a standard duplicant (or the reverse) is refused for traits, interests, skills and appearance, in the dialog and in the worker. Profiles now record their model.
+- Tests: unit tests for the rules, a fixture test that adding an allowed trait changes only that duplicant's traits (standard and bionic), a test that every fixture trait is in the table, and Playwright tests for adding, blocked traits, the bionic list, paste, search and sort.
+- Risks: no exclusion rule is verified in game; the model rules for stress, joy and special traits are inferred from the decompile and fixtures (see open questions).
+
+## Bionic amount caps — 2026-11-05
+
+- The sliders used guessed caps (gunk 200, tank 200, battery 1000 kJ). They now use the decompiled game's maximums, and the worker clamps `setAmount` on a bionic duplicant to `0..max`.
+- Maximums (Kupie/ONI_Decomp, `Assembly-CSharp`):
+  - `BionicOil`: 200 kg, fixed. `Database/Amounts.cs` (`CreateAmount("BionicOil", 0f, 200f, ...)`) and `BionicOilMonitor.OIL_CAPACITY`.
+  - `BionicGunk`: 80 kg, fixed. `GunkMonitor.GUNK_CAPACITY`, used by `Amounts.BionicGunk`.
+  - `BionicOxygenTank`: 240 kg, fixed. `BionicOxygenTankMonitor.OXYGEN_TANK_CAPACITY_KG` = 2400 s × `DUPLICANTSTATS.BIONICS.BaseStats.OXYGEN_USED_PER_SECOND` (0.1).
+  - `BionicInternalBattery`: per duplicant, 480,000 J + 120,000 J per electrobank slot above 4 (`Amounts.cs`; `BionicBatteryMonitor.UpdateCapacityAmount`). The slot count is the `BionicBatteryCountCapacity` attribute (base 4), and the only source is the `ExtraBionicBatteries` perk (+2) of skill `BionicsC3` (`Database/Skills.cs`, `Database/SkillPerks.cs`). So the max is 480,000 J, or 720,000 J with `BionicsC3`.
+- Correction to the audit: the battery max does not depend on the electrobanks installed in the duplicant's storage. It depends on the mastered `BionicsC3` skill. All three mithro-06 bionic duplicants have it, which is why the fixture value 569,163 J exceeds 480,000 J.
+- Load behaviour: `Modifications.Deserialize` writes the saved `value` field directly, so an over-max value is not clamped on load. `AmountInstance.SetValue` clamps to `GetMax()` on the next update. The editor clamps itself; the slider still widens to a saved value that is over the max, for display only.
+- Tests: unit tests for the caps, mithro-06 fixture tests (each amount at its max writes only that value, over-max and negative values clamp), and an e2e spec in the bionic block. That block only runs on full-tier CI.
+- Review follow-ups: `setAmount` throws on NaN or Infinity and changes nothing; removing `BionicsC3` clamps the stored battery to 480,000 J in the same edit, so one undo restores both.
+- Not verified in game.
+
+## DLC page and the Demolior timer — 2026-11-05
+
+- New DLC page (`dlc-page.tsx`, readers in `worker/dlc.ts`). It shows only sections the save has:
+  - Demolior (`DLC4_ID` and an active `LargeImpactor` event): event start, difficulty, impact cycle, now and remaining cycles, impactor health (read only), and an experimental impact-cycle edit.
+  - World mixing (`CurrentMixingLevelsBySetting`), read only. Absent in older saves, which then show nothing.
+  - Geothermal (`DLC2_ID`): controller state and each vent's progress, recent mass and available material, read only.
+- Cycles use `GameUtil.GetCurrentTimeInCycles()`: `GameClock.cycle + timeSinceStartOfCycle / 600 + 1`. The header's `numberOfCycles` is the integer cycle and is not used.
+- The impact time is `eventStartTime × 600 + GetImpactTime()` seconds, but only vanilla reads it. Findings from the decompile (`LargeImpactorStatus`, `LargeImpactorEvent`, `ClusterMapLargeImpactor`, `ClusterTraveler`):
+  - A Spaced Out impactor copies the arrival into the `ClusterMapLargeImpactor.Instance` state machine (`ArrivalTime`, `Speed`) when it is created, and then flies by `ClusterTraveler.TravelETA` (`Speed` and the move potential). Editing `eventStartTime` alone would not postpone it.
+  - The edit therefore rewrites three values: `eventStartTime`, `ArrivalTime`, and `Speed`, which is scaled by old over new time left so the hexes left stay the same. The three values are the only bytes that change; a fixture test pins that.
+  - The save keeps no other copy. `AgeInCycles()` is unused; `largeImpactorLandedCycle` is only written after landing.
+  - The `DemoliorImminentImpact` tag (10 cycles) lives in the cluster layout's definition (`ClusterLayout.clusterTags`); the save keeps only the layout id, not its tags. So without the impactor's saved flight data the real impact time can't be known: the page shows the difficulty's time marked as assumed and the edit is read only with a reason. With flight data, a saved arrival that disagrees with the difficulty is shown as saved.
+- The edit is only offered when a Spaced Out impactor has a `ClusterTraveler`, a readable `ClusterMapLargeImpactor` blob and time left; vanilla saves, missing objects and arrived impactors are read only with a reason.
+- The state machine blob (`StateMachineController.extraRaw`) is read by anchoring on the type name and range-checking every length. If it does not read cleanly the edit is disabled. Undo snapshots now keep `extraRaw` too (one line in `snapshot.ts`).
+- Impactor health is shown read only: `LargeImpactorStatus.sm.Health` is an int parameter, max 1000 (`LargeImpactorConfig.HEALTH`).
+- World mixing names come from the ids; the game's string tables are not in the decompile. Level `GuranteeMixing` (sic) is shown as Guaranteed.
+- The edit is clamped to at least one cycle from now.
+- Tests: unit and fixture tests for each reader (Konove for Demolior, mithro-06 for geothermal, every fixture for mixing), the byte-level edit test, undo, a vanilla-shaped save, an unreadable blob; e2e in `dlc.e2e.ts` (Konove is small tier; the geothermal spec follows the bionic full-tier pattern).
+- Synthetic in-memory saves cover the absent, destroyed, arrived, missing-traveler, vanilla and imminent-arrival layouts without any fixture (Konove is small tier, so CI also runs the fixture tests).
+- Risks: the edit is unverified in game (see `verified-in-game.md`). Only one fixture (Konove) has an active impactor; the synthetic blobs are built from the same layout the reader assumes, so they check the logic, not the layout.
+
+## Bionic boosters and power — 2026-11-05
+
+- Bionic duplicants get a "Boosters & power" tab (read only): the installed boosters by slot, each electrobank with its charge in joules, and the colony's remote workers with their dock and charge.
+- The worker reads all of it in `worker/bionic.ts`, behind a new `bionics()` call. Nothing in `model.ts` changed.
+- Tests cover the slot parsing, an empty result on a save without bionics, and the `mithro-06` fixture (full tier only; on full-tier CI a missing fixture fails instead of skipping).
+- Unlocked slots (base 2 plus skill perks) and bank places (4, or 6 with BionicsC3) are computed from the mastered skills, and the internal battery is shown against its maximum. Risks: the battery storage is taken to be the second `Storage` on the duplicant (shown as unrecognised if it holds anything but electrobanks); traits that change the slot or bank attributes are not seen; booster names show as ids. Writing is not attempted; what it would need is in [open-questions.md](open-questions.md).
