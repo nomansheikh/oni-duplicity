@@ -81,3 +81,16 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - The bionic test needs the 40 MB full-tier fixture, so it is skipped on PRs and runs only on full-tier CI (`main` and nightly). There it fails instead of skipping when the fixture is missing (`CI` set and `FIXTURE_TIER=all`).
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
+
+## Bionic amount caps — 2026-11-05
+
+- The sliders used guessed caps (gunk 200, tank 200, battery 1000 kJ). They now use the decompiled game's maximums, and the worker clamps `setAmount` on a bionic duplicant to `0..max`.
+- Maximums (Kupie/ONI_Decomp, `Assembly-CSharp`):
+  - `BionicOil`: 200 kg, fixed. `Database/Amounts.cs` (`CreateAmount("BionicOil", 0f, 200f, ...)`) and `BionicOilMonitor.OIL_CAPACITY`.
+  - `BionicGunk`: 80 kg, fixed. `GunkMonitor.GUNK_CAPACITY`, used by `Amounts.BionicGunk`.
+  - `BionicOxygenTank`: 240 kg, fixed. `BionicOxygenTankMonitor.OXYGEN_TANK_CAPACITY_KG` = 2400 s × `DUPLICANTSTATS.BIONICS.BaseStats.OXYGEN_USED_PER_SECOND` (0.1).
+  - `BionicInternalBattery`: per duplicant, 480,000 J + 120,000 J per electrobank slot above 4 (`Amounts.cs`; `BionicBatteryMonitor.UpdateCapacityAmount`). The slot count is the `BionicBatteryCountCapacity` attribute (base 4), and the only source is the `ExtraBionicBatteries` perk (+2) of skill `BionicsC3` (`Database/Skills.cs`, `Database/SkillPerks.cs`). So the max is 480,000 J, or 720,000 J with `BionicsC3`.
+- Correction to the audit: the battery max does not depend on the electrobanks installed in the duplicant's storage. It depends on the mastered `BionicsC3` skill. All three mithro-06 bionic duplicants have it, which is why the fixture value 569,163 J exceeds 480,000 J.
+- Load behaviour: `Modifications.Deserialize` writes the saved `value` field directly, so an over-max value is not clamped on load. `AmountInstance.SetValue` clamps to `GetMax()` on the next update. The editor clamps itself; the slider still widens to a saved value that is over the max, for display only.
+- Tests: unit tests for the caps, mithro-06 fixture tests (each amount at its max writes only that value, over-max and negative values clamp), and an e2e spec in the bionic block. That block only runs on full-tier CI.
+- Not verified in game.
