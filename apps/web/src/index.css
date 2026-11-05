@@ -74,6 +74,10 @@
   --m-bad: #c56660;
   --m-warn: #d9a63a;
   --m-xp: #b8598a;
+  /* state-word text on panel #404559 and well #303443: 4.5:1 or better on both */
+  --m-good-text: #66d08a;
+  --m-warn-text: #ffa649;
+  --m-bad-text: #ff9d9a;
   --xp-fill: #6e4057;
   --xp-track: #454545;
   --task-fill: #fab03e;
@@ -230,6 +234,9 @@
   --color-m-bad: var(--m-bad);
   --color-m-warn: var(--m-warn);
   --color-m-xp: var(--m-xp);
+  --color-m-good-text: var(--m-good-text);
+  --color-m-warn-text: var(--m-warn-text);
+  --color-m-bad-text: var(--m-bad-text);
   --color-m-geyser: var(--m-geyser);
   --color-m-dormant: var(--m-dormant);
   --color-olive: var(--olive);
