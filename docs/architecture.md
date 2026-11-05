@@ -111,6 +111,7 @@ save(): Uint8Array
 | Layer      | What                                                                     | Where          |
 | ---------- | ------------------------------------------------------------------------ | -------------- |
 | Round trip | Header and decompressed body byte-equal after writing a parsed save back | every fixture  |
+| Fuzz       | Corrupt or truncated saves end in a `ParseError`, never a hang or crash  | `apple-park`   |
 | Fixtures   | Manifest parsing, tiers and checksum verification                        | `scripts/`     |
 | Manual     | Load → edit → download → reload, in Chrome                               | before each PR |
 
