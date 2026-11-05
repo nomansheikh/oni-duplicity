@@ -18,12 +18,14 @@ const STATE_LABELS: Record<StoryState, string> = {
   discovered: 'Discovered',
   inProgress: 'In progress',
   complete: 'Complete',
+  unknown: 'Unknown state',
 }
 
 const QUEST_LABELS: Record<StoryQuestView['state'], string> = {
   notStarted: 'Not started',
   inProgress: 'In progress',
   completed: 'Completed',
+  unknown: 'Unknown state',
 }
 
 function stateVariant(state: StoryState) {
@@ -34,6 +36,7 @@ function stateVariant(state: StoryState) {
 
 function Timeline({ cycles }: { cycles: StoryView['cycles'] }) {
   const parts = [
+    ['Added', cycles.retrofitted],
     ['Discovered', cycles.discovered],
     ['Started', cycles.inProgress],
     ['Completed', cycles.completed],
