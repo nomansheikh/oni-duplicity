@@ -15,6 +15,7 @@ import type { SaveGame } from '@oni-duplicity/save-parser'
 import type { ChangeTarget } from '../lib/changes.ts'
 import { clampImpact } from './dlc.ts'
 import { listGeysers, objectById, type Edit, type GeyserField } from './model.ts'
+import { harvestableByPrefab } from './pois.ts'
 
 const GEYSER_FIELDS: Record<GeyserField, string> = {
   scaledRate: 'output per active cycle',
@@ -103,6 +104,8 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       const value = range ? Math.min(range.max, Math.max(range.min, edit.value)) : edit.value
       return `${who}${GEYSER_FIELDS[edit.field]} to ${round(value)}`
     }
+    case 'setGeyserType':
+      return `${who}change type to ${findGeyser(edit.typeId)?.name ?? humanize(edit.typeId)}`
     case 'setItemMass':
       return `Set an item's mass to ${round(edit.mass)} kg`
     case 'setItemTemperature':
@@ -119,6 +122,14 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       return 'Research everything'
     case 'setGameSetting':
       return `${findGameSetting(edit.settingId)?.name ?? edit.settingId} to ${humanize(edit.level)}`
+    case 'setDestinationMass':
+      return `Destination ${edit.destination}: set recoverable mass to ${round(edit.mass)} kg`
+    case 'setDestinationAnalysis':
+      return `Destination ${edit.destination}: mark ${edit.level === 'complete' ? 'fully analyzed' : 'discovered'}`
+    case 'revealStarmap':
+      return 'Reveal the known starmap'
+    case 'setPoiStock':
+      return `${harvestableByPrefab.get(edit.id.slice(0, edit.id.lastIndexOf(':')))?.name ?? 'POI'}: set stock to ${round(edit.kg)} kg (experimental)`
     case 'setWorldDiscovered':
       return `${who}mark ${edit.discovered ? 'discovered' : 'undiscovered'}`
     case 'setDemoliorImpact':
@@ -183,6 +194,13 @@ export function editTarget(edit: Edit): ChangeTarget {
       return { category: 'raw', key: edit.path.join('.') }
     case 'setDemoliorImpact':
       return { category: 'colony', key: 'demolior' }
+    case 'setDestinationMass':
+    case 'setDestinationAnalysis':
+      return { category: 'asteroid', key: `destination:${edit.destination}` }
+    case 'revealStarmap':
+      return { category: 'asteroid', key: 'starmap' }
+    case 'setPoiStock':
+      return targetOfObject(edit.id)
     case 'deleteDebris':
       return { category: 'item', key: `debris:${edit.ids.join(',')}` }
     case 'deleteObject':

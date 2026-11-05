@@ -21,9 +21,11 @@ import {
 import { createSearchRunner, type RawSearchOptions } from './raw.ts'
 import { listDlc } from './dlc.ts'
 import { describeEdit, editTarget } from './describe.ts'
+import { listBionics } from './bionic.ts'
 import { worldMap } from './map.ts'
 import type { ChangeCategory, HistoryEntry } from '../lib/changes.ts'
 import { applyWithRestore } from './snapshot.ts'
+import { listPoiOverview } from './pois.ts'
 
 let save: SaveGame | null = null
 let fileName = ''
@@ -75,6 +77,7 @@ const api = {
   duplicants: () => listDuplicants(current()),
   catalogs: () => catalogs(),
   geysers: () => listGeysers(current()),
+  bionics: () => listBionics(current()),
   materials: () => listMaterials(current()),
   critters: () => listCritters(current()),
   techs: () => listTechs(current()),
@@ -83,6 +86,7 @@ const api = {
   stories: () => listStories(current()),
   destinations: () => listDestinations(current()),
   dlc: () => listDlc(current()),
+  pois: () => listPoiOverview(current()),
   materialItems: (elementId: string) => listMaterialItems(current(), elementId),
   rawChildren: (path: RawPath, offset?: number, limit?: number) =>
     rawChildren(current(), path, offset, limit),

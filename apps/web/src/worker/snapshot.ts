@@ -39,7 +39,19 @@ export function snapshot(save: SaveGame, edit: Edit): () => void {
     edit.type === 'deleteObject' || edit.type === 'deleteDebris' || edit.type === 'cloneObject'
   const groups = structural ? save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] })) : []
   const settings = structural ? cloneValue(save.settings) : null
+  // Changing a geyser's type moves it between groups, and may add or drop a group.
+  const layout =
+    edit.type === 'setGeyserType'
+      ? {
+          all: [...save.gameObjects],
+          lists: save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] })),
+        }
+      : null
   return () => {
+    if (layout) {
+      for (const { g, list } of layout.lists) g.gameObjects = list
+      save.gameObjects.splice(0, save.gameObjects.length, ...layout.all)
+    }
     save.header.gameInfo = gameInfo
     save.gameData.customGameSettings = customGameSettings
     // Put the key back only if the save had it, so writing stays identical.
@@ -49,6 +61,7 @@ export function snapshot(save: SaveGame, edit: Edit): () => void {
       s.b.templateData = s.templateData
       if (s.extraData !== undefined) s.b.extraData = s.extraData
       // Edits that touch raw bytes replace the array instead of changing it in place.
+      // Byte edits swap in a new array, so the old one goes back by reference.
       s.b.extraRaw = s.extraRaw
     }
     for (const { g, list } of groups) g.gameObjects = list

@@ -12,9 +12,27 @@ export interface Range {
   max: number
 }
 
+export type GeyserShape = 'gas' | 'liquid' | 'molten'
+
+/**
+ * The prefab footprint follows the shape: gas 2×4, liquid 4×2, molten 3×3 cells
+ * (`GeyserGenericConfig`).
+ */
 export interface GeyserTypeEntry {
   /** The type ID; `configuration.typeId` holds its HashedString hash. */
   id: string
+  /** Decides the prefab's footprint, so a type can only be swapped for one of the same shape. */
+  shape: GeyserShape
+  /** The `SimHashes` name of the element it emits. */
+  element: string
+  /** Kelvin the emitted element leaves at. */
+  outputTemperature: number
+  /** Kelvin of the geyser object itself (`PrimaryElement` temperature in a save). */
+  geyserTemperature: number
+  /** DLC IDs a save must have active for the game to register the prefab. */
+  requiredDlcIds: string[]
+  /** Germs emitted along with the element, per kilogram. */
+  disease?: { id: string; count: number }
   /** Kilograms per active cycle. */
   rate: Range
   /** Seconds per eruption cycle. */
@@ -29,7 +47,10 @@ export interface GeyserTypeEntry {
 
 const r = (min: number, max: number): Range => ({ min, max })
 
-type Timing = Omit<GeyserTypeEntry, 'id' | 'rate'>
+type Timing = Pick<
+  GeyserTypeEntry,
+  'iterationLength' | 'iterationPercent' | 'yearLength' | 'yearPercent'
+>
 
 const YEAR = { yearLength: r(15000, 135000), yearPercent: r(0.4, 0.8) }
 const VENT: Timing = { iterationLength: r(60, 1140), iterationPercent: r(0.1, 0.9), ...YEAR }
@@ -44,41 +65,91 @@ const VOLCANO: Timing = {
   ...YEAR,
 }
 
-const type = (id: string, rate: Range, timing: Timing): GeyserTypeEntry => ({ id, rate, ...timing })
+const E1 = ['EXPANSION1_ID']
+const AQUATIC = ['DLC5_ID']
+
+interface Extra {
+  /** Defaults to 372.15, the constructor's default. */
+  geyserTemperature?: number
+  requiredDlcIds?: string[]
+  disease?: { id: string; count: number }
+}
+
+const type = (
+  id: string,
+  shape: GeyserShape,
+  element: string,
+  outputTemperature: number,
+  rate: Range,
+  timing: Timing,
+  extra: Extra = {},
+): GeyserTypeEntry => ({
+  id,
+  shape,
+  element,
+  outputTemperature,
+  geyserTemperature: extra.geyserTemperature ?? 372.15,
+  requiredDlcIds: extra.requiredDlcIds ?? [],
+  ...(extra.disease ? { disease: extra.disease } : {}),
+  rate,
+  ...timing,
+})
 
 export const geyserTypes: GeyserTypeEntry[] = [
-  type('steam', r(1000, 2000), VENT),
-  type('hot_steam', r(500, 1000), VENT),
-  type('hot_water', r(2000, 4000), VENT),
-  type('slush_water', r(1000, 2000), VENT),
-  type('filthy_water', r(2000, 4000), VENT),
-  type('slush_salt_water', r(1000, 2000), VENT),
-  type('salt_water', r(2000, 4000), VENT),
-  type('small_volcano', r(400, 800), VOLCANO),
-  type('big_volcano', r(800, 1600), VOLCANO),
-  type('liquid_co2', r(100, 200), VENT),
-  type('hot_co2', r(70, 140), VENT),
-  type('hot_hydrogen', r(70, 140), VENT),
-  type('hot_po2', r(70, 140), VENT),
-  type('slimy_po2', r(70, 140), VENT),
-  type('chlorine_gas', r(70, 140), VENT),
-  type('chlorine_gas_cool', r(70, 140), VENT),
-  type('methane', r(70, 140), VENT),
-  type('molten_copper', r(200, 400), METAL),
-  type('molten_iron', r(200, 400), METAL),
-  type('molten_gold', r(200, 400), METAL),
-  type('molten_aluminum', r(200, 400), METAL),
-  type('molten_tungsten', r(200, 400), METAL),
-  type('molten_niobium', r(800, 1600), VOLCANO),
-  type('molten_cobalt', r(200, 400), METAL),
-  type('oil_drip', r(1, 250), {
+  type('steam', 'gas', 'Steam', 383.15, r(1000, 2000), VENT),
+  type('hot_steam', 'gas', 'Steam', 773.15, r(500, 1000), VENT),
+  type('hot_water', 'liquid', 'Water', 368.15, r(2000, 4000), VENT),
+  type('slush_water', 'liquid', 'DirtyWater', 263.15, r(1000, 2000), VENT, {
+    geyserTemperature: 263,
+  }),
+  type('filthy_water', 'liquid', 'DirtyWater', 303.15, r(2000, 4000), VENT, {
+    disease: { id: 'FoodPoisoning', count: 20000 },
+  }),
+  type('slush_salt_water', 'liquid', 'Brine', 263.15, r(1000, 2000), VENT, {
+    geyserTemperature: 263,
+  }),
+  type('salt_water', 'liquid', 'SaltWater', 368.15, r(2000, 4000), VENT),
+  type('small_volcano', 'molten', 'Magma', 2000, r(400, 800), VOLCANO),
+  type('big_volcano', 'molten', 'Magma', 2000, r(800, 1600), VOLCANO),
+  type('liquid_co2', 'liquid', 'LiquidCarbonDioxide', 218, r(100, 200), VENT, {
+    geyserTemperature: 218,
+  }),
+  type('hot_co2', 'gas', 'CarbonDioxide', 773.15, r(70, 140), VENT),
+  type('hot_hydrogen', 'gas', 'Hydrogen', 773.15, r(70, 140), VENT),
+  type('hot_po2', 'gas', 'ContaminatedOxygen', 773.15, r(70, 140), VENT),
+  type('slimy_po2', 'gas', 'ContaminatedOxygen', 333.15, r(70, 140), VENT, {
+    disease: { id: 'SlimeLung', count: 5000 },
+  }),
+  type('chlorine_gas', 'gas', 'ChlorineGas', 333.15, r(70, 140), VENT),
+  type('chlorine_gas_cool', 'gas', 'ChlorineGas', 278.15, r(70, 140), VENT),
+  type('methane', 'gas', 'Methane', 423.15, r(70, 140), VENT),
+  type('molten_copper', 'molten', 'MoltenCopper', 2500, r(200, 400), METAL),
+  type('molten_iron', 'molten', 'MoltenIron', 2800, r(200, 400), METAL),
+  type('molten_gold', 'molten', 'MoltenGold', 2900, r(200, 400), METAL),
+  type('molten_aluminum', 'molten', 'MoltenAluminum', 2000, r(200, 400), METAL, {
+    requiredDlcIds: E1,
+  }),
+  type('molten_tungsten', 'molten', 'MoltenTungsten', 4000, r(200, 400), METAL, {
+    requiredDlcIds: E1,
+  }),
+  type('molten_niobium', 'molten', 'MoltenNiobium', 3500, r(800, 1600), VOLCANO, {
+    requiredDlcIds: E1,
+  }),
+  type('molten_cobalt', 'molten', 'MoltenCobalt', 2500, r(200, 400), METAL, {
+    requiredDlcIds: E1,
+  }),
+  type('oil_drip', 'liquid', 'CrudeOil', 600, r(1, 250), {
     iterationLength: r(600, 600),
     iterationPercent: r(1, 1),
     yearLength: r(100, 500),
     yearPercent: r(0.4, 0.8),
   }),
-  type('liquid_sulfur', r(1000, 2000), VENT),
-  type('murky_brine', r(2000, 4000), VENT),
+  type('liquid_sulfur', 'liquid', 'LiquidSulfur', 438.35, r(1000, 2000), VENT, {
+    requiredDlcIds: E1,
+  }),
+  type('murky_brine', 'liquid', 'MurkyBrine', 368.15, r(2000, 4000), VENT, {
+    requiredDlcIds: AQUATIC,
+  }),
 ]
 
 const SPREAD = 6

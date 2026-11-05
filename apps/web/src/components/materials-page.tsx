@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Search, SlidersHorizontal, Trash2 } from 'lucide-react'
+import { Search, SlidersHorizontal, Trash2, TriangleAlert } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -40,20 +40,28 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { fmt, fmtMass, toCelsius } from '@/lib/format'
 import { saveClient } from '@/lib/save-client'
-import { cn } from '@/lib/utils'
 import type { Edit, MaterialItemView, MaterialView } from '@/worker/model'
 import { Hint, NumberField } from './common'
 
-const STATE_STYLES: Record<string, string> = {
-  Solid: 'border-amber-500/40 bg-amber-500/15 text-amber-700 dark:text-amber-300',
-  Liquid: 'border-sky-500/40 bg-sky-500/15 text-sky-700 dark:text-sky-300',
-  Gas: 'border-violet-500/40 bg-violet-500/15 text-violet-700 dark:text-violet-300',
-}
+// Element states use the game's resource colours: gas cyan, liquid blue, solid tan.
+const STATE_VARIANTS = { Solid: 'solid', Liquid: 'liquid', Gas: 'gas' } as const
 
 function StateBadge({ state }: { state: string }) {
   return (
-    <Badge variant="outline" className={cn(STATE_STYLES[state])}>
+    <Badge variant={STATE_VARIANTS[state as keyof typeof STATE_VARIANTS] ?? 'secondary'}>
       {state}
+    </Badge>
+  )
+}
+
+// An amount as the game's resource lists show it: a bare number with its unit, and the count of
+// places in a quiet caption. An empty amount is a dim dash.
+function Amount({ mass, count }: { mass: number; count: number }) {
+  if (count === 0) return <span className="text-muted-foreground">—</span>
+  return (
+    <Badge variant="bare" className="justify-end">
+      {fmtMass(mass)}
+      <span className="type-caption text-muted-foreground">· {count}</span>
     </Badge>
   )
 }
@@ -95,6 +103,7 @@ export function MaterialsPage({
               type="single"
               variant="outline"
               size="sm"
+              aria-label="Filter by state"
               value={state}
               onValueChange={(v) => setState(v || 'all')}
             >
@@ -131,24 +140,24 @@ export function MaterialsPage({
             <TableBody>
               {visible.map((m) => (
                 <TableRow key={m.id}>
-                  <TableCell className="font-medium">{m.name}</TableCell>
+                  <TableCell className="type-label tracking-normal normal-case">{m.name}</TableCell>
                   <TableCell>
                     <StateBadge state={m.state} />
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {m.looseCount > 0 ? `${fmtMass(m.looseMass)} · ${m.looseCount}` : '—'}
+                  <TableCell className="text-right">
+                    <Amount mass={m.looseMass} count={m.looseCount} />
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {m.storedCount > 0 ? `${fmtMass(m.storedMass)} · ${m.storedCount}` : '—'}
+                  <TableCell className="text-right">
+                    <Amount mass={m.storedMass} count={m.storedCount} />
                   </TableCell>
-                  <TableCell className="text-right font-medium tabular-nums">
+                  <TableCell className="text-right font-bold text-good-hi tabular-nums">
                     {fmtMass(m.looseMass + m.storedMass)}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {fmt(toCelsius(m.temperature), 1)} °C
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" onClick={() => setOpenId(m.id)}>
+                    <Button variant="outline" size="sm" onClick={() => setOpenId(m.id)}>
                       <SlidersHorizontal /> Edit
                     </Button>
                   </TableCell>
@@ -228,11 +237,11 @@ function MaterialSheet({
 
   return (
     <Sheet open={material !== null} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent className="w-full gap-0 sm:max-w-2xl">
+      <SheetContent className="data-[side=right]:w-full data-[side=right]:sm:max-w-3xl">
         {material && (
           <>
             <SheetHeader>
-              <SheetTitle className="flex items-center gap-2">
+              <SheetTitle className="flex items-center gap-3">
                 {material.name} <StateBadge state={material.state} />
               </SheetTitle>
               <SheetDescription>
@@ -241,7 +250,7 @@ function MaterialSheet({
                 {fmt(toCelsius(material.temperature), 1)} °C
               </SheetDescription>
             </SheetHeader>
-            <div className="space-y-4 px-4">
+            <div className="space-y-4 px-4 pt-4">
               <FieldGroup className="grid gap-4 sm:grid-cols-2">
                 <Field>
                   <FieldLabel htmlFor="bulk-temp">Set every temperature</FieldLabel>
@@ -308,9 +317,12 @@ function MaterialSheet({
                 Stored items keep their container; loose debris can be deleted.
               </FieldDescription>
               {loose.length > 0 && (
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 border border-bad/60 bg-bad/10 p-3">
+                  <span className="mr-auto flex items-center gap-2 type-label text-bad-text">
+                    <TriangleAlert className="size-5" /> Loose debris
+                  </span>
                   <Button
-                    variant="outline"
+                    variant="destructive"
                     size="sm"
                     disabled={stale || selected.size === 0}
                     onClick={() => setConfirm('selected')}
@@ -318,7 +330,7 @@ function MaterialSheet({
                     <Trash2 /> Delete selected ({selected.size})
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="destructive"
                     size="sm"
                     disabled={stale || deletable.length === 0}
                     onClick={() => setConfirm('all')}
@@ -370,7 +382,7 @@ function MaterialSheet({
                         )}
                       </TableCell>
                       <TableCell>
-                        {item.loose ? <Badge variant="secondary">Loose</Badge> : item.where}
+                        {item.loose ? <Badge variant="warn">Loose</Badge> : item.where}
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground tabular-nums">
                         {item.x}, {item.y}
@@ -404,7 +416,7 @@ function MaterialSheet({
                           }
                         />
                       </TableCell>
-                      <TableCell className="w-10">
+                      <TableCell className="w-12">
                         {item.loose && (
                           <Hint
                             desc={
@@ -415,7 +427,7 @@ function MaterialSheet({
                           >
                             <span className="inline-flex">
                               <Button
-                                variant="ghost"
+                                variant="destructive"
                                 size="icon-sm"
                                 aria-label="Delete debris"
                                 disabled={stale || item.protected || item.instanceId === null}
@@ -438,12 +450,14 @@ function MaterialSheet({
       <Dialog open={confirm !== null} onOpenChange={(open) => !open && setConfirm(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              Delete {targets.length} loose {targets.length === 1 ? 'item' : 'items'}?
+            <DialogTitle className="flex items-center gap-2">
+              <TriangleAlert className="size-6" /> Delete {targets.length} loose{' '}
+              {targets.length === 1 ? 'item' : 'items'}?
             </DialogTitle>
             <DialogDescription>
-              This removes {fmtMass(targetMass)} of {material?.name} lying on the ground. Stored
-              items are not touched. You can undo it from the header.
+              This removes <strong className="text-bad-text">{fmtMass(targetMass)}</strong> of{' '}
+              {material?.name} lying on the ground. Stored items are not touched. You can undo it
+              from the header.
               {skipped > 0 &&
                 ` ${skipped} ${skipped === 1 ? 'item is' : 'items are'} skipped because ${
                   skipped === 1 ? 'it is' : 'they are'
