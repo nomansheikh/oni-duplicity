@@ -1,36 +1,82 @@
-import { Fragment, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import { ChevronDown, FolderOpen, Orbit, X } from 'lucide-react'
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import { Separator } from '@/components/ui/separator'
-import { SidebarTrigger } from '@/components/ui/sidebar'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
-export function SiteHeader({ crumbs, actions }: { crumbs: string[]; actions?: ReactNode }) {
+export interface OpenFile {
+  name: string
+  colony: string
+  cycle: number
+  version: string
+}
+
+/** The top bar: brand, the open save with its colony and cycle, then the edit actions. */
+export function SiteHeader({
+  file,
+  actions,
+  onOpen,
+  onClose,
+}: {
+  file: OpenFile | null
+  actions?: ReactNode
+  onOpen: () => void
+  onClose: () => void
+}) {
   return (
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
-      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            {crumbs.map((crumb, i) => (
-              <Fragment key={`${i}-${crumb}`}>
-                {i > 0 && <BreadcrumbSeparator />}
-                <BreadcrumbItem>
-                  <BreadcrumbPage className={i < crumbs.length - 1 ? 'text-muted-foreground' : ''}>
-                    {crumb}
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-              </Fragment>
-            ))}
-          </BreadcrumbList>
-        </Breadcrumb>
-        <div className="ml-auto flex items-center gap-2">{actions}</div>
+    <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-ink bg-ground px-3 py-2">
+      <div className="flex items-center gap-2">
+        <span className="flex size-8 items-center justify-center border border-ink bg-title text-fg">
+          <Orbit className="size-5" />
+        </span>
+        <div className="leading-none">
+          <p className="font-heading text-xl font-bold tracking-[0.07em] uppercase">Duplicity</p>
+          <p className="hidden text-xs text-fg-3 sm:block">ONI save editor</p>
+        </div>
       </div>
+
+      {file ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="field-game flex min-w-0 max-w-full items-center gap-3 px-3 py-1 text-left data-[state=open]:bg-tab"
+            >
+              <span className="min-w-0 leading-tight">
+                <span className="block truncate font-heading text-lg font-bold tracking-[0.05em]">
+                  {file.colony}
+                </span>
+                <span className="block truncate text-xs text-fg-3">{file.name}</span>
+              </span>
+              <span
+                className="chip shrink-0"
+                style={{ '--c': 'var(--gold)' } as React.CSSProperties}
+              >
+                Cycle {file.cycle}
+              </span>
+              <ChevronDown className="size-4 shrink-0 text-fg-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="min-w-56">
+            <DropdownMenuLabel className="truncate">{file.name}</DropdownMenuLabel>
+            <p className="px-2 pb-1 text-xs text-fg-3">Save version {file.version}</p>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={onOpen}>
+              <FolderOpen /> Open another save
+            </DropdownMenuItem>
+            <DropdownMenuItem variant="destructive" onSelect={onClose}>
+              <X /> Close save
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : null}
+
+      <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div>
     </header>
   )
 }

@@ -41,9 +41,9 @@ export async function openSave(page: Page, file: string = GALAXY): Promise<void>
   })
 }
 
-/** Clicks a page in the sidebar, e.g. `Geysers` or `Raw data`. */
+/** Opens a page from the top tab strip, e.g. `Geysers` or `Raw data`. */
 export async function goTo(page: Page, title: string): Promise<void> {
-  await page.locator('[data-sidebar="menu-button"]').filter({ hasText: title }).first().click()
+  await page.getByRole('tab', { name: title }).first().click()
 }
 
 /** The number of unsaved edits shown in the header (0 when the button is hidden). */

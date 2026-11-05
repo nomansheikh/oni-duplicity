@@ -1,8 +1,7 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
-import { Download, Moon, Redo2, Sun, Undo2 } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { Download, FolderOpen, Redo2, Undo2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { AppSidebar, type Page } from '@/components/app-sidebar'
+import { AppTabs, type Page } from '@/components/app-sidebar'
 import { ChangesPopover } from '@/components/changes-popover'
 import { DlcBadges } from '@/components/dlc-badge'
 import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
@@ -11,7 +10,6 @@ import { SiteHeader } from '@/components/site-header'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAllowUnverified } from '@/lib/preferences'
@@ -92,19 +90,6 @@ function PageFallback() {
 
 const NO_EDITS: EditStatus = { edits: 0, canUndo: false, canRedo: false }
 
-const PAGE_TITLES: Record<Page, string> = {
-  overview: 'Overview',
-  map: 'World map',
-  duplicants: 'Duplicants',
-  geysers: 'Geysers',
-  materials: 'Materials',
-  critters: 'Critters',
-  research: 'Research',
-  space: 'Space',
-  settings: 'Game settings',
-  raw: 'Raw data',
-}
-
 export default function App() {
   const [state, setState] = useState<State>({ status: 'idle' })
   const [views, setViews] = useState<Views | null>(null)
@@ -116,7 +101,6 @@ export default function App() {
   const [revision, setRevision] = useState(0)
   const fileInput = useRef<HTMLInputElement>(null)
   const [allowUnverified, setAllowUnverified] = useAllowUnverified()
-  const { resolvedTheme, setTheme } = useTheme()
 
   const refresh = useCallback(async () => {
     const [
@@ -238,26 +222,9 @@ export default function App() {
       ? { summary: state.summary, views, catalogs }
       : null
   const selected = views?.duplicants.find((d) => d.id === selectedDupe) ?? views?.duplicants[0]
-  const crumbs = loaded
-    ? [
-        loaded.summary.baseName,
-        PAGE_TITLES[page],
-        ...(page === 'duplicants' && selected ? [selected.name] : []),
-      ]
-    : ['Duplicity']
 
-  const themeToggle = (
-    <>
-      <Button
-        variant="ghost"
-        size="icon"
-        aria-label="Toggle theme"
-        onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-      >
-        {resolvedTheme === 'dark' ? <Sun /> : <Moon />}
-      </Button>
-      <PreferencesDialog allowUnverified={allowUnverified} onAllowUnverified={setAllowUnverified} />
-    </>
+  const preferences = (
+    <PreferencesDialog allowUnverified={allowUnverified} onAllowUnverified={setAllowUnverified} />
   )
   const saveLocked = loaded?.summary.unverified === true && !allowUnverified
 
@@ -323,117 +290,125 @@ export default function App() {
           </TooltipContent>
         )}
       </Tooltip>
-      {themeToggle}
+      {preferences}
     </>
   ) : (
-    themeToggle
+    <>
+      <Button variant="secondary" onClick={() => fileInput.current?.click()}>
+        <FolderOpen />
+        Open a save
+      </Button>
+      {preferences}
+    </>
   )
 
   return (
-    <SidebarProvider
-      style={
-        {
-          '--sidebar-width': 'calc(var(--spacing) * 64)',
-          '--header-height': 'calc(var(--spacing) * 12)',
-        } as CSSProperties
-      }
-    >
-      <AppSidebar
-        variant="inset"
-        page={page}
-        onNavigate={setPage}
-        counts={
+    <div className="flex min-h-svh flex-col bg-ground">
+      <SiteHeader
+        file={
           loaded
             ? {
-                duplicants: loaded.views.duplicants.length,
-                geysers: loaded.views.geysers.length,
-                materials: loaded.views.materials.length,
-                critters: loaded.views.critters.length,
-                space: loaded.views.worlds.length,
+                name: loaded.summary.fileName,
+                colony: loaded.summary.baseName,
+                cycle: loaded.summary.cycles,
+                version: loaded.summary.version,
               }
-            : {}
+            : null
         }
-        file={loaded ? { name: loaded.summary.fileName, version: loaded.summary.version } : null}
+        actions={actions}
         onOpen={() => fileInput.current?.click()}
         onClose={close}
       />
-      <SidebarInset>
-        <SiteHeader crumbs={crumbs} actions={actions} />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 px-4 py-4 md:gap-6 md:py-6 lg:px-6">
-              {state.status === 'idle' && (
-                <OpenSave onFile={open} onPick={() => fileInput.current?.click()} />
+      <nav aria-label="Editor pages" className="border-b border-ink bg-ground px-3 pt-2">
+        <AppTabs
+          page={page}
+          onNavigate={setPage}
+          disabled={loaded === null}
+          counts={
+            loaded
+              ? {
+                  duplicants: loaded.views.duplicants.length,
+                  geysers: loaded.views.geysers.length,
+                  materials: loaded.views.materials.length,
+                  critters: loaded.views.critters.length,
+                  space: loaded.views.worlds.length,
+                }
+              : {}
+          }
+        />
+      </nav>
+      <main className="@container/main flex flex-1 flex-col p-2 sm:p-3">
+        <div className="panel flex flex-1 flex-col bg-field p-1">
+          <div className="flex flex-1 flex-col gap-4 bg-field p-3 md:gap-6 md:p-5">
+            {state.status === 'idle' && (
+              <OpenSave onFile={open} onPick={() => fileInput.current?.click()} />
+            )}
+            {state.status === 'loading' && (
+              <LoadingSave fileName={state.fileName} progress={state.progress} />
+            )}
+            {state.status === 'error' && (
+              <LoadError message={state.message} onPick={() => fileInput.current?.click()} />
+            )}
+            {loaded && (loaded.summary.unverified || loaded.summary.warnings.length > 0) && (
+              <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
+                {loaded.summary.warnings.map((w) => (
+                  <p key={w}>{w}</p>
+                ))}
+                {loaded.summary.unverified && <p>Editing may corrupt this save. Keep a backup.</p>}
+              </div>
+            )}
+            <Suspense fallback={<PageFallback />}>
+              {loaded && page === 'overview' && (
+                <OverviewPage
+                  summary={loaded.summary}
+                  duplicants={loaded.views.duplicants}
+                  geysers={loaded.views.geysers}
+                  onEdit={edit}
+                />
               )}
-              {state.status === 'loading' && (
-                <LoadingSave fileName={state.fileName} progress={state.progress} />
+              {loaded && page === 'duplicants' && (
+                <DuplicantsPage
+                  duplicants={loaded.views.duplicants}
+                  catalogs={loaded.catalogs}
+                  selectedId={selected?.id}
+                  onSelect={setSelectedDupe}
+                  onEdit={edit}
+                />
               )}
-              {state.status === 'error' && (
-                <LoadError message={state.message} onPick={() => fileInput.current?.click()} />
+              {loaded && page === 'geysers' && (
+                <GeysersPage geysers={loaded.views.geysers} onEdit={edit} />
               )}
-              {loaded && (loaded.summary.unverified || loaded.summary.warnings.length > 0) && (
-                <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
-                  {loaded.summary.warnings.map((w) => (
-                    <p key={w}>{w}</p>
-                  ))}
-                  {loaded.summary.unverified && (
-                    <p>Editing may corrupt this save. Keep a backup.</p>
-                  )}
-                </div>
+              {loaded && page === 'critters' && (
+                <CrittersPage critters={loaded.views.critters} onEdit={edit} />
               )}
-              <Suspense fallback={<PageFallback />}>
-                {loaded && page === 'overview' && (
-                  <OverviewPage
-                    summary={loaded.summary}
-                    duplicants={loaded.views.duplicants}
-                    geysers={loaded.views.geysers}
-                    onEdit={edit}
-                  />
-                )}
-                {loaded && page === 'duplicants' && (
-                  <DuplicantsPage
-                    duplicants={loaded.views.duplicants}
-                    catalogs={loaded.catalogs}
-                    selectedId={selected?.id}
-                    onSelect={setSelectedDupe}
-                    onEdit={edit}
-                  />
-                )}
-                {loaded && page === 'geysers' && (
-                  <GeysersPage geysers={loaded.views.geysers} onEdit={edit} />
-                )}
-                {loaded && page === 'critters' && (
-                  <CrittersPage critters={loaded.views.critters} onEdit={edit} />
-                )}
-                {loaded && page === 'research' && (
-                  <ResearchPage techs={loaded.views.techs} onEdit={edit} />
-                )}
-                {loaded && page === 'space' && (
-                  <SpacePage
-                    worlds={loaded.views.worlds}
-                    destinations={loaded.views.destinations}
-                    onEdit={edit}
-                  />
-                )}
-                {loaded && page === 'settings' && (
-                  <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
-                )}
-                {loaded && page === 'map' && (
-                  <MapPage worlds={loaded.views.worlds} revision={revision} />
-                )}
-                {loaded && page === 'raw' && <RawPage revision={revision} onEdit={edit} />}
-                {loaded && page === 'materials' && (
-                  <MaterialsPage
-                    materials={loaded.views.materials}
-                    revision={revision}
-                    onEdit={edit}
-                  />
-                )}
-              </Suspense>
-            </div>
+              {loaded && page === 'research' && (
+                <ResearchPage techs={loaded.views.techs} onEdit={edit} />
+              )}
+              {loaded && page === 'space' && (
+                <SpacePage
+                  worlds={loaded.views.worlds}
+                  destinations={loaded.views.destinations}
+                  onEdit={edit}
+                />
+              )}
+              {loaded && page === 'settings' && (
+                <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
+              )}
+              {loaded && page === 'map' && (
+                <MapPage worlds={loaded.views.worlds} revision={revision} />
+              )}
+              {loaded && page === 'raw' && <RawPage revision={revision} onEdit={edit} />}
+              {loaded && page === 'materials' && (
+                <MaterialsPage
+                  materials={loaded.views.materials}
+                  revision={revision}
+                  onEdit={edit}
+                />
+              )}
+            </Suspense>
           </div>
         </div>
-      </SidebarInset>
+      </main>
       <input
         ref={fileInput}
         type="file"
@@ -445,6 +420,6 @@ export default function App() {
           e.target.value = ''
         }}
       />
-    </SidebarProvider>
+    </div>
   )
 }

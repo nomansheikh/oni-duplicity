@@ -92,3 +92,14 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - No behaviour change. The e2e specs select by role, name, label and `data-sidebar`, none of which changed. Screenshots of the gallery, Overview and Geysers are in `docs/screenshots/ui-library/`.
 - Known: `apps/web/tests/geysers.test.ts` (fixture geyser ranges) fails locally because the fetched fixtures are absent; it does not touch the UI.
 - Next: the app shell and page layouts.
+
+## UI app shell (design v2, phase 2) — 2026-11-05
+
+- Replaced the sidebar layout with the game's shell: a header bar, a top tab strip and a framed content panel.
+- Header: brand, a save menu (colony name, file name, cycle badge; open another or close), the DLC badges, changes popover, undo/redo, download and preferences. With no save open it shows Open a save.
+- Tab strip: the restyled shadcn `Tabs`, one tab per page with an icon in the page's category colour and a count where the page has one. It scrolls sideways at narrow widths; at 390px the page does not overflow.
+- The theme toggle is gone from the header (dark only). Routes, the undo/redo shortcuts and button names are unchanged.
+- e2e: `goTo` now clicks `getByRole('tab', { name })`; no spec changed.
+- Screenshots in `docs/screenshots/ui-app-shell/`. Page internals are untouched.
+- Known: `components/ui/sidebar.tsx` is now unused and can be deleted once the page sessions land.
+- Next: page layouts.
