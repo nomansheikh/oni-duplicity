@@ -156,3 +156,16 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Risks:
   - Arrays that the game keeps in step with another array (parallel arrays such as the conduit flow `serializedIdx` and `versionedSerializedContents`) get out of step when one is extended. The raw editor's warning covers this; nothing here checks it.
   - Not verified in game.
+
+## Delete loose debris — 2026-11-05
+
+- The Materials sheet could already delete one loose chunk with `deleteObject`. This adds the missing parts:
+  - `deleteDebris { ids }`: one edit for any number of chunks, so one undo step. The ids are `KPrefabID` instance IDs, not `Element:index` positions, because positions shift after every delete and a second click on a list that had not refreshed yet could delete a different chunk. The worker throws if an ID is gone and changes nothing. The sheet also disables every delete control until the list for the latest revision has loaded. Undo restores every chunk at its original position in its group.
+  - "Delete selected" and "Delete all loose" with a confirm dialog that shows the count and mass (and how many were skipped).
+  - Checkboxes on loose rows; stored rows never get a delete control, and the worker refuses stored items, buildings and critters.
+- Safety check (decompile and all ten fixtures): nothing that was checked saves a loose item's `KPrefabID` instance ID except the move-order list in `CancellableMove.movables`. Counts of decoded references to loose element chunks, not counting each chunk's own ID: 0 in `beautiful-galaxy`, `beautiful-galaxy-build-744825`, `apple-park`, `konove` and `mithro-01` to `mithro-04`; 2 (Oxylite) in `mithro-05`; 1 (Liquid Sulfur) in `mithro-06`. The game does not null-check those IDs when a move order is cancelled.
+- So a chunk with `Movable.isMarkedForMove`, or whose ID is in any move-order list, cannot be deleted. The trash button is disabled with a hint, bulk delete skips it, and the worker throws. The same guard now covers `deleteObject`, which previously had none.
+- Tests: model, undo and refusal tests in `tests/debris.test.ts`, run on every fixture (delete three chunks of the busiest element, write, re-read, compare with the raw save minus those objects; undo is byte exact); move-order refusal on `mithro-05` and `mithro-06`; five e2e tests (one, selected, all, cancel, undo, plus the move-order case on the 40 MB save).
+- Risks:
+  - Not tried in game. Undecoded raw bytes were not searched for references.
+  - Deleting a chunk deletes its mass from the world; the world grid is untouched.

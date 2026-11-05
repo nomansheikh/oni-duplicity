@@ -34,7 +34,8 @@ export function snapshot(save: SaveGame, edit: Edit): () => void {
     })),
   )
   // Cloning or deleting changes group lists and the unique ID counter, not just behaviors.
-  const structural = edit.type === 'deleteObject' || edit.type === 'cloneObject'
+  const structural =
+    edit.type === 'deleteObject' || edit.type === 'deleteDebris' || edit.type === 'cloneObject'
   const groups = structural ? save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] })) : []
   const settings = structural ? cloneValue(save.settings) : null
   return () => {
