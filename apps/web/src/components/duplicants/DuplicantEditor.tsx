@@ -1,3 +1,13 @@
+import {
+  Award,
+  BatteryCharging,
+  Brain,
+  Droplet,
+  Heart,
+  Moon,
+  Utensils,
+  type LucideIcon,
+} from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -8,6 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Item, ItemContent, ItemMedia } from '@/components/ui/item'
 import { Progress } from '@/components/ui/progress'
 import {
   Select,
@@ -17,12 +28,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { fmt, humanize, portraitParts } from '@/lib/format'
+import { humanize, portraitParts } from '@/lib/format'
 import type { Catalogs, DuplicantEdit, DuplicantProfile, DuplicantView, Edit } from '@/worker/model'
 import { BionicTab } from './BionicTab'
 import { ProfileActions } from './ProfileActions'
 import { CommitInput, DuplicantAvatar } from '../common'
 import {
+  Vital,
   AppearanceTab,
   AttributesTab,
   EffectsTab,
@@ -38,27 +50,14 @@ const GENDERS = [
   ['NB', 'Non-binary'],
 ] as const
 
-function Meter({
-  label,
-  value,
-  max,
-  text,
-}: {
-  label: string
-  value: number
-  max: number
-  text: string
-}) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-baseline justify-between text-xs">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-mono tabular-nums">{text}</span>
-      </div>
-      <Progress value={Math.min(100, (value / max) * 100)} className="h-1.5" />
-    </div>
-  )
-}
+const VITALS: [id: string, Icon: LucideIcon][] = [
+  ['HitPoints', Heart],
+  ['Stress', Brain],
+  ['Calories', Utensils],
+  ['Stamina', Moon],
+  ['BionicInternalBattery', BatteryCharging],
+  ['BionicOil', Droplet],
+]
 
 export function DuplicantEditor({
   dupe,
@@ -74,7 +73,10 @@ export function DuplicantEditor({
   onEdit: (edit: Edit) => void
 }) {
   const edit = (change: DuplicantEdit) => onEdit({ ...change, id: dupe.id } as Edit)
-  const amount = (id: string) => dupe.amounts.find((a) => a.id === id)?.value ?? 0
+  const vitals = VITALS.flatMap(([id, Icon]) => {
+    const amount = dupe.amounts.find((a) => a.id === id)
+    return amount ? [{ amount, Icon }] : []
+  })
   const mastered = dupe.skills.filter((s) => s.mastered).length
 
   return (
@@ -88,14 +90,14 @@ export function DuplicantEditor({
             className="text-lg"
           />
           <div className="min-w-0 space-y-1">
-            <CardTitle className="text-2xl">{dupe.name}</CardTitle>
-            <CardDescription className="line-clamp-2">
+            <CardTitle className="type-h1">{dupe.name}</CardTitle>
+            <CardDescription className="type-small line-clamp-2">
               {dupe.personality.name}
               {dupe.personality.desc && ` · ${dupe.personality.desc}`}
             </CardDescription>
           </div>
           <CardAction className="flex items-center gap-1">
-            {dupe.isBionic && <Badge>Bionic</Badge>}
+            {dupe.isBionic && <Badge variant="info">Bionic</Badge>}
             {dupe.hat && (
               <Badge variant="outline">{humanize(dupe.hat.replace(/^hat_role_/, ''))} hat</Badge>
             )}
@@ -136,37 +138,35 @@ export function DuplicantEditor({
               </Select>
             </Field>
           </FieldGroup>
-          <div className="grid gap-4 @2xl/main:grid-cols-4">
-            <Meter
-              label="Stress"
-              value={amount('Stress')}
-              max={100}
-              text={`${fmt(amount('Stress'), 0)}%`}
-            />
-            <Meter
-              label="Health"
-              value={amount('HitPoints')}
-              max={100}
-              text={fmt(amount('HitPoints'), 0)}
-            />
-            <Meter
-              label="Calories"
-              value={amount('Calories') / 1000}
-              max={4000}
-              text={`${fmt(amount('Calories') / 1000, 0)} kcal`}
-            />
-            <Meter
-              label="Skills"
-              value={mastered}
-              max={Math.max(1, dupe.skills.length)}
-              text={`${mastered} / ${dupe.skills.length}`}
-            />
+          <div className="well flex flex-col gap-1 p-2">
+            {vitals.map(({ amount, Icon }) => (
+              <Vital key={amount.id} amount={amount} Icon={Icon} />
+            ))}
+            <Item variant="need" data-vital="Skills">
+              <ItemMedia variant="icon">
+                <Award />
+              </ItemMedia>
+              <ItemContent className="gap-1.5">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="type-body">Skills</span>
+                  <span className="type-body text-white tabular-nums">
+                    {mastered} / {dupe.skills.length}
+                  </span>
+                </div>
+                <Progress
+                  variant="xp"
+                  value={mastered}
+                  max={Math.max(1, dupe.skills.length)}
+                  valueLabel={`${mastered} / ${dupe.skills.length}`}
+                />
+              </ItemContent>
+            </Item>
           </div>
         </CardContent>
       </Card>
 
       <Tabs defaultValue="traits" className="gap-4">
-        <TabsList className="flex h-auto flex-wrap">
+        <TabsList className="h-auto flex-wrap">
           <TabsTrigger value="traits">Traits</TabsTrigger>
           <TabsTrigger value="interests">Interests</TabsTrigger>
           <TabsTrigger value="attributes">Attributes</TabsTrigger>
