@@ -13,6 +13,7 @@ import {
 } from '@oni-duplicity/game-data'
 import type { SaveGame } from '@oni-duplicity/save-parser'
 import type { ChangeTarget } from '../lib/changes.ts'
+import { clampImpact } from './dlc.ts'
 import { listGeysers, objectById, type Edit, type GeyserField } from './model.ts'
 
 const GEYSER_FIELDS: Record<GeyserField, string> = {
@@ -120,6 +121,8 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       return `${findGameSetting(edit.settingId)?.name ?? edit.settingId} to ${humanize(edit.level)}`
     case 'setWorldDiscovered':
       return `${who}mark ${edit.discovered ? 'discovered' : 'undiscovered'}`
+    case 'setDemoliorImpact':
+      return `Demolior: impact at cycle ${round(clampImpact(save, edit.impactCycle))}`
     case 'rawSet':
       return `Raw: set ${edit.path.join('.')} to ${String(edit.value)}`
     case 'rawRemove':
@@ -178,6 +181,8 @@ export function editTarget(edit: Edit): ChangeTarget {
     case 'rawDuplicate':
     case 'rawAdd':
       return { category: 'raw', key: edit.path.join('.') }
+    case 'setDemoliorImpact':
+      return { category: 'colony', key: 'demolior' }
     case 'deleteDebris':
       return { category: 'item', key: `debris:${edit.ids.join(',')}` }
     case 'deleteObject':

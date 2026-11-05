@@ -35,6 +35,7 @@ import {
   type StoredItem,
   type TemplateData,
 } from '@oni-duplicity/save-parser'
+import { demoliorObjects, setDemoliorImpact } from './dlc.ts'
 
 // --- View models (sent to the UI) -----------------------------------------
 
@@ -368,6 +369,7 @@ export type Edit =
   | { type: 'rawAdd'; path: RawPath }
   | { type: 'setMaterialTemperature'; elementId: string; kelvin: number }
   | { type: 'scaleMaterialMass'; elementId: string; factor: number }
+  | { type: 'setDemoliorImpact'; impactCycle: number }
 
 // --- Helpers ---------------------------------------------------------------
 
@@ -795,6 +797,9 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
         pe.Units = Math.max(0, Number(pe.Units) * edit.factor)
       }
       return
+    case 'setDemoliorImpact':
+      setDemoliorImpact(save, edit.impactCycle)
+      return
     default:
       applyObjectEdit(objectById(save, edit.id), edit)
   }
@@ -1026,6 +1031,7 @@ export function itemByRef(save: SaveGame, ref: string): GameObject {
 
 /** The game objects an edit may change, for undo snapshots. */
 export function touchedBy(save: SaveGame, edit: Edit): GameObject[] {
+  if (edit.type === 'setDemoliorImpact') return demoliorObjects(save)
   if (edit.type === 'bulkDuplicants') {
     return objectsWith(save, 'MinionIdentity').map(({ obj }) => obj)
   }
