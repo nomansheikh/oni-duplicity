@@ -35,6 +35,8 @@ const badgeVariants = cva(
         liquid: '[--c:var(--cat-liquid)]',
         solid: '[--c:var(--cat-solid)]',
         vacuum: '[--c:var(--cat-vacuum)]',
+        // colony row: icon, number and unit, no border or background
+        bare: 'h-auto min-h-0 gap-1.5 border-transparent bg-transparent px-0 font-sans text-base font-normal tracking-normal text-white normal-case [&>svg]:size-5!',
         // stat pill: dark inset box, numbers in tabular figures
         stat: 'h-[1.9rem] gap-[0.45rem] border-ink bg-inset px-[0.6rem] font-sans text-[0.9rem] font-semibold tracking-normal text-foreground normal-case tabular-nums',
       },

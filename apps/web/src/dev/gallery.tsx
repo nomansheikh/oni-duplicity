@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { SearchIcon, SettingsIcon, SkullIcon } from 'lucide-react'
+import { ArrowUpIcon, HeartIcon, SearchIcon, SettingsIcon, SkullIcon } from 'lucide-react'
 import { Badge, type badgeVariants } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -37,7 +37,8 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { Progress, type ProgressTone } from '@/components/ui/progress'
+import { Item, ItemActions, ItemContent, ItemMedia } from '@/components/ui/item'
+import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
@@ -72,31 +73,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 type BadgeVariant = NonNullable<Parameters<typeof badgeVariants>[0]>['variant']
 
 const BADGES: Record<string, BadgeVariant[]> = {
-  Base: ['default', 'secondary', 'destructive', 'outline', 'ghost', 'link'],
+  Base: ['default', 'secondary', 'destructive', 'outline', 'ghost', 'link', 'bare'],
   Status: ['good', 'warn', 'bad', 'info'],
   Resources: ['oxygen', 'water', 'food', 'power', 'metal', 'plant', 'critter', 'geyser', 'dlc'],
   Elements: ['gas', 'liquid', 'solid', 'vacuum'],
   Stat: ['stat'],
 }
-
-const TONES = [
-  'good',
-  'warn',
-  'bad',
-  'xp',
-  'geyser',
-  'dormant',
-  'oxygen',
-  'water',
-  'food',
-  'power',
-  'metal',
-  'plant',
-  'critter',
-  'gas',
-  'liquid',
-  'solid',
-] satisfies ProgressTone[]
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -252,27 +234,98 @@ export default function Gallery() {
         </div>
       </Section>
 
-      <Section title="Progress (variant API; final meter look pending spec)">
-        <div className="grid gap-3 md:grid-cols-2">
-          {TONES.map((t, i) => (
-            <Progress
-              key={t}
-              tone={t}
-              value={20 + ((i * 17) % 80)}
-              label={t}
-              valueLabel={`${20 + ((i * 17) % 80)}%`}
-            />
-          ))}
-          <Progress tone="good" segmented value={70} label="Segmented" valueLabel="70%" />
+      <Section title="Meters (Progress variants)">
+        <div className="grid gap-5 md:grid-cols-2">
+          <Progress variant="blocks" tone="good" value={30} label="Stress: 30 %" state="Calm" />
+          <Progress variant="blocks" tone="warn" value={62} label="Stress: 62 %" state="Stressed" />
+          <Progress variant="blocks" tone="bad" value={88} label="Stress: 88 %" state="Breaking" />
           <Progress
-            tone="warn"
-            segmented
-            size="lg"
-            value={45}
-            label="Segmented large"
-            valueLabel="45%"
+            variant="blocks"
+            tone="good"
+            value={100}
+            overflow={12}
+            label="Morale: 112"
+            state="Great"
           />
-          <Progress tone="bad" size="sm" value={15} />
+          <Progress variant="xp" value={81} valueLabel="14145 / 17545" />
+          <Progress variant="task" value={55} label="Research: Advanced Cooking" state="55 %" />
+          <Progress
+            variant="task"
+            value={30}
+            dormant={25}
+            marker={42}
+            label="Steam Vent"
+            state="active, 2.4 cycles left"
+          />
+          <Progress
+            variant="gauge"
+            tone="good"
+            value={78}
+            label="Calories: 3,100 kcal / 4,000 kcal"
+            state="Fed"
+          />
+          <Progress variant="gauge" tone="warn" value={38} label="Stamina: 38 %" state="Tired" />
+          <Progress variant="gauge" tone="bad" value={12} label="Bionic oil: 12 %" state="Low" />
+          <Progress
+            variant="gauge"
+            tone="good"
+            value={100}
+            overflow={480}
+            label="Storage: 20,480 kg / 20,000 kg"
+            state="Full"
+          />
+        </div>
+      </Section>
+
+      <Section title="Vitals rows and colony stats">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="well flex flex-col">
+            <Item variant="need">
+              <ItemMedia variant="icon">
+                <HeartIcon />
+              </ItemMedia>
+              <ItemContent className="flex-row justify-between">
+                <span>Health</span>
+                <span className="text-sm text-white tabular-nums">100 %</span>
+              </ItemContent>
+              <ItemActions>
+                <ArrowUpIcon />
+              </ItemActions>
+            </Item>
+            <Item variant="need">
+              <ItemMedia variant="icon">
+                <HeartIcon />
+              </ItemMedia>
+              <ItemContent className="flex-row justify-between">
+                <span>Stress</span>
+                <span className="text-sm text-warn tabular-nums">62 %</span>
+              </ItemContent>
+              <ItemActions>
+                <ArrowUpIcon />
+              </ItemActions>
+            </Item>
+            <Item variant="need">
+              <ItemMedia variant="icon">
+                <HeartIcon />
+              </ItemMedia>
+              <ItemContent className="flex-row justify-between">
+                <span>Calories</span>
+                <span className="text-sm text-bad-text tabular-nums">210 kcal</span>
+              </ItemContent>
+              <ItemActions>
+                <ArrowUpIcon />
+              </ItemActions>
+            </Item>
+          </div>
+          <Row>
+            <Badge variant="bare">
+              <HeartIcon />9 duplicants
+            </Badge>
+            <Badge variant="bare">
+              <SkullIcon />
+              88 cycles
+            </Badge>
+          </Row>
         </div>
       </Section>
 

@@ -57,7 +57,7 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "tab shrink-0 justify-center rounded-none whitespace-nowrap transition-colors group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:bg-tab-hi disabled:pointer-events-none disabled:opacity-50 data-active:bg-tab-on data-active:text-on-tab group-data-[variant=line]/tabs-list:px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_[data-slot=tab-count]]:bg-black/30 [&_[data-slot=tab-count]]:px-1.5 [&_[data-slot=tab-count]]:text-[0.8rem]",
+        "tab shrink-0 justify-center rounded-none whitespace-nowrap transition-colors group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start shadow-[inset_0_-2px_0_rgb(0_0_0/.18)] hover:bg-tab-hi disabled:pointer-events-none disabled:opacity-50 data-active:bg-tab-on data-active:text-on-tab data-active:shadow-[inset_0_-2px_0_rgb(0_0_0/.28)] group-data-[variant=line]/tabs-list:px-3 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_[data-slot=tab-count]]:bg-black/30 [&_[data-slot=tab-count]]:px-1.5 [&_[data-slot=tab-count]]:text-[0.8rem]",
         'data-active:hover:bg-tab-on',
         className,
       )}
