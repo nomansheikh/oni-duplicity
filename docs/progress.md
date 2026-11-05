@@ -170,3 +170,12 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Risks:
   - Not tried in game. Undecoded raw bytes were not searched for references.
   - Deleting a chunk deletes its mass from the world; the world grid is untouched.
+
+## Raw data page on the v2 components — 2026-11-05
+
+- `raw-page.tsx` restyled onto the game-native components and the type scale; no behaviour, test id, role or name changed.
+- Tree: dark inset well, 44 px rows, indent guides, key column aligned so values line up, container keys bold white, leaf keys dimmed, values in monospace coloured by kind (string `good`, number `info`, boolean `gold`, bytes `warn`), selection highlight in the game's orange.
+- Search: results panel with a field-coloured header, a `key` / `path` / `value` chip per hit, and the path split into a dimmed route and a bold final key.
+- Warning banner and hints use the `warn` token and `type-small` / `type-caption`.
+- Screenshots: `docs/screenshots/raw-page/before.jpg`, `after.jpg`.
+- Not checked: the geysers fixture test (`tests/geysers.test.ts`) fails in this worktree and the file is untouched by this change.

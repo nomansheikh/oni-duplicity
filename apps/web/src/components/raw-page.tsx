@@ -49,6 +49,8 @@ import { formatPath, parsePath } from '@/lib/raw-path'
 import { CommitInput } from './common'
 
 const PAGE = 500
+/** Pixels of indent per tree level. */
+const INDENT = 20
 
 const keyOf = (path: RawPath) => JSON.stringify(path)
 
@@ -210,7 +212,7 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 40,
+    estimateSize: () => 44,
     overscan: 16,
   })
 
@@ -254,7 +256,7 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
           <InputGroup className="w-72">
             <InputGroupInput
               placeholder="Go to path, e.g. gameObjects[0]"
-              className="font-mono text-xs"
+              className="font-mono"
               value={goto}
               onChange={(e) => setGoto(e.target.value)}
               onKeyDown={(e) => {
@@ -268,8 +270,8 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
         </CardAction>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center gap-2 rounded-md border border-chart-3/40 bg-chart-3/10 px-3 py-2 text-sm">
-          <TriangleAlert className="size-4 shrink-0 text-chart-3" />
+        <div className="flex items-center gap-3 border border-warn/50 bg-warn/10 px-3 py-2 type-small">
+          <TriangleAlert className="size-5 shrink-0 text-warn" />
           Type names, lengths and IDs are read by the game as-is. Only change values you understand.
         </div>
         <div className="space-y-2">
@@ -285,13 +287,13 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
                 {search.state === 'running' ? <Loader2 className="animate-spin" /> : <Search />}
               </InputGroupAddon>
             </InputGroup>
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-center gap-2 type-small">
               <Switch size="sm" checked={searchValues} onCheckedChange={setSearchValues} />
               Also match values
             </label>
-            <span className="text-xs text-muted-foreground">
-              Type part of a key (<span className="font-mono">numberOfCycles</span>) or a path (
-              <span className="font-mono">gameInfo.numberOf</span>).
+            <span className="type-caption text-fg-2">
+              Type part of a key (<span className="font-mono text-white">numberOfCycles</span>) or a
+              path (<span className="font-mono text-white">gameInfo.numberOf</span>).
             </span>
           </div>
           {search.state === 'done' && (
@@ -299,7 +301,7 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
           )}
         </div>
         <Breadcrumb>
-          <BreadcrumbList className="font-mono text-xs">
+          <BreadcrumbList className="font-mono type-small">
             <BreadcrumbItem>
               {root.length === 0 ? (
                 <BreadcrumbPage>save</BreadcrumbPage>
@@ -323,7 +325,7 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
         </Breadcrumb>
         <div
           ref={scrollRef}
-          className="h-[calc(100svh-19rem)] min-h-80 overflow-auto rounded-md border"
+          className="h-[calc(100svh-19rem)] min-h-80 overflow-auto border border-ink bg-inset"
         >
           <div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
             {virtualizer.getVirtualItems().map((item) => {
@@ -331,13 +333,13 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
               return (
                 <div
                   key={item.key}
-                  className="absolute inset-x-0 top-0 border-b last:border-b-0"
+                  className="absolute inset-x-0 top-0 border-b border-ink/70 last:border-b-0"
                   style={{ transform: `translateY(${item.start}px)`, height: item.size }}
                 >
                   {row.type === 'more' ? (
                     <div
                       className="flex h-full items-center"
-                      style={{ paddingLeft: row.depth * 16 + 36 }}
+                      style={{ paddingLeft: row.depth * INDENT + 40 }}
                     >
                       <Button
                         variant="link"
@@ -373,7 +375,7 @@ export function RawPage({ revision, onEdit }: { revision: number; onEdit: (edit:
             })}
           </div>
           {rows.length === 0 && (
-            <p className="p-6 text-center text-sm text-muted-foreground">Nothing here.</p>
+            <p className="p-6 text-center type-small text-fg-2">Nothing here.</p>
           )}
         </div>
       </CardContent>
@@ -409,14 +411,14 @@ function RootCrumb({
 }
 
 const KIND_STYLES: Record<string, string> = {
-  object: 'text-muted-foreground',
-  array: 'text-muted-foreground',
-  string: 'text-emerald-600 dark:text-emerald-400',
-  number: 'text-sky-600 dark:text-sky-400',
-  bigint: 'text-sky-600 dark:text-sky-400',
-  boolean: 'text-violet-600 dark:text-violet-400',
-  bytes: 'text-amber-600 dark:text-amber-400',
-  null: 'text-muted-foreground',
+  object: 'text-fg-2',
+  array: 'text-fg-2',
+  string: 'text-good',
+  number: 'text-info',
+  bigint: 'text-info',
+  boolean: 'text-gold',
+  bytes: 'text-warn',
+  null: 'text-fg-2',
 }
 
 function RawRow({
@@ -443,11 +445,19 @@ function RawRow({
   return (
     <div
       className={cn(
-        'group flex h-full items-center gap-2 pr-2 hover:bg-muted/50',
-        highlighted && 'bg-primary/10 ring-1 ring-primary ring-inset',
+        'group relative flex h-full items-center gap-2 pr-2 hover:bg-hover-row',
+        highlighted && 'bg-warn/15 ring-2 ring-warn ring-inset',
       )}
-      style={{ paddingLeft: depth * 16 + 8 }}
+      style={{ paddingLeft: depth * INDENT + 8 }}
     >
+      {Array.from({ length: depth }, (_, level) => (
+        <span
+          key={level}
+          aria-hidden
+          className="absolute inset-y-0 w-px bg-edge/40"
+          style={{ left: level * INDENT + 20 }}
+        />
+      ))}
       {container && (entry.size ?? 0) > 0 ? (
         <Button
           variant="ghost"
@@ -463,19 +473,19 @@ function RawRow({
       <button
         type="button"
         className={cn(
-          'shrink-0 text-left font-mono text-xs',
-          container ? 'cursor-pointer font-medium' : 'cursor-default text-muted-foreground',
+          'min-w-44 shrink-0 truncate text-left font-mono type-small',
+          container ? 'cursor-pointer font-bold text-white' : 'cursor-default text-fg-2',
         )}
         onClick={container ? onToggle : undefined}
       >
         {typeof entry.key === 'number' ? `[${entry.key}]` : entry.key}
       </button>
       {entry.label && (
-        <Badge variant="secondary" className="max-w-72 justify-start font-mono text-[11px]">
+        <Badge variant="secondary" className="max-w-72 justify-start font-mono">
           <span className="truncate">{entry.label}</span>
         </Badge>
       )}
-      <div className={cn('min-w-0 flex-1 font-mono text-xs', KIND_STYLES[entry.kind])}>
+      <div className={cn('min-w-0 flex-1 font-mono type-small', KIND_STYLES[entry.kind])}>
         <RawValue entry={entry} onEdit={onEdit} />
       </div>
       <DropdownMenu>
@@ -551,6 +561,25 @@ function AddItem({ enabled, onSelect }: { enabled: boolean; onSelect: () => void
 }
 
 const MATCH_LABEL: Record<RawMatch['by'], string> = { key: 'key', path: 'path', value: 'value' }
+const MATCH_VARIANT: Record<RawMatch['by'], 'info' | 'warn' | 'good'> = {
+  key: 'info',
+  path: 'warn',
+  value: 'good',
+}
+
+/** A path with the last segment (the key itself) in white and the route to it dimmed. */
+function PathText({ path }: { path: RawPath }) {
+  const full = formatPath(path)
+  const last = formatPath(path.slice(-1))
+  const split = full.length - last.length
+  const tail = full.endsWith(last) ? split : full.length
+  return (
+    <span className="min-w-0 flex-1 truncate" title={full}>
+      <span className="text-fg-2">{full.slice(0, tail)}</span>
+      <span className="font-bold text-white">{full.slice(tail)}</span>
+    </span>
+  )
+}
 
 function SearchResults({
   result,
@@ -560,8 +589,8 @@ function SearchResults({
   onPick: (path: RawPath) => void
 }) {
   return (
-    <div className="rounded-md border">
-      <div className="flex items-center justify-between border-b px-3 py-1.5 text-xs text-muted-foreground">
+    <div className="border border-ink bg-inset">
+      <div className="flex items-center justify-between gap-3 border-b border-ink bg-field px-3 py-1.5 type-caption text-fg-2">
         <span>
           {result.matches.length === 0
             ? 'No matches in the whole save'
@@ -577,17 +606,15 @@ function SearchResults({
             <li key={keyOf(match.path)}>
               <button
                 type="button"
-                className="flex w-full items-center gap-2 px-3 py-1 text-left font-mono text-xs hover:bg-muted/50"
+                className="flex w-full items-center gap-3 px-3 py-1.5 text-left font-mono type-small hover:bg-hover-row"
                 onClick={() => onPick(match.path)}
               >
-                <Badge variant="outline" className="shrink-0 text-[10px]">
+                <Badge variant={MATCH_VARIANT[match.by]} className="w-16 shrink-0">
                   {MATCH_LABEL[match.by]}
                 </Badge>
-                <span className="min-w-0 flex-1 truncate">{formatPath(match.path)}</span>
+                <PathText path={match.path} />
                 {match.value !== undefined && (
-                  <span className="max-w-64 shrink-0 truncate text-muted-foreground">
-                    {match.value}
-                  </span>
+                  <span className="max-w-64 shrink-0 truncate text-good">{match.value}</span>
                 )}
               </button>
             </li>
@@ -609,12 +636,8 @@ function RawValue({ entry, onEdit }: { entry: RawEntry; onEdit: (edit: Edit) => 
     case 'bytes':
       return (
         <span className="truncate">
-          {entry.size} bytes <span className="text-muted-foreground">{entry.value}</span>{' '}
-          <Badge
-            variant="outline"
-            className="text-[10px]"
-            title="Byte arrays cannot be edited here"
-          >
+          {entry.size} bytes <span className="text-fg-2">{entry.value}</span>{' '}
+          <Badge variant="outline" title="Byte arrays cannot be edited here">
             read-only
           </Badge>
         </span>
@@ -635,7 +658,7 @@ function RawValue({ entry, onEdit }: { entry: RawEntry; onEdit: (edit: Edit) => 
         <CommitInput
           value={String(entry.value)}
           aria-label={String(entry.key)}
-          className={cn('h-7 max-w-md font-mono text-xs', KIND_STYLES[entry.kind])}
+          className={cn('h-8 max-w-md font-mono', KIND_STYLES[entry.kind])}
           onCommit={(text) => set(entry.kind === 'string' ? text : text.trim())}
         />
       )
