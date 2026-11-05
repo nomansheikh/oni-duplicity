@@ -82,17 +82,6 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
 
-## UI component library (design v2, phase 1) — 2026-11-05
-
-- Rewrote the theme in `apps/web/src/index.css` from the sampled v2 palette: dark only, radius 0, shadcn variables mapped onto surface, title-bar, tab, button, text-tier, status, meter and category tokens. Added `panel`, `title-bar`, `well`, `inset-layer`, `tip-game`, `btn-game`, `tab`, `chip` and `field-game` utilities.
-- Fonts are now Rajdhani (headings) and Noto Sans (body) through `@fontsource`; Barlow and Chakra Petch are removed. The `dark:` variant always applies, so the existing theme switch no longer changes anything.
-- Restyled the primitives the app uses, keeping them shadcn and `cva`: button (new `accent` variant), card (`panel` and `well` variants, header is the mauve title bar), tabs, badge (status, resource and element colour variants, `stat`), input, select, checkbox, switch, slider, table, dialog, tooltip, dropdown, popover, sheet, separator, scroll area, kbd, empty and toggle group.
-- `Progress` has `variant="blocks" | "xp" | "task" | "gauge"` and `tone="good" | "warn" | "bad"`, built to the meter spec (20 beveled cells, XP bar, in-world task bar with dormant and now marker, storage gauge with ticks and over-max cap). `meterTone(kind, pct)` returns the tone for amounts, health and stress. The slider matches the gauge. Also added `Item variant="need"` (vitals row) and `Badge variant="bare"` (colony stat), a bottom-shade bevel on tabs, buttons and toggles, and a flat `#272c3d` tooltip.
-- Dev gallery at `/?gallery`. It is imported only when `import.meta.env.DEV` is true, so the production build contains no gallery code.
-- No behaviour change. The e2e specs select by role, name, label and `data-sidebar`, none of which changed. Screenshots of the gallery, Overview and Geysers are in `docs/screenshots/ui-library/`.
-- Known: `apps/web/tests/geysers.test.ts` (fixture geyser ranges) fails locally because the fetched fixtures are absent; it does not touch the UI.
-- Next: the app shell and page layouts.
-
 ## Stories page — 2026-11-05
 
 - New read-only Stories page lists the six story traits (Mega Brain Tank, Critter Manipulator, Lonely Minion, Fossil Hunt, Morb Rover Maker, Hijacked Headquarters) with state, asteroid and the cycle each state was reached.
@@ -109,7 +98,7 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - **Trait modifiers** in each prefab's config: age (the lifespan), calories (the stomach size) and hit points, for 58 critters; babies use their adult's. A robot's battery (sweep bot 9,000, scout 180,000, Morb 180,000, Fetch Drone 120,000) comes the same way.
 - The Frosty Planet, Prehistoric Planet, Bionic Booster and Spaced Out critters now show scale growth, milk, beckoning, moisture, mucus and robot batteries with proper names. An amount is editable only when the save has the DLC its prefab needs.
 - The worker refuses a value that is not finite, clamps to `0..max`, and refuses an amount whose maximum is not confirmed. Undo restores the same bytes.
-- Unconfirmed amounts are shown read only with the reason. Hit points of six critter families are in that group (question 18).
+- Unconfirmed amounts are shown read only with the reason. Hit points of six critter families are in that group (question 22).
 - Tests: every critter in every fixture sits at or below its confirmed maximum, the DLC amounts of the colony and of `apple-park` show their maxima, clamping and non-finite values, and byte-exact undo. Beckoning and the robot batteries are checked against the full-tier fixture (`FIXTURE_TIER=all`). One end-to-end spec edits scale growth through the stats sheet.
 
 ## Parser benchmark and regression gate — 2026-11-05
