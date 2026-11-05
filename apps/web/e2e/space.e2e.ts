@@ -19,10 +19,12 @@ test('renames an asteroid', async ({ page }) => {
   )
   await openSave(page)
   await goTo(page, 'Space')
-  const name = page.locator('input[value="Arboroni"]')
+  // Pick the field by position: matching on its value would stop matching once typed into.
+  const name = page.getByRole('textbox', { name: 'Asteroid name' }).nth(1)
+  await expect(name).toHaveValue('Arboroni')
   await name.fill('Duplicity Prime')
   await name.press('Enter')
-  await expect(page.locator('input[value="Duplicity Prime"]')).toBeVisible()
+  await expect(name).toHaveValue('Duplicity Prime')
 
   const { save } = await downloadSave(page)
   expect(behavior(world(save, 1), 'AsteroidGridEntity')!.templateData!.m_name).toBe(

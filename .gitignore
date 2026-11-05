@@ -34,3 +34,6 @@ test-data/fetched/
 playwright-report
 test-results
 blob-report
+
+# Oracle parser built by `vp run differential`
+.cache/

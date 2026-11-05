@@ -1,6 +1,9 @@
-import { defineConfig } from 'vite-plus'
+import { fileURLToPath } from 'node:url'
+import { configDefaults, defineConfig } from 'vite-plus'
 
 export default defineConfig({
+  // Component tests import the web app's `@/` paths.
+  resolve: { alias: { '@': fileURLToPath(new URL('./apps/web/src', import.meta.url)) } },
   defaultPackage: {
     dev: './apps/web',
     build: './apps/web',
@@ -8,6 +11,10 @@ export default defineConfig({
   },
   staged: {
     '*': 'vp check --fix',
+  },
+  test: {
+    // Agent worktrees live under .claude/ and contain their own copies of the tests.
+    exclude: [...configDefaults.exclude, '**/.claude/**'],
   },
   fmt: {
     semi: false,
@@ -40,6 +47,14 @@ export default defineConfig({
     tasks: {
       fixtures: {
         command: 'node scripts/fetch-fixtures.ts',
+        cache: false,
+      },
+      bench: {
+        command: 'node scripts/bench.ts',
+        cache: false,
+      },
+      differential: {
+        command: 'node scripts/run-differential.ts',
         cache: false,
       },
     },
