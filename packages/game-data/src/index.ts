@@ -8,6 +8,7 @@ export {
   type GeyserTypeEntry,
   type Range,
 } from './geyser-types.ts'
+export { stories, storyQuests, type StoryEntry, type StoryQuestEntry } from './stories.ts'
 import { geyserTypes } from './geyser-types.ts'
 import { extraTraits, traitIdFixes } from './trait-info.ts'
 
