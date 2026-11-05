@@ -92,8 +92,12 @@ export interface SkillView extends Named {
 
 export interface AmountView extends Named {
   value: number
-  /** Highest value the game allows, when known. Critter amounts only. */
+  /** Highest value the game allows, when known. */
   max?: number
+  /** Lowest value the game allows, when it isn't 0 (decor). */
+  min?: number
+  /** Shown when no maximum could be derived: the value is editable, but not clamped. */
+  warning?: string
   /** Why the amount can't be edited (an unconfirmed maximum, a missing DLC). Critter amounts only. */
   readOnlyReason?: string
 }
@@ -462,6 +466,95 @@ export function bionicAmountMax(
   }
 }
 
+/**
+ * Maximums of a standard duplicant's amounts, from the decompiled game.
+ * - `Database/Amounts.cs` (`CreateAmount(id, min, max, …)`): Stamina, Stress, Bladder, Toxicity
+ *   and Breath 0..100, Decor -1000..1000, RadiationBalance and Temperature 0..10000.
+ *   `ImmuneLevel` takes `DUPLICANTSTATS.STANDARD.BaseStats.IMMUNE_LEVEL_MAX` (100).
+ * - `HitPoints` and `Calories` are created with a maximum of 0; the minion prefab adds
+ *   `BaseStats.HIT_POINTS` (100, `BaseMinionConfig.BaseMinionTraits`) and `BaseStats.MAX_CALORIES`
+ *   (4,000,000 cal, `MinionConfig`) as modifiers to the max attribute. Bionics have
+ *   `MAX_CALORIES = 0` and no calories amount.
+ * - The only things that change these maximums are the Breath ones: the `Minnow` trait
+ *   (`BreathMax` +400, `TRAITS.cs`) and the Swimming skill (`IncreasedLungCapacity`, +100,
+ *   `SkillPerks.cs`). No trait, skill or effect modifies another duplicant amount's max.
+ * - `AmountInstance.SetValue` clamps to min..max, so the game would clamp on load anyway.
+ */
+const DUPLICANT_AMOUNT_LIMITS: Record<string, { min: number; max: number }> = {
+  Stamina: { min: 0, max: 100 },
+  Stress: { min: 0, max: 100 },
+  Bladder: { min: 0, max: 100 },
+  Toxicity: { min: 0, max: 100 },
+  ImmuneLevel: { min: 0, max: 100 },
+  HitPoints: { min: 0, max: 100 },
+  Breath: { min: 0, max: 100 },
+  Calories: { min: 0, max: 4_000_000 },
+  RadiationBalance: { min: 0, max: 10_000 },
+  Decor: { min: -1000, max: 1000 },
+  Temperature: { min: 0, max: 10_000 },
+}
+export const MINNOW_BREATH_BONUS = 400
+export const SWIMMING_BREATH_BONUS = 100
+
+export interface AmountLimit {
+  min: number
+  max: number
+}
+
+/**
+ * The game's range for one of a duplicant's amounts, or undefined when it can't be derived
+ * (an amount this table doesn't know, such as a modded one). The editor leaves those unclamped.
+ */
+export function duplicantAmountLimit(
+  amountId: string,
+  isBionic: boolean,
+  traitIds: Iterable<string>,
+  masteredSkills: Iterable<string>,
+): AmountLimit | undefined {
+  const bionicMax = isBionic ? bionicAmountMax(amountId, masteredSkills) : undefined
+  if (bionicMax !== undefined) return { min: 0, max: bionicMax }
+  if (isBionic && amountId === 'Calories') return undefined
+  const base = DUPLICANT_AMOUNT_LIMITS[amountId]
+  if (!base) return undefined
+  if (amountId !== 'Breath') return base
+  const skills = new Set(masteredSkills)
+  const traits = new Set(traitIds)
+  return {
+    min: base.min,
+    max:
+      base.max +
+      (traits.has('Minnow') ? MINNOW_BREATH_BONUS : 0) +
+      (skills.has('Swimming') ? SWIMMING_BREATH_BONUS : 0),
+  }
+}
+
+function traitIdsOf(obj: GameObject): string[] {
+  return (behavior(obj, 'Klei.AI.Traits')?.templateData?.TraitIds ?? []) as string[]
+}
+
+function limitOf(obj: GameObject, id: string, amountId: string): AmountLimit | undefined {
+  return duplicantAmountLimit(
+    amountId,
+    id.startsWith('BionicMinion:'),
+    traitIdsOf(obj),
+    masteredSkillIds(obj),
+  )
+}
+
+/**
+ * Brings every amount whose maximum just dropped (a lost trait or skill) back under it, in the
+ * same edit, so undo restores both. Never raises a value.
+ */
+function reclampAmounts(obj: GameObject, id: string): void {
+  for (const amount of modifiers(obj)?.amounts ?? []) {
+    const limit = limitOf(obj, id, amount.name)
+    const stored = amount.value as { value: number } | undefined
+    if (limit && stored && Number.isFinite(stored.value) && stored.value > limit.max) {
+      stored.value = limit.max
+    }
+  }
+}
+
 function masteredSkillIds(obj: GameObject): string[] {
   const resume = behavior(obj, 'MinionResume')?.templateData
   return ((resume?.MasteryBySkillID ?? []) as [string, boolean][])
@@ -721,12 +814,18 @@ export function listDuplicants(save: SaveGame): DuplicantView[] {
       experience:
         typeof resume?.totalExperienceGained === 'number' ? resume.totalExperienceGained : 0,
       amounts: (modifiers(obj)?.amounts ?? []).map((a) => {
-        const max =
-          prefab === 'BionicMinion' ? bionicAmountMax(a.name, masteredSkillIds(obj)) : undefined
+        const limit = duplicantAmountLimit(
+          a.name,
+          prefab === 'BionicMinion',
+          traitIds,
+          masteredSkillIds(obj),
+        )
         return {
           ...named(a.name, findAmount(a.name)),
           value: Number((a.value as { value: number }).value),
-          ...(max === undefined ? {} : { max }),
+          ...(limit
+            ? { max: limit.max, ...(limit.min === 0 ? {} : { min: limit.min }) }
+            : { warning: 'No confirmed maximum for this amount, so it is not clamped.' }),
         }
       }),
       effects: effectList.map((e) => ({
@@ -1071,6 +1170,7 @@ function applyObjectEdit(obj: GameObject, edit: Edit, ctx: DuplicantContext): vo
       traits.TraitIds = ((traits.TraitIds as string[] | null) ?? []).filter(
         (t) => t !== edit.traitId,
       )
+      reclampAmounts(obj, edit.id)
       return
     }
     case 'setInterest': {
@@ -1099,14 +1199,9 @@ function applyObjectEdit(obj: GameObject, edit: Edit, ctx: DuplicantContext): vo
       )
       if (edit.mastered) list.push([edit.skillId, true])
       resume.MasteryBySkillID = list
-      // Losing BionicsC3 lowers the battery cap; bring the charge down in the same edit, so undo
-      // restores both.
-      if (edit.id.startsWith('BionicMinion:')) {
-        const battery = modifiers(obj)?.amounts.find((a) => a.name === 'BionicInternalBattery')
-        const max = bionicAmountMax('BionicInternalBattery', masteredSkillIds(obj))!
-        const stored = battery?.value as { value: number } | undefined
-        if (stored && stored.value > max) stored.value = max
-      }
+      // Losing BionicsC3 lowers the battery cap and losing Swimming the breath cap; bring the
+      // value down in the same edit, so undo restores both.
+      reclampAmounts(obj, edit.id)
       return
     }
     case 'setExperience':
@@ -1116,12 +1211,11 @@ function applyObjectEdit(obj: GameObject, edit: Edit, ctx: DuplicantContext): vo
       const amount = modifiers(obj)?.amounts.find((a) => a.name === edit.amountId)
       if (!amount) throw new Error(`No amount ${edit.amountId}`)
       if (!Number.isFinite(edit.value)) throw new Error(`Not a finite amount: ${edit.value}`)
-      // The game keeps bionic amounts within their maximum, so never write past it.
-      const max = edit.id.startsWith('BionicMinion:')
-        ? bionicAmountMax(edit.amountId, masteredSkillIds(obj))
-        : undefined
-      ;(amount.value as { value: number }).value =
-        max === undefined ? edit.value : Math.min(Math.max(edit.value, 0), max)
+      // The game keeps amounts within their range, so never write past it.
+      const limit = limitOf(obj, edit.id, edit.amountId)
+      ;(amount.value as { value: number }).value = limit
+        ? Math.min(Math.max(edit.value, limit.min), limit.max)
+        : edit.value
       return
     }
     case 'addEffect': {
