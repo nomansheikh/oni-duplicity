@@ -58,6 +58,30 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - The map refuses a world whose offset or size falls outside the saved grid, and the map page shows the reason.
 - New tests cover the rollback, the debug flag, each bulk action (write, parse, compare which paths changed) and the map on every fixture.
 
+## End-to-end tests — 2026-11-05
+
+- Playwright suite in `apps/web/e2e/`: each test loads a fixture, edits through the UI, downloads the save and re-parses it with the save-parser. `expectOnlyChanged` then asserts that the diff against the original is exactly the intended paths and nothing else.
+- `diffSaves` also compares `templates`, and for arrays of different lengths it reports each added or removed index (`path/<i>`) next to `path/length`, so a test expecting a length change has to account for the items.
+- Coverage (45 tests):
+  - colony rename, sandbox and debug flag;
+  - undo/redo and the unsaved-changes list;
+  - duplicant name, gender, interests, experience, appearance, traits, skills, attributes, amounts and effects (add, remove, cycles), and pasting part of a profile;
+  - every colony-wide action: relieve stress, fill needs, master skills, set every attribute;
+  - bionic power bank and gear oil;
+  - critter tame, wild, clone and delete;
+  - geyser value, clamp and rename;
+  - materials mass, temperature and bulk edits;
+  - research, one tech and everything;
+  - asteroid rename and discover;
+  - a difficulty setting;
+  - raw edit, plus array remove and duplicate.
+- The suite runs in about 65 s locally (45 passed, twice in a row).
+- CI runs it in the `ci` job after the build.
+- Risks:
+  - The bionic test needs the 40 MB full-tier fixture, so it is skipped on PRs and runs only on full-tier CI (`main` and nightly). There it fails instead of skipping when the fixture is missing (`CI` set and `FIXTURE_TIER=all`).
+  - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
+- Next: parser acceptance (bench, fuzz, differential).
+
 ## Parser benchmark and regression gate — 2026-11-05
 
 - `vp run bench` times read + inflate, parse body, write body and deflate for the 40 MB and 13 MB saves (one warm-up, median of five, each save in its own process) and prints a table with peak RSS. It skips with a message when the saves are not downloaded.

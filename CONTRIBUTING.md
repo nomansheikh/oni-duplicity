@@ -26,11 +26,19 @@ vp run fixtures --file mithro-03-late-game-cycle-1160.sav
 # parser benchmark and regression gate (needs the full tier)
 vp run bench            # compare against test-data/bench-baseline.json
 vp run bench --update   # re-record the baseline after an intended change
+
+# end-to-end tests in Chromium (builds the app and serves it on port 5179)
+vp -C apps/web exec playwright install chromium   # once
+vp -C apps/web run e2e
 ```
 
 `vp run bench` takes about two minutes. Run it on a quiet machine: other busy processes make the timings, and so the comparison, unreliable.
 
 The parser fuzz tests (`packages/save-parser/tests/fuzz`) run in `vp test` with about 500 cases. Tune them with `FUZZ_SCALE` (case-count multiplier, e.g. `FUZZ_SCALE=20`), `FUZZ_SEED`, `FUZZ_DEADLINE_MS` and `FUZZ_ONLY=<category>#<n>` to replay one case (with the same `FUZZ_SEED`; it ignores `FUZZ_SCALE`, and an unknown name fails). A failure prints its seed and mutation.
+
+If the bundled browser can't be downloaded, set `PLAYWRIGHT_CHROMIUM_PATH` to a local Chromium or Chrome.
+
+The bionic duplicant test needs the 40 MB `mithro-06` save from the full fixture tier. It is skipped unless that save is downloaded, and runs only on full-tier CI (`main` and nightly); there it fails if the save is missing.
 
 The pre-commit hook runs `vp check --fix` on staged files.
 
@@ -41,6 +49,7 @@ The pre-commit hook runs `vp check --fix` on staged files.
 - Code style is whatever `vp check --fix` produces: no semicolons, single quotes.
 - Parser changes must keep the round-trip test passing on every fixture (the last command above).
 - New editors go through `worker/model.ts`: add a view model, an `Edit` variant and its `applyEdit` case, and make sure undo restores it.
+- Every mutating feature gets an end-to-end test in `apps/web/e2e`: edit through the UI, download, and use `expectOnlyChanged` to assert the save changed exactly where intended.
 
 ## Game data
 
