@@ -82,6 +82,42 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
 
+## Parser benchmark and regression gate — 2026-11-05
+
+- `vp run bench` times read + inflate, parse body, write body and deflate for the 40 MB and 13 MB saves (one warm-up, median of five, each save in its own process) and prints a table with peak RSS. It skips with a message when the saves are not downloaded.
+- The gate compares each phase's time divided by a memory-bound calibration workload (256 MB buffer stream plus many small allocations, sampled after every pass) against `test-data/bench-baseline.json`, keyed per `<platform>-<arch>`, and fails above +30%. A phase that looks regressed is measured again and fails only if it regresses twice. Stale sizes, zero or non-finite baseline times, a worker timeout or kill, and a missing platform baseline under `--require` are errors. `vp run bench --update` rewrites the baseline for the current platform.
+- CI runs `vp run bench --require` on pushes to `main`, nightly, on manifest changes, and on PRs touching the parser or the bench (about 2.7 minutes, fetching just the two saves). Dispatching the CI workflow with `bench_baseline` records a baseline on the runner and uploads it as an artifact; the `linux-x64` baseline was recorded that way.
+- Measured, 40 MB save, median: Apple M2 Max (12 cores, 32 GB, Node 26.13.0, quiet machine) read + inflate 1.6 s, parse 1.6 s, write 2.7 s, deflate 4.0 s, peak RSS 3.3 to 4.1 GB. GitHub runner (4-core AMD EPYC, 16 GB, Node 24.22.2): 1.7 s, 3.3 s, 6.6 s, 5.8 s, peak RSS 2.6 GB. The 13 MB save: Mac 0.44, 0.43, 0.59, 1.1 s; runner 0.49, 0.88, 1.5, 1.6 s.
+- Spread of the normalized phase times across runs: at most ±5.7% over 5 local runs and ±5.3% over 3 CI runs on two CPU models (raw times: ±4.5% and ±3.5%). Both are far below 30%, so the gate uses the calibrated ratio, which also halved the noise on a loaded Mac (raw ±27 to 42%, normalized ±17 to 21%).
+- Parse meets the 5 s target on both machines. **Saving does not:** write body plus deflate is about 6.7 s on the Mac and about 12 s on the runner with `fflate` at level 1. Whether the target covers compression is open question #15; the assumption is "not met".
+- The older "28 s with `fflate`" figure above was measured in the browser and is not reproduced here; its settings are not recorded. In Node on the Mac, `fflate` takes 3.7 s at level 1 and 5.1 s at level 6 (the default) for the 40 MB body, so the level alone does not explain 28 s; the gap to the browser is unexplained.
+- Next: decide how to meet the save target (see #15), and look at the 2.6 to 4.1 GB peak, since the browser tab limit is the real constraint.
+- Risks: the calibration only partly tracks the parser, so a change that slows both is invisible. Runner hardware varies (two EPYC models in three runs, with little effect so far). The Linux baseline reflects 3 runs, so refresh it if the gate flaps. A noisy machine can still fail twice in a row.
+
+## Differential test against oni-save-parser — 2026-11-05
+
+- `vp run differential` compares every fixture with konove's oni-save-parser (`3bb6076`, built from source into `.cache/oracle`, not a dependency) on Node 24: 0 real disagreements across all 10 fixtures (7.33–7.38). Differences and the oracle's `Klei.AI.Modifiers` `DiseaseInstance` defect are in [save-format.md](save-format.md); open question 1 is resolved.
+- Each fixture runs in its own child process (oracle peak memory up to 3.7 GB on the largest save; capped at 6 GB).
+- Time on this machine, oracle / ours: apple-park 0.2 / 0.06 s; beautiful-galaxy ×2 1.1 / 0.2 s; konove-save-game 1.1 / 0.2 s; mithro-01 0.2 / 0.06 s; mithro-02 1.2 / 0.2 s; mithro-03 7.8 / 1.2 s; mithro-04 16.6 / 2.7 s; mithro-05 16.8 / 2.7 s; mithro-06 27.8 / 4.1 s.
+- Whole run: small tier about 8 s warm and 12 s with a cold oracle build (about 4 s); all tiers 97 s.
+- CI: the step runs after the tests, with the same tier as the fixtures, and caches `.cache/oracle` by the hash of `scripts/differential/oracle.ts`.
+- Gaps: no fixture has a non-empty sickness list on `Klei.AI.Modifiers` (and only two on `MinionModifiers`); 7.28–7.32 are not covered; the oracle cannot confirm anything against the game.
+- A unit test (`scripts/differential/compare.test.ts`) checks that normalized equal values pass and tampered values fail, using synthetic objects.
+
+## Parser fuzz tests — 2026-11-05
+
+- `packages/save-parser/tests/fuzz` mutates `apple-park.sav` with a seeded PRNG and requires every case to end in a `ParseError`, or in a parse that writes back, re-parses its own output and writes the same bytes again. A `ParseError` from the writer or from re-parsing our own output is a bug, as is anything else (`TypeError`, `RangeError`, a raw zlib error, a hang, out of memory) counts as a bug.
+- Seven regions: whole-file truncation, header flips, template flips, compressed-body flips, and, on the decompressed body, truncation, flips in the world and settings data, and flips in the game objects and game data. Body flips mostly avoid opaque payloads such as sim data.
+- Cases run in `node:worker_threads` workers with a 5 s deadline; a hung worker is terminated and the case is retried once in a fresh worker before it counts as a hang; a crash or out-of-memory (256 MB old-generation cap, which does not cover typed arrays) also counts as a failure. Failures are grouped by error and print the seed and mutation, and `FUZZ_ONLY` replays one case regardless of scale.
+- The default run is about 500 cases in roughly 12 s. At `FUZZ_SCALE=20` (10,000 cases, 3 to 4.5 minutes) one case failed: a flipped type byte in the templates leaves a collection type without its element type, and `readCollection` throws a `TypeError` instead of a `ParseError` (`FUZZ_SEED=big2 FUZZ_ONLY=templates#105`). It is not fixed in this change.
+- Fault injection: removing the bounds check in `Reader` produced grouped `RangeError` failures, an infinite loop in the header reader produced a `timeout` failure, and a body that stops re-parsing produced a `reparse` failure, so the harness does detect bugs. All changes were reverted.
+- Gaps: one fixture, and no well-formed but hostile inputs such as huge valid counts or lengths.
+- Next: the differential test against oni-save-parser.
+
+## Test run — 2026-11-05
+
+- Root `vp test` no longer collects tests under `.claude/`, so agent worktrees can't fail the run. The app and package configs don't set `test.exclude`, so they needed no change.
+
 ## Load/save polish — 2026-11-05
 
 - Autosave: saves whose header says `isAutoSave` get an "Autosave" badge in the header and a note that the game's autosave rotation may overwrite an edited autosave. The note names `gameInfo.originalSaveName` (a field of `SaveGame.GameInfo` in the decompile, present in the fixtures) and `Summary` now carries it. The download name is unchanged.
