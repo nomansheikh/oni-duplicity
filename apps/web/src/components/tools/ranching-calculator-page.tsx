@@ -112,7 +112,7 @@ export function RanchingCalculatorPage({ critters }: { critters: CritterView[] }
               className="tabular-nums"
             />
           </Labelled>
-          <Labelled label="Ranching attribute of the rancher">
+          <Labelled label="Rancher's ranching skill" title="Ranching attribute of the rancher">
             <Input
               type="number"
               min={0}
@@ -244,9 +244,17 @@ export function RanchingCalculatorPage({ critters }: { critters: CritterView[] }
   )
 }
 
-function Labelled({ label, children }: { label: string; children: React.ReactNode }) {
+function Labelled({
+  label,
+  title,
+  children,
+}: {
+  label: string
+  title?: string
+  children: React.ReactNode
+}) {
   return (
-    <label className="flex flex-col gap-1">
+    <label className="flex flex-col gap-1" title={title}>
       <span className="type-label">{label}</span>
       {children}
     </label>
