@@ -19,7 +19,19 @@ export {
 } from './geyser-types.ts'
 export { stories, storyQuests, type StoryEntry, type StoryQuestEntry } from './stories.ts'
 import { geyserTypes } from './geyser-types.ts'
+import { buildEffectIndex, type EffectDetailRow, type EffectInfo } from './effect-info.ts'
 import { extraTraits, traitIdFixes } from './trait-info.ts'
+
+export {
+  effectGroupLabels,
+  formatEffectModifier,
+  type EffectGroup,
+  type EffectInfo,
+  type EffectModifier,
+  type EffectUnits,
+  type FormattedModifier,
+  type ModifierTone,
+} from './effect-info.ts'
 
 export {
   extraTraits,
@@ -88,6 +100,17 @@ export const findTrait = index(traits)
 export const findAttribute = index(attributes)
 export const findAmount = index(amounts)
 export const findEffect = index(effects)
+/** Whether an effect is bad, how long it lasts and its modifiers. Undefined for IDs that aren't effects. */
+export const findEffectInfo: (id: string) => EffectInfo | undefined = buildEffectIndex(
+  data.effectDetails as EffectDetailRow[],
+)
+/** The game's display name of an attribute or amount (`StressDelta` is "Stress"), by ID. */
+export const findAttributeName = (id: string): string | undefined =>
+  (
+    findAttribute(id) ??
+    findAmount(id.replace(/Delta$/, '')) ??
+    findAttribute(id.replace(/Delta$/, ''))
+  )?.name
 export const findPersonality = index(personalities)
 /** Geyser prefabs are `GeyserGeneric_<type>`. */
 export const findGeyser = (prefab: string) => index(geysers)(prefab.replace(/^GeyserGeneric_/, ''))
