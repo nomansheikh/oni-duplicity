@@ -1,6 +1,8 @@
 import { rawCanAdd, rawDefaultItem } from './raw.ts'
 import {
   MinionSkills,
+  critterAmountMax,
+  critterAmountNames,
   effects as effectCatalog,
   findAmount,
   findCritter,
@@ -89,8 +91,10 @@ export interface SkillView extends Named {
 
 export interface AmountView extends Named {
   value: number
-  /** The game's maximum for this duplicant, set for the bionic amounts only. */
+  /** Highest value the game allows, when known. Critter amounts only. */
   max?: number
+  /** Why the amount can't be edited (an unconfirmed maximum, a missing DLC). Critter amounts only. */
+  readOnlyReason?: string
 }
 
 export interface EffectView extends Named {
@@ -1007,6 +1011,24 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
         pe.Units = Math.max(0, Number(pe.Units) * edit.factor)
       }
       return
+    case 'setAmount': {
+      if (!Number.isFinite(edit.value)) throw new Error('An amount must be a finite number')
+      const obj = objectById(save, edit.id)
+      let value = edit.value
+      if (behavior(obj, 'CreatureBrain')?.templateData) {
+        // A critter's maximum comes from the game's data, so refuse what isn't confirmed.
+        const limit = critterAmountMax(splitId(edit.id).group, edit.amountId, dlcIds(save))
+        if (limit.max === undefined)
+          throw new Error(`${edit.amountId} is read only: ${limit.reason}`)
+        value = Math.min(Math.max(value, 0), limit.max)
+      }
+      applyObjectEdit(
+        obj,
+        { ...edit, value },
+        { prefab: splitId(edit.id).group, dlcIds: dlcIds(save) },
+      )
+      return
+    }
     case 'setDestinationMass':
     case 'setDestinationAnalysis':
     case 'revealStarmap':
@@ -1452,6 +1474,7 @@ function assignNewIds(save: SaveGame, obj: GameObject): void {
 }
 
 export function listCritters(save: SaveGame): CritterView[] {
+  const dlcs = dlcIds(save)
   return objectsWith(save, 'CreatureBrain').map(({ id, prefab, obj }) => {
     const entry = findCritter(prefab)
     return {
@@ -1462,10 +1485,14 @@ export function listCritters(save: SaveGame): CritterView[] {
       baby: entry?.baby ?? prefab.endsWith('Baby'),
       x: Math.round(obj.position.x),
       y: Math.round(obj.position.y),
-      amounts: (modifiers(obj)?.amounts ?? []).map((a) => ({
-        ...named(a.name, findAmount(a.name)),
-        value: Number((a.value as { value: number }).value),
-      })),
+      amounts: (modifiers(obj)?.amounts ?? []).map((a) => {
+        const limit = critterAmountMax(prefab, a.name, dlcs)
+        return {
+          ...named(a.name, findAmount(a.name) ?? critterAmountNames[a.name]),
+          value: Number((a.value as { value: number }).value),
+          ...(limit.max === undefined ? { readOnlyReason: limit.reason } : { max: limit.max }),
+        }
+      }),
     }
   })
 }
