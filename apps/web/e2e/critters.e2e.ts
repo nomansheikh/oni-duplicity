@@ -212,6 +212,10 @@ test('edits a DLC amount within its maximum and keeps unconfirmed ones read only
   await field.blur()
   await expect(field).toHaveValue('42')
 
+  // The sheet covers the download button until it closes.
+  await page.keyboard.press('Escape')
+  await expect(field).toBeHidden()
+
   const { save } = await downloadSave(page)
   expect(stored(group(save, prefab)[index]!, 'ScaleGrowth')).toBe(42)
   expectOnlyChanged(before, save, [
