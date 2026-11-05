@@ -87,7 +87,7 @@ export function DuplicantEditor({
             name={dupe.name}
             parts={portraitParts(dupe.appearance)}
             size={64}
-            className="text-lg"
+            className="type-h3"
           />
           <div className="min-w-0 space-y-1">
             <CardTitle className="type-h1">{dupe.name}</CardTitle>

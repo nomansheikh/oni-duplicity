@@ -488,6 +488,17 @@
   text-transform: uppercase;
 }
 
+/* group heading inside menus, selects and command lists */
+@utility menu-heading {
+  font-family: var(--font-heading);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+}
+
 /* sunken field (input, select trigger, number box) */
 @utility field-game {
   background: var(--inset);

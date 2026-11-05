@@ -88,7 +88,7 @@ export function NumberField({
 }) {
   const shown = Number(value.toFixed(digits))
   return (
-    <InputGroup className={cn('w-32', className)}>
+    <InputGroup className={cn('w-36', className)}>
       <InputGroupInput
         key={shown}
         type="number"
@@ -177,7 +177,9 @@ export function SearchPicker({
                     {excluded.has(item.id) && <Check className="ml-auto" />}
                   </span>
                   {item.desc && (
-                    <span className="line-clamp-2 text-xs text-muted-foreground">{item.desc}</span>
+                    <span className="line-clamp-2 type-caption text-muted-foreground">
+                      {item.desc}
+                    </span>
                   )}
                 </CommandItem>
               ))}
