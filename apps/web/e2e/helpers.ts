@@ -48,9 +48,12 @@ export async function goTo(page: Page, title: string): Promise<void> {
 
 /** The number of unsaved edits shown in the header (0 when the button is hidden). */
 export async function editCount(page: Page): Promise<number> {
-  const button = page.getByRole('button', { name: /unsaved edits?$/ })
-  if (!(await button.isVisible())) return 0
-  return Number((await button.textContent())?.match(/\d+/)?.[0] ?? 0)
+  // Read in one call: the button disappears when the last edit is undone, and a separate
+  // visibility check followed by a text read would wait forever on a button that just went.
+  const labels = await page
+    .getByRole('button', { name: /unsaved edits?$/ })
+    .evaluateAll((buttons) => buttons.map((b) => b.textContent ?? ''))
+  return Number(labels[0]?.match(/\d+/)?.[0] ?? 0)
 }
 
 /** Opens the pre-save dialog and confirms it. */
