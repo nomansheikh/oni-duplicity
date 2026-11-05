@@ -26,8 +26,15 @@ const bankState = (prefab: string) =>
 function Charge({ joules, capacity }: { joules: number; capacity: number }) {
   return (
     <div className="flex items-center gap-3">
-      <Progress value={Math.min(100, (joules / capacity) * 100)} className="h-1.5 w-32" />
-      <span className="font-mono text-xs tabular-nums">
+      <Progress
+        variant="gauge"
+        tone="good"
+        value={joules}
+        max={capacity}
+        overflow={Math.max(0, joules - capacity)}
+        className="w-40"
+      />
+      <span className="type-small tabular-nums">
         {capacity >= 1000 ? `${fmt(joules / 1000, 1)} kJ` : `${fmt(joules, 1)} J`}
       </span>
     </div>
@@ -68,20 +75,18 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
               const locked = slot > view.unlockedSlots
               return (
                 <TableRow key={slot}>
-                  <TableCell className="font-mono tabular-nums">{slot}</TableCell>
+                  <TableCell className="tabular-nums">{slot}</TableCell>
                   <TableCell>
                     {booster ? (
                       <span className="flex items-center gap-2">
                         {boosterName(booster.prefab)}
-                        <Badge variant="outline" className="font-mono">
-                          {booster.prefab}
-                        </Badge>
+                        <Badge variant="secondary">{booster.prefab}</Badge>
                       </span>
                     ) : (
                       <span className="text-muted-foreground">{locked ? 'Locked' : 'Empty'}</span>
                     )}
                     {booster && locked && (
-                      <Badge variant="destructive" className="ml-2">
+                      <Badge variant="bad" className="ml-2">
                         Locked slot
                       </Badge>
                     )}
@@ -98,17 +103,14 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
         description={`Banks in this duplicant's battery storage: ${view.electrobanks?.length ?? '?'} of ${view.batteryCapacity} places used. A full bank holds ${fmt(BANK_CAPACITY_J / 1000, 0)} kJ.`}
       >
         {view.internalBattery && (
-          <div className="mb-4 space-y-1.5">
-            <div className="flex items-baseline justify-between text-xs">
-              <span className="text-muted-foreground">Internal battery</span>
-              <span className="font-mono tabular-nums">
-                {fmt(view.internalBattery.charge / 1000, 1)} /{' '}
-                {fmt(view.internalBattery.max / 1000, 0)} kJ
-              </span>
-            </div>
+          <div className="well mb-4 p-3">
             <Progress
-              value={Math.min(100, (view.internalBattery.charge / view.internalBattery.max) * 100)}
-              className="h-1.5"
+              variant="gauge"
+              tone="good"
+              value={view.internalBattery.charge}
+              max={view.internalBattery.max}
+              overflow={Math.max(0, view.internalBattery.charge - view.internalBattery.max)}
+              label={`Internal battery: ${fmt(view.internalBattery.charge / 1000, 1)} / ${fmt(view.internalBattery.max / 1000, 0)} kJ`}
             />
           </div>
         )}
@@ -134,8 +136,8 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
                   const bank = view.electrobanks![i]
                   return (
                     <TableRow key={i}>
-                      <TableCell className="font-mono tabular-nums">{i + 1}</TableCell>
-                      <TableCell className="font-mono text-xs">
+                      <TableCell className="type-body tabular-nums">{i + 1}</TableCell>
+                      <TableCell className="type-small">
                         {bank?.prefab ?? <span className="text-muted-foreground">Empty place</span>}
                       </TableCell>
                       <TableCell>{bank ? bankState(bank.prefab) : ''}</TableCell>

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { Sparkles, X } from 'lucide-react'
+import { Sparkles, X, type LucideIcon } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -26,6 +27,7 @@ import {
   ItemContent,
   ItemDescription,
   ItemGroup,
+  ItemMedia,
   ItemTitle,
 } from '@/components/ui/item'
 import {
@@ -35,11 +37,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-import { findTraitInfo } from '@oni-duplicity/game-data'
-import { humanize, portraitParts } from '@/lib/format'
+import { findTraitInfo, type TraitCategory } from '@oni-duplicity/game-data'
+import { fmt, humanize, portraitParts } from '@/lib/format'
 import { heldConflicts } from '@/lib/traits'
+import { meterTone, type MeterKind } from '@/lib/meter'
 import type { AmountView, DuplicantEdit, DuplicantView, Named } from '@/worker/model'
 import { DuplicantAvatar, Hint, NumberField, SearchPicker } from '../common'
 import { TraitCategoryBadge, TraitPicker } from './TraitPicker'
@@ -71,7 +75,7 @@ export function Panel({
 
 export function Nothing({ title, description }: { title: string; description: string }) {
   return (
-    <Empty className="border border-dashed">
+    <Empty className="well border border-dashed">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <Sparkles />
@@ -80,6 +84,21 @@ export function Nothing({ title, description }: { title: string; description: st
         <EmptyDescription>{description}</EmptyDescription>
       </EmptyHeader>
     </Empty>
+  )
+}
+
+/** The trait name as a badge: green for a positive trait, red for a negative one, plain otherwise. */
+function TraitName({ name, category }: { name: string; category: TraitCategory | undefined }) {
+  const polar = category === 'positive' || category === 'negative'
+  return (
+    <>
+      <Badge
+        variant={category === 'positive' ? 'good' : category === 'negative' ? 'bad' : 'secondary'}
+      >
+        {name}
+      </Badge>
+      {!polar && <TraitCategoryBadge category={category} />}
+    </>
   )
 }
 
@@ -114,15 +133,16 @@ export function TraitsTab({
           {dupe.traits.map((trait) => (
             <Item key={trait.id} variant="outline" data-trait={trait.id}>
               <ItemContent>
-                <ItemTitle>
-                  {trait.name}
-                  <TraitCategoryBadge category={findTraitInfo(trait.id)?.category} />
+                <ItemTitle className="type-h3">
+                  <TraitName name={trait.name} category={findTraitInfo(trait.id)?.category} />
                 </ItemTitle>
                 {trait.desc && (
-                  <ItemDescription className="whitespace-pre-line">{trait.desc}</ItemDescription>
+                  <ItemDescription className="type-small whitespace-pre-line">
+                    {trait.desc}
+                  </ItemDescription>
                 )}
                 {conflicts.has(trait.id) && (
-                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                  <p className="type-caption text-warn">
                     {conflicts.get(trait.id)} The save has it, so it is kept.
                   </p>
                 )}
@@ -247,14 +267,19 @@ export function SkillsTab({ dupe, edit }: { dupe: DuplicantView; edit: EditFn })
       >
         <div className="grid gap-4 @3xl/main:grid-cols-2 @6xl/main:grid-cols-3">
           {[...groups].map(([group, skills]) => (
-            <FieldSet key={group} className="rounded-lg border p-4">
-              <FieldLegend variant="label">{humanize(group)}</FieldLegend>
+            <FieldSet key={group} className="well p-4">
+              <FieldLegend variant="label" className="type-h3">
+                {humanize(group)}
+              </FieldLegend>
               <FieldGroup className="gap-3">
                 {skills.map((skill) => {
                   const id = `${dupe.id}-skill-${skill.id}`
                   return (
                     <Field key={skill.id} orientation="horizontal">
-                      <FieldLabel htmlFor={id} className="font-normal">
+                      <FieldLabel
+                        htmlFor={id}
+                        className="type-body font-normal normal-case tracking-normal"
+                      >
                         {skill.name}
                       </FieldLabel>
                       <Switch
@@ -336,11 +361,87 @@ const NEEDS = [
 ]
 const BIONIC = ['BionicInternalBattery', 'BionicOil', 'BionicGunk', 'BionicOxygenTank']
 
-function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
+const GAUGES = new Set([
+  'Calories',
+  'Stamina',
+  'BionicOil',
+  'BionicOxygenTank',
+  'BionicInternalBattery',
+])
+
+/** How an amount reads: the shown value, its maximum and how far it is over it. */
+function readAmount(amount: AmountView) {
   const format = AMOUNT_FORMATS[amount.id] ?? { max: 100, unit: '' }
   const scale = format.scale ?? 1
   const offset = format.offset ?? 0
   const shown = amount.value * scale + offset
+  const cap = amount.max === undefined ? format.max : amount.max * scale + offset
+  return { format, scale, offset, shown, cap, over: Math.max(0, shown - cap) }
+}
+
+/**
+ * The game's meter for an amount: blocks for health and stress, a storage gauge for calories,
+ * stamina and the bionic tanks, a thin bar for the rest. Over the maximum it shows the cap.
+ */
+function AmountMeter({ amount, className }: { amount: AmountView; className?: string }) {
+  const { shown, cap, over } = readAmount(amount)
+  const pct = cap > 0 ? (Math.min(shown, cap) / cap) * 100 : 0
+  const blocks = amount.id === 'HitPoints' || amount.id === 'Stress'
+  const kind: MeterKind =
+    amount.id === 'HitPoints'
+      ? 'health'
+      : amount.id === 'Stress' || amount.id === 'BionicGunk'
+        ? 'stress'
+        : 'amount'
+  const vital = blocks || GAUGES.has(amount.id) || amount.id === 'BionicGunk'
+  const tone = vital ? meterTone(kind, pct) : 'good'
+  if (blocks)
+    return (
+      <Progress
+        variant="blocks"
+        tone={tone}
+        value={shown}
+        max={cap}
+        overflow={over}
+        className={className}
+      />
+    )
+  if (GAUGES.has(amount.id))
+    return (
+      <Progress
+        variant="gauge"
+        tone={tone}
+        value={shown}
+        max={cap}
+        overflow={over}
+        className={className}
+      />
+    )
+  return <Progress tone={tone} value={shown} max={cap} overflow={over} className={className} />
+}
+
+export function Vital({ amount, Icon }: { amount: AmountView; Icon: LucideIcon }) {
+  const { shown, format } = readAmount(amount)
+  return (
+    <Item variant="need" data-vital={amount.id}>
+      <ItemMedia variant="icon">
+        <Icon />
+      </ItemMedia>
+      <ItemContent className="gap-1.5">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="type-body">{amount.name}</span>
+          <span className="type-body text-white tabular-nums">
+            {fmt(shown, format.digits ?? 0)} {format.unit}
+          </span>
+        </div>
+        <AmountMeter amount={amount} />
+      </ItemContent>
+    </Item>
+  )
+}
+
+export function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
+  const { format, scale, offset, shown } = readAmount(amount)
   // Critter amounts carry the game's own maximum; duplicants fall back to a typical range.
   const bounded = amount.max !== undefined
   const readOnly = amount.readOnlyReason !== undefined
@@ -352,10 +453,11 @@ function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
   const commit = (next: number) =>
     edit({ type: 'setAmount', amountId: amount.id, value: (next - offset) / scale })
   return (
-    <Field data-disabled={readOnly || undefined}>
+    <Field className="well gap-3 p-3" data-disabled={readOnly || undefined}>
       <Hint desc={amount.desc}>
-        <FieldLabel className="w-fit">{amount.name}</FieldLabel>
+        <FieldLabel className="type-label w-fit">{amount.name}</FieldLabel>
       </Hint>
+      <AmountMeter amount={amount} />
       <div className="flex items-center gap-3">
         <Slider
           value={[Math.min(Math.max(shown, sliderBottom), Math.max(sliderTop, sliderBottom))]}
