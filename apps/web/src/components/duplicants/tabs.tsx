@@ -410,10 +410,7 @@ export function HealthTab({ dupe, edit }: { dupe: DuplicantView; edit: EditFn })
           <AmountGroup amounts={pick(BIONIC)} edit={edit} />
         </Panel>
       )}
-      <Panel
-        title="Needs"
-        description="The game clamps values to each duplicant's maximum when it loads."
-      >
+      <Panel title="Needs" description="Values are limited to each duplicant's real maximum.">
         <AmountGroup amounts={pick(NEEDS)} edit={edit} />
       </Panel>
       {other.length > 0 && (

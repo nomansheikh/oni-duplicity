@@ -478,7 +478,8 @@ export function bionicAmountMax(
  * - The only things that change these maximums are the Breath ones: the `Minnow` trait
  *   (`BreathMax` +400, `TRAITS.cs`) and the Swimming skill (`IncreasedLungCapacity`, +100,
  *   `SkillPerks.cs`). No trait, skill or effect modifies another duplicant amount's max.
- * - `AmountInstance.SetValue` clamps to min..max, so the game would clamp on load anyway.
+ * - The saved value is a raw float (`AmountInstance.value`); the game clamps only on the next
+ *   `SetValue` or `ApplyDelta`, not on load, so an out-of-range value stays until then.
  */
 const DUPLICANT_AMOUNT_LIMITS: Record<string, { min: number; max: number }> = {
   Stamina: { min: 0, max: 100 },
@@ -1007,7 +1008,22 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
           present.has(amountId) && applyEdit(save, { type: 'setAmount', id, amountId, value })
         if (edit.action === 'relieveStress') setAmount('Stress', 0)
         if (edit.action === 'fillNeeds') {
-          for (const [amountId, value] of Object.entries(FULL_NEEDS)) setAmount(amountId, value)
+          for (const [amountId, full] of Object.entries(FULL_NEEDS)) {
+            // Fill to this duplicant's own maximum (breath is 500 or 600 with Minnow or Swimming),
+            // and never lower a value that is already higher.
+            const current = Number(
+              (
+                modifiers(obj)?.amounts.find((a) => a.name === amountId)?.value as
+                  | { value: number }
+                  | undefined
+              )?.value,
+            )
+            const max = limitOf(obj, id, amountId)?.max ?? full
+            setAmount(
+              amountId,
+              full === 0 ? 0 : Math.max(max, Number.isFinite(current) ? current : 0),
+            )
+          }
         }
         if (edit.action === 'setAttributes') {
           const levels = (behavior(obj, 'Klei.AI.AttributeLevels')?.templateData?.saveLoadLevels ??

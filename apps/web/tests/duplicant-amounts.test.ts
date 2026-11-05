@@ -110,6 +110,25 @@ describe('standard duplicant amounts in the Galaxy save', () => {
     expect(sameBytes(writeSaveParts(save).body, before)).toBe(true)
   }, 120_000)
 
+  test("fill needs tops up breath to a Minnow duplicant's own maximum", () => {
+    const save = load()
+    const dupe = standard(save).find((d) => amount(d, 'Breath').max === 100)!
+    const obj = objectById(save, dupe.id)
+    const traits = obj.behaviors.find((b) => b.name === 'Klei.AI.Traits')!.templateData!
+    traits.TraitIds = [...(traits.TraitIds as string[]), 'Minnow']
+    const view = () => standard(save).find((d) => d.id === dupe.id)!
+    applyEdit(save, { type: 'setAmount', id: dupe.id, amountId: 'Breath', value: 30 })
+    const before = writeSaveParts(save).body.slice()
+    const undo = applyWithRestore(save, { type: 'bulkDuplicants', action: 'fillNeeds' })
+    expect(amount(view(), 'Breath').value).toBe(500)
+    undo()
+    expect(sameBytes(writeSaveParts(save).body, before)).toBe(true)
+    // A value already above the old flat 100 is never lowered.
+    applyEdit(save, { type: 'setAmount', id: dupe.id, amountId: 'Breath', value: 450 })
+    applyEdit(save, { type: 'bulkDuplicants', action: 'fillNeeds' })
+    expect(amount(view(), 'Breath').value).toBe(500)
+  }, 120_000)
+
   test('a non-finite value is rejected and changes nothing', () => {
     const save = load()
     const dupe = standard(save)[0]!

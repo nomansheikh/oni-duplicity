@@ -60,5 +60,5 @@ The editor clamps a duplicant's amounts to the game's range (`Database/Amounts.c
 - Breath is the only amount whose maximum moves: the `Minnow` trait (+400) and the Swimming skill (+100). Both come from the decompile and are read from the save's trait and skill lists. A mod or a game update that adds another `BreathMax` source would make the cap too low.
 - An amount outside the table (a modded one) has no derivable maximum. It stays editable and unclamped, and the UI says so.
 - Bionics have no calories amount (`MAX_CALORIES = 0`), so a `Calories` entry on a bionic is left unclamped.
-- Importing a duplicant profile (`applyProfile`) can change traits and skills without re-clamping breath. The game clamps on load, so this should be harmless.
+- Importing a duplicant profile (`applyProfile`) can change traits and skills without re-clamping breath. The game does not clamp a loaded value (`AmountInstance.value` is a raw serialized float; clamping happens on the next `SetValue` or `ApplyDelta`), so an imported profile could leave breath above a lowered maximum until then.
 - The Swimming skill needs `DLC5_ID`; the editor trusts the mastery list in the save and does not check the DLC.
