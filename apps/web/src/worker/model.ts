@@ -849,6 +849,14 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
       )
       if (edit.mastered) list.push([edit.skillId, true])
       resume.MasteryBySkillID = list
+      // Losing BionicsC3 lowers the battery cap; bring the charge down in the same edit, so undo
+      // restores both.
+      if (edit.id.startsWith('BionicMinion:')) {
+        const battery = modifiers(obj)?.amounts.find((a) => a.name === 'BionicInternalBattery')
+        const max = bionicAmountMax('BionicInternalBattery', masteredSkillIds(obj))!
+        const stored = battery?.value as { value: number } | undefined
+        if (stored && stored.value > max) stored.value = max
+      }
       return
     }
     case 'setExperience':
@@ -857,6 +865,7 @@ function applyObjectEdit(obj: GameObject, edit: Edit): void {
     case 'setAmount': {
       const amount = modifiers(obj)?.amounts.find((a) => a.name === edit.amountId)
       if (!amount) throw new Error(`No amount ${edit.amountId}`)
+      if (!Number.isFinite(edit.value)) throw new Error(`Not a finite amount: ${edit.value}`)
       // The game keeps bionic amounts within their maximum, so never write past it.
       const max = edit.id.startsWith('BionicMinion:')
         ? bionicAmountMax(edit.amountId, masteredSkillIds(obj))

@@ -1,8 +1,16 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { parseSave, writeSave, writeSaveParts } from '@oni-duplicity/save-parser'
-import { describe, expect, test } from 'vite-plus/test'
-import { applyEdit, bionicAmountMax, listDuplicants } from '../src/worker/model.ts'
+import { parseSave, writeSave, writeSaveParts, type SaveGame } from '@oni-duplicity/save-parser'
+import { beforeAll, describe, expect, test } from 'vite-plus/test'
+import {
+  applyEdit,
+  bionicAmountMax,
+  listDuplicants,
+  type DuplicantView,
+  objectById,
+} from '../src/worker/model.ts'
+import { applyWithRestore } from '../src/worker/snapshot.ts'
+import { galaxy, sameBytes } from './helpers.ts'
 
 describe('bionicAmountMax', () => {
   test('uses the game constants for the fixed amounts', () => {
@@ -91,4 +99,101 @@ maybe('bionic amounts in mithro-06', () => {
     },
     300_000,
   )
+})
+
+describe('setAmount guards', () => {
+  test('a non-bionic amount is not clamped', () => {
+    const save = parseSave(readFileSync(galaxy))
+    const dupe = listDuplicants(save).find(
+      (d) => !d.isBionic && d.amounts.some((a) => a.id === 'Stress'),
+    )!
+    applyEdit(save, { type: 'setAmount', id: dupe.id, amountId: 'Stress', value: 5000 })
+    const stress = listDuplicants(save)
+      .find((d) => d.id === dupe.id)!
+      .amounts.find((a) => a.id === 'Stress')!
+    expect(stress.value).toBe(5000)
+    expect(stress.max).toBeUndefined()
+  }, 120_000)
+
+  test.each([Number.NaN, Infinity, -Infinity])(
+    '%s is rejected and changes nothing',
+    (value) => {
+      const save = parseSave(readFileSync(galaxy))
+      const dupe = listDuplicants(save).find((d) => d.amounts.some((a) => a.id === 'Stress'))!
+      const before = writeSaveParts(save).body.slice()
+      expect(() =>
+        applyEdit(save, { type: 'setAmount', id: dupe.id, amountId: 'Stress', value }),
+      ).toThrow(/finite/)
+      expect(sameBytes(writeSaveParts(save).body, before)).toBe(true)
+    },
+    120_000,
+  )
+})
+
+maybe('bionic caps follow the BionicsC3 skill in mithro-06', () => {
+  let save: SaveGame
+  let dupe: DuplicantView
+  beforeAll(() => {
+    save = parseSave(readFileSync(MITHRO))
+    dupe = listDuplicants(save).find((d) => d.isBionic)!
+  }, 300_000)
+  const body = () => writeSaveParts(save).body.slice()
+  const view = () => listDuplicants(save).find((d) => d.id === dupe.id)!
+  const battery = () => view().amounts.find((a) => a.id === 'BionicInternalBattery')!
+  const setBattery = (value: number) =>
+    applyEdit(save, { type: 'setAmount', id: dupe.id, amountId: 'BionicInternalBattery', value })
+
+  test('without BionicsC3 the cap is 480,000 J and losing the skill lowers the charge', () => {
+    const before = body()
+    const startCharge = battery().value
+    expect(startCharge).toBeGreaterThan(480_000)
+
+    const undo = applyWithRestore(save, {
+      type: 'setSkillMastered',
+      id: dupe.id,
+      skillId: 'BionicsC3',
+      mastered: false,
+    })
+    expect(battery().max).toBe(480_000)
+    expect(battery().value).toBe(480_000)
+    setBattery(9_999_999)
+    expect(battery().value).toBe(480_000)
+
+    // One undo puts back both the skill and the charge.
+    undo()
+    expect(battery().max).toBe(720_000)
+    expect(battery().value).toBeCloseTo(startCharge, 0)
+    expect(sameBytes(body(), before)).toBe(true)
+  }, 300_000)
+
+  test('a mastery entry set to false does not count', () => {
+    const resume = objectById(save, dupe.id).behaviors.find((b) => b.name === 'MinionResume')!
+      .templateData as { MasteryBySkillID: [string, boolean][] }
+    const original = resume.MasteryBySkillID
+    resume.MasteryBySkillID = original.map(([id, m]) => [id, id === 'BionicsC3' ? false : m])
+    try {
+      expect(battery().max).toBe(480_000)
+      setBattery(9_999_999)
+      expect(battery().value).toBe(480_000)
+    } finally {
+      resume.MasteryBySkillID = original
+    }
+  }, 300_000)
+
+  test('undo and redo of a clamped write are byte identical', () => {
+    const before = body()
+    const undo = applyWithRestore(save, {
+      type: 'setAmount',
+      id: dupe.id,
+      amountId: 'BionicGunk',
+      value: 1000,
+    })
+    const applied = body()
+    expect(sameBytes(applied, before)).toBe(false)
+    expect(view().amounts.find((a) => a.id === 'BionicGunk')!.value).toBe(80)
+    undo()
+    expect(sameBytes(body(), before)).toBe(true)
+    applyEdit(save, { type: 'setAmount', id: dupe.id, amountId: 'BionicGunk', value: 1000 })
+    expect(sameBytes(body(), applied)).toBe(true)
+  }, 300_000)
 })

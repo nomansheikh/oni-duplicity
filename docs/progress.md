@@ -93,4 +93,5 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Correction to the audit: the battery max does not depend on the electrobanks installed in the duplicant's storage. It depends on the mastered `BionicsC3` skill. All three mithro-06 bionic duplicants have it, which is why the fixture value 569,163 J exceeds 480,000 J.
 - Load behaviour: `Modifications.Deserialize` writes the saved `value` field directly, so an over-max value is not clamped on load. `AmountInstance.SetValue` clamps to `GetMax()` on the next update. The editor clamps itself; the slider still widens to a saved value that is over the max, for display only.
 - Tests: unit tests for the caps, mithro-06 fixture tests (each amount at its max writes only that value, over-max and negative values clamp), and an e2e spec in the bionic block. That block only runs on full-tier CI.
+- Review follow-ups: `setAmount` throws on NaN or Infinity and changes nothing; removing `BionicsC3` clamps the stored battery to 480,000 J in the same edit, so one undo restores both.
 - Not verified in game.
