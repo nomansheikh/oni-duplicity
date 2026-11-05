@@ -123,6 +123,8 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       return `Raw: remove ${edit.path.join('.')}`
     case 'rawDuplicate':
       return `Raw: duplicate ${edit.path.join('.')}`
+    case 'rawAdd':
+      return `Raw: add an item to ${edit.path.join('.')}`
     case 'setMaterialTemperature':
       return `${findElement(edit.elementId)?.name ?? edit.elementId}: every temperature to ${round(edit.kelvin - 273.15)} °C`
     case 'scaleMaterialMass':
