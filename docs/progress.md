@@ -305,3 +305,14 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - The worker reads all of it in `worker/bionic.ts`, behind a new `bionics()` call. Nothing in `model.ts` changed.
 - Tests cover the slot parsing, an empty result on a save without bionics, and the `mithro-06` fixture (full tier only; on full-tier CI a missing fixture fails instead of skipping).
 - Unlocked slots (base 2 plus skill perks) and bank places (4, or 6 with BionicsC3) are computed from the mastered skills, and the internal battery is shown against its maximum. Risks: the battery storage is taken to be the second `Storage` on the duplicant (shown as unrecognised if it holds anything but electrobanks); traits that change the slot or bank attributes are not seen; booster names show as ids. Writing is not attempted; what it would need is in [open-questions.md](open-questions.md).
+
+## UI app shell (design v2, phase 2) — 2026-11-05
+
+- Replaced the sidebar layout with the game's shell: a header bar, a top tab strip and a framed content panel.
+- Header: brand, a save menu (colony name, file name, cycle badge; open another or close), the DLC badges, changes popover, undo/redo, download and preferences. With no save open it shows Open a save.
+- Tab strip: the restyled shadcn `Tabs`, one tab per page with an icon in the page's category colour and a count where the page has one. It scrolls sideways at narrow widths with an edge fade, scrolls the focused tab into view, and at 390px the page does not overflow. The pages sit in a `TabsContent`, tab names read "Duplicants, 9", and no tab is active while no save is open.
+- The theme toggle is gone from the header: dark only for now; a light theme comes later (`ThemeProvider` forces dark). Routes, the undo/redo shortcuts and button names are unchanged.
+- e2e: `goTo` now clicks `getByRole('tab', { name })`; no spec changed.
+- Screenshots in `docs/screenshots/ui-app-shell/`. Page internals are untouched.
+- Known: `components/ui/sidebar.tsx` is now unused and can be deleted once the page sessions land.
+- Next: page layouts.
