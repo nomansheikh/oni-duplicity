@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Download, FolderOpen, Redo2, Undo2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { AppTabs, type Page } from '@/components/app-sidebar'
+import { AppTabs } from '@/components/app-sidebar'
 import { ChangesPopover } from '@/components/changes-popover'
 import { Badge } from '@/components/ui/badge'
 import { DlcBadges } from '@/components/dlc-badge'
@@ -9,6 +9,8 @@ import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
 import { SaveDialog } from '@/components/save-dialog'
 import { PreferencesDialog } from '@/components/preferences-dialog'
 import { SiteHeader } from '@/components/site-header'
+import { useDirtyPages } from '@/hooks/use-dirty-pages'
+import { firstPages, groupOf, type GroupId, type Page } from '@/lib/nav'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
@@ -59,8 +61,24 @@ interface EditStatus {
 }
 
 // Pages load on first visit so opening the app only pulls in the shell.
+const AsteroidsPage = lazy(() =>
+  import('@/components/asteroids-page').then((m) => ({ default: m.AsteroidsPage })),
+)
 const CrittersPage = lazy(() =>
   import('@/components/critters-page').then((m) => ({ default: m.CrittersPage })),
+)
+const GeyserCalculatorPage = lazy(() =>
+  import('@/components/tools/geyser-calculator-page').then((m) => ({
+    default: m.GeyserCalculatorPage,
+  })),
+)
+const RanchingCalculatorPage = lazy(() =>
+  import('@/components/tools/ranching-calculator-page').then((m) => ({
+    default: m.RanchingCalculatorPage,
+  })),
+)
+const SkillPlannerPage = lazy(() =>
+  import('@/components/tools/skill-planner-page').then((m) => ({ default: m.SkillPlannerPage })),
 )
 const DlcPage = lazy(() => import('@/components/dlc-page').then((m) => ({ default: m.DlcPage })))
 const DuplicantsPage = lazy(() =>
@@ -109,17 +127,21 @@ const INNER = 'flex w-full flex-1 flex-col gap-4 md:gap-6'
  */
 const PAGE_WIDTH: Record<Page, 'readable' | 'full'> = {
   overview: 'readable',
-  settings: 'readable',
+  difficulty: 'readable',
   research: 'readable',
   stories: 'readable',
-  dlc: 'readable',
+  content: 'readable',
   space: 'readable',
+  asteroids: 'readable',
+  'geyser-calculator': 'readable',
+  'ranching-calculator': 'readable',
   map: 'full',
   raw: 'full',
-  materials: 'full',
+  resources: 'full',
   critters: 'full',
   duplicants: 'full',
   geysers: 'full',
+  'skill-planner': 'full',
 }
 
 /** Pages sit in the tab panel once a save is open, so each tab names a real panel. */
@@ -146,10 +168,13 @@ export default function App() {
   const [catalogs, setCatalogs] = useState<Catalogs | null>(null)
   const [editStatus, setEditStatus] = useState<EditStatus>(NO_EDITS)
   const [page, setPage] = useState<Page>('overview')
+  // Each group opens on the sub-tab it was last left on.
+  const [lastPage, setLastPage] = useState(firstPages)
   const [selectedDupe, setSelectedDupe] = useState<string>()
   const [saving, setSaving] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [revision, setRevision] = useState(0)
+  const dirty = useDirtyPages(editStatus.edits, revision)
   const fileInput = useRef<HTMLInputElement>(null)
   const [allowUnverified, setAllowUnverified] = useAllowUnverified()
 
@@ -192,6 +217,12 @@ export default function App() {
     setRevision((r) => r + 1)
   }, [])
 
+  const navigate = useCallback((next: Page) => {
+    setPage(next)
+    setLastPage((last) => ({ ...last, [groupOf(next).id]: next }))
+  }, [])
+  const selectGroup = (group: GroupId) => setPage(lastPage[group])
+
   const open = async (file: File) => {
     if (editStatus.edits > 0 && !confirm('Discard your unsaved changes?')) return
     setState({ status: 'loading', fileName: file.name, progress: 0 })
@@ -204,7 +235,7 @@ export default function App() {
       )
       setCatalogs(await saveClient.catalogs())
       await refresh()
-      setPage('overview')
+      navigate('overview')
     } catch (error) {
       setState({ status: 'error', info: describeLoadError(error) })
     }
@@ -344,6 +375,15 @@ export default function App() {
             <Button onClick={() => setConfirmOpen(true)} disabled={saving || saveLocked}>
               <Download />
               <span className="hidden sm:inline">{saving ? 'Saving…' : 'Download save'}</span>
+              {editStatus.edits > 0 && (
+                <span
+                  data-testid="download-count"
+                  aria-hidden
+                  className="bg-black/30 px-1.5 text-[0.8rem] tabular-nums"
+                >
+                  {editStatus.edits}
+                </span>
+              )}
             </Button>
           </span>
         </TooltipTrigger>
@@ -384,15 +424,17 @@ export default function App() {
       />
       <AppTabs
         page={loaded ? page : null}
-        onNavigate={setPage}
+        onNavigate={navigate}
+        onSelectGroup={selectGroup}
+        dirty={dirty}
         counts={
           loaded
             ? {
                 duplicants: loaded.views.duplicants.length,
                 geysers: loaded.views.geysers.length,
-                materials: loaded.views.materials.length,
+                resources: loaded.views.materials.length,
                 critters: loaded.views.critters.length,
-                space: loaded.views.worlds.length,
+                asteroids: loaded.views.worlds.length,
                 stories: loaded.views.stories.length,
               }
             : {}
@@ -451,32 +493,51 @@ export default function App() {
                   />
                 )}
                 {loaded && page === 'geysers' && (
-                  <GeysersPage geysers={loaded.views.geysers} onEdit={edit} />
+                  <GeysersPage
+                    geysers={loaded.views.geysers}
+                    worlds={loaded.views.worlds}
+                    onEdit={edit}
+                  />
                 )}
                 {loaded && page === 'critters' && (
-                  <CrittersPage critters={loaded.views.critters} onEdit={edit} />
+                  <CrittersPage
+                    critters={loaded.views.critters}
+                    worlds={loaded.views.worlds}
+                    onEdit={edit}
+                  />
                 )}
                 {loaded && page === 'research' && (
                   <ResearchPage techs={loaded.views.techs} onEdit={edit} />
                 )}
                 {loaded && page === 'space' && (
                   <SpacePage
-                    worlds={loaded.views.worlds}
                     destinations={loaded.views.destinations}
                     revision={revision}
                     onEdit={edit}
                   />
                 )}
+                {loaded && page === 'asteroids' && (
+                  <AsteroidsPage worlds={loaded.views.worlds} onEdit={edit} />
+                )}
+                {loaded && page === 'geyser-calculator' && (
+                  <GeyserCalculatorPage geysers={loaded.views.geysers} />
+                )}
+                {loaded && page === 'ranching-calculator' && (
+                  <RanchingCalculatorPage critters={loaded.views.critters} />
+                )}
+                {loaded && page === 'skill-planner' && (
+                  <SkillPlannerPage duplicants={loaded.views.duplicants} />
+                )}
                 {loaded && page === 'stories' && <StoriesPage stories={loaded.views.stories} />}
-                {loaded && page === 'dlc' && <DlcPage revision={revision} onEdit={edit} />}
-                {loaded && page === 'settings' && (
+                {loaded && page === 'content' && <DlcPage revision={revision} onEdit={edit} />}
+                {loaded && page === 'difficulty' && (
                   <SettingsPage settings={loaded.views.gameSettings} onEdit={edit} />
                 )}
                 {loaded && page === 'map' && (
                   <MapPage worlds={loaded.views.worlds} revision={revision} />
                 )}
                 {loaded && page === 'raw' && <RawPage revision={revision} onEdit={edit} />}
-                {loaded && page === 'materials' && (
+                {loaded && page === 'resources' && (
                   <MaterialsPage
                     materials={loaded.views.materials}
                     revision={revision}

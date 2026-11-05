@@ -2,7 +2,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { Switch } from '@/components/ui/switch'
 import {
   Table,
   TableBody,
@@ -13,77 +12,27 @@ import {
 } from '@/components/ui/table'
 import { meterTone } from '@/lib/meter'
 import { fmt } from '@/lib/format'
-import type { DestinationView, Edit, WorldView } from '@/worker/model'
-import { CommitInput, NumberField } from './common'
+import type { DestinationView, Edit } from '@/worker/model'
+import { NumberField } from './common'
+import { PageHeader } from './page-header'
 import { PoiTable } from './poi-table'
 
 export function SpacePage({
-  worlds,
   destinations,
   revision,
   onEdit,
 }: {
-  worlds: WorldView[]
   destinations: DestinationView[]
   revision: number
   onEdit: (edit: Edit) => void
 }) {
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Asteroids</CardTitle>
-          <CardDescription>
-            Rename asteroids and reveal undiscovered ones on the starmap.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>World</TableHead>
-                <TableHead className="text-right">Size</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Discovered</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {worlds.map((world) => (
-                <TableRow key={world.id}>
-                  <TableCell>
-                    <CommitInput
-                      value={world.name}
-                      aria-label="Asteroid name"
-                      className="w-52"
-                      onCommit={(name) => onEdit({ type: 'setAsteroidName', id: world.id, name })}
-                    />
-                  </TableCell>
-                  <TableCell className="type-small text-muted-foreground">
-                    {world.worldType}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {world.width} × {world.height}
-                  </TableCell>
-                  <TableCell className="space-x-1">
-                    {world.startWorld && <Badge variant="warn">Start</Badge>}
-                    {world.visited && <Badge variant="info">Visited</Badge>}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Switch
-                      checked={world.discovered}
-                      aria-label="Discovered"
-                      onCheckedChange={(discovered) =>
-                        onEdit({ type: 'setWorldDiscovered', id: world.id, discovered })
-                      }
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <PageHeader
+        title="Space"
+        description="Points of interest and base-game destinations on the starmap. Asteroids are under World."
+        summary={[{ label: 'Destinations', value: destinations.length }]}
+      />
       <PoiTable revision={revision} onEdit={onEdit} />
       {destinations.length > 0 && (
         <Card>

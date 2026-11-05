@@ -2,14 +2,7 @@ import { useMemo, useState } from 'react'
 import { Copy, Search, SlidersHorizontal, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress, meterTone, type MeterKind } from '@/components/ui/progress'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import {
@@ -36,8 +29,11 @@ import {
 } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { fmt } from '@/lib/format'
-import type { AmountView, CritterView, DuplicantEdit, Edit } from '@/worker/model'
+import type { AmountView, CritterView, DuplicantEdit, Edit, WorldView } from '@/worker/model'
 import { AmountGroup } from './duplicants/tabs'
+import { AsteroidFilter } from './asteroid-filter'
+import { asteroidName } from '@/lib/asteroid'
+import { PageHeader } from './page-header'
 
 const amount = (c: CritterView, id: string) => c.amounts.find((a) => a.id === id)?.value
 
@@ -174,32 +170,34 @@ function IconAction({
 
 export function CrittersPage({
   critters,
+  worlds,
   onEdit,
 }: {
   critters: CritterView[]
+  worlds: WorldView[]
   onEdit: (edit: Edit) => void
 }) {
   const [query, setQuery] = useState('')
   const [family, setFamily] = useState('all')
+  const [asteroid, setAsteroid] = useState('all')
   const [openId, setOpenId] = useState<string | null>(null)
   const families = useMemo(() => [...new Set(critters.map((c) => c.family))].sort(), [critters])
   const visible = critters.filter(
     (c) =>
       (family === 'all' || c.family === family) &&
+      (asteroid === 'all' || c.asteroid === asteroid) &&
       `${c.name} ${c.prefab}`.toLowerCase().includes(query.toLowerCase()),
   )
   const open = critters.find((c) => c.id === openId) ?? null
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Critters</CardTitle>
-          <CardDescription>
-            {critters.length} critters across {families.length} families. Tame, clone, delete or
-            tune their stats.
-          </CardDescription>
-          <CardAction className="flex flex-wrap items-center gap-2">
+      <PageHeader
+        title="Critters"
+        description={`${critters.length} critters across ${families.length} families. Tame, clone, delete or tune their stats.`}
+        actions={
+          <>
+            <AsteroidFilter worlds={worlds} value={asteroid} onChange={setAsteroid} />
             <Select value={family} onValueChange={setFamily}>
               <SelectTrigger className="w-44" aria-label="Family">
                 <SelectValue />
@@ -223,14 +221,17 @@ export function CrittersPage({
                 <Search />
               </InputGroupAddon>
             </InputGroup>
-          </CardAction>
-        </CardHeader>
+          </>
+        }
+      />
+      <Card>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Critter</TableHead>
                 <TableHead>Family</TableHead>
+                <TableHead>Asteroid</TableHead>
                 <TableHead>Wildness</TableHead>
                 <TableHead>Age</TableHead>
                 <TableHead>Fertility</TableHead>
@@ -253,6 +254,9 @@ export function CrittersPage({
                     </TableCell>
                     <TableCell>
                       <Badge variant="critter">{c.family}</Badge>
+                    </TableCell>
+                    <TableCell className="type-small text-muted-foreground">
+                      {asteroidName(worlds, c.asteroid)}
                     </TableCell>
                     <TableCell>
                       <WildnessBadge critter={c} />

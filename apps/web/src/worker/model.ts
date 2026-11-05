@@ -140,6 +140,8 @@ export interface CritterView {
   baby: boolean
   x: number
   y: number
+  /** The `WorldView` id of the asteroid it is on, when its position falls inside one. */
+  asteroid?: string
   amounts: AmountView[]
 }
 
@@ -281,6 +283,8 @@ export interface GeyserView {
   name: string
   x: number
   y: number
+  /** The `WorldView` id of the asteroid it is on, when its position falls inside one. */
+  asteroid?: string
   /** Kilograms emitted per cycle while active (`scaledRate`). */
   massPerCycle: number
   /** Seconds per eruption cycle, and the share of it spent erupting. */
@@ -845,6 +849,7 @@ export function catalogs(): Catalogs {
 }
 
 export function listGeysers(save: SaveGame): GeyserView[] {
+  const boxes = worldBoxes(save)
   return objectsWith(save, 'Geyser').map(({ id, prefab, obj }) => {
     const config = data(obj, 'Geyser').configuration as GeyserConfig
     const name = behavior(obj, 'UserNameable')?.templateData?.savedName
@@ -858,6 +863,7 @@ export function listGeysers(save: SaveGame): GeyserView[] {
       name: typeof name === 'string' ? name : (type?.name ?? prefab),
       x: Math.round(obj.position.x),
       y: Math.round(obj.position.y),
+      ...asteroidOf(boxes, obj.position),
       massPerCycle: config.scaledRate ?? 0,
       iterationSeconds: config.scaledIterationLength ?? 0,
       iterationPercent: config.scaledIterationPercent ?? 0,
@@ -1591,6 +1597,7 @@ function assignNewIds(save: SaveGame, obj: GameObject): void {
 
 export function listCritters(save: SaveGame): CritterView[] {
   const dlcs = dlcIds(save)
+  const boxes = worldBoxes(save)
   return objectsWith(save, 'CreatureBrain').map(({ id, prefab, obj }) => {
     const entry = findCritter(prefab)
     return {
@@ -1601,6 +1608,7 @@ export function listCritters(save: SaveGame): CritterView[] {
       baby: entry?.baby ?? prefab.endsWith('Baby'),
       x: Math.round(obj.position.x),
       y: Math.round(obj.position.y),
+      ...asteroidOf(boxes, obj.position),
       amounts: (modifiers(obj)?.amounts ?? []).map((a) => {
         const limit = critterAmountMax(prefab, a.name, dlcs)
         return {
@@ -1876,6 +1884,8 @@ const STORY_MACHINES: Record<string, string> = {
 
 interface WorldBox {
   id: number
+  /** The world's game object id, the same as `WorldView.id`. */
+  objectId: string
   name: string
   x: number
   y: number
@@ -1883,16 +1893,36 @@ interface WorldBox {
   height: number
 }
 
+/** `{ asteroid }` for the world containing the position, or nothing when none does. */
+function asteroidOf(boxes: WorldBox[], position: { x: number; y: number }): { asteroid?: string } {
+  const box = boxes.find(
+    (w) =>
+      position.x >= w.x &&
+      position.x < w.x + w.width &&
+      position.y >= w.y &&
+      position.y < w.y + w.height,
+  )
+  return box ? { asteroid: box.objectId } : {}
+}
+
 function worldBoxes(save: SaveGame): WorldBox[] {
   const boxes: WorldBox[] = []
-  for (const { obj } of objectsWith(save, 'WorldContainer')) {
+  for (const { id: objectId, obj } of objectsWith(save, 'WorldContainer')) {
     const world = data(obj, 'WorldContainer')
     const asteroid = behavior(obj, 'AsteroidGridEntity')?.templateData
     const name = typeof asteroid?.m_name === 'string' ? asteroid.m_name : world.worldName
     const offset = world.worldOffset as { x: number; y: number } | undefined
     const size = world.worldSize as { x: number; y: number } | undefined
     if (typeof world.id !== 'number' || typeof name !== 'string' || !offset || !size) continue
-    boxes.push({ id: world.id, name, x: offset.x, y: offset.y, width: size.x, height: size.y })
+    boxes.push({
+      id: world.id,
+      objectId,
+      name,
+      x: offset.x,
+      y: offset.y,
+      width: size.x,
+      height: size.y,
+    })
   }
   return boxes
 }

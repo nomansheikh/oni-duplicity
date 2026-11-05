@@ -14,7 +14,7 @@ import {
 
 /** Opens the edit sheet of one element, e.g. `Wolframite`. */
 async function openElement(page: Page, name: string) {
-  await goTo(page, 'Materials')
+  await goTo(page, 'Resources')
   await page.getByPlaceholder('Search elements').fill(name)
   await page
     .getByRole('row')

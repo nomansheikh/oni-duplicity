@@ -100,7 +100,7 @@ const api = {
   },
   /** Unsaved edits, oldest first, each with the object it changed. */
   history: (): HistoryEntry[] =>
-    undoStack.map(({ label, category, key }) => ({ label, category, key })),
+    undoStack.map(({ label, category, key, edit }) => ({ label, category, key, type: edit.type })),
   status,
   apply(edit: Edit) {
     apply(edit)

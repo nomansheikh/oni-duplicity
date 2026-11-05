@@ -25,7 +25,7 @@ test.describe('Demolior', () => {
 
   test('shows the event and its timing', async ({ page }) => {
     await openSave(page, KONOVE)
-    await goTo(page, 'DLC')
+    await goTo(page, 'Content')
     const card = page.locator('[data-slot=card]').filter({ hasText: 'Demolior impact' })
     await expect(card).toBeVisible()
     await expect(card.getByText('Cycle 1.1', { exact: true })).toBeVisible()
@@ -39,7 +39,7 @@ test.describe('Demolior', () => {
   test('postpones the impact and changes only the timing fields', async ({ page }) => {
     const start = events(original(KONOVE)).activeEvents[0]!.eventStartTime
     await openSave(page, KONOVE)
-    await goTo(page, 'DLC')
+    await goTo(page, 'Content')
     const input = page.getByRole('spinbutton', { name: 'Impact cycle' })
     await expect(input).toHaveValue('201.1')
     await input.fill('251.1')
@@ -57,7 +57,7 @@ test.describe('Demolior', () => {
 
   test('an impact in the past is clamped to one cycle from now', async ({ page }) => {
     await openSave(page, KONOVE)
-    await goTo(page, 'DLC')
+    await goTo(page, 'Content')
     const input = page.getByRole('spinbutton', { name: 'Impact cycle' })
     await input.fill('5')
     await input.press('Enter')
@@ -66,7 +66,7 @@ test.describe('Demolior', () => {
 
   test('undo puts the original timing back', async ({ page }) => {
     await openSave(page, KONOVE)
-    await goTo(page, 'DLC')
+    await goTo(page, 'Content')
     const input = page.getByRole('spinbutton', { name: 'Impact cycle' })
     await input.fill('300')
     await input.press('Enter')
@@ -84,7 +84,7 @@ test.describe('Demolior', () => {
 
 test('lists world mixing as read only', async ({ page }) => {
   await openSave(page, GALAXY)
-  await goTo(page, 'DLC')
+  await goTo(page, 'Content')
   const card = page.locator('[data-slot=card]').filter({ hasText: 'World mixing' })
   await expect(card.getByText("can't be changed after the world exists")).toBeVisible()
   const row = (name: string) => card.getByRole('row').filter({ hasText: name })
@@ -105,7 +105,7 @@ test.describe('geothermal', () => {
   test('shows the controller state and each vent', async ({ page }) => {
     expect(hasFixture(MITHRO), `${MITHRO} is missing from the full-tier fixtures`).toBe(true)
     await openSave(page, MITHRO)
-    await goTo(page, 'DLC')
+    await goTo(page, 'Content')
     const card = page.locator('[data-slot=card]').filter({ hasText: 'Geothermal plant' })
     await expect(card.getByText('Complete', { exact: true }).first()).toBeVisible()
     const rows = card.getByRole('row')
