@@ -35,8 +35,8 @@ export function SiteHeader({
           <Orbit className="size-5" />
         </span>
         <div className="leading-none">
-          <p className="font-heading text-xl font-bold tracking-[0.07em] uppercase">Duplicity</p>
-          <p className="hidden text-xs text-fg-3 sm:block">ONI save editor</p>
+          <p className="text-h2 font-heading uppercase">Duplicity</p>
+          <p className="hidden text-caption text-fg-3 sm:block">ONI save editor</p>
         </div>
       </div>
 
@@ -48,10 +48,8 @@ export function SiteHeader({
               className="field-game flex min-w-0 max-w-full items-center gap-3 px-3 py-1 text-left data-[state=open]:bg-tab"
             >
               <span className="min-w-0 leading-tight">
-                <span className="block truncate font-heading text-lg font-bold tracking-[0.05em]">
-                  {file.colony}
-                </span>
-                <span className="block truncate text-xs text-fg-3">{file.name}</span>
+                <span className="block truncate font-heading text-h3">{file.colony}</span>
+                <span className="block truncate text-caption text-fg-3">{file.name}</span>
               </span>
               <span
                 className="chip shrink-0"
@@ -64,7 +62,7 @@ export function SiteHeader({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="min-w-56">
             <DropdownMenuLabel className="truncate">{file.name}</DropdownMenuLabel>
-            <p className="px-2 pb-1 text-xs text-fg-3">Save version {file.version}</p>
+            <p className="px-2 pb-1 text-caption text-fg-3">Save version {file.version}</p>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={onOpen}>
               <FolderOpen /> Open another save
