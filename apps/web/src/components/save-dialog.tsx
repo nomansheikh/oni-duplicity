@@ -20,6 +20,7 @@ export function SaveDialog({
   fileName,
   isAutoSave,
   originalSaveName,
+  saving,
   onConfirm,
 }: {
   open: boolean
@@ -27,6 +28,7 @@ export function SaveDialog({
   fileName: string
   isAutoSave: boolean
   originalSaveName: string
+  saving: boolean
   onConfirm: () => void
 }) {
   const [entries, setEntries] = useState<HistoryEntry[] | null>(null)
@@ -88,7 +90,7 @@ export function SaveDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={onConfirm} disabled={entries === null}>
+          <Button onClick={onConfirm} disabled={entries === null || saving}>
             <Download />
             Confirm download
           </Button>

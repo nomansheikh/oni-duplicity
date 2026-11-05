@@ -193,7 +193,7 @@ export default function App() {
   const redo = useCallback(() => run(() => saveClient.redo()), [run])
 
   const download = async () => {
-    if (state.status !== 'loaded') return
+    if (state.status !== 'loaded' || saving) return
     setConfirmOpen(false)
     setSaving(true)
     try {
@@ -221,13 +221,15 @@ export default function App() {
     if (state.status !== 'loaded') return
     const onKey = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z') return
+      // The save dialog lists the edits as they are; changing them under it would make it stale.
+      if (confirmOpen) return
       if (e.target instanceof HTMLInputElement) return
       e.preventDefault()
       void (e.shiftKey ? redo() : undo())
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [state.status, undo, redo])
+  }, [state.status, confirmOpen, undo, redo])
 
   useEffect(() => {
     document.title = `${editStatus.edits > 0 ? '• ' : ''}Duplicity · ONI save editor`
@@ -465,6 +467,7 @@ export default function App() {
           fileName={`${loaded.summary.baseName}.sav`}
           isAutoSave={loaded.summary.isAutoSave}
           originalSaveName={loaded.summary.originalSaveName}
+          saving={saving}
           onConfirm={download}
         />
       )}
