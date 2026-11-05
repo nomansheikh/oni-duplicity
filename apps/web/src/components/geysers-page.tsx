@@ -1,8 +1,16 @@
 import { useState } from 'react'
-import { SlidersHorizontal } from 'lucide-react'
+import { FlaskConical, SlidersHorizontal } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Sheet,
   SheetContent,
@@ -144,6 +152,16 @@ function GeyserSheet({
                   value={`${fmt(activeCycles(geyser))} / ${fmt(dormantCycles(geyser))} cycles`}
                 />
               </div>
+              {geyser.swapTargets.length > 0 && (
+                <TypeChanger
+                  key={geyser.id}
+                  geyser={geyser}
+                  onChange={(typeId) => {
+                    onEdit({ type: 'setGeyserType', id: geyser.id, typeId })
+                    onClose()
+                  }}
+                />
+              )}
               {!geyser.matchesRolls && (
                 <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
                   The saved values don&apos;t match this geyser&apos;s rolls, so something other
@@ -214,6 +232,53 @@ function GeyserSheet({
         )}
       </SheetContent>
     </Sheet>
+  )
+}
+
+function TypeChanger({
+  geyser,
+  onChange,
+}: {
+  geyser: GeyserView
+  onChange: (typeId: string) => void
+}) {
+  const [typeId, setTypeId] = useState('')
+  return (
+    <Field>
+      <FieldLabel>
+        Type
+        <Badge variant="outline" className="gap-1">
+          <FlaskConical /> Experimental
+        </Badge>
+      </FieldLabel>
+      <div className="flex gap-2">
+        <Select value={typeId} onValueChange={setTypeId}>
+          <SelectTrigger className="flex-1" aria-label="New type">
+            <SelectValue placeholder={`Change from ${geyser.typeName}`} />
+          </SelectTrigger>
+          <SelectContent>
+            {geyser.swapTargets.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button variant="outline" disabled={!typeId} onClick={() => onChange(typeId)}>
+          Change type
+        </Button>
+      </div>
+      <FieldDescription>
+        Only types of the same size that your save&apos;s DLCs allow are listed. Output, temperature
+        and germs follow the new type and the rolls are kept. Experimental: not yet verified in
+        game, so keep a backup.
+      </FieldDescription>
+      {geyser.hasGeyserControl && (
+        <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
+          This save uses the Geyser Control mod; it may reapply its own values after the swap.
+        </div>
+      )}
+    </Field>
   )
 }
 

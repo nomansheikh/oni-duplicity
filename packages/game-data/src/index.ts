@@ -5,6 +5,7 @@ export {
   geyserTypes,
   resample,
   unresample,
+  type GeyserShape,
   type GeyserTypeEntry,
   type Range,
 } from './geyser-types.ts'
