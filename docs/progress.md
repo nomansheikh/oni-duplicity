@@ -81,3 +81,14 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
   - The bionic test needs the 40 MB full-tier fixture, so it is skipped on PRs and runs only on full-tier CI (`main` and nightly). There it fails instead of skipping when the fixture is missing (`CI` set and `FIXTURE_TIER=all`).
   - Deleting a critter left no reference in the decoded data of `beautiful-galaxy`: no decoded value refers to any critter id, whereas duplicant ids are referenced 5,244 times. Undecoded raw bytes were not checked, so confirm in game.
 - Next: parser acceptance (bench, fuzz, differential).
+
+## Space points of interest (read-only) — 2026-11-05
+
+- The Space page lists every Spaced Out point of interest: type, starmap location, stock and capacity, time to refill, artifact state and whether the colony has found it. Nothing is written.
+- Where the data lives: a POI's location is plain template data (`m_location`); its type hash, two rolls, stock and artifact charge are inside the `StateMachineController` bytes, one serialized state machine instance each for `HarvestablePOIStates` and `ArtifactPOIStates`. Reveal state is `ClusterFogOfWarManager`'s `m_revealPointsByCell` in the save game object's state machine bytes. A spawned artifact waits in a `StarmapHexCellInventory` object on its tile (7.37 and later).
+- The reader in `apps/web/src/worker/pois.ts` looks for the instance's type name and reads the fields behind it. It rejects anything that does not match instead of guessing.
+- The type table (`apps/web/src/lib/space-pois.ts`) is transcribed from `HarvestablePOIConfig` and `ArtifactPOIConfig` and lives in `apps/web`, not `packages/game-data`. Every saved type hash matches a transcribed id.
+- Tests: a fixture test reads every POI in every fixture (rolls within 0–1, stock within capacity, charge within 0–1), and an e2e test checks the table renders for the galaxy fixture.
+- Risks:
+  - The artifact fields moved between versions (see open question 20); the reader accepts both layouts, but only 7.33, 7.36, 7.37 and 7.38 saves were checked.
+  - Stock is shown against a capacity worked out from the saved roll and the transcribed range. A wrong range would show a wrong capacity; the fixtures never exceed it.

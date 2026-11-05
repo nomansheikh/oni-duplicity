@@ -12,6 +12,7 @@ import {
 import { fmt } from '@/lib/format'
 import type { DestinationView, Edit, WorldView } from '@/worker/model'
 import { CommitInput } from './common'
+import { PoiTable } from './poi-table'
 
 export function SpacePage({
   worlds,
@@ -76,6 +77,7 @@ export function SpacePage({
           </Table>
         </CardContent>
       </Card>
+      <PoiTable />
       {destinations.length > 0 && (
         <Card>
           <CardHeader>
