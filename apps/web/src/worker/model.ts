@@ -256,6 +256,8 @@ export interface DuplicantView {
   dlcIds: string[]
   /** The cycle the duplicant arrived in (`MinionIdentity.arrivalTime`; 0 for the first three). */
   arrivalTime: number
+  /** Cycles since arrival, as the game shows it: the current cycle minus `arrivalTime`. */
+  age: number
   name: string
   gender: string
   personality: Named
@@ -755,6 +757,9 @@ function appearanceOf(obj: GameObject): AccessorySlotView[] {
 
 export function listDuplicants(save: SaveGame): DuplicantView[] {
   const activeDlcs = new Set(dlcIds(save))
+  // The header stores `GameClock.GetCycle()`; MinionPersonalityPanel shows the age as that minus
+  // `arrivalTime`.
+  const cycle = save.header.gameInfo.numberOfCycles
   return objectsWith(save, 'MinionIdentity').map(({ id, prefab, obj }) => {
     const identity = data(obj, 'MinionIdentity')
     const resume = behavior(obj, 'MinionResume')?.templateData
@@ -799,6 +804,10 @@ export function listDuplicants(save: SaveGame): DuplicantView[] {
       model: modelOf(obj, prefab),
       dlcIds: [...activeDlcs],
       arrivalTime: typeof identity.arrivalTime === 'number' ? identity.arrivalTime : 0,
+      age: Math.max(
+        0,
+        Math.floor(cycle - (typeof identity.arrivalTime === 'number' ? identity.arrivalTime : 0)),
+      ),
       name: typeof identity.name === 'string' ? identity.name : '',
       gender: typeof identity.gender === 'string' ? identity.gender : '',
       personality: withName(named(personalityKey, findPersonality(personalityKey)), identity.name),
