@@ -173,4 +173,3 @@ The gate fails a phase whose time, divided by a calibration workload timed in th
 - **Newer minor versions open editable**, but downloading them needs the "allow unverified versions" preference.
 - **Geyser ranges are transcribed**, not generated: see `packages/game-data`.
 - **The bench gate is calibrated, not absolute.** It compares each phase against a per-platform committed baseline, scaled by a fixed memory-bound workload timed in the same run. It cannot catch a slowdown that also slows the calibration, and the save-time target is not met. See Performance.
-- **Geyser ranges are transcribed**, not generated: see `packages/game-data`.
