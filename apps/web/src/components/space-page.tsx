@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import {
   Table,
@@ -10,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { meterTone } from '@/lib/meter'
 import { fmt } from '@/lib/format'
 import type { DestinationView, Edit, WorldView } from '@/worker/model'
 import { CommitInput, NumberField } from './common'
@@ -57,13 +59,15 @@ export function SpacePage({
                       onCommit={(name) => onEdit({ type: 'setAsteroidName', id: world.id, name })}
                     />
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{world.worldType}</TableCell>
+                  <TableCell className="type-small text-muted-foreground">
+                    {world.worldType}
+                  </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {world.width} × {world.height}
                   </TableCell>
                   <TableCell className="space-x-1">
-                    {world.startWorld && <Badge>Start</Badge>}
-                    {world.visited && <Badge variant="secondary">Visited</Badge>}
+                    {world.startWorld && <Badge variant="warn">Start</Badge>}
+                    {world.visited && <Badge variant="info">Visited</Badge>}
                   </TableCell>
                   <TableCell className="text-right">
                     <Switch
@@ -104,16 +108,18 @@ export function SpacePage({
               <TableBody>
                 {destinations.map((d) => (
                   <TableRow key={d.id} data-destination={d.id}>
-                    <TableCell className="font-medium">{d.type}</TableCell>
+                    <TableCell className="type-h3">{d.type}</TableCell>
                     <TableCell className="text-right tabular-nums">
                       {fmt(d.distance * 10000, 0)} km
                     </TableCell>
-                    <TableCell className="flex flex-wrap gap-1">
-                      {d.resources.map((r) => (
-                        <Badge key={r.name} variant="outline">
-                          {r.name} · {fmt(r.amount * 100, 0)}%
-                        </Badge>
-                      ))}
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {d.resources.map((r) => (
+                          <Badge key={r.name} variant="outline">
+                            {r.name} · {fmt(r.amount * 100, 0)}%
+                          </Badge>
+                        ))}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <MassEditor destination={d} onEdit={onEdit} />
@@ -141,31 +147,44 @@ function MassEditor({
 }) {
   if (!d.mass) return <span className="text-muted-foreground">–</span>
   const { current, capacity } = d.mass
+  const percent = capacity > 0 ? Math.min(100, (current / capacity) * 100) : 0
   return (
-    <div className="flex items-center gap-2">
-      <NumberField
-        label={`Recoverable mass of destination ${d.id}`}
-        value={current}
-        min={0}
-        max={capacity}
-        unit="kg"
-        className="w-36"
-        onCommit={(mass) => onEdit({ type: 'setDestinationMass', destination: d.id, mass })}
+    <div className="flex min-w-72 flex-col gap-2">
+      <Progress
+        variant="gauge"
+        tone={meterTone('amount', percent)}
+        value={percent}
+        aria-label={`Recoverable mass gauge of destination ${d.id}`}
       />
-      <span className="text-xs text-muted-foreground tabular-nums">of {fmt(capacity, 0)}</span>
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={current >= capacity}
-        onClick={() => onEdit({ type: 'setDestinationMass', destination: d.id, mass: capacity })}
-      >
-        Fill
-      </Button>
+      <div className="flex items-center gap-2">
+        <NumberField
+          label={`Recoverable mass of destination ${d.id}`}
+          value={current}
+          min={0}
+          max={capacity}
+          unit="kg"
+          className="w-36"
+          onCommit={(mass) => onEdit({ type: 'setDestinationMass', destination: d.id, mass })}
+        />
+        <span className="type-caption text-muted-foreground tabular-nums">
+          of {fmt(capacity, 0)}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={current >= capacity}
+          onClick={() => onEdit({ type: 'setDestinationMass', destination: d.id, mass: capacity })}
+        >
+          Fill
+        </Button>
+      </div>
     </div>
   )
 }
 
 const ANALYSIS_LABEL = { hidden: 'Hidden', discovered: 'Discovered', complete: 'Analyzed' } as const
+
+const ANALYSIS_TONE = { hidden: 'secondary', discovered: 'info', complete: 'good' } as const
 
 function AnalysisEditor({
   destination: d,
@@ -176,9 +195,7 @@ function AnalysisEditor({
 }) {
   return (
     <div className="flex items-center justify-end gap-2">
-      <Badge variant={d.analysis === 'complete' ? 'default' : 'secondary'}>
-        {ANALYSIS_LABEL[d.analysis]}
-      </Badge>
+      <Badge variant={ANALYSIS_TONE[d.analysis]}>{ANALYSIS_LABEL[d.analysis]}</Badge>
       {d.analysis === 'hidden' && (
         <Button
           variant="outline"
