@@ -42,3 +42,11 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Checked by hand in Chrome: edit → download → reload for duplicants, critters (clone, tame), materials, research, game settings, asteroids and raw edits; undo and redo after each.
 - A production build served from `/oni-duplicity/` loads saves and portraits. Lazy-loading the pages cut the main chunk from 688 kB to 399 kB (122 kB gzipped).
 - Nothing is verified in the game yet.
+
+## Geyser edits follow the rolls — 2026-11-05
+
+- The decompiled `GeyserInstanceConfiguration` recomputes `scaled*` from the rolls whenever a save is loaded (`didInit` is not saved), so the first version of the geyser editor, which changed only `scaled*`, would most likely have been undone by the game.
+- Edits now set the roll and write the matching value, clamped to the type's range. The ranges are transcribed into `packages/game-data/src/geyser-types.ts`; every game-rolled geyser in the ten fixtures matches them exactly.
+- Four geysers in the owner's colony sit at their type maximums regardless of their rolls, most likely from a mod. The editor flags them.
+- Next: in-game check of a geyser edit; e2e tests.
+- Risk: the decompile's game build is unknown. If a build keeps the saved values instead, the edits still hold, since both are written.

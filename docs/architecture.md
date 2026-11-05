@@ -74,7 +74,7 @@ Generated, never hand-typed. `vp run extract-game-data` reads a local game insta
 | `Managed/Assembly-CSharp.dll`                  | Exact IDs (for example `BingeEater`), read from the assembly's UTF-16 string literals |
 | `StreamingAssets/elements/*.yaml`              | Elements and their SimHashes                                                          |
 
-Coverage: traits, attributes, skill groups, amounts, effects, personalities, geysers, elements, critters, techs and game settings. Skills come from [konove/oni-save-parser](https://github.com/konove/oni-save-parser) (MIT, attributed in `src/skills.ts`). The assembly is only read locally; decompiled code is never committed.
+Coverage: traits, attributes, skill groups, amounts, effects, personalities, geysers, elements, critters, techs and game settings. Geyser types and their ranges (output, eruption and activity timing) are floats in code, which the extractor cannot read, so `src/geyser-types.ts` transcribes them from `GeyserGenericConfig`; a test checks them against every geyser in the fixtures. Skills come from [konove/oni-save-parser](https://github.com/konove/oni-save-parser) (MIT, attributed in `src/skills.ts`). The assembly is only read locally; decompiled code is never committed.
 
 ## `apps/web`
 
@@ -95,6 +95,8 @@ save(): Uint8Array
 **Data flow.** After every edit, undo or redo, the app refetches its view models from the worker and bumps a `revision` that open panels use to reload. Only the page state (current page, selection, preferences) lives on the main thread.
 
 **World map.** The worker decodes the sim grid once per save, crops one asteroid using its `WorldContainer` offset and size, and transfers element indices, temperatures and masses; the page colors them on a canvas, so switching between element, temperature and mass views needs no worker call.
+
+**Geysers.** The game saves each geyser's rolls and the values they give (`scaled*`), but recomputes the values from the rolls and the type's range when it loads a save. An edit sets the roll and writes the matching value, clamped to the type's range; geysers of unknown types can only be renamed.
 
 **Unsaved changes.** The worker describes each edit in plain words as it is applied (before a delete removes the name it needs) and keeps the label with its undo entry; the header lists them.
 
@@ -147,3 +149,4 @@ save(): Uint8Array
 - **Portraits are shown**, using react-oni-duplicant's sprites instead of committing any art.
 - **Newer minor versions open editable**, but downloading them needs the "allow unverified versions" preference.
 - **No bench gate** in CI yet.
+- **Geyser ranges are transcribed**, not generated: see `packages/game-data`.

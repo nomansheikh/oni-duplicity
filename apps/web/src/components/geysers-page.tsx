@@ -120,9 +120,6 @@ function GeyserSheet({
   onClose: () => void
   onEdit: (edit: Edit) => void
 }) {
-  const set = (field: GeyserField, value: number) =>
-    geyser && onEdit({ type: 'setGeyserValue', id: geyser.id, field, value })
-
   return (
     <Sheet open={geyser !== null} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="w-full sm:max-w-lg">
@@ -147,82 +144,131 @@ function GeyserSheet({
                   value={`${fmt(activeCycles(geyser))} / ${fmt(dormantCycles(geyser))} cycles`}
                 />
               </div>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel>Output per active cycle</FieldLabel>
-                  <NumberField
-                    label="Output per active cycle"
-                    value={geyser.massPerCycle}
-                    digits={1}
-                    min={0}
-                    unit="kg"
-                    className="w-40"
-                    onCommit={(kg) => set('scaledRate', kg)}
-                  />
-                  <FieldDescription>
-                    Everything a cycle of activity emits; the rate while erupting follows from it.
-                  </FieldDescription>
-                </Field>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field>
-                    <FieldLabel>Eruption cycle</FieldLabel>
-                    <NumberField
-                      label="Eruption cycle"
-                      value={geyser.iterationSeconds}
-                      min={1}
-                      unit="s"
-                      className="w-full"
-                      onCommit={(s) => set('scaledIterationLength', s)}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>Erupting</FieldLabel>
-                    <NumberField
-                      label="Erupting share"
-                      value={geyser.iterationPercent * 100}
-                      digits={1}
-                      min={1}
-                      unit="%"
-                      className="w-full"
-                      onCommit={(p) => set('scaledIterationPercent', p / 100)}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>Activity cycle</FieldLabel>
-                    <NumberField
-                      label="Activity cycle"
-                      value={geyser.yearSeconds / SECONDS_PER_CYCLE}
-                      digits={1}
-                      min={1}
-                      unit="cycles"
-                      className="w-full"
-                      onCommit={(c) => set('scaledYearLength', c * SECONDS_PER_CYCLE)}
-                    />
-                  </Field>
-                  <Field>
-                    <FieldLabel>Active</FieldLabel>
-                    <NumberField
-                      label="Active share"
-                      value={geyser.yearPercent * 100}
-                      digits={1}
-                      min={1}
-                      unit="%"
-                      className="w-full"
-                      onCommit={(p) => set('scaledYearPercent', p / 100)}
-                    />
-                  </Field>
+              {!geyser.matchesRolls && (
+                <div className="rounded-lg border border-chart-3/50 bg-chart-3/10 px-4 py-3 text-sm">
+                  The saved values don&apos;t match this geyser&apos;s rolls, so something other
+                  than the game changed them, probably a mod. Without that mod the game works them
+                  out from the rolls again when it loads the save. Editing a value fixes its roll.
                 </div>
-                <FieldDescription>
-                  The game rolled these when the world was generated and keeps the saved values.
-                  Anything outside the natural range for this type still works, but no geyser would
-                  roll it. Not yet verified in game.
-                </FieldDescription>
-              </FieldGroup>
+              )}
+              {geyser.ranges ? (
+                <FieldGroup>
+                  <GeyserInput
+                    geyser={geyser}
+                    field="scaledRate"
+                    label="Output per active cycle"
+                    unit="kg"
+                    digits={1}
+                    onEdit={onEdit}
+                    description="Everything a cycle of activity emits; the rate while erupting follows from it."
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <GeyserInput
+                      geyser={geyser}
+                      field="scaledIterationLength"
+                      label="Eruption cycle"
+                      unit="s"
+                      onEdit={onEdit}
+                    />
+                    <GeyserInput
+                      geyser={geyser}
+                      field="scaledIterationPercent"
+                      label="Erupting"
+                      unit="%"
+                      digits={1}
+                      scale={100}
+                      onEdit={onEdit}
+                    />
+                    <GeyserInput
+                      geyser={geyser}
+                      field="scaledYearLength"
+                      label="Activity cycle"
+                      unit="cycles"
+                      digits={1}
+                      scale={1 / SECONDS_PER_CYCLE}
+                      onEdit={onEdit}
+                    />
+                    <GeyserInput
+                      geyser={geyser}
+                      field="scaledYearPercent"
+                      label="Active"
+                      unit="%"
+                      digits={1}
+                      scale={100}
+                      onEdit={onEdit}
+                    />
+                  </div>
+                  <FieldDescription>
+                    Each value stays within what the game can roll for this type: the game stores
+                    the roll and works the value out from it when it loads the save. Not yet
+                    verified in game.
+                  </FieldDescription>
+                </FieldGroup>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  This geyser type isn&apos;t known to Duplicity, so only its name can be changed.
+                </p>
+              )}
             </div>
           </>
         )}
       </SheetContent>
     </Sheet>
+  )
+}
+
+const VIEW_VALUE: Record<GeyserField, (g: GeyserView) => number> = {
+  scaledRate: (g) => g.massPerCycle,
+  scaledIterationLength: (g) => g.iterationSeconds,
+  scaledIterationPercent: (g) => g.iterationPercent,
+  scaledYearLength: (g) => g.yearSeconds,
+  scaledYearPercent: (g) => g.yearPercent,
+}
+
+function GeyserInput({
+  geyser,
+  field,
+  label,
+  unit,
+  digits = 0,
+  scale = 1,
+  description,
+  onEdit,
+}: {
+  geyser: GeyserView
+  field: GeyserField
+  label: string
+  unit: string
+  digits?: number
+  /** Stored value × scale = shown value. */
+  scale?: number
+  description?: string
+  onEdit: (edit: Edit) => void
+}) {
+  const range = geyser.ranges![field]
+  const fixed = range.max <= range.min
+  const [min, max] = [range.min * scale, range.max * scale]
+  return (
+    <Field>
+      <FieldLabel>{label}</FieldLabel>
+      <NumberField
+        label={label}
+        value={VIEW_VALUE[field](geyser) * scale}
+        digits={digits}
+        min={min}
+        max={max}
+        disabled={fixed}
+        unit={unit}
+        className="w-full"
+        onCommit={(value) =>
+          onEdit({ type: 'setGeyserValue', id: geyser.id, field, value: value / scale })
+        }
+      />
+      <FieldDescription>
+        {fixed ? 'Fixed for this type.' : `${fmt(min, digits)} to ${fmt(max, digits)} ${unit}.`}
+        {description && ` ${description}`}
+      </FieldDescription>
+    </Field>
   )
 }
 

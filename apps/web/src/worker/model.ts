@@ -11,11 +11,16 @@ import {
   findElementByHash,
   findEffect,
   findGeyser,
+  findGeyserTypeByHash,
   findPersonality,
   findTrait,
   humanize,
+  resample,
   skillGroups,
   traits as traitCatalog,
+  unresample,
+  type GeyserTypeEntry,
+  type Range,
 } from '@oni-duplicity/game-data'
 import {
   MAX_VERIFIED_MINOR,
@@ -212,11 +217,19 @@ export interface GeyserView {
   /** Seconds per activity cycle, and the share of it spent active. */
   yearSeconds: number
   yearPercent: number
+  /** The type's natural range per field; missing for types the editor doesn't know. */
+  ranges?: Record<GeyserField, Range>
+  /**
+   * False when the saved values aren't what the rolls give (changed by a mod or another
+   * editor). The game recomputes them from the rolls when it loads the save.
+   */
+  matchesRolls: boolean
 }
 
 /**
- * The game rolls these once when a geyser is created and saves the results; it does not
- * recompute them from the rolls on load, so editing them is what changes the geyser.
+ * The game saves both the rolls and the values they give (`scaled*`), but recomputes the values
+ * from the rolls when it loads a save. An edit therefore sets the roll and writes the matching
+ * value, which keeps the save consistent whichever of the two the game reads.
  */
 export type GeyserField =
   | 'scaledRate'
@@ -224,6 +237,32 @@ export type GeyserField =
   | 'scaledIterationPercent'
   | 'scaledYearLength'
   | 'scaledYearPercent'
+
+const GEYSER_FIELDS: Record<
+  GeyserField,
+  { roll: string; range: keyof Omit<GeyserTypeEntry, 'id'> }
+> = {
+  scaledRate: { roll: 'rateRoll', range: 'rate' },
+  scaledIterationLength: { roll: 'iterationLengthRoll', range: 'iterationLength' },
+  scaledIterationPercent: { roll: 'iterationPercentRoll', range: 'iterationPercent' },
+  scaledYearLength: { roll: 'yearLengthRoll', range: 'yearLength' },
+  scaledYearPercent: { roll: 'yearPercentRoll', range: 'yearPercent' },
+}
+
+type GeyserConfig = Record<string, number> & { typeId?: { hash: number } }
+
+function geyserType(config: GeyserConfig): GeyserTypeEntry | undefined {
+  const hash = config.typeId?.hash
+  return hash === undefined ? undefined : findGeyserTypeByHash(hash)
+}
+
+/** The game computes in single precision; allow for that when comparing. */
+function rollsMatch(config: GeyserConfig, type: GeyserTypeEntry): boolean {
+  return Object.entries(GEYSER_FIELDS).every(([field, { roll, range }]) => {
+    const expected = resample(config[roll] ?? 0, type[range])
+    return Math.abs((config[field] ?? 0) - expected) <= Math.abs(expected) * 1e-5
+  })
+}
 
 /** A portable copy of a duplicant's editable state (copy/paste and JSON export). */
 export interface DuplicantProfile {
@@ -532,9 +571,10 @@ export function catalogs(): Catalogs {
 
 export function listGeysers(save: SaveGame): GeyserView[] {
   return objectsWith(save, 'Geyser').map(({ id, prefab, obj }) => {
-    const config = data(obj, 'Geyser').configuration as Record<string, number>
+    const config = data(obj, 'Geyser').configuration as GeyserConfig
     const name = behavior(obj, 'UserNameable')?.templateData?.savedName
     const type = findGeyser(prefab)
+    const ranges = geyserType(config)
     return {
       id,
       prefab,
@@ -548,6 +588,14 @@ export function listGeysers(save: SaveGame): GeyserView[] {
       iterationPercent: config.scaledIterationPercent ?? 0,
       yearSeconds: config.scaledYearLength ?? 0,
       yearPercent: config.scaledYearPercent ?? 0,
+      ...(ranges
+        ? {
+            ranges: Object.fromEntries(
+              Object.entries(GEYSER_FIELDS).map(([field, { range }]) => [field, ranges[range]]),
+            ) as Record<GeyserField, Range>,
+          }
+        : {}),
+      matchesRolls: ranges ? rollsMatch(config, ranges) : true,
     }
   })
 }
@@ -619,19 +667,19 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
     }
     case 'setGeyserValue': {
       const config = data(objectById(save, edit.id), 'Geyser').configuration as
-        | Record<string, number>
+        | GeyserConfig
         | undefined
-      if (!config || !(edit.field in config)) throw new Error('This geyser has no such setting')
-      const percent = edit.field.endsWith('Percent')
-      const valid = percent
-        ? edit.value > 0 && edit.value <= 1
-        : edit.field === 'scaledRate'
-          ? edit.value >= 0
-          : edit.value >= 1
-      if (!Number.isFinite(edit.value) || !valid) {
-        throw new Error(percent ? 'Use a share between 1% and 100%' : 'Use a positive value')
+      const field = GEYSER_FIELDS[edit.field]
+      if (!config || !field || !(edit.field in config) || !(field.roll in config)) {
+        throw new Error('This geyser has no such setting')
       }
-      config[edit.field] = edit.value
+      const type = geyserType(config)
+      if (!type) throw new Error('Unknown geyser type; only its name can be changed')
+      if (!Number.isFinite(edit.value)) throw new Error('Use a number')
+      // Values are stored as single-precision floats.
+      const roll = Math.fround(unresample(edit.value, type[field.range]))
+      config[field.roll] = roll
+      config[edit.field] = Math.fround(resample(roll, type[field.range]))
       return
     }
     case 'setItemMass':

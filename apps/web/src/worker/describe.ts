@@ -12,7 +12,7 @@ import {
   humanize,
 } from '@oni-duplicity/game-data'
 import type { SaveGame } from '@oni-duplicity/save-parser'
-import { objectById, type Edit, type GeyserField } from './model.ts'
+import { listGeysers, objectById, type Edit, type GeyserField } from './model.ts'
 
 const GEYSER_FIELDS: Record<GeyserField, string> = {
   scaledRate: 'output per active cycle',
@@ -95,8 +95,12 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       return edit.action === 'setAttributes'
         ? `Everyone: every attribute to ${edit.level}`
         : `Everyone: ${BULK[edit.action]}`
-    case 'setGeyserValue':
-      return `${who}${GEYSER_FIELDS[edit.field]} to ${round(edit.value)}`
+    case 'setGeyserValue': {
+      // The edit clamps to the type's range; name the value that will be stored.
+      const range = listGeysers(save).find((g) => g.id === edit.id)?.ranges?.[edit.field]
+      const value = range ? Math.min(range.max, Math.max(range.min, edit.value)) : edit.value
+      return `${who}${GEYSER_FIELDS[edit.field]} to ${round(value)}`
+    }
     case 'setItemMass':
       return `Set an item's mass to ${round(edit.mass)} kg`
     case 'setItemTemperature':
