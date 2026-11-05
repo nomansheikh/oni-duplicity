@@ -40,12 +40,15 @@ import {
 import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
-import { findTraitInfo, type TraitCategory } from '@oni-duplicity/game-data'
+import { effectGroupLabels, findTraitInfo, type TraitCategory } from '@oni-duplicity/game-data'
+import { effectDetail, groupEffects } from '@/lib/effects'
 import { fmt, humanize, portraitParts } from '@/lib/format'
 import { heldConflicts } from '@/lib/traits'
 import { meterTone, type MeterKind } from '@/lib/meter'
 import type { AmountView, DuplicantEdit, DuplicantView, Named } from '@/worker/model'
-import { DuplicantAvatar, Hint, NumberField, SearchPicker } from '../common'
+import { DuplicantAvatar, Hint, NumberField } from '../common'
+import { EffectModifiers } from './EffectModifiers'
+import { EffectPicker } from './EffectPicker'
 import { TraitCategoryBadge, TraitPicker } from './TraitPicker'
 
 type EditFn = (change: DuplicantEdit) => void
@@ -542,10 +545,8 @@ export function EffectsTab({
       title="Effects"
       description="Temporary buffs and debuffs, with the cycles they have left."
       action={
-        <SearchPicker
-          label="Add effect"
-          heading="Effects"
-          items={catalog}
+        <EffectPicker
+          catalog={catalog}
           exclude={dupe.effects.map((e) => e.id)}
           onSelect={(effectId) => edit({ type: 'addEffect', effectId, cycles: 1 })}
         />
@@ -557,37 +558,47 @@ export function EffectsTab({
           description="Add a buff or debuff with the button above."
         />
       ) : (
-        <ItemGroup className="gap-2">
-          {dupe.effects.map((effect) => (
-            <Item key={effect.id} variant="outline">
-              <ItemContent>
-                <ItemTitle>{effect.name}</ItemTitle>
-                {effect.desc && <ItemDescription>{effect.desc}</ItemDescription>}
-              </ItemContent>
-              <ItemActions>
-                <NumberField
-                  label={`${effect.name} cycles left`}
-                  value={effect.cyclesRemaining}
-                  digits={2}
-                  min={0}
-                  unit="cycles"
-                  className="w-40"
-                  onCommit={(cycles) =>
-                    edit({ type: 'setEffectCycles', effectId: effect.id, cycles })
-                  }
-                />
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  aria-label={`Remove ${effect.name}`}
-                  onClick={() => edit({ type: 'removeEffect', effectId: effect.id })}
-                >
-                  <X />
-                </Button>
-              </ItemActions>
-            </Item>
+        <div className="flex flex-col gap-5">
+          {groupEffects(dupe.effects).map(({ group, items }) => (
+            <section key={group} className="flex flex-col gap-2">
+              <h3 className="type-label text-muted-foreground">
+                {effectGroupLabels[group]} ({items.length})
+              </h3>
+              <ItemGroup className="gap-2">
+                {items.map((effect) => (
+                  <Item key={effect.id} variant="outline">
+                    <ItemContent>
+                      <ItemTitle>{effect.name}</ItemTitle>
+                      {effect.desc && <ItemDescription>{effect.desc}</ItemDescription>}
+                      <EffectModifiers modifiers={effectDetail(effect.id).modifiers} />
+                    </ItemContent>
+                    <ItemActions>
+                      <NumberField
+                        label={`${effect.name} cycles left`}
+                        value={effect.cyclesRemaining}
+                        digits={2}
+                        min={0}
+                        unit="cycles"
+                        className="w-40"
+                        onCommit={(cycles) =>
+                          edit({ type: 'setEffectCycles', effectId: effect.id, cycles })
+                        }
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        aria-label={`Remove ${effect.name}`}
+                        onClick={() => edit({ type: 'removeEffect', effectId: effect.id })}
+                      >
+                        <X />
+                      </Button>
+                    </ItemActions>
+                  </Item>
+                ))}
+              </ItemGroup>
+            </section>
           ))}
-        </ItemGroup>
+        </div>
       )}
     </Panel>
   )
