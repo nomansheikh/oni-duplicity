@@ -1,6 +1,26 @@
-import { ArrowDownNarrowWide, ArrowUpNarrowWide, Search, SearchX } from 'lucide-react'
+import {
+  ArrowDownNarrowWide,
+  ArrowUpNarrowWide,
+  Copy,
+  EllipsisVertical,
+  Search,
+  SearchX,
+} from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import {
   Item,
@@ -95,6 +115,24 @@ export function DuplicantsPage({
                 ? `${duplicants.length} in this colony`
                 : `${visible.length} of ${duplicants.length} in this colony`}
             </CardDescription>
+            <CardAction>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" aria-label="Roster actions">
+                    <EllipsisVertical />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    disabled={!selected || selected.isBionic}
+                    onSelect={() => selected && onEdit({ type: 'cloneDuplicant', id: selected.id })}
+                  >
+                    <Copy /> Clone {selected?.name ?? 'duplicant'}
+                    {selected?.isBionic && ' (bionic)'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </CardAction>
           </CardHeader>
           <CardContent className="space-y-3">
             <InputGroup>

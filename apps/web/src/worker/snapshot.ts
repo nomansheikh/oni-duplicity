@@ -36,7 +36,10 @@ export function snapshot(save: SaveGame, edit: Edit): () => void {
   )
   // Cloning or deleting changes group lists and the unique ID counter, not just behaviors.
   const structural =
-    edit.type === 'deleteObject' || edit.type === 'deleteDebris' || edit.type === 'cloneObject'
+    edit.type === 'deleteObject' ||
+    edit.type === 'deleteDebris' ||
+    edit.type === 'cloneObject' ||
+    edit.type === 'cloneDuplicant'
   const groups = structural ? save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] })) : []
   const settings = structural ? cloneValue(save.settings) : null
   // Changing a geyser's type moves it between groups, and may add or drop a group.

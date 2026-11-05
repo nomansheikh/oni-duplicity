@@ -2,6 +2,7 @@ import {
   Award,
   BatteryCharging,
   Brain,
+  Copy,
   Droplet,
   Heart,
   Moon,
@@ -9,6 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardAction,
@@ -101,6 +103,19 @@ export function DuplicantEditor({
             {dupe.hat && (
               <Badge variant="outline">{humanize(dupe.hat.replace(/^hat_role_/, ''))} hat</Badge>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={dupe.isBionic}
+              title={
+                dupe.isBionic
+                  ? 'Bionic duplicants cannot be cloned: their boosters and battery banks refer back to them'
+                  : undefined
+              }
+              onClick={() => edit({ type: 'cloneDuplicant' })}
+            >
+              <Copy /> Clone
+            </Button>
             <ProfileActions
               dupe={dupe}
               clipboard={clipboard}
