@@ -299,10 +299,11 @@ const AMOUNT_FORMATS: Record<string, AmountFormat> = {
   Temperature: { max: 100, unit: '°C', offset: -273.15, digits: 1 },
   RadiationBalance: { max: 1000, unit: 'rads' },
   Decor: { max: 200, unit: 'decor' },
+  // The bionic maximums come from the worker (`AmountView.max`); these are the game's base values.
   BionicOil: { max: 200, unit: 'kg', digits: 1 },
-  BionicGunk: { max: 200, unit: 'kg', digits: 1 },
-  BionicOxygenTank: { max: 200, unit: 'kg', digits: 1 },
-  BionicInternalBattery: { max: 1000, unit: 'kJ', scale: 1 / 1000, digits: 1 },
+  BionicGunk: { max: 80, unit: 'kg', digits: 1 },
+  BionicOxygenTank: { max: 240, unit: 'kg', digits: 1 },
+  BionicInternalBattery: { max: 480, unit: 'kJ', scale: 1 / 1000, digits: 1 },
   Age: { max: 100, unit: 'cycles', digits: 1 },
   Wildness: { max: 100, unit: '%' },
   Fertility: { max: 100, unit: '%' },
@@ -328,6 +329,7 @@ function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
   const scale = format.scale ?? 1
   const offset = format.offset ?? 0
   const shown = amount.value * scale + offset
+  const cap = amount.max === undefined ? format.max : amount.max * scale + offset
   const commit = (next: number) =>
     edit({ type: 'setAmount', amountId: amount.id, value: (next - offset) / scale })
   return (
@@ -339,7 +341,7 @@ function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
         <Slider
           value={[shown]}
           min={Math.min(0, shown)}
-          max={Math.max(format.max, shown)}
+          max={Math.max(cap, shown)}
           step={format.digits ? 0.1 : 1}
           onValueCommit={([v]) => commit(v!)}
         />
@@ -348,6 +350,8 @@ function AmountField({ amount, edit }: { amount: AmountView; edit: EditFn }) {
           value={shown}
           digits={format.digits ?? 0}
           unit={format.unit}
+          min={amount.max === undefined ? undefined : 0}
+          max={amount.max === undefined ? undefined : cap}
           className="w-36"
           onCommit={commit}
         />
