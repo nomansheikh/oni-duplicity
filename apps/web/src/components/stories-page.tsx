@@ -1,3 +1,4 @@
+import { BookOpen } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,
@@ -7,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
+import { EmptyState } from './empty-state'
 import { fmt } from '@/lib/format'
 import { PageHeader } from './page-header'
 import type { StoryQuestView, StoryState, StoryView } from '@/worker/model'
@@ -116,14 +117,11 @@ export function StoriesPage({ stories }: { stories: StoryView[] }) {
           status="read-only"
           description="Where each story trait stands in this save."
         />
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>No story traits</EmptyTitle>
-            <EmptyDescription>
-              This save has no story traits, or was made before they existed.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <EmptyState
+          icon={BookOpen}
+          title="No story traits"
+          description="This save has no story traits, or was made before they existed. No tales to tell."
+        />
       </div>
     )
   }

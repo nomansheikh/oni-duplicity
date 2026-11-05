@@ -90,9 +90,9 @@ test.describe('traits', () => {
   test('does not offer bionic traits to a standard duplicant', async ({ page }) => {
     await pick(page, 'Cook')
     await openTraitPicker(page, 'BionicBug')
-    await expect(page.getByText('Nothing found.')).toBeVisible()
+    await expect(page.getByText('No such trait')).toBeVisible()
     await page.locator('[cmdk-input]').fill('StartWithBooster')
-    await expect(page.getByText('Nothing found.')).toBeVisible()
+    await expect(page.getByText('No such trait')).toBeVisible()
   })
 
   test('searches the duplicant list by name, trait and interest', async ({ page }) => {
@@ -112,7 +112,7 @@ test.describe('traits', () => {
     await search.fill('hauling')
     await expect(names).toHaveText(['Supplier'])
     await search.fill('no such thing')
-    await expect(page.getByText('No duplicants match.')).toBeVisible()
+    await expect(page.getByText('Nobody matches that search. Try another name.')).toBeVisible()
   })
 
   test('sorts the duplicant list', async ({ page }) => {
@@ -180,7 +180,7 @@ test.describe('traits on a bionic duplicant', () => {
     )
 
     await openTraitPicker(page, 'Anemic')
-    await expect(page.getByText('Nothing found.')).toBeVisible()
+    await expect(page.getByText('No such trait')).toBeVisible()
 
     await page.locator('[cmdk-input]').fill('BionicBug1')
     const option = page.getByRole('option').first()

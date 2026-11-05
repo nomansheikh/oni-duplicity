@@ -28,6 +28,8 @@ import {
 } from '@/lib/tools/skill-planner'
 import { skillConstants, skillGroups } from '@/lib/tools/skill-tree-data'
 import type { DuplicantView } from '@/worker/model'
+import { EmptyState } from '@/components/empty-state'
+import { Users } from 'lucide-react'
 
 /** Read only: a plan is kept in this browser and never written to the save. */
 export function SkillPlannerPage({ duplicants }: { duplicants: DuplicantView[] }) {
@@ -60,7 +62,11 @@ export function SkillPlannerPage({ duplicants }: { duplicants: DuplicantView[] }
       {dupe ? (
         <Planner key={dupe.id} dupe={dupe} />
       ) : (
-        <p className="type-small text-muted-foreground">This save has no duplicants.</p>
+        <EmptyState
+          icon={Users}
+          title="No duplicants"
+          description="Nobody to plan for. The colony is empty."
+        />
       )}
     </div>
   )

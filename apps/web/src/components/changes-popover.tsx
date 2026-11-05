@@ -3,6 +3,7 @@ import { History } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { EmptyState } from './empty-state'
 import { saveClient } from '@/lib/save-client'
 
 /** The unsaved edits, newest first, so they can be reviewed before downloading. */
@@ -35,6 +36,15 @@ export function ChangesPopover({ count, revision }: { count: number; revision: n
           <p className="text-sm text-muted-foreground">Newest first. Undo removes the top one.</p>
         </div>
         <ScrollArea className="max-h-80">
+          {items.length === 0 && (
+            <EmptyState
+              size="compact"
+              className="border-0"
+              icon={History}
+              title="No changes"
+              description="Nothing edited yet. The save is exactly as you found it."
+            />
+          )}
           <ol className="flex flex-col py-1">
             {items.map((label, i) => (
               <li key={items.length - i} className="flex gap-3 px-4 py-1.5 text-sm">

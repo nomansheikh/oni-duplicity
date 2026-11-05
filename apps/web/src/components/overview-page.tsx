@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { Activity, Droplets, Timer, TriangleAlert, Users } from 'lucide-react'
+import { Activity, Droplets, ShieldCheck, Timer, TriangleAlert, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -13,6 +13,7 @@ import type { DuplicantView, Edit, GeyserView, Summary } from '@/worker/model'
 import { CommitInput } from './common'
 import { DlcBadges } from './dlc-badge'
 import { PageHeader } from './page-header'
+import { EmptyState } from './empty-state'
 
 function StatCard({
   label,
@@ -167,7 +168,12 @@ export function OverviewPage({
         </CardHeader>
         <CardContent>
           {shown.length === 0 ? (
-            <p className="type-small text-muted-foreground">Nothing needs attention.</p>
+            <EmptyState
+              size="compact"
+              icon={ShieldCheck}
+              title="All clear"
+              description="Nothing needs attention. Everyone is fed, rested and mostly sane."
+            />
           ) : (
             <ItemGroup className="gap-2">
               {shown.map((item) => (

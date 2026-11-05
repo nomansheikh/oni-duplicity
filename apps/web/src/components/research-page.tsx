@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FlaskConical, Search } from 'lucide-react'
+import { FlaskConical, PartyPopper, Search, SearchX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { Edit, TechView } from '@/worker/model'
+import { EmptyState } from './empty-state'
 import { PageHeader } from './page-header'
 
 export function ResearchPage({
@@ -80,6 +81,31 @@ export function ResearchPage({
               </InputGroupAddon>
             </InputGroup>
           </div>
+          {visible.length === 0 && (
+            <EmptyState
+              icon={query ? SearchX : PartyPopper}
+              title={query ? 'No such tech' : filter === 'todo' ? 'All researched' : 'Nothing here'}
+              description={
+                query
+                  ? `Nothing in the research tree matches "${query}". The scientists checked twice.`
+                  : filter === 'todo'
+                    ? "Everything's researched. The scientists are out of homework."
+                    : 'No tech has been researched yet. The lab is awfully quiet.'
+              }
+              action={
+                query || filter !== 'all'
+                  ? {
+                      label: query ? 'Clear search' : 'Show all',
+                      onClick: () => {
+                        setQuery('')
+                        if (!query) setFilter('all')
+                      },
+                    }
+                  : undefined
+              }
+              data-testid="research-empty"
+            />
+          )}
           <div className="grid gap-2 @2xl/main:grid-cols-2 @5xl/main:grid-cols-3">
             {visible.map((tech) => (
               <FieldLabel key={tech.id} htmlFor={`tech-${tech.id}`}>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Copy, Search, SlidersHorizontal, Trash2 } from 'lucide-react'
+import { Copy, Rabbit, Search, SearchX, SlidersHorizontal, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -34,6 +34,7 @@ import { AmountGroup } from './duplicants/tabs'
 import { AsteroidFilter } from './asteroid-filter'
 import { asteroidName } from '@/lib/asteroid'
 import { PageHeader } from './page-header'
+import { EmptyState } from './empty-state'
 
 const amount = (c: CritterView, id: string) => c.amounts.find((a) => a.id === id)?.value
 
@@ -242,6 +243,36 @@ export function CrittersPage({
               </TableRow>
             </TableHeader>
             <TableBody>
+              {visible.length === 0 && (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={10} className="p-0">
+                    <EmptyState
+                      icon={critters.length === 0 ? Rabbit : SearchX}
+                      title={critters.length === 0 ? 'No critters' : 'No critters here'}
+                      description={
+                        critters.length === 0
+                          ? 'Not a single critter in this save. Awfully quiet in the ranch.'
+                          : asteroid !== 'all' && !query && family === 'all'
+                            ? 'No critters on this asteroid. Maybe they are all hiding.'
+                            : 'No critter matches those filters. Try a wider net.'
+                      }
+                      action={
+                        critters.length > 0
+                          ? {
+                              label: 'Clear filters',
+                              onClick: () => {
+                                setQuery('')
+                                setFamily('all')
+                                setAsteroid('all')
+                              },
+                            }
+                          : undefined
+                      }
+                      data-testid="critters-empty"
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
               {visible.map((c) => {
                 const wild = (amount(c, 'Wildness') ?? 0) > 0
                 return (
