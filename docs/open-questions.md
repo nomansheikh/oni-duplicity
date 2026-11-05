@@ -29,7 +29,8 @@ What the read-only view relies on, from the decompiled `BionicUpgradesMonitor`, 
 - An installed booster is a stored object with a `BionicUpgradeComponent` behavior whose `assignee_slotInstanceID` is `BionicUpgrade`, `BionicUpgrade2` … `BionicUpgrade8` (slot 1 has no number).
 - An electrobank is a stored object with an `Electrobank` behavior holding `charge` in joules. `Electrobank.capacity` is 120000. An `EmptyElectrobank` has no `Electrobank` behavior, so it has no charge to read.
 - A remote worker's `RemoteWorkerCapacitor.charge` is in joules, capacity 60. The dock's `RemoteWorkerDock.worker` is a reference by `KPrefabID.InstanceID`.
-- Which slots are unlocked comes from the `BionicBoosterSlots` attribute, not from the slots, so the view cannot tell a locked empty slot from an unlocked one.
+- Unlocked slots are not saved. The view computes them as the `BionicBoosterSlots` base (2) plus the `ExtraBionicBooster*` perks of mastered skills (BionicsA1 +1, A2 +1, A3 +2, B2 +1, C2 +1; `ExtraBionicBooster5` is granted by no skill), clamped to 0..8. Bank places are the `BionicBatteryCountCapacity` base (4) plus 2 with BionicsC3. Traits or effects that change these attributes would not be seen. On `mithro-06` every installed booster sits in a computed-unlocked slot.
+- The internal battery maximum is 120000 per bank place (the base 480000 plus 120000 per place above 4, from `BionicBatteryMonitor`).
 - Booster display names are localized strings the extractor does not read, so the view shows the id.
 
 Installing a booster would need, none of it done or verified in game:

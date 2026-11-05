@@ -53,7 +53,7 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
     <div className="flex flex-col gap-4 md:gap-6">
       <Panel
         title="Boosters"
-        description="Installed booster components, by slot. Read only. The save does not record which slots are unlocked, so an empty slot may be locked."
+        description={`Installed boosters by slot. ${view.unlockedSlots} of ${view.slotCount} slots are unlocked by learned skills. Read only.`}
       >
         <Table>
           <TableHeader>
@@ -65,6 +65,7 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
           <TableBody>
             {slots.map((slot) => {
               const booster = view.boosters.find((b) => b.slot === slot)
+              const locked = slot > view.unlockedSlots
               return (
                 <TableRow key={slot}>
                   <TableCell className="font-mono tabular-nums">{slot}</TableCell>
@@ -77,7 +78,12 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
                         </Badge>
                       </span>
                     ) : (
-                      <span className="text-muted-foreground">Empty</span>
+                      <span className="text-muted-foreground">{locked ? 'Locked' : 'Empty'}</span>
+                    )}
+                    {booster && locked && (
+                      <Badge variant="destructive" className="ml-2">
+                        Locked slot
+                      </Badge>
                     )}
                   </TableCell>
                 </TableRow>
@@ -89,33 +95,61 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
 
       <Panel
         title="Electrobanks"
-        description={`Banks in this duplicant's battery storage. A full bank holds ${fmt(BANK_CAPACITY_J / 1000, 0)} kJ.`}
+        description={`Banks in this duplicant's battery storage: ${view.electrobanks?.length ?? '?'} of ${view.batteryCapacity} places used. A full bank holds ${fmt(BANK_CAPACITY_J / 1000, 0)} kJ.`}
       >
-        {view.electrobanks.length === 0 ? (
-          <Nothing title="No electrobanks" description="This duplicant carries no battery." />
+        {view.internalBattery && (
+          <div className="mb-4 space-y-1.5">
+            <div className="flex items-baseline justify-between text-xs">
+              <span className="text-muted-foreground">Internal battery</span>
+              <span className="font-mono tabular-nums">
+                {fmt(view.internalBattery.charge / 1000, 1)} /{' '}
+                {fmt(view.internalBattery.max / 1000, 0)} kJ
+              </span>
+            </div>
+            <Progress
+              value={Math.min(100, (view.internalBattery.charge / view.internalBattery.max) * 100)}
+              className="h-1.5"
+            />
+          </div>
+        )}
+        {view.electrobanks === null ? (
+          <Nothing
+            title="Battery storage not recognised"
+            description="The storage expected to hold the banks contains something else, so nothing is shown."
+          />
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-20">Place</TableHead>
                 <TableHead>Bank</TableHead>
                 <TableHead>State</TableHead>
                 <TableHead>Charge</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {view.electrobanks.map((bank, i) => (
-                <TableRow key={i}>
-                  <TableCell className="font-mono text-xs">{bank.prefab}</TableCell>
-                  <TableCell>{bankState(bank.prefab)}</TableCell>
-                  <TableCell>
-                    {bank.charge === null ? (
-                      <span className="text-muted-foreground">None</span>
-                    ) : (
-                      <Charge joules={bank.charge} capacity={BANK_CAPACITY_J} />
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {Array.from(
+                { length: Math.max(view.batteryCapacity, view.electrobanks.length) },
+                (_, i) => {
+                  const bank = view.electrobanks![i]
+                  return (
+                    <TableRow key={i}>
+                      <TableCell className="font-mono tabular-nums">{i + 1}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {bank?.prefab ?? <span className="text-muted-foreground">Empty place</span>}
+                      </TableCell>
+                      <TableCell>{bank ? bankState(bank.prefab) : ''}</TableCell>
+                      <TableCell>
+                        {!bank || bank.charge === null ? (
+                          <span className="text-muted-foreground">{bank ? 'None' : ''}</span>
+                        ) : (
+                          <Charge joules={bank.charge} capacity={BANK_CAPACITY_J} />
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  )
+                },
+              )}
             </TableBody>
           </Table>
         )}

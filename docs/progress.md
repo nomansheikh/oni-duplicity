@@ -87,7 +87,7 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Bionic duplicants get a "Boosters & power" tab (read only): the installed boosters by slot, each electrobank with its charge in joules, and the colony's remote workers with their dock and charge.
 - The worker reads all of it in `worker/bionic.ts`, behind a new `bionics()` call. Nothing in `model.ts` changed.
 - Tests cover the slot parsing, an empty result on a save without bionics, and the `mithro-06` fixture (full tier only; on full-tier CI a missing fixture fails instead of skipping).
-- Risks: the battery storage is taken to be the second `Storage` on the duplicant, an assumption from the prefab code. The unlocked slot count is not read, and booster names show as ids. Writing is not attempted; what it would need is in [open-questions.md](open-questions.md).
+- Unlocked slots (base 2 plus skill perks) and bank places (4, or 6 with BionicsC3) are computed from the mastered skills, and the internal battery is shown against its maximum. Risks: the battery storage is taken to be the second `Storage` on the duplicant (shown as unrecognised if it holds anything but electrobanks); traits that change the slot or bank attributes are not seen; booster names show as ids. Writing is not attempted; what it would need is in [open-questions.md](open-questions.md).
 
 ## Parser benchmark and regression gate — 2026-11-05
 

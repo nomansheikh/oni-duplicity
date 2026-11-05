@@ -26,10 +26,19 @@ export interface BionicView {
   id: string
   /** Installed boosters, ordered by slot. Boosters that only wait on the floor are not listed. */
   boosters: BoosterView[]
-  /** Slots the game could ever hold (always 8); how many are unlocked is not saved directly. */
+  /** Slots the game could ever hold (always 8). */
   slotCount: number
-  /** Electrobanks in the duplicant's battery storage. */
-  electrobanks: ElectrobankView[]
+  /** Unlocked slots: the base value plus the perks of the mastered skills, clamped to 0..8. */
+  unlockedSlots: number
+  /**
+   * Electrobanks in the duplicant's battery storage, or null when the storage could not be
+   * identified (it held something that is not an electrobank).
+   */
+  electrobanks: ElectrobankView[] | null
+  /** How many banks the battery storage holds: the base value plus the perks, 4 or 6. */
+  batteryCapacity: number
+  /** The `BionicInternalBattery` amount in joules and its maximum, or null when not saved. */
+  internalBattery: { charge: number; max: number } | null
 }
 
 export interface RemoteWorkerView {
@@ -59,6 +68,22 @@ export interface BionicOverview {
 /** A game object saved inside a storage; it carries its prefab name. */
 type StoredItem = GameObject & { name: string }
 
+/** Base of the `BionicBoosterSlots` attribute (decompile: `Database/Attributes.cs`). */
+export const BASE_BOOSTER_SLOTS = 2
+/** Base of the `BionicBatteryCountCapacity` attribute. */
+export const BASE_BATTERY_CAPACITY = 4
+
+/** Slots each skill adds through its `ExtraBionicBooster*` perk (`Database/Skills.cs`). */
+const SLOT_PERKS: Record<string, number> = {
+  BionicsA1: 1,
+  BionicsA2: 1,
+  BionicsA3: 2,
+  BionicsB2: 1,
+  BionicsC2: 1,
+}
+/** Banks added by the `ExtraBionicBatteries` perk of `BionicsC3`. */
+const EXTRA_BATTERIES = 2
+
 const BOOSTER_SLOT_PREFIX = 'BionicUpgrade'
 
 function find(obj: GameObject, name: string): Behavior | undefined {
@@ -86,32 +111,76 @@ function instanceId(obj: GameObject): number | undefined {
   return typeof id === 'number' ? id : undefined
 }
 
-function bionicOf(id: string, obj: GameObject): BionicView {
-  const boosters: BoosterView[] = []
-  const electrobanks: ElectrobankView[] = []
-  const storages = obj.behaviors.filter((b) => b.name === 'Storage')
-  // The prefab adds, in order: the default storage, then the battery, upgrade and oxygen tank
-  // storages. The storage ids are not saved, so the battery storage is the second one and the
-  // boosters are found by their component, wherever they are stored.
-  storages.forEach((storage, index) => {
-    for (const item of storedItems(storage)) {
-      const component = find(item, 'BionicUpgradeComponent')
-      if (component) {
-        const slot = boosterSlotNumber(component.templateData?.assignee_slotInstanceID)
-        const prefab = item.name
-        if (slot !== null && prefab) boosters.push({ slot, prefab })
-      } else if (index === 1) {
-        const bank = find(item, 'Electrobank')
-        const charge = bank?.templateData?.charge
-        electrobanks.push({
-          prefab: item.name,
-          charge: typeof charge === 'number' ? charge : null,
-        })
+function masteredSkills(obj: GameObject): Set<string> {
+  const entries = find(obj, 'MinionResume')?.templateData?.MasteryBySkillID
+  const mastered = new Set<string>()
+  if (Array.isArray(entries)) {
+    for (const entry of entries) {
+      if (Array.isArray(entry) && typeof entry[0] === 'string' && entry[1] === true) {
+        mastered.add(entry[0])
       }
     }
-  })
+  }
+  return mastered
+}
+
+export function unlockedSlotCount(mastered: Set<string>): number {
+  let total = BASE_BOOSTER_SLOTS
+  for (const [skill, slots] of Object.entries(SLOT_PERKS)) if (mastered.has(skill)) total += slots
+  return Math.min(BOOSTER_SLOT_COUNT, Math.max(0, total))
+}
+
+export function batteryCapacity(mastered: Set<string>): number {
+  return BASE_BATTERY_CAPACITY + (mastered.has('BionicsC3') ? EXTRA_BATTERIES : 0)
+}
+
+function internalBatteryOf(obj: GameObject): BionicView['internalBattery'] {
+  const modifiers = (find(obj, 'MinionModifiers') ?? find(obj, 'Klei.AI.Modifiers'))?.extraData as
+    | { amounts?: { name: string; value: { value?: unknown } }[] }
+    | undefined
+  const amount = modifiers?.amounts?.find((a) => a.name === 'BionicInternalBattery')
+  const charge = Number(amount?.value?.value)
+  return amount && Number.isFinite(charge) ? { charge, max: 0 } : null
+}
+
+function bionicOf(id: string, obj: GameObject): BionicView {
+  const boosters: BoosterView[] = []
+  const storages = obj.behaviors.filter((b) => b.name === 'Storage')
+  // The prefab adds, in order: the default storage, then the battery, upgrade and oxygen tank
+  // storages. The storage ids are not saved, so the battery storage is taken to be the second
+  // one, and only when everything in it is an electrobank. Boosters are found by their
+  // component, wherever they are stored.
+  for (const storage of storages) {
+    for (const item of storedItems(storage)) {
+      const component = find(item, 'BionicUpgradeComponent')
+      if (!component) continue
+      const slot = boosterSlotNumber(component.templateData?.assignee_slotInstanceID)
+      if (slot !== null && item.name) boosters.push({ slot, prefab: item.name })
+    }
+  }
   boosters.sort((a, b) => a.slot - b.slot)
-  return { id, boosters, slotCount: BOOSTER_SLOT_COUNT, electrobanks }
+
+  const batteryItems = storedItems(storages[1])
+  const electrobanks = batteryItems.every((item) => /Electrobank/.test(item.name))
+    ? batteryItems.map((item) => {
+        const charge = find(item, 'Electrobank')?.templateData?.charge
+        return { prefab: item.name, charge: typeof charge === 'number' ? charge : null }
+      })
+    : null
+
+  const mastered = masteredSkills(obj)
+  const capacity = batteryCapacity(mastered)
+  const battery = internalBatteryOf(obj)
+  return {
+    id,
+    boosters,
+    slotCount: BOOSTER_SLOT_COUNT,
+    unlockedSlots: unlockedSlotCount(mastered),
+    electrobanks,
+    batteryCapacity: capacity,
+    // `BionicBatteryMonitor` raises the base maximum (4 banks) by one bank's worth per extra bank.
+    internalBattery: battery && { charge: battery.charge, max: ELECTROBANK_CAPACITY_J * capacity },
+  }
 }
 
 function groupObjects(save: SaveGame, prefab: string): { id: string; obj: GameObject }[] {
