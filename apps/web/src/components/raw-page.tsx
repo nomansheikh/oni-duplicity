@@ -446,7 +446,7 @@ function RawRow({
     <div
       className={cn(
         'group relative flex h-full items-center gap-2 pr-2 hover:bg-hover-row',
-        highlighted && 'bg-warn/15 ring-2 ring-warn ring-inset',
+        highlighted && 'bg-warn/15 ring-2 ring-primary ring-warn! ring-inset',
       )}
       style={{ paddingLeft: depth * INDENT + 8 }}
     >

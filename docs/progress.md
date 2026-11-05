@@ -178,4 +178,4 @@ Node 24.21.0, pnpm 12.6.0, TypeScript 7.0.2.
 - Search: results panel with a field-coloured header, a `key` / `path` / `value` chip per hit, and the path split into a dimmed route and a bold final key.
 - Warning banner and hints use the `warn` token and `type-small` / `type-caption`.
 - Screenshots: `docs/screenshots/raw-page/before.jpg`, `after.jpg`.
-- Not checked: the geysers fixture test (`tests/geysers.test.ts`) fails in this worktree and the file is untouched by this change.
+- The highlighted row keeps the `ring-primary` class because the e2e tests select on it; `ring-warn!` overrides its colour.
