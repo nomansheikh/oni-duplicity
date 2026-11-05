@@ -10,8 +10,12 @@ import {
 
 async function rename(page: import('@playwright/test').Page, name: string) {
   const input = page.getByLabel('Colony name')
+  const before = await editCount(page)
   await input.fill(name)
   await input.press('Enter')
+  // The input holds what was typed whether or not the edit landed; the edit count only
+  // moves once the worker has applied it.
+  await expect.poll(() => editCount(page)).toBe(before + 1)
   await expect(input).toHaveValue(name)
 }
 
