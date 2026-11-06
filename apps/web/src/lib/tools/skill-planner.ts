@@ -1,46 +1,16 @@
 /**
- * Pure maths for the skill planner. The tree and the numbers are in `skill-tree-data.ts`, each
- * with the decompiled file it was read from. Nothing here reads or writes a save.
+ * Pure maths for the skill planner. The tree comes from `skill-data.ts` and the numbers from
+ * `skill-math.ts`, both read out of the game. Nothing here reads or writes a save.
  */
-import { skillConstants, skillNodes, type SkillNode } from './skill-tree-data'
-
-const EXPANSION1 = 'EXPANSION1_ID'
-
-/**
- * Skills that exist only without Spaced Out: with it active the game flags them deprecated and
- * they cannot be learned (Database/Skills.cs; see each node's `notes`).
- */
-const BASE_GAME_ONLY = new Set(['Researching3', 'Astronauting1', 'Astronauting2'])
-
-export interface PlannerContext {
-  /** `Minion` or `BionicMinion`. */
-  model: string
-  /** DLC ids active in the save. */
-  dlcIds: string[]
-}
-
-export interface Skill extends SkillNode {
-  /** Prerequisites that apply with this save's DLCs. */
-  requires: string[]
-}
-
-/** The skills a duplicant of this model can learn in this save, with the right prerequisites. */
-export function skillsFor(ctx: PlannerContext): Skill[] {
-  const dlcs = new Set(ctx.dlcIds)
-  const hasE1 = dlcs.has(EXPANSION1)
-  return skillNodes
-    .filter(
-      (s) =>
-        (s.model ?? 'Minion') === ctx.model &&
-        (s.dlcIds ?? []).every((d) => dlcs.has(d)) &&
-        !(hasE1 && BASE_GAME_ONLY.has(s.id)),
-    )
-    .map((s) => ({
-      ...s,
-      requires:
-        hasE1 && s.prerequisitesWithExpansion1 ? s.prerequisitesWithExpansion1 : s.prerequisites,
-    }))
-}
+import type { Skill } from './skill-data'
+import {
+  baselineMorale,
+  expectationForTiers,
+  experienceForPoints,
+  interestMorale,
+  moraleCost,
+  pointsForExperience,
+} from './skill-math'
 
 /**
  * Adds a skill to the plan together with every prerequisite that is neither mastered nor
@@ -131,8 +101,6 @@ export interface PlanSummary {
   pointsAvailableNow: number
 }
 
-const K = skillConstants
-
 export function summarizePlan(input: {
   skills: Skill[]
   mastered: ReadonlySet<string>
@@ -146,7 +114,7 @@ export function summarizePlan(input: {
   const byId = new Map(skills.map((s) => [s.id, s]))
   const learned = skills.filter((s) => mastered.has(s.id))
   const interestCount = (list: Skill[]) => list.filter((s) => interests.has(s.group)).length
-  const expectationBefore = K.expectationForTiers(learned.map((s) => s.tier))
+  const expectationBefore = expectationForTiers(learned.map((s) => s.tier))
   // Mastered skills the tree doesn't know still cost a point.
   const unknownMastered = [...mastered].filter((id) => !byId.has(id)).length
   const masteredCount = learned.length + unknownMastered
@@ -159,34 +127,32 @@ export function summarizePlan(input: {
     const skill = byId.get(id)
     if (!skill) continue
     points += 1
-    expectation += skill.tier + 1
+    expectation += moraleCost(skill.tier)
     if (interests.has(skill.group)) interestSkills += 1
     steps.push({
       skill,
       pointsAfter: points,
       expectationAfter: expectation,
       interestSkillsAfter: interestSkills,
-      experienceNeeded: K.experienceForPoints(points),
+      experienceNeeded: experienceForPoints(points),
     })
   }
-  const experienceNeeded = K.experienceForPoints(points)
+  const experienceNeeded = experienceForPoints(points)
   return {
     steps,
     masteredCount,
     pointsAfter: points,
     expectationBefore,
     expectationAfter: expectation,
-    interestMoraleBefore: interestCount(learned) * K.interest.moralePerLearnedSkillInGroup,
-    interestMoraleAfter: interestSkills * K.interest.moralePerLearnedSkillInGroup,
+    interestMoraleBefore: interestCount(learned) * interestMorale,
+    interestMoraleAfter: interestSkills * interestMorale,
     moraleFromOtherSources: Math.max(
       0,
-      expectation -
-        K.moraleExpectation.baselineMorale -
-        interestSkills * K.interest.moralePerLearnedSkillInGroup,
+      expectation - baselineMorale - interestSkills * interestMorale,
     ),
     experienceNeeded,
     experienceMissing: Math.max(0, experienceNeeded - experience),
-    pointsAvailableNow: K.pointsForExperience(experience) - masteredCount,
+    pointsAvailableNow: pointsForExperience(experience) - masteredCount,
   }
 }
 
@@ -206,7 +172,7 @@ export function nodeState(
 /**
  * Morale left over once the plan is learned. Current morale (read off the Vitals screen, the
  * save doesn't hold it) already includes the interest morale of what is mastered; each planned
- * skill then costs `tier + 1` expectation and adds 1 morale when it is in an interest group.
+ * skill then costs its morale expectation and adds 1 morale when it is in an interest group.
  */
 export function moraleSurplus(summary: PlanSummary, currentMorale: number): number {
   return (

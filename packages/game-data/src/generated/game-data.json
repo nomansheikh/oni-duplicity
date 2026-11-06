@@ -9236,5 +9236,1677 @@
         }
       ]
     }
-  ]
+  ],
+  "skillTree": {
+    "groups": [
+      {
+        "id": "Mining",
+        "name": "Digger",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "Building",
+        "name": "Builder",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "Farming",
+        "name": "Farmer",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "Ranching",
+        "name": "Rancher",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "Cooking",
+        "name": "Cooker",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "Art",
+        "name": "Decorator",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "Research",
+        "name": "Researcher",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "Rocketry",
+        "name": "Pilot",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "Suits",
+        "name": "Suit Wearer",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "Hauling",
+        "name": "Supplier",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "Technicals",
+        "name": "Operator",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "MedicalAid",
+        "name": "Doctor",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "Basekeeping",
+        "name": "Tidier",
+        "allowAsAptitude": true
+      },
+      {
+        "id": "SwimmingSkills",
+        "name": "Swimming",
+        "allowAsAptitude": false
+      },
+      {
+        "id": "BionicSkills",
+        "name": "",
+        "allowAsAptitude": false
+      }
+    ],
+    "perks": [
+      {
+        "id": "IncreaseDigSpeedSmall",
+        "text": "+2 Excavation",
+        "attribute": "Digging",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseDigSpeedMedium",
+        "text": "+2 Excavation",
+        "attribute": "Digging",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseDigSpeedLarge",
+        "text": "+2 Excavation",
+        "attribute": "Digging",
+        "amount": 2
+      },
+      {
+        "id": "CanDigVeryFirm",
+        "text": "Very Firm Material Mining"
+      },
+      {
+        "id": "CanDigAbyssalite",
+        "text": "Abyssalite Mining"
+      },
+      {
+        "id": "CanDigDiamondAndObsidan",
+        "text": "Diamond and Obsidian Mining"
+      },
+      {
+        "id": "CanDigCorium",
+        "text": "Corium Mining"
+      },
+      {
+        "id": "CanDigUnobtanium",
+        "text": "Neutronium Mining"
+      },
+      {
+        "id": "IncreaseConstructionSmall",
+        "text": "+2 Construction",
+        "attribute": "Construction",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseConstructionMedium",
+        "text": "+2 Construction",
+        "attribute": "Construction",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseConstructionLarge",
+        "text": "+2 Construction",
+        "attribute": "Construction",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseConstructionMechatronics",
+        "text": "+2 Construction",
+        "attribute": "Construction",
+        "amount": 2
+      },
+      {
+        "id": "CanDemonlish",
+        "text": "Demolish Gravitas Buildings"
+      },
+      {
+        "id": "IncreaseLearningSmall",
+        "text": "+2 Science",
+        "attribute": "Learning",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseLearningMedium",
+        "text": "+2 Science",
+        "attribute": "Learning",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseLearningLarge",
+        "text": "+2 Science",
+        "attribute": "Learning",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseLearningLargeSpace",
+        "text": "+2 Science",
+        "attribute": "Learning",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseBotanySmall",
+        "text": "+2 Agriculture",
+        "attribute": "Botanist",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseBotanyMedium",
+        "text": "+2 Agriculture",
+        "attribute": "Botanist",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseBotanyLarge",
+        "text": "+2 Agriculture",
+        "attribute": "Botanist",
+        "amount": 2
+      },
+      {
+        "id": "CanFarmTinker",
+        "text": "Crop Tending"
+      },
+      {
+        "id": "CanIdentifyMutantSeeds",
+        "text": "Can identify Mutant Seeds at the Botanical Analyzer"
+      },
+      {
+        "id": "CanFarmStation",
+        "text": "Can craft Micronutrient Fertilizer at the Farm Station"
+      },
+      {
+        "id": "CanSalvagePlantFiber",
+        "text": "Can salvage Plant Husk"
+      },
+      {
+        "id": "IncreaseRanchingSmall",
+        "text": "+2 Husbandry",
+        "attribute": "Ranching",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseRanchingMedium",
+        "text": "+2 Husbandry",
+        "attribute": "Ranching",
+        "amount": 2
+      },
+      {
+        "id": "CanWrangleCreatures",
+        "text": "Critter Wrangling"
+      },
+      {
+        "id": "CanUseRanchStation",
+        "text": "Grooming Station Usage"
+      },
+      {
+        "id": "CanUseMilkingStation",
+        "text": "Milking Station Usage"
+      },
+      {
+        "id": "IncreaseAthleticsSmall",
+        "text": "+2 Athletics",
+        "attribute": "Athletics",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseAthletics",
+        "text": "+2 Athletics",
+        "attribute": "Athletics",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseAthleticsLarge",
+        "text": "+2 Athletics",
+        "attribute": "Athletics",
+        "amount": 2
+      },
+      {
+        "id": "CanSwim",
+        "text": "Novice swimming ability"
+      },
+      {
+        "id": "IncreasedLungCapacity",
+        "text": "+100 Maximum Breath",
+        "attribute": "BreathMax",
+        "amount": 100
+      },
+      {
+        "id": "IncreaseSwimmerStaminaInLiquid",
+        "text": "Reduced Stamina consumption when swimming"
+      },
+      {
+        "id": "IncreaseSwimmerAthleticsInLiquid",
+        "text": "Increased swimming speed"
+      },
+      {
+        "id": "ReduceSaltWaterSwimmingEyeIrritation",
+        "text": "Increased resistance to Eye Irritation caused by Salt Water"
+      },
+      {
+        "id": "ImprovedLiquidTemperatureTolerance",
+        "text": "Increased resistance to Chilly Surroundings when in liquid"
+      },
+      {
+        "id": "IncreaseStrengthGofer",
+        "text": "+2 Strength",
+        "attribute": "Strength",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseStrengthCourier",
+        "text": "+2 Strength",
+        "attribute": "Strength",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseStrengthGroundskeeper",
+        "text": "+2 Strength",
+        "attribute": "Strength",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseStrengthPlumber",
+        "text": "+2 Strength",
+        "attribute": "Strength",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseCarryAmountSmall",
+        "text": "+400 Carrying Capacity",
+        "attribute": "CarryAmount",
+        "amount": 400
+      },
+      {
+        "id": "IncreaseCarryAmountMedium",
+        "text": "+800 Carrying Capacity",
+        "attribute": "CarryAmount",
+        "amount": 800
+      },
+      {
+        "id": "IncreaseArtSmall",
+        "text": "+2 Creativity",
+        "attribute": "Art",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseArt",
+        "text": "+2 Creativity",
+        "attribute": "Art",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseArtLarge",
+        "text": "+2 Creativity",
+        "attribute": "Art",
+        "amount": 2
+      },
+      {
+        "id": "CanArt",
+        "text": "Can produce artwork using: Blank Canvas, Sculpting Block, Large Sculpting Block, Ice Block, Metal Block, Wood Block"
+      },
+      {
+        "id": "CanArtUgly",
+        "text": "Crude artwork quality"
+      },
+      {
+        "id": "CanArtOkay",
+        "text": "Mediocre artwork quality"
+      },
+      {
+        "id": "CanArtGreat",
+        "text": "Master artwork quality"
+      },
+      {
+        "id": "CanStudyArtifact",
+        "text": "Artifact Analysis Station Usage"
+      },
+      {
+        "id": "CanClothingAlteration",
+        "text": "Clothing Refashionator Usage"
+      },
+      {
+        "id": "IncreaseMachinerySmall",
+        "text": "+2 Machinery",
+        "attribute": "Machinery",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseMachineryMedium",
+        "text": "+2 Machinery",
+        "attribute": "Machinery",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseMachineryLarge",
+        "text": "+2 Machinery",
+        "attribute": "Machinery",
+        "amount": 2
+      },
+      {
+        "id": "ConveyorBuild",
+        "text": "Conveyor Rail Construction"
+      },
+      {
+        "id": "CanPowerTinker",
+        "text": "Generator Tuning and Microchip Crafting"
+      },
+      {
+        "id": "CanMakeMissiles",
+        "text": "Blastshot Maker Usage"
+      },
+      {
+        "id": "CanCraftElectronics",
+        "text": "Soldering Station Usage",
+        "requiredDlcIds": ["DLC3_ID"]
+      },
+      {
+        "id": "CanElectricGrill",
+        "text": "Electric Grill Usage"
+      },
+      {
+        "id": "CanGasRange",
+        "text": "Gas Range Usage"
+      },
+      {
+        "id": "CanDeepFry",
+        "text": "Deep Fryer Usage"
+      },
+      {
+        "id": "CanSushiBar",
+        "text": "Sushi Bar Usage"
+      },
+      {
+        "id": "IncreaseCookingSmall",
+        "text": "+2 Cuisine",
+        "attribute": "Cooking",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseCookingMedium",
+        "text": "+2 Cuisine",
+        "attribute": "Cooking",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseCookingLarge",
+        "text": "+2 Cuisine",
+        "attribute": "Cooking",
+        "amount": 2
+      },
+      {
+        "id": "CanSpiceGrinder ",
+        "text": "Spice Grinder Usage"
+      },
+      {
+        "id": "IncreaseCaringSmall",
+        "text": "+2 Medicine",
+        "attribute": "Caring",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseCaringMedium",
+        "text": "+2 Medicine",
+        "attribute": "Caring",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseCaringLarge",
+        "text": "+2 Medicine",
+        "attribute": "Caring",
+        "amount": 2
+      },
+      {
+        "id": "CanCompound",
+        "text": "Apothecary Usage"
+      },
+      {
+        "id": "CanDoctor",
+        "text": "Sick Bay Usage"
+      },
+      {
+        "id": "CanAdvancedMedicine",
+        "text": "Disease Clinic Usage"
+      },
+      {
+        "id": "ExosuitExpertise",
+        "text": "Exosuit Penalty Reduction"
+      },
+      {
+        "id": "ExosuitDurability",
+        "text": "Slows Exosuit Durability Damage"
+      },
+      {
+        "id": "AllowAdvancedResearch",
+        "text": "Super Computer Usage"
+      },
+      {
+        "id": "AllowInterStellarResearch",
+        "text": "Virtual Planetarium Usage"
+      },
+      {
+        "id": "AllowNuclearResearch",
+        "text": "Materials Study Terminal Usage"
+      },
+      {
+        "id": "AllowOrbitalResearch",
+        "text": "Virtual Planetarium Usage"
+      },
+      {
+        "id": "AllowGeyserTuning",
+        "text": "Geotuner Usage"
+      },
+      {
+        "id": "AllowChemistry",
+        "text": "Emulsifier Usage"
+      },
+      {
+        "id": "CanStudyWorldObjects",
+        "text": "Geographical Analysis"
+      },
+      {
+        "id": "CanUseClusterTelescope",
+        "text": "Telescope Usage"
+      },
+      {
+        "id": "CanUseClusterTelescopeEnclosed",
+        "text": "Enclosed Telescope Usage"
+      },
+      {
+        "id": "CanDoPlumbing",
+        "text": "Pipe Emptying"
+      },
+      {
+        "id": "CanUseRockets",
+        "text": "Command Capsule Usage"
+      },
+      {
+        "id": "FasterSpaceFlight",
+        "text": "+0.1 Piloting",
+        "attribute": "SpaceNavigation",
+        "amount": 0.1
+      },
+      {
+        "id": "CanTrainToBeAstronaut",
+        "text": "Space Cadet Centrifuge Usage"
+      },
+      {
+        "id": "CanMissionControl",
+        "text": "Mission Control Station Usage"
+      },
+      {
+        "id": "CanUseRocketControlStation",
+        "text": "Rocket Control Station Usage"
+      },
+      {
+        "id": "IncreaseRocketSpeedSmall",
+        "text": "+2 Piloting",
+        "attribute": "SpaceNavigation",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseCarryAmountBionic",
+        "text": "+600 Carrying Capacity",
+        "attribute": "CarryAmount",
+        "amount": 600
+      },
+      {
+        "id": "ExtraBionicBooster1",
+        "text": "+1 Booster Slots",
+        "attribute": "BionicBoosterSlots",
+        "amount": 1
+      },
+      {
+        "id": "ExtraBionicBooster2",
+        "text": "+1 Booster Slots",
+        "attribute": "BionicBoosterSlots",
+        "amount": 1
+      },
+      {
+        "id": "ExtraBionicBooster3",
+        "text": "+2 Booster Slots",
+        "attribute": "BionicBoosterSlots",
+        "amount": 2
+      },
+      {
+        "id": "ExtraBionicBooster4",
+        "text": "+1 Booster Slots",
+        "attribute": "BionicBoosterSlots",
+        "amount": 1
+      },
+      {
+        "id": "ExtraBionicBooster5",
+        "text": "+1 Booster Slots",
+        "attribute": "BionicBoosterSlots",
+        "amount": 1
+      },
+      {
+        "id": "ExtraBionicBooster6",
+        "text": "+1 Booster Slots",
+        "attribute": "BionicBoosterSlots",
+        "amount": 1
+      },
+      {
+        "id": "ExtraBionicBatteries",
+        "text": "+2 Power Banks",
+        "attribute": "BionicBatteryCountCapacity",
+        "amount": 2
+      },
+      {
+        "id": "BionicEardrumsDefense",
+        "text": "Immunity to Popped Eardrums"
+      },
+      {
+        "id": "BionicMinorEyeIrritationDefense",
+        "text": "Immunity to Minor Eye Irritation"
+      },
+      {
+        "id": "BionicMajorEyeIrritationDefense",
+        "text": "Immunity to Major Eye Irritation"
+      },
+      {
+        "id": "BionicToastySurroundingsDefense",
+        "text": "Immunity to Toasty Surroundings"
+      },
+      {
+        "id": "BionicChillySurroundingsDefense",
+        "text": "Immunity to Chilly Surroundings"
+      },
+      {
+        "id": "ReducedBionicGunkProduction",
+        "text": "10% Slower Gunk Buildup"
+      },
+      {
+        "id": "EfficientBionicGears",
+        "text": "50% Grinding Gears penalty reduction"
+      },
+      {
+        "id": "IncreaseAthleticsBionicsC1",
+        "text": "+2 Athletics",
+        "attribute": "Athletics",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseAthleticsBionicsC2",
+        "text": "+2 Athletics",
+        "attribute": "Athletics",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseAthleticsBionicsB2",
+        "text": "+2 Athletics",
+        "attribute": "Athletics",
+        "amount": 2
+      },
+      {
+        "id": "IncreaseAthleticsBionicsA2",
+        "text": "+2 Athletics",
+        "attribute": "Athletics",
+        "amount": 2
+      },
+      {
+        "id": "IncreasedCarryBionics",
+        "text": "+400 Carrying Capacity",
+        "attribute": "CarryAmount",
+        "amount": 400
+      },
+      {
+        "id": "IncreasedCarryBionicsMinor",
+        "text": "+200 Carrying Capacity",
+        "attribute": "CarryAmount",
+        "amount": 200
+      },
+      {
+        "id": "CanFarmClams",
+        "text": "Clampum farming"
+      }
+    ],
+    "skills": [
+      {
+        "id": "Mining1",
+        "name": "Hard Digging",
+        "description": "Allows the excavation of Very Firm materials such as Granite",
+        "tier": 0,
+        "group": "Mining",
+        "hat": "hat_role_mining1",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": ["IncreaseDigSpeedSmall", "CanDigVeryFirm"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Mining2",
+        "name": "Superhard Digging",
+        "description": "Allows the excavation of the element Abyssalite",
+        "tier": 1,
+        "group": "Mining",
+        "hat": "hat_role_mining2",
+        "model": "Minion",
+        "prerequisites": ["Mining1"],
+        "perks": ["IncreaseDigSpeedMedium", "CanDigAbyssalite"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Mining3",
+        "name": "Super-Duperhard Digging",
+        "description": "Allows the excavation of Nearly Impenetrable elements, including Diamond and Obsidian",
+        "tier": 2,
+        "group": "Mining",
+        "hat": "hat_role_mining3",
+        "model": "Minion",
+        "prerequisites": ["Mining2"],
+        "perks": ["IncreaseDigSpeedLarge", "CanDigDiamondAndObsidan"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Mining4",
+        "name": "Hazmat Digging",
+        "description": "Allows the excavation of dangerous materials like Corium",
+        "tier": 3,
+        "group": "Mining",
+        "hat": "hat_role_mining4",
+        "model": "Minion",
+        "prerequisites": ["Mining3"],
+        "perks": ["CanDigCorium"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["EXPANSION1_ID"],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Building1",
+        "name": "Improved Construction I",
+        "description": "Marginally improves a Duplicant's construction speeds",
+        "tier": 0,
+        "group": "Building",
+        "hat": "hat_role_building1",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": ["IncreaseConstructionSmall"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Building2",
+        "name": "Improved Construction II",
+        "description": "Further increases a Duplicant's construction speeds",
+        "tier": 1,
+        "group": "Building",
+        "hat": "hat_role_building2",
+        "model": "Minion",
+        "prerequisites": ["Building1"],
+        "perks": ["IncreaseConstructionMedium"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Building3",
+        "name": "Demolition",
+        "description": "Enables a Duplicant to deconstruct Gravitas buildings",
+        "tier": 2,
+        "group": "Building",
+        "hat": "hat_role_building3",
+        "model": "Minion",
+        "prerequisites": ["Building2"],
+        "perks": ["IncreaseConstructionLarge", "CanDemonlish"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Farming1",
+        "name": "Improved Farming I",
+        "description": "Minorly increase a Duplicant's farming skills, increasing their chances of harvesting new plant Seeds",
+        "tier": 0,
+        "group": "Farming",
+        "hat": "hat_role_farming1",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": [],
+        "conditionalPerks": [
+          {
+            "perk": "IncreaseBotanySmall",
+            "when": []
+          },
+          {
+            "perk": "CanFarmClams",
+            "when": [
+              {
+                "dlc": "DLC5_ID",
+                "active": true
+              }
+            ]
+          }
+        ],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Farming2",
+        "name": "Crop Tending",
+        "description": "Enables tending Plants, which will increase their growth speed",
+        "tier": 1,
+        "group": "Farming",
+        "hat": "hat_role_farming2",
+        "model": "Minion",
+        "prerequisites": ["Farming1"],
+        "perks": ["IncreaseBotanyMedium", "CanFarmTinker", "CanFarmStation"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Farming3",
+        "name": "Improved Farming II",
+        "description": "Enables a Duplicant to gather Plant Husks as a byproduct when harvesting certain Plants",
+        "tier": 2,
+        "group": "Farming",
+        "hat": "hat_role_farming3",
+        "model": "Minion",
+        "prerequisites": ["Farming2"],
+        "perks": ["IncreaseBotanyLarge", "CanSalvagePlantFiber"],
+        "conditionalPerks": [
+          {
+            "perk": "CanIdentifyMutantSeeds",
+            "when": [
+              {
+                "dlc": "EXPANSION1_ID",
+                "active": true
+              }
+            ]
+          }
+        ],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Ranching1",
+        "name": "Critter Ranching I",
+        "description": "Allows a Duplicant to handle and care for Critters",
+        "tier": 1,
+        "group": "Ranching",
+        "hat": "hat_role_rancher1",
+        "model": "Minion",
+        "prerequisites": ["Farming1"],
+        "perks": ["IncreaseRanchingSmall", "CanUseRanchStation", "CanWrangleCreatures"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Ranching2",
+        "name": "Critter Ranching II",
+        "description": "Improves a Duplicant's Ranching skills",
+        "tier": 2,
+        "group": "Ranching",
+        "hat": "hat_role_rancher2",
+        "model": "Minion",
+        "prerequisites": ["Ranching1"],
+        "perks": ["IncreaseRanchingMedium", "CanUseMilkingStation"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Researching1",
+        "name": "Advanced Research",
+        "description": "Allows Duplicants to perform research using a Super Computer",
+        "tier": 0,
+        "group": "Research",
+        "hat": "hat_role_research1",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": ["IncreaseLearningSmall", "AllowAdvancedResearch", "AllowChemistry"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Researching2",
+        "name": "Field Research",
+        "description": "Duplicants can perform studies on Geysers, Planetoid, and other geographical phenomena",
+        "tier": 1,
+        "group": "Research",
+        "hat": "hat_role_research2",
+        "model": "Minion",
+        "prerequisites": ["Researching1"],
+        "perks": ["IncreaseLearningMedium", "CanStudyWorldObjects", "AllowGeyserTuning"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "AtomicResearch",
+        "name": "Applied Sciences Research",
+        "description": "Enables Duplicants to study matter using the Materials Study Terminal",
+        "tier": 2,
+        "group": "Research",
+        "hat": "hat_role_research5",
+        "model": "Minion",
+        "prerequisites": ["Researching2"],
+        "perks": ["IncreaseLearningLarge", "AllowNuclearResearch"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["EXPANSION1_ID"],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Researching4",
+        "name": "Applied Sciences Research",
+        "description": "Enables Duplicants to study matter using the Materials Study Terminal",
+        "tier": 2,
+        "group": "Research",
+        "hat": "hat_role_research4",
+        "model": "Minion",
+        "prerequisites": ["Researching2"],
+        "perks": ["IncreaseLearningLarge", "AllowNuclearResearch"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["EXPANSION1_ID"],
+        "when": [],
+        "deprecatedWhen": [[]]
+      },
+      {
+        "id": "Researching3",
+        "name": "Astronomy",
+        "description": "Enables Duplicants to study outer space using the Telescope",
+        "tier": 2,
+        "group": "Research",
+        "hat": "hat_role_research3",
+        "model": "Minion",
+        "prerequisites": ["Researching2"],
+        "perks": ["IncreaseLearningLarge", "AllowInterStellarResearch", "CanMissionControl"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": [
+          [
+            {
+              "dlc": "EXPANSION1_ID",
+              "active": true
+            }
+          ]
+        ]
+      },
+      {
+        "id": "Astronomy",
+        "name": "Astronomy",
+        "description": "Enables Duplicants to study outer space using the Telescope",
+        "tier": 1,
+        "group": "Research",
+        "hat": "hat_role_research3",
+        "model": "Minion",
+        "prerequisites": ["Researching1"],
+        "perks": ["CanUseClusterTelescope", "CanUseClusterTelescopeEnclosed", "CanMissionControl"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["EXPANSION1_ID"],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "SpaceResearch",
+        "name": "Data Analysis Researcher",
+        "description": "Enables Duplicants to conduct research using the Virtual Planetarium",
+        "tier": 2,
+        "group": "Research",
+        "hat": "hat_role_research4",
+        "model": "Minion",
+        "prerequisites": ["Astronomy"],
+        "perks": ["IncreaseLearningLargeSpace", "AllowOrbitalResearch"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["EXPANSION1_ID"],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "RocketPiloting1",
+        "name": "Rocket Piloting",
+        "description": "Allows a Duplicant to operate a Rocket Control Station and pilot rockets",
+        "tier": 0,
+        "group": "Rocketry",
+        "hat": "hat_role_astronaut1",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": ["CanUseRocketControlStation"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["EXPANSION1_ID"],
+        "when": [
+          {
+            "dlc": "EXPANSION1_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "RocketPiloting2",
+        "name": "Rocket Piloting II",
+        "description": "Allows Duplicants to pilot rockets at faster speeds",
+        "tier": 2,
+        "group": "Rocketry",
+        "hat": "hat_role_astronaut2",
+        "model": "Minion",
+        "prerequisites": ["RocketPiloting1", "Astronomy"],
+        "perks": ["IncreaseRocketSpeedSmall"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["EXPANSION1_ID"],
+        "when": [
+          {
+            "dlc": "EXPANSION1_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Cooking1",
+        "name": "Grilling",
+        "description": "Allows Duplicants to cook using the Electric Grill",
+        "tier": 0,
+        "group": "Cooking",
+        "hat": "hat_role_cooking1",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": ["IncreaseCookingSmall", "CanElectricGrill"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Cooking2",
+        "name": "Enhanced Seasoning",
+        "description": "Allows Duplicants to cook using the Gas Range, Smoker, Deep Fryer, Sushi Bar, and Spice Grinder",
+        "tier": 1,
+        "group": "Cooking",
+        "hat": "hat_role_cooking2",
+        "model": "Minion",
+        "prerequisites": ["Cooking1"],
+        "perks": [
+          "IncreaseCookingMedium",
+          "CanGasRange",
+          "CanDeepFry",
+          "CanSushiBar",
+          "CanSpiceGrinder "
+        ],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Cooking3",
+        "name": "Fine Dining",
+        "description": "Improves a Duplicant's cooking speed",
+        "tier": 2,
+        "group": "Cooking",
+        "hat": "hat_role_cooking3",
+        "model": "Minion",
+        "prerequisites": ["Cooking2"],
+        "perks": ["IncreaseCookingLarge"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Arting1",
+        "name": "Art Fundamentals",
+        "description": "Teaches the most basic level of art skill",
+        "tier": 0,
+        "group": "Art",
+        "hat": "hat_role_art1",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": ["IncreaseArtSmall", "CanArtUgly", "CanArt"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Arting2",
+        "name": "Aesthetic Design",
+        "description": "Allows moderately attractive art to be created",
+        "tier": 1,
+        "group": "Art",
+        "hat": "hat_role_art2",
+        "model": "Minion",
+        "prerequisites": ["Arting1"],
+        "perks": ["IncreaseArt", "CanArtOkay", "CanClothingAlteration"],
+        "conditionalPerks": [
+          {
+            "perk": "CanStudyArtifact",
+            "when": [
+              {
+                "dlc": "EXPANSION1_ID",
+                "active": true
+              }
+            ]
+          }
+        ],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Arting3",
+        "name": "Masterworks",
+        "description": "Enables the painting and sculpting of masterpieces",
+        "tier": 2,
+        "group": "Art",
+        "hat": "hat_role_art3",
+        "model": "Minion",
+        "prerequisites": ["Arting2"],
+        "perks": ["IncreaseArtLarge", "CanArtGreat"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Hauling1",
+        "name": "Improved Carrying I",
+        "description": "Minorly increase a Duplicant's strength and carrying capacity",
+        "tier": 0,
+        "group": "Hauling",
+        "hat": "hat_role_hauling1",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": ["IncreaseStrengthGofer", "IncreaseCarryAmountSmall"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Hauling2",
+        "name": "Improved Carrying II",
+        "description": "Further increases a Duplicant's strength and carrying capacity for even swifter deliveries",
+        "tier": 1,
+        "group": "Hauling",
+        "hat": "hat_role_hauling2",
+        "model": "Minion",
+        "prerequisites": ["Hauling1"],
+        "perks": ["IncreaseStrengthCourier", "IncreaseCarryAmountMedium"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "ThermalSuits",
+        "name": "Suit Sustainability Training",
+        "description": "Suits equipped by this Duplicant lose durability 25% slower.",
+        "tier": 1,
+        "group": "Suits",
+        "hat": "hat_role_suits1",
+        "model": "Minion",
+        "prerequisites": ["Hauling1", "RocketPiloting1"],
+        "perks": ["IncreaseAthleticsLarge", "ExosuitDurability"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["EXPANSION1_ID"],
+        "when": [
+          {
+            "dlc": "EXPANSION1_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "ThermalSuits",
+        "name": "Suit Sustainability Training",
+        "description": "Suits equipped by this Duplicant lose durability 25% slower.",
+        "tier": 1,
+        "group": "Suits",
+        "hat": "hat_role_suits1",
+        "model": "Minion",
+        "prerequisites": ["Hauling1"],
+        "perks": ["IncreaseAthleticsLarge", "ExosuitDurability"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [
+          {
+            "dlc": "EXPANSION1_ID",
+            "active": false
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Suits1",
+        "name": "Exosuit Training",
+        "description": "Eliminates the runspeed loss experienced while wearing exosuits",
+        "tier": 2,
+        "group": "Suits",
+        "hat": "hat_role_suits2",
+        "model": "Minion",
+        "prerequisites": ["ThermalSuits"],
+        "perks": ["IncreaseAthletics", "ExosuitExpertise"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Technicals1",
+        "name": "Improved Tinkering",
+        "description": "Marginally improves a Duplicant's tinkering speeds",
+        "tier": 0,
+        "group": "Technicals",
+        "hat": "hat_role_technicals1",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": ["IncreaseMachinerySmall"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Technicals2",
+        "name": "Electrical Engineering",
+        "description": "Enables generator Tune-Up, which will temporarily provide improved Power output",
+        "tier": 1,
+        "group": "Technicals",
+        "hat": "hat_role_technicals2",
+        "model": "Minion",
+        "prerequisites": ["Technicals1"],
+        "perks": ["IncreaseMachineryMedium", "CanPowerTinker", "CanCraftElectronics"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Engineering1",
+        "name": "Mechatronics Engineering",
+        "description": "Allows the construction and maintenance of Conveyor Rail systems",
+        "tier": 2,
+        "group": "Technicals",
+        "hat": "hat_role_engineering1",
+        "model": "Minion",
+        "prerequisites": ["Hauling2", "Technicals2"],
+        "perks": ["IncreaseMachineryLarge", "IncreaseConstructionMechatronics", "ConveyorBuild"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Basekeeping1",
+        "name": "Improved Strength",
+        "description": "Minorly improves a Duplicant's physical strength",
+        "tier": 0,
+        "group": "Basekeeping",
+        "hat": "hat_role_basekeeping1",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": ["IncreaseStrengthGroundskeeper"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Basekeeping2",
+        "name": "Plumbing",
+        "description": "Allows a Duplicant to empty Pipes without making a mess",
+        "tier": 1,
+        "group": "Basekeeping",
+        "hat": "hat_role_basekeeping2",
+        "model": "Minion",
+        "prerequisites": ["Basekeeping1"],
+        "perks": ["IncreaseStrengthPlumber", "CanDoPlumbing"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Pyrotechnics",
+        "name": "Pyrotechnics",
+        "description": "Allows a Duplicant to make Blastshot for the Meteor Blaster",
+        "tier": 2,
+        "group": "Basekeeping",
+        "hat": "hat_role_pyrotechnics",
+        "model": "Minion",
+        "prerequisites": ["Basekeeping2"],
+        "perks": ["CanMakeMissiles"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Astronauting1",
+        "name": "W.I.P. Skill",
+        "description": "This skill doesn't really do anything right now.",
+        "tier": 3,
+        "group": "Suits",
+        "hat": "hat_role_astronaut1",
+        "model": "Minion",
+        "prerequisites": ["Researching3", "Suits1"],
+        "perks": ["IncreaseAthletics"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["EXPANSION1_ID"],
+        "when": [
+          {
+            "dlc": "EXPANSION1_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": [
+          [
+            {
+              "dlc": "EXPANSION1_ID",
+              "active": true
+            }
+          ]
+        ]
+      },
+      {
+        "id": "Astronauting2",
+        "name": "W.I.P. Skill",
+        "description": "This skill doesn't really do anything right now.",
+        "tier": 4,
+        "group": "Suits",
+        "hat": "hat_role_astronaut2",
+        "model": "Minion",
+        "prerequisites": ["Astronauting1"],
+        "perks": ["IncreaseAthletics"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["EXPANSION1_ID"],
+        "when": [
+          {
+            "dlc": "EXPANSION1_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": [
+          [
+            {
+              "dlc": "EXPANSION1_ID",
+              "active": true
+            }
+          ]
+        ]
+      },
+      {
+        "id": "Astronauting1",
+        "name": "Rocket Piloting",
+        "description": "Allows a Duplicant to operate a Command Capsule to pilot a rocket ship",
+        "tier": 3,
+        "group": "Suits",
+        "hat": "hat_role_astronaut1",
+        "model": "Minion",
+        "prerequisites": ["Researching3", "Suits1"],
+        "perks": ["CanUseRockets"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [
+          {
+            "dlc": "EXPANSION1_ID",
+            "active": false
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Astronauting2",
+        "name": "Rocket Navigation",
+        "description": "Improves the speed that space missions are completed",
+        "tier": 4,
+        "group": "Suits",
+        "hat": "hat_role_astronaut2",
+        "model": "Minion",
+        "prerequisites": ["Astronauting1"],
+        "perks": ["FasterSpaceFlight"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [
+          {
+            "dlc": "EXPANSION1_ID",
+            "active": false
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Medicine1",
+        "name": "Medicine Compounding",
+        "description": "Allows Duplicants to produce medicines at the Apothecary",
+        "tier": 0,
+        "group": "MedicalAid",
+        "hat": "hat_role_medicalaid1",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": ["IncreaseCaringSmall", "CanCompound"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Medicine2",
+        "name": "Bedside Manner",
+        "description": "Trains Duplicants to administer medicine at the Sick Bay",
+        "tier": 1,
+        "group": "MedicalAid",
+        "hat": "hat_role_medicalaid2",
+        "model": "Minion",
+        "prerequisites": ["Medicine1"],
+        "perks": ["IncreaseCaringMedium", "CanDoctor"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Medicine3",
+        "name": "Advanced Medical Care",
+        "description": "Trains Duplicants to operate the Disease Clinic",
+        "tier": 2,
+        "group": "MedicalAid",
+        "hat": "hat_role_medicalaid3",
+        "model": "Minion",
+        "prerequisites": ["Medicine2"],
+        "perks": ["IncreaseCaringLarge", "CanAdvancedMedicine"],
+        "conditionalPerks": [],
+        "requiredDlcIds": [],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Swimming",
+        "name": "Basic Swimming",
+        "description": "Allows Duplicants to safely navigate liquid environments.",
+        "tier": 0,
+        "group": "SwimmingSkills",
+        "hat": "hat_role_swimming",
+        "model": "Minion",
+        "prerequisites": [],
+        "perks": [
+          "CanSwim",
+          "IncreasedLungCapacity",
+          "ImprovedLiquidTemperatureTolerance",
+          "ReduceSaltWaterSwimmingEyeIrritation"
+        ],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC5_ID"],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "Swimming2",
+        "name": "Divemaster",
+        "description": "Grants Duplicants expert proficiency in liquid environment navigation.",
+        "tier": 1,
+        "group": "SwimmingSkills",
+        "hat": "hat_role_swimming2",
+        "model": "Minion",
+        "prerequisites": ["Swimming"],
+        "perks": ["IncreaseSwimmerStaminaInLiquid", "IncreaseSwimmerAthleticsInLiquid"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC5_ID"],
+        "when": [],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "BionicsA1",
+        "name": "Booster Processing I",
+        "description": "Allows Bionic Duplicants to install an additional booster.",
+        "tier": 0,
+        "group": "BionicSkills",
+        "hat": "hat_role_gainingboosters1",
+        "model": "BionicMinion",
+        "prerequisites": [],
+        "perks": ["ExtraBionicBooster1"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC3_ID"],
+        "when": [
+          {
+            "dlc": "DLC3_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "BionicsA2",
+        "name": "Booster Processing II",
+        "description": "Allows Bionic Duplicants to install an additional booster, and increases runspeed.",
+        "tier": 1,
+        "group": "BionicSkills",
+        "hat": "hat_role_gainingboosters2",
+        "model": "BionicMinion",
+        "prerequisites": ["BionicsA1"],
+        "perks": ["ExtraBionicBooster2", "IncreaseAthleticsBionicsA2"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC3_ID"],
+        "when": [
+          {
+            "dlc": "DLC3_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "BionicsA3",
+        "name": "Complex Processing",
+        "description": "Allows Bionic Duplicants to install an additional booster, and reduces the runspeed loss experienced while wearing exosuits.",
+        "tier": 2,
+        "group": "BionicSkills",
+        "hat": "hat_role_gainingboosters3",
+        "model": "BionicMinion",
+        "prerequisites": ["BionicsA2"],
+        "perks": ["ExtraBionicBooster3", "ExosuitExpertise"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC3_ID"],
+        "when": [
+          {
+            "dlc": "DLC3_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "BionicsB1",
+        "name": "Improved Gears I",
+        "description": "Significantly reduces the negative impacts of low Gear Oil.",
+        "tier": 0,
+        "group": "BionicSkills",
+        "hat": "hat_role_innerworkings1",
+        "model": "BionicMinion",
+        "prerequisites": [],
+        "perks": ["EfficientBionicGears"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC3_ID"],
+        "when": [
+          {
+            "dlc": "DLC3_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "BionicsB2",
+        "name": "Improved Gears II",
+        "description": "Allows Bionic Duplicants to install an additional booster.",
+        "tier": 1,
+        "group": "BionicSkills",
+        "hat": "hat_role_innerworkings2",
+        "model": "BionicMinion",
+        "prerequisites": ["BionicsB1"],
+        "perks": ["ExtraBionicBooster4", "IncreaseAthleticsBionicsB2"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC3_ID"],
+        "when": [
+          {
+            "dlc": "DLC3_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "BionicsC1",
+        "name": "Schematics",
+        "description": "Allows Bionic Duplicants to perform research using a Super Computer, and craft items at the Soldering Station.",
+        "tier": 0,
+        "group": "BionicSkills",
+        "hat": "hat_role_craftingboosters1",
+        "model": "BionicMinion",
+        "prerequisites": [],
+        "perks": ["CanCraftElectronics", "IncreaseAthleticsBionicsC1"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC3_ID"],
+        "when": [
+          {
+            "dlc": "DLC3_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "BionicsC2",
+        "name": "Advanced Schematics",
+        "description": "Allows Bionic Duplicants to install an additional booster and increase their runspeed.",
+        "tier": 1,
+        "group": "BionicSkills",
+        "hat": "hat_role_craftingboosters2",
+        "model": "BionicMinion",
+        "prerequisites": ["BionicsC1"],
+        "perks": ["ExtraBionicBooster6", "IncreaseAthleticsBionicsC2"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC3_ID"],
+        "when": [
+          {
+            "dlc": "DLC3_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "BionicsC3",
+        "name": "Power Banking",
+        "description": "Increases Power Bank storage capacity to maximize work time between replacements.",
+        "tier": 2,
+        "group": "BionicSkills",
+        "hat": "hat_role_innerworkings3",
+        "model": "BionicMinion",
+        "prerequisites": ["BionicsB2", "BionicsC2"],
+        "perks": ["ExtraBionicBatteries"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC3_ID"],
+        "when": [
+          {
+            "dlc": "DLC3_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "BionicsD1",
+        "name": "Improved Hardware",
+        "description": "Increases resistance to environmental irritants and pressure-related injuries",
+        "tier": 0,
+        "group": "BionicSkills",
+        "hat": "hat_role_gainingboosters1",
+        "model": "BionicMinion",
+        "prerequisites": [],
+        "perks": [
+          "BionicEardrumsDefense",
+          "BionicMinorEyeIrritationDefense",
+          "BionicMajorEyeIrritationDefense"
+        ],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC3_ID"],
+        "when": [
+          {
+            "dlc": "DLC3_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      },
+      {
+        "id": "BionicsD2",
+        "name": "Climate Control",
+        "description": "Allows Bionic Duplicants to work comfortably in a wider range of ambient temperatures",
+        "tier": 1,
+        "group": "BionicSkills",
+        "hat": "hat_role_gainingboosters1",
+        "model": "BionicMinion",
+        "prerequisites": ["BionicsD1"],
+        "perks": ["BionicToastySurroundingsDefense", "BionicChillySurroundingsDefense"],
+        "conditionalPerks": [],
+        "requiredDlcIds": ["DLC3_ID"],
+        "when": [
+          {
+            "dlc": "DLC3_ID",
+            "active": true
+          }
+        ],
+        "deprecatedWhen": []
+      }
+    ],
+    "tuning": {
+      "targetSkillsEarned": 15,
+      "targetSkillsCycle": 250,
+      "experienceLevelPower": 1.44,
+      "secondsPerCycle": 600,
+      "moraleCostByTier": [1, 2, 3, 4, 5, 6, 7],
+      "baselineMorale": 1,
+      "interestMorale": 1
+    }
+  }
 }

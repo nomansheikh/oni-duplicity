@@ -9,6 +9,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { readSkillTree } from './skills/index.ts'
 
 const DEFAULT_PATHS = [
   join(
@@ -361,6 +362,7 @@ const data = {
   critters: readCritters(strings),
   techs: collect(strings, literals, 'STRINGS.RESEARCH.TECHS.'),
   gameSettings: readGameSettings(strings),
+  ...readSkillTree(strings),
 }
 
 const out = new URL('../src/generated/game-data.json', import.meta.url)
