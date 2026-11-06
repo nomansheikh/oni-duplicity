@@ -8,6 +8,14 @@ export {
   type CritterAmountMax,
   type CritterLimits,
 } from './critter-amounts.ts'
+export {
+  findRanchSpecies,
+  ranching,
+  type RanchDietEntry,
+  type RanchProductEntry,
+  type RanchSpecies,
+  type RanchingData,
+} from './ranching.ts'
 export { MinionSkills, type MinionSkill } from './skills.ts'
 export {
   geyserTypes,
