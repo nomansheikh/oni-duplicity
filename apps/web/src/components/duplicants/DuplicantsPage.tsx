@@ -34,7 +34,12 @@ export function DuplicantsPage({
         ]}
       />
       <div className="grid gap-4 @4xl/main:grid-cols-[22rem_1fr] md:gap-6">
-        <DuplicantRoster duplicants={duplicants} selectedId={selected?.id} onSelect={onSelect} />
+        <DuplicantRoster
+          duplicants={duplicants}
+          selectedId={selected?.id}
+          onSelect={onSelect}
+          onEdit={onEdit}
+        />
         {selected ? (
           <DuplicantEditor
             key={selected.id}

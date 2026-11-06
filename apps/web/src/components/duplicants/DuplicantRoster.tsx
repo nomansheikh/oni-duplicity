@@ -2,7 +2,14 @@ import { useState } from 'react'
 import { ArrowDownNarrowWide, ArrowUpNarrowWide, Search, SearchX } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import {
   Item,
@@ -22,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { DuplicantView } from '@/worker/model'
+import type { DuplicantView, Edit } from '@/worker/model'
 import {
   SORT_OPTIONS,
   arrivalCycle,
@@ -36,15 +43,18 @@ import {
 import { fmt, portraitParts } from '@/lib/format'
 import { DuplicantAvatar } from '../common'
 import { EmptyState } from '../empty-state'
+import { RosterMenu } from './CloneActions'
 
 export function DuplicantRoster({
   duplicants,
   selectedId,
   onSelect,
+  onEdit,
 }: {
   duplicants: DuplicantView[]
   selectedId: string | undefined
   onSelect: (id: string) => void
+  onEdit: (edit: Edit) => void
 }) {
   const [query, setQuery] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('save')
@@ -75,6 +85,9 @@ export function DuplicantRoster({
             ? `${duplicants.length} in this colony`
             : `${visible.length} of ${duplicants.length} in this colony`}
         </CardDescription>
+        <CardAction>
+          <RosterMenu selected={duplicants.find((d) => d.id === selectedId)} onEdit={onEdit} />
+        </CardAction>
       </CardHeader>
       <CardContent className="space-y-3">
         <InputGroup>

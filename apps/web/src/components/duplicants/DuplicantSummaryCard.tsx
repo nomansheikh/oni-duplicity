@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/select'
 import { humanize, portraitParts } from '@/lib/format'
 import type { DuplicantEdit, DuplicantProfile, DuplicantView } from '@/worker/model'
+import { CloneButton } from './CloneActions'
 import { ProfileActions } from './ProfileActions'
 import { CommitInput, DuplicantAvatar } from '../common'
 import { Vital } from './tabs'
@@ -90,6 +91,7 @@ export function DuplicantSummaryCard({
           {dupe.hat && (
             <Badge variant="outline">{humanize(dupe.hat.replace(/^hat_role_/, ''))} hat</Badge>
           )}
+          <CloneButton dupe={dupe} onClone={() => edit({ type: 'cloneDuplicant' })} />
           <ProfileActions
             dupe={dupe}
             clipboard={clipboard}

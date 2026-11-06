@@ -1,3 +1,4 @@
+import { cloneDuplicant } from './clone.ts'
 import { rawCanAdd, rawDefaultItem } from './raw.ts'
 import {
   MinionSkills,
@@ -402,6 +403,7 @@ export type Edit =
   | { type: 'deleteObject'; id: string }
   | { type: 'deleteDebris'; ids: number[] }
   | { type: 'cloneObject'; id: string }
+  | { type: 'cloneDuplicant'; id: string }
   | { type: 'setTechResearched'; techId: string; complete: boolean }
   | { type: 'researchAll' }
   | { type: 'setGameSetting'; settingId: string; level: string }
@@ -606,11 +608,11 @@ const SLOT_TYPES: Record<AccessorySlot, string[]> = {
   skin: ['arm_lower', 'arm_upper', 'leg_skin'],
 }
 
-function behavior(obj: GameObject, name: string): Behavior | undefined {
+export function behavior(obj: GameObject, name: string): Behavior | undefined {
   return obj.behaviors.find((b) => b.name === name)
 }
 
-function data(obj: GameObject, name: string): TemplateData {
+export function data(obj: GameObject, name: string): TemplateData {
   const found = behavior(obj, name)?.templateData
   if (!found) throw new Error(`Object has no decoded "${name}" behavior`)
   return found
@@ -1100,6 +1102,9 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       list.splice(index + 1, 0, copy)
       return
     }
+    case 'cloneDuplicant':
+      cloneDuplicant(save, edit.id)
+      return
     case 'setTechResearched':
       setTech(save, edit.techId, edit.complete)
       return
@@ -1357,7 +1362,7 @@ function applyProfile(
 
 const ELEMENT_IDS = new Set(elementCatalog.map((e) => e.id))
 
-function splitId(id: string): { group: string; index: number } {
+export function splitId(id: string): { group: string; index: number } {
   const split = id.lastIndexOf(':')
   return { group: id.slice(0, split), index: Number(id.slice(split + 1)) }
 }
@@ -1431,6 +1436,11 @@ export function touchedBy(save: SaveGame, edit: Edit): GameObject[] {
   if (edit.type === 'setDemoliorImpact') return demoliorObjects(save)
   if (edit.type === 'bulkDuplicants') {
     return objectsWith(save, 'MinionIdentity').map(({ obj }) => obj)
+  }
+  if (edit.type === 'cloneDuplicant') {
+    // The schedules live on the SaveGame object.
+    const saveGame = saveGameObject(save)
+    return saveGame ? [objectById(save, edit.id), saveGame] : [objectById(save, edit.id)]
   }
   if ('id' in edit) return [objectById(save, edit.id)]
   if ('ref' in edit) return [objectById(save, edit.ref.split('/')[0]!)]
@@ -1581,7 +1591,7 @@ export function cloneValue<T>(value: T): T {
   return value
 }
 
-function locate(save: SaveGame, id: string): { list: GameObject[]; index: number } {
+export function locate(save: SaveGame, id: string): { list: GameObject[]; index: number } {
   const { group, index } = splitId(id)
   const list = save.gameObjects.find((g) => g.name === group)?.gameObjects
   if (!list?.[index]) throw new Error(`No object ${id}`)
@@ -1589,7 +1599,7 @@ function locate(save: SaveGame, id: string): { list: GameObject[]; index: number
 }
 
 /** Give an object (and anything it stores) fresh KPrefabID instance IDs from Game+Settings. */
-function assignNewIds(save: SaveGame, obj: GameObject): void {
+export function assignNewIds(save: SaveGame, obj: GameObject): void {
   const kpid = behavior(obj, 'KPrefabID')?.templateData
   if (kpid) {
     const next = Number(save.settings.nextUniqueID)
