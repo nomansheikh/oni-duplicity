@@ -1,13 +1,5 @@
 import type { SaveGame } from '@oni-duplicity/save-parser'
-import {
-  assignNewIds,
-  behavior,
-  cloneValue,
-  data,
-  locate,
-  saveGameObject,
-  splitId,
-} from './model.ts'
+import { behavior, cloneValue, data, locate, saveGameObject, splitId } from './model.ts'
 
 /** Field name that precedes every state machine's reference to its own duplicant (see below). */
 const SM_MASTER_LABEL = new TextEncoder().encode('masterTarget')
@@ -69,14 +61,18 @@ export function cloneDuplicant(save: SaveGame, id: string): void {
   const machines = behavior(source, 'StateMachineController')
   if (!machines) throw new Error('This duplicant has no state machine data, so it cannot be cloned')
 
+  // Nothing in the save changes until every check has passed, so a throw never leaks ids.
+  const next = Number(save.settings.nextUniqueID)
+  if (!Number.isFinite(next)) throw new Error('This save has no unique ID counter')
   const copy = cloneValue(source)
   const proxy = cloneValue(proxyGroup.gameObjects[proxyIndex]!)
-  assignNewIds(save, copy)
-  assignNewIds(save, proxy)
-  const copyId = Number(data(copy, 'KPrefabID').InstanceID)
+  const copyId = next
+  const proxyId = next + 1
+  data(copy, 'KPrefabID').InstanceID = copyId
+  data(proxy, 'KPrefabID').InstanceID = proxyId
   data(proxy, 'MinionAssignablesProxy').target_instance_id = copyId
   const copyIdentity = data(copy, 'MinionIdentity')
-  copyIdentity.assignableProxy = { id: Number(data(proxy, 'KPrefabID').InstanceID) }
+  copyIdentity.assignableProxy = { id: proxyId }
   copyIdentity.name = `${String(identity.name)} (clone)`
 
   const rewritten = retargetStateMachines(
@@ -97,6 +93,7 @@ export function cloneDuplicant(save: SaveGame, id: string): void {
     if (schedule.assigned.some((a) => a.id === sourceId)) schedule.assigned.push({ id: copyId })
   }
 
+  save.settings.nextUniqueID = next + 2
   list.splice(index + 1, 0, copy)
   proxyGroup.gameObjects.splice(proxyIndex + 1, 0, proxy)
   save.header.gameInfo.numberOfDuplicants += 1
