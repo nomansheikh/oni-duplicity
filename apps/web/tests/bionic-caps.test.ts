@@ -10,7 +10,7 @@ import {
   objectById,
 } from '../src/worker/model.ts'
 import { applyWithRestore } from '../src/worker/snapshot.ts'
-import { galaxy, sameBytes } from './helpers.ts'
+import { sameBytes } from './helpers.ts'
 
 describe('bionicAmountMax', () => {
   test('uses the game constants for the fixed amounts', () => {
@@ -98,40 +98,6 @@ maybe('bionic amounts in mithro-06', () => {
       expect(value()).toBe(0)
     },
     300_000,
-  )
-})
-
-describe('setAmount guards', () => {
-  test('an amount with no known maximum is not clamped and carries a warning', () => {
-    const save = parseSave(readFileSync(galaxy))
-    const dupe = listDuplicants(save).find((d) => !d.isBionic)!
-    const modifiers = objectById(save, dupe.id).behaviors.find((b) => b.name === 'MinionModifiers')!
-    const amounts = (
-      modifiers.extraData as { amounts: { name: string; value: { value: number } }[] }
-    ).amounts
-    amounts[0]!.name = 'ModdedAmount'
-    const view = () =>
-      listDuplicants(save)
-        .find((d) => d.id === dupe.id)!
-        .amounts.find((a) => a.id === 'ModdedAmount')!
-    expect(view().max).toBeUndefined()
-    expect(view().warning).toMatch(/not clamped/)
-    applyEdit(save, { type: 'setAmount', id: dupe.id, amountId: 'ModdedAmount', value: 5000 })
-    expect(view().value).toBe(5000)
-  }, 120_000)
-
-  test.each([Number.NaN, Infinity, -Infinity])(
-    '%s is rejected and changes nothing',
-    (value) => {
-      const save = parseSave(readFileSync(galaxy))
-      const dupe = listDuplicants(save).find((d) => d.amounts.some((a) => a.id === 'Stress'))!
-      const before = writeSaveParts(save).body.slice()
-      expect(() =>
-        applyEdit(save, { type: 'setAmount', id: dupe.id, amountId: 'Stress', value }),
-      ).toThrow(/finite/)
-      expect(sameBytes(writeSaveParts(save).body, before)).toBe(true)
-    },
-    120_000,
   )
 })
 

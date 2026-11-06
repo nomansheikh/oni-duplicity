@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { Activity, Droplets, ShieldCheck, Timer, TriangleAlert, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,114 +14,8 @@ import { CommitInput } from './common'
 import { DlcBadges } from './dlc-badge'
 import { PageHeader } from './page-header'
 import { EmptyState } from './empty-state'
-
-function StatCard({
-  label,
-  value,
-  icon,
-  footer,
-  detail,
-  meter,
-}: {
-  label: string
-  value: ReactNode
-  icon: ReactNode
-  footer: ReactNode
-  detail: ReactNode
-  meter?: ReactNode
-}) {
-  return (
-    <Card size="sm" className="@container/card">
-      <CardHeader>
-        <CardTitle>{label}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        <Badge variant="bare" className="type-h1 tabular-nums [&>svg]:size-6!">
-          {icon}
-          {value}
-        </Badge>
-        {meter}
-        <div className="line-clamp-1 type-small font-medium">{footer}</div>
-        <div className="type-small text-muted-foreground">{detail}</div>
-      </CardContent>
-    </Card>
-  )
-}
-
-const STRESS_TEXT = {
-  good: 'Colony is calm',
-  warn: 'Keep an eye on morale',
-  bad: 'Colony is struggling',
-} as const
-
-function average(values: number[]): number {
-  return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0
-}
-
-type Attention = { id: string; tone: 'warn' | 'bad' | 'info'; label: string; text: string }
-
-const STRESSED_AT = 60
-const LOW_HEALTH_AT = 35
-const MAX_ATTENTION = 5
-
-/** Things worth a look, derived from data the app already loads. Most urgent first. */
-function attentionItems(
-  summary: Summary,
-  duplicants: DuplicantView[],
-  demolior: DemoliorView | null,
-): Attention[] {
-  const amount = (d: DuplicantView, id: string) => d.amounts.find((a) => a.id === id)?.value
-  const items: Attention[] = []
-  if (demolior && demolior.remainingCycles > 0) {
-    items.push({
-      id: 'demolior',
-      tone: 'bad',
-      label: 'Impact',
-      text: `Demolior hits in ${fmt(demolior.remainingCycles, 1)} cycles (cycle ${fmt(demolior.impactCycle, 1)})`,
-    })
-  }
-  for (const d of duplicants) {
-    const health = amount(d, 'HitPoints')
-    if (health !== undefined && health < LOW_HEALTH_AT) {
-      items.push({
-        id: `health-${d.id}`,
-        tone: 'bad',
-        label: 'Health',
-        text: `${d.name} is at ${fmt(health, 0)}% health`,
-      })
-    }
-  }
-  for (const d of duplicants) {
-    const stress = amount(d, 'Stress')
-    if (stress !== undefined && stress >= STRESSED_AT) {
-      items.push({
-        id: `stress-${d.id}`,
-        tone: 'warn',
-        label: 'Stress',
-        text: `${d.name} is at ${fmt(stress, 0)}% stress`,
-      })
-    }
-  }
-  if (summary.debugWasUsed || summary.sandbox) {
-    items.push({
-      id: 'achievements',
-      tone: 'warn',
-      label: 'Achievements',
-      text: summary.debugWasUsed
-        ? 'Achievements are disabled because debug mode was used'
-        : 'Achievements are disabled while sandbox mode is on',
-    })
-  }
-  if (summary.unverified) {
-    items.push({
-      id: 'unverified',
-      tone: 'info',
-      label: 'Version',
-      text: `Save version ${summary.version} is newer than the versions this editor was checked against`,
-    })
-  }
-  return items
-}
+import { MAX_ATTENTION, STRESS_TEXT, attentionItems, average } from './overview-attention'
+import { StatCard } from './overview-stat-card'
 
 export function OverviewPage({
   summary,
