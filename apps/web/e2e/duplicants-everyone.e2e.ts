@@ -102,6 +102,13 @@ test.describe('duplicants', () => {
       Bladder: 0,
       Stress: 0,
     }
+    // Breath fills to the duplicant's own maximum: +400 with the Minnow trait (`TRAITS.cs`) and
+    // +100 with the Swimming skill (`SkillPerks.cs`). A need already above its maximum is kept.
+    const breathMax = (i: number) => {
+      const { traitIds, mastery } = fixtureDupe(GALAXY, 'Minion', i)
+      const swims = mastery.some(([id, mastered]) => id === 'Swimming' && mastered)
+      return full.Breath! + (traitIds.includes('Minnow') ? 400 : 0) + (swims ? 100 : 0)
+    }
     await page.getByRole('button', { name: 'Everyone' }).click()
     await page.getByRole('menuitem', { name: 'Heal and fill needs' }).click()
 
@@ -114,8 +121,10 @@ test.describe('duplicants', () => {
       ).amounts
       before.forEach((amount, n) => {
         if (!(amount.name in full)) return
-        expect(amounts[n]!.value.value, `duplicant ${i} ${amount.name}`).toBe(full[amount.name])
-        if (amount.value.value !== full[amount.name]) {
+        const max = amount.name === 'Breath' ? breathMax(i) : full[amount.name]!
+        const want = max === 0 ? 0 : Math.max(max, amount.value.value)
+        expect(amounts[n]!.value.value, `duplicant ${i} ${amount.name}`).toBe(want)
+        if (amount.value.value !== want) {
           expected.push(`^objects/Minion/${i}/MinionModifiers/extraData/amounts/${n}/value/value$`)
         }
       })
