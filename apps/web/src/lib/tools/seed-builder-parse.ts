@@ -1,11 +1,12 @@
 import type { MixingLevels } from '@/seed/mixing'
 import type { SeedRule } from '@/seed/rules'
 import type { BuilderState } from './seed-builder'
+import { parseSeedLimit } from './seed-limit'
 
 /** Reads stored state back. Anything that is not a well-formed state gives null. */
 export function parseState(value: unknown): BuilderState | null {
   if (typeof value !== 'object' || value === null) return null
-  const { cluster, mixing, presetId, rules } = value as Record<string, unknown>
+  const { cluster, mixing, presetId, rules, maxSeeds } = value as Record<string, unknown>
   if (typeof cluster !== 'string' || !Array.isArray(rules)) return null
   const clean = rules.filter(isRuleLike)
   const ids = new Set(clean.map((rule) => rule.id))
@@ -15,6 +16,7 @@ export function parseState(value: unknown): BuilderState | null {
     mixing: parseMixing(mixing),
     presetId: typeof presetId === 'string' ? presetId : null,
     rules: clean,
+    maxSeeds: parseSeedLimit(maxSeeds),
   }
 }
 

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  applyPreset,
   changeCluster,
   emptyState,
   fitToDlcs,
@@ -8,6 +7,8 @@ import {
   type BuilderState,
 } from '@/lib/tools/seed-builder'
 import { asteroidOptions, availableIds } from '@/lib/tools/seed-catalog'
+import type { SeedLimit } from '@/lib/tools/seed-limit'
+import { loadPreset } from '@/lib/tools/seed-presets'
 import { SEED_CLUSTERS, type SeedCluster } from '@/seed/clusters'
 import { dlcsInPlay, fitMixing, type MixingLevels } from '@/seed/mixing'
 import type { SeedPreset } from '@/seed/rules'
@@ -60,11 +61,12 @@ export function useSeedBuilder() {
     [cluster],
   )
   const selectPreset = useCallback(
-    (preset: SeedPreset) =>
-      setState((s) =>
-        fitToDlcs(applyPreset(s, preset), availableIds(dlcsInPlay(cluster, s.mixing))),
-      ),
+    (preset: SeedPreset) => setState((s) => loadPreset(s, preset, dlcsInPlay(cluster, s.mixing))),
     [cluster],
   )
-  return { state, setState, cluster, selectCluster, setMixing, selectPreset }
+  const setMaxSeeds = useCallback(
+    (maxSeeds: SeedLimit) => setState((s) => ({ ...s, maxSeeds })),
+    [],
+  )
+  return { state, setState, cluster, selectCluster, setMixing, selectPreset, setMaxSeeds }
 }

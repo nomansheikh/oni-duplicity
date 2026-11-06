@@ -2,6 +2,7 @@ import { mixingSettings } from '@oni-duplicity/game-data'
 import { describe, expect, it } from 'vite-plus/test'
 import { clusterByPrefix } from './clusters.ts'
 import {
+  coordinateDlcs,
   decodeMixing,
   dlcsInPlay,
   encodeMixing,
@@ -62,6 +63,13 @@ describe('availability', () => {
       ['DLC2_ID', 'DLC4_ID', 'EXPANSION1_ID'].sort(),
     )
     expect(dlcsInPlay(cluster('SNDST-A'), {})).toEqual([])
+  })
+
+  it('reads the DLCs a result needs from its coordinate', () => {
+    expect(coordinateDlcs('AQU-C', 'AQU-C-1393183751-0-0-J5XRH4Y1').sort()).toEqual(
+      ['DLC2_ID', 'DLC3_ID', 'DLC4_ID', 'DLC5_ID', 'EXPANSION1_ID'].sort(),
+    )
+    expect(coordinateDlcs('SNDST-A', 'SNDST-A-42-0-0-0')).toEqual([])
   })
 
   it('drops the toggle of a DLC the cluster already needs', () => {

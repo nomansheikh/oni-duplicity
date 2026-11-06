@@ -1,5 +1,11 @@
 import { mixingSections, mixingSettings, type MixingSetting } from '@oni-duplicity/game-data'
-import { asteroidRemixSlots, biomeRemixSlots, isSpacedOut, type SeedCluster } from './clusters.ts'
+import {
+  asteroidRemixSlots,
+  biomeRemixSlots,
+  clusterByPrefix,
+  isSpacedOut,
+  type SeedCluster,
+} from './clusters.ts'
 
 /**
  * The Mixing tab of a new game as data: setting id to level value (`0` Disabled, `1` Enabled or
@@ -55,6 +61,16 @@ export function dlcsInPlay(cluster: SeedCluster, levels: MixingLevels): string[]
     if (setting.kind === 'dlc' && (levels[setting.id] ?? 0) > 0) dlcs.add(setting.id)
   }
   return [...dlcs]
+}
+
+/**
+ * The DLCs a coordinate's game needs: its cluster's, and the ones its mixing code (the last
+ * segment) switches on.
+ */
+export function coordinateDlcs(prefix: string, coordinate: string): string[] {
+  const cluster = clusterByPrefix(prefix)
+  const code = coordinate.slice(coordinate.lastIndexOf('-') + 1)
+  return cluster ? dlcsInPlay(cluster, decodeMixing(code)) : []
 }
 
 /**

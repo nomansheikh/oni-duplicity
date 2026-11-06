@@ -1,8 +1,5 @@
 import { findWorldgenTrait, findWorldgenWorld } from '@oni-duplicity/game-data'
 import { geyserName } from '@/lib/seed-draw/geyser-marks'
-import { clusterByPrefix } from '@/seed/clusters'
-import { decodeMixing, dlcsInPlay } from '@/seed/mixing'
-import type { SeedResult } from '@/seed/result'
 import type { SeedRule, RuleScope } from '@/seed/rules'
 
 /** The game's name for a trait id such as `expansion1::traits/GeoActive`. */
@@ -43,11 +40,4 @@ export function ruleLabel(rule: SeedRule): string {
 
 export function mapsLink(coordinate: string): string {
   return `https://mapsnotincluded.org/map-explorer/${encodeURIComponent(coordinate)}`
-}
-
-/** The DLCs a result's game needs: its cluster's, and the ones its mixing code switches on. */
-export function resultDlcs(result: SeedResult): string[] {
-  const cluster = clusterByPrefix(result.prefix)
-  const code = result.coordinate.slice(result.coordinate.lastIndexOf('-') + 1)
-  return cluster ? dlcsInPlay(cluster, decodeMixing(code)) : []
 }

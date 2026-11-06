@@ -14,8 +14,9 @@ import { ResultsSlot } from './results-slot'
  * generator only loads when Find is clicked.
  */
 export function SeedFinderPage() {
-  const { state, setState, cluster, selectCluster, setMixing, selectPreset } = useSeedBuilder()
-  const { search, progress, summary, running, find, stop } = useSeedSearch()
+  const builder = useSeedBuilder()
+  const { state, setState, cluster, selectCluster, setMixing, selectPreset, setMaxSeeds } = builder
+  const { search, progress, summary, limit, running, find, stop } = useSeedSearch()
   const rules = runnableRules(state)
   return (
     <div className="flex flex-col gap-4">
@@ -30,8 +31,8 @@ export function SeedFinderPage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <SetupBar
+            state={state}
             cluster={cluster}
-            mixing={state.mixing}
             onCluster={selectCluster}
             onMixing={setMixing}
             onPreset={selectPreset}
@@ -42,7 +43,12 @@ export function SeedFinderPage() {
             blocker={blocker(state) ?? mixingBlocker(cluster, state.mixing)}
             progress={progress}
             summary={summary}
-            onFind={() => void find(cluster, rules, state.mixing)}
+            maxSeeds={state.maxSeeds}
+            runLimit={limit}
+            onMaxSeeds={setMaxSeeds}
+            onFind={() =>
+              void find({ cluster, rules, mixing: state.mixing, maxSeeds: state.maxSeeds })
+            }
             onStop={stop}
           />
         </CardContent>

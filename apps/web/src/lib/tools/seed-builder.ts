@@ -7,6 +7,7 @@ import type {
   TraitRule,
 } from '@/seed/rules'
 import type { MixingLevels } from '@/seed/mixing'
+import { DEFAULT_SEED_LIMIT, type SeedLimit } from './seed-limit'
 
 export { parseState } from './seed-builder-parse'
 
@@ -22,6 +23,8 @@ export interface BuilderState {
   /** The preset the rows started from, shown in the picker until the user stops matching it. */
   presetId: string | null
   rules: SeedRule[]
+  /** Seeds a search tries before it stops on its own; `null` runs until Stop. */
+  maxSeeds: SeedLimit
 }
 
 export type RuleKind = SeedRule['kind']
@@ -29,7 +32,7 @@ export type RuleKind = SeedRule['kind']
 export const DEFAULT_WEIGHT = 1
 
 export function emptyState(cluster: string): BuilderState {
-  return { cluster, mixing: {}, presetId: null, rules: [] }
+  return { cluster, mixing: {}, presetId: null, rules: [], maxSeeds: DEFAULT_SEED_LIMIT }
 }
 
 export function nextRuleId(rules: SeedRule[]): string {

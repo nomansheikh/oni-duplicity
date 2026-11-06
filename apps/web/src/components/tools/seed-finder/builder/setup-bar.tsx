@@ -1,29 +1,23 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import type { BuilderState } from '@/lib/tools/seed-builder'
 import type { SeedCluster } from '@/seed/clusters'
-import type { MixingLevels } from '@/seed/mixing'
-import { SEED_PRESETS } from '@/seed/presets'
+import { dlcsInPlay } from '@/seed/mixing'
 import type { SeedPreset } from '@/seed/rules'
 import { ClusterPicker } from './cluster-picker'
 import { MixingPicker } from './mixing-picker'
+import { PresetPicker } from './preset-picker'
 
 /**
  * Cluster, mixing and preset pickers. A preset fills the rows; they stay editable afterwards.
  */
 export function SetupBar({
+  state,
   cluster,
-  mixing,
   onCluster,
   onMixing,
   onPreset,
 }: {
+  state: BuilderState
   cluster: SeedCluster
-  mixing: MixingLevels
   onCluster: (prefix: string) => void
   onMixing: (id: string, level: number) => void
   onPreset: (preset: SeedPreset) => void
@@ -36,28 +30,11 @@ export function SetupBar({
       </label>
       <div className="flex flex-col gap-1 type-label">
         Mixing
-        <MixingPicker cluster={cluster} levels={mixing} onChange={onMixing} />
+        <MixingPicker cluster={cluster} levels={state.mixing} onChange={onMixing} />
       </div>
       <label className="flex flex-col gap-1 type-label">
         Preset
-        <Select
-          value=""
-          onValueChange={(id) => {
-            const preset = SEED_PRESETS.find((p) => p.id === id)
-            if (preset) onPreset(preset)
-          }}
-        >
-          <SelectTrigger className="w-64" aria-label="Preset">
-            <SelectValue placeholder="Load a preset…" />
-          </SelectTrigger>
-          <SelectContent>
-            {SEED_PRESETS.map((preset) => (
-              <SelectItem key={preset.id} value={preset.id}>
-                {preset.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <PresetPicker state={state} dlcs={dlcsInPlay(cluster, state.mixing)} onPreset={onPreset} />
       </label>
     </div>
   )
