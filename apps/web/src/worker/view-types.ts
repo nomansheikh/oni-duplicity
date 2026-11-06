@@ -1,3 +1,4 @@
+import type { SeedCoordinate } from './coordinate/coordinate.ts'
 import type { DestinationState } from './space-edits.ts'
 
 export interface Named {
@@ -15,6 +16,8 @@ export interface Summary {
   buildVersion: number
   dlcIds: string[]
   clusterId: string
+  /** The world's settings coordinate, or null when the save does not determine it. */
+  seedCoordinate: SeedCoordinate | null
   isAutoSave: boolean
   /** The save this was written from (`gameInfo.originalSaveName`); autosaves are named after it. */
   originalSaveName: string
