@@ -24,7 +24,8 @@ jobs:
   ci:
     name: ci
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Unit tests take about 13 minutes and end-to-end up to 30 (Playwright's own global timeout).
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -132,12 +133,14 @@ jobs:
         run: vp exec playwright install --with-deps chromium
 
       - name: End-to-end tests
+        id: e2e
         if: ${{ !cancelled() && steps.fixtures.conclusion == 'success' && github.event_name != 'pull_request' }}
+        timeout-minutes: 35
         working-directory: apps/web
         run: vp exec playwright test
 
       - name: Upload Playwright report
-        if: failure()
+        if: ${{ always() && (steps.e2e.outcome == 'failure' || steps.e2e.outcome == 'cancelled') }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playwright-report
