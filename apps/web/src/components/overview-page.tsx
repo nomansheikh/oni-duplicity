@@ -15,6 +15,7 @@ import { DlcBadges } from './dlc-badge'
 import { PageHeader } from './page-header'
 import { EmptyState } from './empty-state'
 import { MAX_ATTENTION, STRESS_TEXT, attentionItems, average } from './overview-attention'
+import { SeedCoordinate } from './seed-coordinate'
 import { StatCard } from './overview-stat-card'
 
 export function OverviewPage({
@@ -165,6 +166,7 @@ export function OverviewPage({
                   </ItemDescription>
                 </ItemContent>
               </Item>
+              <SeedCoordinate summary={summary} />
               <Item variant="outline" size="sm">
                 <ItemContent>
                   <ItemTitle>Content</ItemTitle>

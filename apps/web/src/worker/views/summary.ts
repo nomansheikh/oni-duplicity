@@ -1,4 +1,5 @@
 import { MAX_VERIFIED_MINOR, type SaveGame } from '@oni-duplicity/save-parser'
+import { seedCoordinate } from '../coordinate/coordinate.ts'
 import { behavior, dlcIds, saveGameObject } from '../save-helpers.ts'
 import type { Summary } from '../view-types.ts'
 
@@ -17,6 +18,7 @@ export function summarize(save: SaveGame, fileName: string): Summary {
     buildVersion: save.header.buildVersion,
     dlcIds: dlcIds(save),
     clusterId: info.clusterId ?? '',
+    seedCoordinate: seedCoordinate(save),
     isAutoSave: info.isAutoSave,
     originalSaveName: typeof info.originalSaveName === 'string' ? info.originalSaveName : '',
     sandbox: Boolean(sandbox ?? info.sandboxEnabled),

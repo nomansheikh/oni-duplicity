@@ -21,6 +21,7 @@ import { humanize } from '@/lib/format'
 import { saveClient } from '@/lib/save-client'
 import type { Edit, GameSettingView, Summary } from '@/worker/model'
 import { PageHeader } from './page-header'
+import { SeedCoordinate } from './seed-coordinate'
 
 // The sandbox switch below edits this setting too, so it is not listed twice.
 const SANDBOX_SETTING = 'SandboxMode'
@@ -89,6 +90,7 @@ export function SettingsPage({
           </CardContent>
         </Card>
       )}
+      {summary && <SeedCoordinate summary={summary} />}
       <Card variant="well">
         <CardHeader>
           <CardTitle>Difficulty options</CardTitle>
