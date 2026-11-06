@@ -17,6 +17,7 @@ catalog:
   '@fontsource/rajdhani': ^5.2.0
   '@oni-duplicity/game-data': workspace:*
   '@oni-duplicity/save-parser': workspace:*
+  '@onimaxxing/worldgen': 0.33.4
   '@playwright/test': ^1.64.1
   '@tailwindcss/vite': ^4.3.3
   '@tanstack/react-table': ^9.2.4
