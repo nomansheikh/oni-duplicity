@@ -2,11 +2,10 @@ import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { AppFooter } from '@/components/app-footer'
 import { AppTabs } from '@/components/app-sidebar'
-import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
 import { SaveDialog } from '@/components/save-dialog'
 import { SiteHeader } from '@/components/site-header'
 import { useDirtyPages } from '@/hooks/use-dirty-pages'
-import { firstPages, groupOf, type GroupId, type Page } from '@/lib/nav'
+import { entryPage, firstPages, groupOf, shownPage, type GroupId, type Page } from '@/lib/nav'
 import { describeLoadError } from '@/lib/load-error'
 import { useAllowUnverified } from '@/lib/preferences'
 import { loadSave, saveClient } from '@/lib/save-client'
@@ -18,6 +17,7 @@ import { HeaderActions } from '@/app/header-actions'
 import { Body } from '@/app/page-body'
 import { PageRouter } from '@/app/page-router'
 import { SaveNotices } from '@/app/save-notices'
+import { StartScreen } from '@/app/start-screen'
 import { NO_EDITS, type EditStatus, type State, type Views } from '@/app/types'
 import { useWindowEffects } from '@/app/use-window-effects'
 
@@ -47,7 +47,8 @@ export default function App() {
     setPage(next)
     setLastPage((last) => ({ ...last, [groupOf(next).id]: next }))
   }, [])
-  const selectGroup = (group: GroupId) => setPage(lastPage[group])
+  const selectGroup = (group: GroupId) =>
+    setPage(entryPage(group, lastPage[group], state.status === 'loaded'))
 
   const open = async (file: File) => {
     if (editStatus.edits > 0 && !confirm('Discard your unsaved changes?')) return
@@ -117,6 +118,7 @@ export default function App() {
   const selected = views?.duplicants.find((d) => d.id === selectedDupe) ?? views?.duplicants[0]
   const saveLocked = loaded?.summary.unverified === true && !allowUnverified
   const pick = () => fileInput.current?.click()
+  const shown = shownPage(page, loaded !== null)
 
   const actions = (
     <HeaderActions
@@ -144,7 +146,8 @@ export default function App() {
           onClose={close}
         />
         <AppTabs
-          page={loaded ? page : null}
+          page={shown}
+          saveOpen={loaded !== null}
           onNavigate={navigate}
           onSelectGroup={selectGroup}
           dirty={dirty}
@@ -152,12 +155,8 @@ export default function App() {
         >
           <main className="@container/main flex flex-1 flex-col p-2 sm:p-3">
             <div className="panel flex flex-1 flex-col bg-field p-1">
-              <Body page={loaded ? page : null}>
-                {state.status === 'idle' && <OpenSave onFile={open} onPick={pick} />}
-                {state.status === 'loading' && (
-                  <LoadingSave fileName={state.fileName} progress={state.progress} />
-                )}
-                {state.status === 'error' && <LoadError info={state.info} onPick={pick} />}
+              <Body page={shown}>
+                {!shown && <StartScreen state={state} onFile={open} onPick={pick} />}
                 {loaded && <SaveNotices summary={loaded.summary} />}
                 <PageRouter
                   loaded={loaded}

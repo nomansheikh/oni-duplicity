@@ -24,6 +24,11 @@ const RanchingCalculatorPage = lazy(() =>
 const SkillPlannerPage = lazy(() =>
   import('@/components/tools/skill-planner-page').then((m) => ({ default: m.SkillPlannerPage })),
 )
+const SeedFinderPage = lazy(() =>
+  import('@/components/tools/seed-finder/seed-finder-page').then((m) => ({
+    default: m.SeedFinderPage,
+  })),
+)
 const DlcPage = lazy(() => import('@/components/dlc-page').then((m) => ({ default: m.DlcPage })))
 const DuplicantsPage = lazy(() =>
   import('@/components/duplicants/DuplicantsPage').then((m) => ({ default: m.DuplicantsPage })),
@@ -118,6 +123,7 @@ export function PageRouter({
       {loaded && page === 'skill-planner' && (
         <SkillPlannerPage duplicants={loaded.views.duplicants} />
       )}
+      {page === 'seed-finder' && <SeedFinderPage />}
       {loaded && page === 'stories' && <StoriesPage stories={loaded.views.stories} />}
       {loaded && page === 'content' && <DlcPage revision={revision} onEdit={edit} />}
       {loaded && page === 'difficulty' && (

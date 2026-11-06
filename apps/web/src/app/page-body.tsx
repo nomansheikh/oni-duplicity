@@ -28,6 +28,7 @@ const PAGE_WIDTH: Record<Page, 'readable' | 'full'> = {
   duplicants: 'full',
   geysers: 'full',
   'skill-planner': 'full',
+  'seed-finder': 'full',
 }
 
 /** Pages sit in the tab panel once a save is open, so each tab names a real panel. */
