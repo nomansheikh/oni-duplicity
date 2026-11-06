@@ -4,343 +4,38 @@
  * - exact IDs (e.g. "BingeEater") recovered from string literals in Managed/Assembly-CSharp.dll,
  *   because the strings file only has upper-cased keys (STRINGS.DUPLICANTS.TRAITS.BINGEEATER).
  *
+ * - ranching data (species, morphs, diets, eggs) read from the decompiled game source, which is
+ *   run through a small C# interpreter (scripts/csharp). Needs the decompile: clone
+ *   https://github.com/Kupie/ONI_Decomp to .cache/ONI_Decomp or set ONI_DECOMP to its folder.
+ *
  * Usage: vp run extract-game-data   (set ONI_PATH to the game folder if it isn't the Steam default)
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { homedir } from 'node:os'
+import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { readSkillTree } from './skills/index.ts'
-
-const DEFAULT_PATHS = [
-  join(
-    homedir(),
-    'Library/Application Support/Steam/steamapps/common/OxygenNotIncluded/OxygenNotIncluded.app/Contents/Resources/Data',
-  ),
-  'C:/Program Files (x86)/Steam/steamapps/common/OxygenNotIncluded/OxygenNotIncluded_Data',
-  join(homedir(), '.steam/steam/steamapps/common/OxygenNotIncluded/OxygenNotIncluded_Data'),
-]
-
-function dataDir(): string {
-  const env = process.env.ONI_PATH
-  const candidates = env
-    ? [
-        env,
-        join(env, 'OxygenNotIncluded.app/Contents/Resources/Data'),
-        join(env, 'OxygenNotIncluded_Data'),
-      ]
-    : DEFAULT_PATHS
-  const found = candidates.find((p) =>
-    existsSync(join(p, 'StreamingAssets/strings/strings_template.pot')),
-  )
-  if (!found) throw new Error(`Game data not found. Set ONI_PATH. Tried:\n${candidates.join('\n')}`)
-  return found
-}
-
-/** msgctxt → msgid from a gettext template. */
-function readPot(path: string): Map<string, string> {
-  const unquote = (s: string) => JSON.parse(s) as string
-  const entries = new Map<string, string>()
-  let ctxt: string | null = null
-  let target: 'ctxt' | 'id' | null = null
-  let id = ''
-  const flush = () => {
-    if (ctxt !== null) entries.set(ctxt, id)
-    ctxt = null
-    id = ''
-  }
-  for (const line of readFileSync(path, 'utf8').split('\n')) {
-    if (line.startsWith('msgctxt ')) {
-      flush()
-      ctxt = unquote(line.slice(8))
-      target = 'ctxt'
-    } else if (line.startsWith('msgid ')) {
-      id = unquote(line.slice(6))
-      target = 'id'
-    } else if (line.startsWith('"') && target === 'id') {
-      id += unquote(line)
-    } else if (line.startsWith('msgstr')) {
-      target = null
-    }
-  }
-  flush()
-  return entries
-}
-
-/** Upper-cased identifier → identifiers found as UTF-16 string literals in the assembly. */
-function readAssemblyLiterals(path: string): Map<string, string[]> {
-  const bytes = readFileSync(path)
-  const byUpper = new Map<string, string[]>()
-  let run = ''
-  const flush = () => {
-    if (run.length >= 2 && /^[A-Za-z][A-Za-z0-9_]*$/.test(run)) {
-      const key = run.toUpperCase()
-      const list = byUpper.get(key) ?? []
-      if (!list.includes(run)) list.push(run)
-      byUpper.set(key, list)
-    }
-    run = ''
-  }
-  for (let i = 0; i + 1 < bytes.length; i += 1) {
-    const c = bytes[i]!
-    if (bytes[i + 1] === 0 && c >= 0x20 && c < 0x7f) {
-      run += String.fromCharCode(c)
-      i += 1
-    } else {
-      flush()
-    }
-  }
-  flush()
-  return byUpper
-}
-
-const clean = (text: string) => text.replace(/<[^>]+>/g, '').trim()
-
-const sdbmLower = (s: string) => {
-  let h = 0
-  for (const ch of s.toLowerCase()) h = (ch.charCodeAt(0) + (h << 6) + (h << 16) - h) | 0
-  return h
-}
-
-interface Entry {
-  id: string
-  name: string
-  desc?: string
-}
-
-function collect(
-  strings: Map<string, string>,
-  literals: Map<string, string[]>,
-  prefix: string,
-  {
-    exactId = false,
-    descKeys = ['DESC', 'DESCRIPTION'],
-  }: { exactId?: boolean; descKeys?: string[] } = {},
-): Entry[] {
-  const entries: Entry[] = []
-  const re = new RegExp(`^${prefix.replace(/\./g, '\\.')}([A-Z0-9_]+)\\.NAME$`)
-  for (const [key, name] of strings) {
-    const match = re.exec(key)
-    if (!match) continue
-    const upper = match[1]!
-    const candidates = literals.get(upper) ?? []
-    // Prefer a mixed-case literal (the real ID) over an all-caps constant.
-    const id = exactId ? upper : (candidates.find((c) => c !== upper) ?? candidates[0])
-    if (!id) continue
-    const desc = descKeys.map((k) => strings.get(`${prefix}${upper}.${k}`)).find(Boolean)
-    entries.push({ id, name: clean(name), ...(desc ? { desc: clean(desc) } : {}) })
-  }
-  return entries.sort((a, b) => a.name.localeCompare(b.name))
-}
+import { extractRanching } from './ranching/extract-ranching.ts'
+import { readAssemblyLiterals } from './extract/assembly.ts'
+import { clean, collect, sdbmLower } from './extract/collect.ts'
+import { readCritters } from './extract/critters.ts'
+import { readEffectDetails } from './extract/effects.ts'
+import { readElements } from './extract/elements.ts'
+import { dataDir, decompDir } from './extract/paths.ts'
+import { readPot } from './extract/pot.ts'
+import { readGameSettings } from './extract/settings.ts'
 
 const dir = dataDir()
 const strings = readPot(join(dir, 'StreamingAssets/strings/strings_template.pot'))
 const literals = readAssemblyLiterals(join(dir, 'Managed/Assembly-CSharp.dll'))
 
-interface ElementEntry extends Entry {
-  hash: number
-  state: string
-  dlcId?: string
-}
-
-/** Elements (SimHashes) from StreamingAssets/elements/*.yaml; names from STRINGS.ELEMENTS. */
-function readElements(strings: Map<string, string>): ElementEntry[] {
-  const elements: ElementEntry[] = []
-  for (const file of ['solid', 'liquid', 'gas', 'special']) {
-    const text = readFileSync(join(dir, `StreamingAssets/elements/${file}.yaml`), 'utf8')
-    for (const block of text.split(/\n  - elementId: /).slice(1)) {
-      const id = block.split(/[\s#]/)[0]!
-      const field = (key: string) =>
-        new RegExp(`\\n\\s+${key}:\\s*"?([^"\\n#]*)"?`).exec(block)?.[1]?.trim()
-      const state = field('state') ?? 'Solid'
-      const dlcId = field('dlcId')
-      const name = strings.get(`STRINGS.ELEMENTS.${id.toUpperCase()}.NAME`)
-      elements.push({
-        id,
-        name: clean(name ?? id),
-        hash: sdbmLower(id),
-        state,
-        ...(dlcId ? { dlcId } : {}),
-      })
-    }
-  }
-  return elements.sort((a, b) => a.name.localeCompare(b.name))
-}
-
-interface CritterEntry extends Entry {
-  /** Species family, e.g. PACU for Pacu, Tropical Pacu and their fry. */
-  family: string
-  baby: boolean
-}
-
-/** Critters keyed by prefab ID (upper-cased), taken from the <link> in each species name. */
-function readCritters(strings: Map<string, string>): CritterEntry[] {
-  const critters = new Map<string, CritterEntry>()
-  for (const [key, value] of strings) {
-    const match = /^STRINGS\.CREATURES\.SPECIES\.([A-Z0-9_]+)\.(?:[A-Z0-9_]+\.)*NAME$/.exec(key)
-    if (!match || match[1] === 'GEYSER') continue
-    const link = /<link="([A-Z0-9_]+)">/.exec(value)?.[1]
-    if (!link) continue
-    const baby = key.includes('.BABY.')
-    const id = baby ? `${link}BABY` : link
-    if (!critters.has(id)) {
-      critters.set(id, { id, name: clean(value), family: match[1]!, baby })
-    }
-  }
-  return [...critters.values()].sort((a, b) => a.name.localeCompare(b.name))
-}
-
-/** IDs written with underscores in string keys (CALORIE_BURN) match literals without them (CalorieBurn). */
-const normalize = (s: string) => s.toUpperCase().replace(/_/g, '')
-
-/** Rank candidate spellings: PascalCase IDs first, then other mixed case, lower, upper. */
-function rank(candidate: string): number {
-  if (/^[A-Z][a-z]/.test(candidate)) return 0
-  if (/[a-z]/.test(candidate) && /[A-Z]/.test(candidate)) return 1
-  if (candidate === candidate.toLowerCase()) return 2
-  return 3
-}
-
-function literalFor(upperKey: string): string | undefined {
-  const wanted = normalize(upperKey)
-  const candidates: string[] = []
-  for (const [key, list] of literals) if (normalize(key) === wanted) candidates.push(...list)
-  return candidates.sort((a, b) => rank(a) - rank(b))[0]
-}
-
-/** Settings whose string key differs from the ID stored in saves. */
-const SETTING_ALIASES: Record<string, string> = { BIONICPOWERUSE: 'BionicWattage' }
-
-interface SettingEntry extends Entry {
-  levels: Entry[]
-}
-
-/** Custom game settings (difficulty) and their levels from the new-game screen strings. */
-function readGameSettings(strings: Map<string, string>): SettingEntry[] {
-  const prefix = 'STRINGS.UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.'
-  const settings = new Map<string, SettingEntry>()
-  for (const [key, value] of strings) {
-    const setting = new RegExp(`^${prefix.replace(/\./g, '\\.')}([A-Z0-9_]+)\\.NAME$`).exec(key)
-    if (setting) {
-      const upper = setting[1]!
-      const tooltip = strings.get(`${prefix}${upper}.TOOLTIP`)
-      settings.set(upper, {
-        id: SETTING_ALIASES[upper] ?? literalFor(upper) ?? upper,
-        name: clean(value),
-        ...(tooltip ? { desc: clean(tooltip) } : {}),
-        levels: [],
-      })
-    }
-  }
-  for (const [key, value] of strings) {
-    const level = new RegExp(
-      `^${prefix.replace(/\./g, '\\.')}([A-Z0-9_]+)\\.LEVELS\\.([A-Z0-9_]+)\\.NAME$`,
-    ).exec(key)
-    const entry = level && settings.get(level[1]!)
-    if (!level || !entry) continue
-    const tooltip = strings.get(`${prefix}${level[1]}.LEVELS.${level[2]}.TOOLTIP`)
-    entry.levels.push({
-      id: literalFor(level[2]!) ?? level[2]!,
-      name: clean(value),
-      ...(tooltip ? { desc: clean(tooltip) } : {}),
-    })
-  }
-  return [...settings.values()].filter((s) => s.levels.length > 0)
-}
-
-/** One attribute change of an effect, as written in the MinionModifiers table. */
-interface EffectModifierRow {
-  attribute: string
-  value: number
-  units: string
-  multiplier: boolean
-}
-
-interface EffectDetailRow {
-  id: string
-  bad: boolean
-  /** Cycles; 0 when the effect lasts until something removes it. */
-  duration: number
-  modifiers: EffectModifierRow[]
-}
-
-/** Splits CSV text into rows, honouring quoted fields (which may hold commas). */
-function parseCsv(text: string): string[][] {
-  const rows: string[][] = []
-  let row: string[] = []
-  let field = ''
-  let quoted = false
-  for (let i = 0; i < text.length; i += 1) {
-    const c = text[i]!
-    if (quoted) {
-      if (c === '"' && text[i + 1] === '"') {
-        field += '"'
-        i += 1
-      } else if (c === '"') quoted = false
-      else field += c
-    } else if (c === '"') quoted = true
-    else if (c === ',') {
-      row.push(field)
-      field = ''
-    } else if (c === '\n' || c === '\r') {
-      if (c === '\r' && text[i + 1] === '\n') i += 1
-      row.push(field)
-      field = ''
-      rows.push(row)
-      row = []
-    } else field += c
-  }
-  if (field || row.length > 0) rows.push([...row, field])
-  return rows
-}
-
-/**
- * The game's `MinionModifiers` table is a CSV text asset in resources.assets (Unity writes the
- * asset name, a 4-byte length and then the text). `ModifierSet.LoadEffects` builds each effect
- * from the first row of an ID (name, duration, `IsBad`) and adds one attribute modifier per row.
- * `Duration` is in cycles; `PerDay` values are per cycle.
- */
-function readEffectDetails(path: string): EffectDetailRow[] {
-  const bytes = readFileSync(path)
-  const marker = bytes.indexOf('MinionModifiers\0')
-  if (marker < 0) throw new Error('MinionModifiers table not found in resources.assets')
-  const at = (marker + 'MinionModifiers'.length + 3) & ~3
-  const length = bytes.readUInt32LE(at)
-  const [header, ...rows] = parseCsv(bytes.subarray(at + 4, at + 4 + length).toString('utf8'))
-  const col = (name: string) => header!.indexOf(name)
-  const [id, type, attribute, value, units, multiplier, duration, isBad] = [
-    'Id',
-    'Type',
-    'Attribute',
-    'Value',
-    'Units',
-    'Multiplier',
-    'Duration',
-    'IsBad',
-  ].map(col) as [number, number, number, number, number, number, number, number]
-  const effects = new Map<string, EffectDetailRow>()
-  for (const row of rows) {
-    if (row[type] !== 'Effect' || !row[id]) continue
-    let effect = effects.get(row[id]!)
-    if (!effect) {
-      effect = {
-        id: row[id]!,
-        bad: row[isBad] === '1',
-        duration: Number(row[duration] || 0),
-        modifiers: [],
-      }
-      effects.set(effect.id, effect)
-    }
-    if (row[attribute]) {
-      effect.modifiers.push({
-        attribute: row[attribute]!,
-        value: Number(row[value]),
-        units: row[units] || 'Flat',
-        multiplier: row[multiplier] === '1',
-      })
-    }
-  }
-  return [...effects.values()].sort((a, b) => a.id.localeCompare(b.id))
-}
+const elementsList = readElements(dir, strings)
+const ranching = extractRanching({
+  decompDir: decompDir(),
+  gameDataDir: dir,
+  strings,
+  elementName: (id) => elementsList.find((e) => e.id === id)?.name,
+  clean,
+}).data
+if (ranching.gaps.length > 0) console.warn(`ranching gaps:\n${ranching.gaps.join('\n')}`)
 
 const data = {
   source:
@@ -358,13 +53,15 @@ const data = {
   effectDetails: readEffectDetails(join(dir, 'resources.assets')),
   personalities: collect(strings, literals, 'STRINGS.DUPLICANTS.PERSONALITIES.', { exactId: true }),
   geysers: collect(strings, literals, 'STRINGS.CREATURES.SPECIES.GEYSER.', { exactId: true }),
-  elements: readElements(strings),
+  elements: elementsList,
   critters: readCritters(strings),
   techs: collect(strings, literals, 'STRINGS.RESEARCH.TECHS.'),
-  gameSettings: readGameSettings(strings),
+  gameSettings: readGameSettings(strings, literals),
+  ranching,
   ...readSkillTree(strings),
 }
 
 const out = new URL('../src/generated/game-data.json', import.meta.url)
 writeFileSync(out, `${JSON.stringify(data, null, 1)}\n`)
 for (const [k, v] of Object.entries(data)) if (Array.isArray(v)) console.log(`${k}: ${v.length}`)
+console.log(`ranching species: ${ranching.species.length}`)

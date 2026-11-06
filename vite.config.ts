@@ -32,12 +32,7 @@ export default defineConfig({
     overrides: [
       {
         // Over the limit before the rule existed. Remove each entry as its file is split; never add one.
-        files: [
-          'apps/web/src/components/tools/ranching-flow.tsx',
-          'apps/web/src/lib/tools/ranching-data.ts',
-          'apps/web/src/worker/model.ts',
-          'packages/game-data/scripts/extract-game-data.ts',
-        ],
+        files: ['apps/web/src/worker/model.ts'],
         rules: { 'max-lines': 'off' },
       },
       {

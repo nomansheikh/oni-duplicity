@@ -113,6 +113,8 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       return `${who}delete`
     case 'cloneObject':
       return `${who}clone`
+    case 'cloneDuplicant':
+      return `${who}clone`
     case 'deleteDebris':
       return `Delete ${edit.ids.length} loose ${edit.ids.length === 1 ? 'item' : 'items'}`
     case 'setTechResearched':
