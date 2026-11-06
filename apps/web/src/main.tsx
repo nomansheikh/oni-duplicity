@@ -1,6 +1,5 @@
 import { lazy, StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
-import { ThemeProvider } from 'next-themes'
 import { SeedViewer } from '@/components/seed-viewer/seed-viewer'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -17,22 +16,20 @@ const showSeedTest = SeedTest !== null && new URLSearchParams(location.search).h
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider attribute="class" defaultTheme="dark" forcedTheme="dark" enableSystem={false}>
-      <TooltipProvider delayDuration={300}>
-        {showSeedTest && SeedTest ? (
-          <Suspense fallback={null}>
-            <SeedTest />
-          </Suspense>
-        ) : showGallery && Gallery ? (
-          <Suspense fallback={null}>
-            <Gallery />
-          </Suspense>
-        ) : (
-          <App />
-        )}
-        <SeedViewer />
-        <Toaster />
-      </TooltipProvider>
-    </ThemeProvider>
+    <TooltipProvider delayDuration={300}>
+      {showSeedTest && SeedTest ? (
+        <Suspense fallback={null}>
+          <SeedTest />
+        </Suspense>
+      ) : showGallery && Gallery ? (
+        <Suspense fallback={null}>
+          <Gallery />
+        </Suspense>
+      ) : (
+        <App />
+      )}
+      <SeedViewer />
+      <Toaster />
+    </TooltipProvider>
   </StrictMode>,
 )

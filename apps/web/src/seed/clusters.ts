@@ -27,9 +27,9 @@ export interface SeedCluster {
 }
 
 /**
- * The prefixes of clusters verified to generate with the bundled worldgen. Everything else about
- * a cluster comes from the extracted game data. Left out:
- * the Skewed Asteroid event clusters (`KF23-*`) and the developer test clusters.
+ * The prefixes of clusters verified to generate with the bundled worldgen, and worth searching.
+ * Everything else about a cluster comes from the extracted game data. Left out: the developer test
+ * clusters, and the Skewed Asteroid event clusters (`KF23-*`), see `VIEW_ONLY`.
  */
 const GENERATABLE = new Set([
   ...['SNDST-A', 'FRST-A', 'HTFST-A', 'LUSH-A', 'OASIS-A', 'OCAN-A', 'BAD-A', 'S-FRZ', 'VOLCA'],
@@ -41,6 +41,15 @@ const GENERATABLE = new Set([
   ...['PRE-A', 'PRE-C', 'V-PRE-C', 'PRES-A', 'V-PRES-C'],
   ...['AQU-A', 'AQU-C', 'V-AQU-C'],
 ])
+
+/**
+ * The Skewed Asteroid event clusters generate with the bundled worldgen (checked on 12 seeds each
+ * with the finder's own extraction; the failures are template placements, as for any cluster), but
+ * a seed search is meaningless for them: both cluster yamls set `fixedCoordinate: 7`, and
+ * `ColonyDestinationSelectScreen` locks the seed to 7 and disables Shuffle for them. So the viewer
+ * opens their coordinates (a save made from one can show its map) and the finder does not list them.
+ */
+const VIEW_ONLY = new Set(['KF23-A', 'KF23-C'])
 
 export const isSpacedOut = (cluster: SeedCluster) => cluster.requiredDlcIds.includes(SPACED_OUT)
 
@@ -58,9 +67,9 @@ export function clusterGroup(cluster: SeedCluster): string {
 /** Group order: the base game, then the DLCs in the game's order. */
 const GROUP_ORDER = ['', ...worldgenDlcs.map((dlc) => dlc.id)]
 
-/** Grouped as the picker shows them; within a group, in the game's menu order. */
-export const SEED_CLUSTERS: SeedCluster[] = worldgenClusters
-  .filter((cluster) => GENERATABLE.has(cluster.prefix))
+/** Every cluster the viewer can open: the searchable ones and the view-only ones. */
+const VIEWABLE_CLUSTERS: SeedCluster[] = worldgenClusters
+  .filter((cluster) => GENERATABLE.has(cluster.prefix) || VIEW_ONLY.has(cluster.prefix))
   .map((cluster): SeedCluster => ({
     prefix: cluster.prefix,
     layout: cluster.layout,
@@ -69,14 +78,19 @@ export const SEED_CLUSTERS: SeedCluster[] = worldgenClusters
     tags: cluster.tags,
     worlds: cluster.worlds,
   }))
-  .sort(
-    (a, b) =>
-      GROUP_ORDER.indexOf(clusterGroup(a)) - GROUP_ORDER.indexOf(clusterGroup(b)) ||
-      Number(isSpacedOut(a)) - Number(isSpacedOut(b)),
-  )
 
+/** The clusters the finder searches, grouped as the picker shows them; within a group, in the game's menu order. */
+export const SEED_CLUSTERS: SeedCluster[] = VIEWABLE_CLUSTERS.filter(
+  (cluster) => !VIEW_ONLY.has(cluster.prefix),
+).sort(
+  (a, b) =>
+    GROUP_ORDER.indexOf(clusterGroup(a)) - GROUP_ORDER.indexOf(clusterGroup(b)) ||
+    Number(isSpacedOut(a)) - Number(isSpacedOut(b)),
+)
+
+/** A cluster by coordinate prefix, including the view-only ones that `SEED_CLUSTERS` leaves out. */
 export function clusterByPrefix(prefix: string): SeedCluster | undefined {
-  return SEED_CLUSTERS.find((cluster) => cluster.prefix === prefix)
+  return VIEWABLE_CLUSTERS.find((cluster) => cluster.prefix === prefix)
 }
 
 /** How many placements an asteroid remix can replace (`GetMaxNumOfGuaranteedWorldMixings`). */
