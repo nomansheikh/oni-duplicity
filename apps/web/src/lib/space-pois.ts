@@ -1,5 +1,5 @@
-import artifactData from '../data/artifact-pois.json'
-import harvestableData from '../data/harvestable-pois.json'
+import artifactData from '../data/artifact-pois.json' with { type: 'json' }
+import harvestableData from '../data/harvestable-pois.json' with { type: 'json' }
 
 /**
  * Space points of interest in Spaced Out: what the game rolls their capacity and recharge in.

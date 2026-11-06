@@ -7,6 +7,8 @@ export default defineConfig({
   testMatch: '**/*.e2e.ts',
   // Each test loads and saves a whole colony in a worker; the 40 MB save takes a while.
   timeout: 120_000,
+  // On CI, stop the run before the step timeout so the HTML report is still written and uploaded.
+  globalTimeout: process.env.CI ? 30 * 60_000 : 0,
   expect: { timeout: 15_000 },
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),

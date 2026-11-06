@@ -22,7 +22,7 @@ test('tames a wild critter', async ({ page }) => {
   expect(wildness(source)).toBe(100)
 
   await openCritters(page, 'PacuTropical')
-  const row = critterRow(page, '94, 111')
+  const row = critterRow(page, 'PacuTropical', index)
   await expect(row).toContainText('Wild 100%')
   await row.getByRole('button', { name: 'Tame', exact: true }).click()
   await expect(row).toContainText('Tame')
@@ -46,7 +46,7 @@ test('makes a tame critter wild', async ({ page }) => {
   expect(wildness(source)).toBe(0)
 
   await openCritters(page, 'PacuTropical')
-  const row = critterRow(page, '117, 106')
+  const row = critterRow(page, 'PacuTropical', index)
   await expect(row).toContainText('Tame')
   await row.getByRole('button', { name: 'Make wild' }).click()
   await expect(row).toContainText('Wild 100%')
@@ -70,7 +70,7 @@ test('clones a critter next to the original with a fresh id', async ({ page }) =
 
   await openCritters(page, prefab)
   await expect(page.getByRole('row').filter({ hasText: 'Beakon Fry' })).toHaveCount(2)
-  await critterRow(page, '99, 200').getByRole('button', { name: 'Clone' }).click()
+  await critterRow(page, prefab, 0).getByRole('button', { name: 'Clone' }).click()
   await expect(page.getByRole('row').filter({ hasText: 'Beakon Fry' })).toHaveCount(3)
 
   const { save } = await downloadSave(page)
@@ -111,7 +111,7 @@ test('deletes a critter and leaves the rest alone', async ({ page }) => {
 
   await openCritters(page, prefab)
   await expect(page.getByRole('row')).toHaveCount(10)
-  await critterRow(page, '39, 99').getByRole('button', { name: 'Delete' }).click()
+  await critterRow(page, prefab, 1).getByRole('button', { name: 'Delete' }).click()
   await expect(page.getByRole('row')).toHaveCount(9)
 
   const { save } = await downloadSave(page)

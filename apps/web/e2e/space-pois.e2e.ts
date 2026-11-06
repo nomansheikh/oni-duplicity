@@ -10,7 +10,7 @@ test('lists the starmap points of interest', async ({ page }) => {
 
   await openSave(page)
   await goTo(page, 'Space')
-  await expect(page.getByText('Points of interest')).toBeVisible()
+  await expect(page.getByText('Points of interest', { exact: true })).toBeVisible()
   const rows = page.locator('tr[data-poi]')
   await expect(rows).toHaveCount(expected)
 
