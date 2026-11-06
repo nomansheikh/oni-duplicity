@@ -1,4 +1,3 @@
-import type { ComponentType } from 'react'
 import { PageHeader } from '@/components/page-header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { blocker, runnableRules } from '@/lib/tools/seed-builder'
@@ -7,17 +6,13 @@ import { SearchControls } from './builder/search-controls'
 import { SetupBar } from './builder/setup-bar'
 import { useSeedBuilder } from './builder/use-seed-builder'
 import { useSeedSearch } from './builder/use-seed-search'
-import { ResultsStub, type SeedResultsProps } from './results-slot'
+import { ResultsSlot } from './results-slot'
 
 /**
  * Searches world seeds for the geysers and traits you want. Nothing here touches a save, and the
- * generator only loads when Find is clicked. `Results` is where the results list plugs in.
+ * generator only loads when Find is clicked.
  */
-export function SeedFinderPage({
-  Results = ResultsStub,
-}: {
-  Results?: ComponentType<SeedResultsProps>
-}) {
+export function SeedFinderPage() {
   const { state, setState, cluster, selectCluster, selectPreset } = useSeedBuilder()
   const { search, progress, summary, running, find, stop } = useSeedSearch()
   const rules = runnableRules(state)
@@ -45,7 +40,7 @@ export function SeedFinderPage({
           />
         </CardContent>
       </Card>
-      <Results search={search} cluster={cluster} rules={rules} progress={progress} />
+      <ResultsSlot search={search} cluster={cluster} rules={rules} progress={progress} />
     </div>
   )
 }
