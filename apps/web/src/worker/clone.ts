@@ -1,5 +1,6 @@
 import type { SaveGame } from '@oni-duplicity/save-parser'
-import { behavior, cloneValue, data, locate, saveGameObject, splitId } from './model.ts'
+import { behavior, data, saveGameObject, splitId } from './save-helpers.ts'
+import { cloneValue, locate } from './structure.ts'
 
 /** Field name that precedes every state machine's reference to its own duplicant (see below). */
 const SM_MASTER_LABEL = new TextEncoder().encode('masterTarget')

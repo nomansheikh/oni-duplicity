@@ -31,11 +31,6 @@ export default defineConfig({
     options: { typeAware: true, typeCheck: true },
     overrides: [
       {
-        // Over the limit before the rule existed. Remove each entry as its file is split; never add one.
-        files: ['apps/web/src/worker/model.ts'],
-        rules: { 'max-lines': 'off' },
-      },
-      {
         files: ['apps/web/**'],
         plugins: ['react'],
         rules: {
