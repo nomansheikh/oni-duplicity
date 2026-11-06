@@ -6,6 +6,7 @@ import {
   worldgenClusters,
   worldgenTraits,
   worldgenWorlds,
+  zoneTypes,
 } from '../src/index.ts'
 
 test('every cluster has a unique prefix, a real name and exactly one start world', () => {
@@ -55,4 +56,12 @@ test('worlds resolve by path and by id', () => {
   expect(findWorldgenWorld('expansion1::worlds/TerraMoonlet')?.name).toBe('Terrania Asteroid')
   expect(findWorldgenWorld('TerraMoonlet')?.path).toBe('expansion1::worlds/TerraMoonlet')
   for (const world of worldgenWorlds) expect(world.name, world.path).not.toMatch(/^STRINGS\./)
+})
+
+test('the zone types are the ids the generator reports, in enum order', () => {
+  expect(zoneTypes).toHaveLength(new Set(zoneTypes).size)
+  expect(zoneTypes.slice(0, 3)).toEqual(['FrozenWastes', 'CrystalCaverns', 'BoggyMarsh'])
+  for (const id of ['OilField', 'ToxicJungle', 'IceCaves', 'PrehistoricGarden', 'KelpForest']) {
+    expect(zoneTypes, id).toContain(id)
+  }
 })

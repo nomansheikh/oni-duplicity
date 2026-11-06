@@ -106,6 +106,11 @@ export const worldgenDlcs: WorldgenDlc[] = data.worldgen.dlcs
 export const mixingSettings = data.worldgen.mixing as MixingSetting[]
 /** The Mixing tab's sections in the game's order: DLC content, asteroid remix, biome remix. */
 export const mixingSections = data.worldgen.mixingSections as MixingSection[]
+/**
+ * Every zone type id the generator can emit (`SubWorld.ZoneType`), as a seed result's biome grid
+ * names them, e.g. `OilField` and `ToxicJungle`.
+ */
+export const zoneTypes: string[] = data.worldgen.zoneTypes
 
 export const findWorldgenCluster = (prefix: string): WorldgenCluster | undefined =>
   worldgenClusters.find((cluster) => cluster.prefix === prefix)
