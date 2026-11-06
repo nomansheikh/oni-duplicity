@@ -1,75 +1,18 @@
-import { expect, test, type Page } from '@playwright/test'
-import type { SaveGame } from '@oni-duplicity/save-parser'
+import { expect, test } from '@playwright/test'
+import { diffSaves, downloadSave, expectOnlyChanged, GALAXY, group, original } from './helpers.ts'
 import {
-  behavior,
-  diffSaves,
-  downloadSave,
-  expectOnlyChanged,
-  GALAXY,
-  goTo,
-  group,
-  openSave,
-  original,
-} from './helpers.ts'
-
-type Obj = SaveGame['gameObjects'][number]['gameObjects'][number]
-
-const WILDNESS = 'Wildness'
-
-/** Opens the critters page filtered to one prefab (the search matches the prefab ID). */
-async function openCritters(page: Page, prefab: string) {
-  await openSave(page)
-  await goTo(page, 'Critters')
-  await expect(page.getByText(/\d+ critters across \d+ families/)).toBeVisible()
-  await page.getByPlaceholder('Search critters').fill(prefab)
-}
-
-/** The table row of the critter shown at this rounded position, e.g. `94, 111`. */
-function critterRow(page: Page, position: string) {
-  return page
-    .getByRole('row')
-    .filter({ has: page.getByRole('cell', { name: position, exact: true }) })
-}
-
-const amounts = (obj: Obj) =>
-  (behavior(obj, 'Klei.AI.Modifiers')!.extraData as { amounts: { name: string; value: unknown }[] })
-    .amounts
-
-const wildness = (obj: Obj) =>
-  (amounts(obj).find((a) => a.name === WILDNESS)!.value as { value: number }).value
-
-const instanceId = (obj: Obj) => Number(behavior(obj, 'KPrefabID')!.templateData!.InstanceID)
-
-const nextUniqueId = (save: SaveGame) => Number(save.settings.nextUniqueID)
-
-/** The save with one prefab group replaced by `objects`, for diffing everything else. */
-function withGroup(save: SaveGame, prefab: string, objects: Obj[]): SaveGame {
-  return {
-    ...save,
-    gameObjects: save.gameObjects.map((g) =>
-      g.name === prefab ? { ...g, gameObjects: objects } : g,
-    ),
-  }
-}
-
-/** The save without one prefab group, for asserting that every other group is untouched. */
-function withoutGroup(save: SaveGame, prefab: string): SaveGame {
-  return { ...save, gameObjects: save.gameObjects.filter((g) => g.name !== prefab) }
-}
-
-/** Drops every `InstanceID`, which a clone gets fresh (also on what it stores). */
-function stripIds(value: unknown): unknown {
-  if (value instanceof Uint8Array) return value
-  if (Array.isArray(value)) return value.map(stripIds)
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value)
-        .filter(([key]) => key !== 'InstanceID')
-        .map(([key, v]) => [key, stripIds(v)]),
-    )
-  }
-  return value
-}
+  amounts,
+  critterRow,
+  instanceId,
+  nextUniqueId,
+  openCritters,
+  stripIds,
+  WILDNESS,
+  wildness,
+  withGroup,
+  withoutGroup,
+  type Obj,
+} from './critters-helpers.ts'
 
 test('tames a wild critter', async ({ page }) => {
   // The first tropical pacu, at 94, 111, is wild.
@@ -178,49 +121,4 @@ test('deletes a critter and leaves the rest alone', async ({ page }) => {
   // Every other prefab group, and everything outside the objects, is untouched.
   expect(diffSaves(withoutGroup(before, prefab), withoutGroup(save, prefab))).toEqual([])
   expect(nextUniqueId(save)).toBe(nextUniqueId(before))
-})
-
-const slot = (obj: Obj, id: string) => amounts(obj).findIndex((a) => a.name === id)
-const stored = (obj: Obj, id: string) =>
-  (amounts(obj).find((a) => a.name === id)!.value as { value: number }).value
-
-test('edits a DLC amount within its maximum and keeps unconfirmed ones read only', async ({
-  page,
-}) => {
-  // The second sea turtle (39, 99) has scale growth, which the game caps at 100.
-  const prefab = 'SeaTurtle'
-  const index = 1
-  const before = original(GALAXY)
-  const source = group(before, prefab)[index]!
-  const growth = slot(source, 'ScaleGrowth')
-  expect(growth).toBeGreaterThanOrEqual(0)
-  expect(stored(source, 'ScaleGrowth')).not.toBe(42)
-
-  await openCritters(page, prefab)
-  await critterRow(page, '39, 99').getByRole('button', { name: 'Edit stats' }).click()
-
-  // Hit points have two answers in the game data, so they are shown but locked.
-  await expect(page.getByLabel('Health', { exact: true })).toBeDisabled()
-  await expect(page.getByText(/Read only\./).first()).toBeVisible()
-
-  // Typing past the maximum is held at 100, a value inside the range is kept as typed.
-  const field = page.getByLabel('Scale Growth', { exact: true })
-  await field.fill('500')
-  await field.blur()
-  await expect(field).toHaveValue('100')
-  await field.fill('42')
-  await field.blur()
-  await expect(field).toHaveValue('42')
-
-  // The sheet covers the download button until it closes.
-  await page.keyboard.press('Escape')
-  await expect(field).toBeHidden()
-
-  const { save } = await downloadSave(page)
-  expect(stored(group(save, prefab)[index]!, 'ScaleGrowth')).toBe(42)
-  expectOnlyChanged(before, save, [
-    new RegExp(
-      `^objects/${prefab}/${index}/Klei\\.AI\\.Modifiers/extraData/amounts/${growth}/value/value$`,
-    ),
-  ])
 })
