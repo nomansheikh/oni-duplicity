@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
-import { describeSeed } from '@/seed/details/describe-seed'
+import { describeSeed, SeedUnsupportedError } from '@/seed/details/describe-seed'
 import type { SeedDetail } from '@/seed/details/types'
 
 export type DetailState =
   | { status: 'loading' }
   | { status: 'ready'; detail: SeedDetail }
-  | { status: 'error'; message: string }
+  /** `unsupported`: no retry will help; the coordinate is outside what the generator makes. */
+  | { status: 'error'; message: string; unsupported: boolean }
 
 const LOADING: DetailState = { status: 'loading' }
 
@@ -26,6 +27,7 @@ export function useSeedDetail(coordinate: string): { state: DetailState; retry: 
           state: {
             status: 'error',
             message: error instanceof Error ? error.message : 'Could not generate this seed',
+            unsupported: error instanceof SeedUnsupportedError,
           },
         }),
     )

@@ -1,3 +1,4 @@
+import { checkCoordinate } from './coordinate.ts'
 import type { DescribeMessage, DescribeReply } from './protocol.ts'
 import type { SeedDetail } from './types.ts'
 
@@ -6,6 +7,9 @@ export const RECYCLE_AFTER = 30
 /** The generator holds a few hundred MB, so an idle worker is stopped. */
 export const IDLE_MS = 60_000
 const KEEP = 2
+
+/** The coordinate is malformed or outside what the bundled generator makes. */
+export class SeedUnsupportedError extends Error {}
 
 interface Pending {
   resolve: (detail: SeedDetail) => void
@@ -56,6 +60,9 @@ function spawn(): Worker {
  * The last couple of seeds are kept, so reopening one is instant.
  */
 export function describeSeed(coordinate: string): Promise<SeedDetail> {
+  const check = checkCoordinate(coordinate)
+  if (!check.ok) return Promise.reject(new SeedUnsupportedError(check.message))
+  coordinate = check.parsed.coordinate
   const cached = recent.get(coordinate)
   if (cached) return Promise.resolve(cached)
   clearTimeout(idleTimer)

@@ -26,6 +26,8 @@ self.onmessage = async (event: MessageEvent<DescribeMessage>) => {
     const map = worldgen.generate(coordinate) as unknown as RawDetailMap | { error: string }
     if ('error' in map) throw new Error(map.error)
     if (map.failure) throw new Error('This seed does not generate')
+    if (map.coordinate !== coordinate)
+      throw new Error('The generator made a different seed than asked for')
     const detail = describeMap(map, worldgen.version())
     reply({ type: 'detail', id, detail }, detailBuffers(detail))
   } catch (error) {

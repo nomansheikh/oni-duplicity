@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { CompareLink } from '@/components/seed-viewer/compare-link'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { engineNotice, type SeedResult } from '@/seed/result'
+import type { SeedDetail } from '@/seed/details/types'
+import { engineNotice } from '@/seed/result'
 import type { SeedRule } from '@/seed/rules'
 import { asteroidLabel } from '../results/labels'
 import { RuleLists } from '../results/rule-lists'
@@ -13,55 +15,74 @@ import { useSeedDetail } from './use-seed-detail'
 const STARMAP = 'starmap'
 const RULES = 'rules'
 
-/** Everything about a seed, generated on demand: its asteroids, starmap and the rules it met. */
-export function SeedDetails({ result, rules }: { result: SeedResult; rules: SeedRule[] }) {
-  const { state, retry } = useSeedDetail(result.coordinate)
-  const start = result.asteroids.find((a) => a.isStart) ?? result.asteroids[0]
-  const [tab, setTab] = useState(start?.id ?? RULES)
+/** How a search result met the rules; the Rules tab only shows for a seed that came from one. */
+export interface RuleOutcome {
+  rules: SeedRule[]
+  matched: string[]
+  missed: string[]
+  notice: string
+}
 
+/** Everything about a seed, generated on demand: its asteroids, starmap and, if searched, its rules. */
+export function SeedDetails({
+  coordinate,
+  outcome,
+}: {
+  coordinate: string
+  outcome?: RuleOutcome
+}) {
+  const { state, retry } = useSeedDetail(coordinate)
   if (state.status === 'error') {
     return (
-      <div className="flex flex-col items-start gap-2">
+      <div className="flex flex-col items-start gap-2" role="alert">
         <p className="type-small text-destructive">{state.message}</p>
-        <Button variant="secondary" size="sm" onClick={retry}>
-          Try again
-        </Button>
+        {state.unsupported ? (
+          <p className="type-small text-muted-foreground">
+            The seed can still be looked at on Mapsnotincluded.
+          </p>
+        ) : (
+          <Button variant="secondary" size="sm" onClick={retry}>
+            Try again
+          </Button>
+        )}
+        <CompareLink coordinate={coordinate} />
       </div>
     )
   }
-  const detail = state.status === 'ready' ? state.detail : undefined
+  if (state.status === 'loading') return <Loading />
+  return <Loaded detail={state.detail} outcome={outcome} />
+}
+
+function Loaded({ detail, outcome }: { detail: SeedDetail; outcome?: RuleOutcome }) {
+  const start = detail.asteroids.find((a) => a.isStart) ?? detail.asteroids[0]
+  const [tab, setTab] = useState(start?.id ?? STARMAP)
   return (
     <Tabs value={tab} onValueChange={setTab}>
       <TabsList className="h-auto flex-wrap justify-start">
-        {result.asteroids.map((a) => (
+        {detail.asteroids.map((a) => (
           <TabsTrigger key={a.id} value={a.id}>
             {asteroidLabel(a.id)}
           </TabsTrigger>
         ))}
         <TabsTrigger value={STARMAP}>Starmap</TabsTrigger>
-        <TabsTrigger value={RULES}>Rules</TabsTrigger>
+        {outcome && <TabsTrigger value={RULES}>Rules</TabsTrigger>}
       </TabsList>
-      {result.asteroids.map((a) => {
-        const asteroid = detail?.asteroids.find((d) => d.id === a.id)
-        return (
-          <TabsContent key={a.id} value={a.id}>
-            {detail && asteroid ? (
-              <AsteroidView key={a.id} detail={detail} asteroid={asteroid} />
-            ) : (
-              <Loading />
-            )}
-          </TabsContent>
-        )
-      })}
+      {detail.asteroids.map((a) => (
+        <TabsContent key={a.id} value={a.id}>
+          <AsteroidView detail={detail} asteroid={a} />
+        </TabsContent>
+      ))}
       <TabsContent value={STARMAP}>
-        {detail ? <StarmapView detail={detail} /> : <Loading />}
+        <StarmapView detail={detail} />
       </TabsContent>
-      <TabsContent value={RULES} className="flex flex-col gap-2">
-        <RuleLists rules={rules} matched={result.matched} missed={result.missed} />
-        <p className="type-caption text-muted-foreground">
-          {result.notice || engineNotice(result.engineBuild)}
-        </p>
-      </TabsContent>
+      {outcome && (
+        <TabsContent value={RULES} className="flex flex-col gap-2">
+          <RuleLists rules={outcome.rules} matched={outcome.matched} missed={outcome.missed} />
+          <p className="type-caption text-muted-foreground">
+            {outcome.notice || engineNotice(detail.engineBuild)}
+          </p>
+        </TabsContent>
+      )}
     </Tabs>
   )
 }

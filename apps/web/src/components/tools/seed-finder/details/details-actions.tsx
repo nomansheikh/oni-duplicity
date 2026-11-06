@@ -1,7 +1,7 @@
-import { Check, Copy, ExternalLink } from 'lucide-react'
+import { Check, Copy } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { mapsLink } from '../results/labels'
+import { CompareLink } from '@/components/seed-viewer/compare-link'
 
 /** "Copy code" and a quieter link to compare the seed on Mapsnotincluded. */
 export function DetailsActions({ coordinate }: { coordinate: string }) {
@@ -21,12 +21,7 @@ export function DetailsActions({ coordinate }: { coordinate: string }) {
         {copied ? <Check /> : <Copy />}
         {copied ? 'Copied' : 'Copy code'}
       </Button>
-      <Button variant="link" size="xs" asChild>
-        <a href={mapsLink(coordinate)} target="_blank" rel="noreferrer">
-          <ExternalLink />
-          Compare on Mapsnotincluded
-        </a>
-      </Button>
+      <CompareLink coordinate={coordinate} />
     </div>
   )
 }

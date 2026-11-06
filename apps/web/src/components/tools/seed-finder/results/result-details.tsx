@@ -34,7 +34,16 @@ export function ResultDetails({ rank, result, rules, onClose }: Props) {
               </DialogDescription>
             </DialogHeader>
             <div className="overflow-y-auto bg-panel p-4">
-              <SeedDetails key={result.coordinate} result={result} rules={rules} />
+              <SeedDetails
+                key={result.coordinate}
+                coordinate={result.coordinate}
+                outcome={{
+                  rules,
+                  matched: result.matched,
+                  missed: result.missed,
+                  notice: result.notice,
+                }}
+              />
             </div>
           </>
         )}

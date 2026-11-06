@@ -1,13 +1,13 @@
-import { Check, Copy, ExternalLink } from 'lucide-react'
+import { Check, Copy } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { ViewSeedButton } from '@/components/seed-viewer/view-seed-button'
+import { CompareLink } from '@/components/seed-viewer/compare-link'
 import { Button } from '@/components/ui/button'
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
 import type { Summary } from '@/worker/model'
 
-const MAPS_NOT_INCLUDED = 'https://mapsnotincluded.org/map-explorer/'
-
-/** The world's settings coordinate, as the game's pause screen shows it, with a link to its map. */
+/** The world's settings coordinate, as the game's pause screen shows it, with a way to view its map. */
 export function SeedCoordinate({ summary }: { summary: Summary }) {
   const [copied, setCopied] = useState(false)
   const seed = summary.seedCoordinate
@@ -31,7 +31,7 @@ export function SeedCoordinate({ summary }: { summary: Summary }) {
               {seed.coordinate}
             </ItemDescription>
             <ItemDescription className="type-caption line-clamp-none">
-              Story traits are not stored in a save, so the link assumes none were guaranteed when
+              Story traits are not stored in a save, so the map assumes none were guaranteed when
               the world was made.
             </ItemDescription>
           </>
@@ -46,15 +46,8 @@ export function SeedCoordinate({ summary }: { summary: Summary }) {
           <Button type="button" variant="outline" size="sm" onClick={() => void copy()}>
             {copied ? <Check /> : <Copy />} {copied ? 'Copied' : 'Copy'}
           </Button>
-          <Button variant="secondary" size="sm" asChild>
-            <a
-              href={`${MAPS_NOT_INCLUDED}${encodeURIComponent(seed.coordinate)}`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <ExternalLink /> Open on Mapsnotincluded
-            </a>
-          </Button>
+          <ViewSeedButton coordinate={seed.coordinate} variant="secondary" size="sm" />
+          <CompareLink coordinate={seed.coordinate} />
         </ItemActions>
       )}
     </Item>

@@ -7,6 +7,7 @@ import { SetupBar } from './builder/setup-bar'
 import { useSeedBuilder } from './builder/use-seed-builder'
 import { useSeedSearch } from './builder/use-seed-search'
 import { ResultsSlot } from './results-slot'
+import { SeedLookup } from './seed-lookup'
 
 /**
  * Searches world seeds for the geysers and traits you want. Nothing here touches a save, and the
@@ -40,6 +41,7 @@ export function SeedFinderPage() {
           />
         </CardContent>
       </Card>
+      <SeedLookup />
       <ResultsSlot search={search} cluster={cluster} rules={rules} progress={progress} />
     </div>
   )

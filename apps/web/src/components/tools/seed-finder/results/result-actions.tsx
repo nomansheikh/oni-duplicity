@@ -1,9 +1,10 @@
-import { Check, Copy, ExternalLink } from 'lucide-react'
+import { Check, Copy } from 'lucide-react'
 import { useState } from 'react'
+import { ViewSeedButton } from '@/components/seed-viewer/view-seed-button'
 import { Button } from '@/components/ui/button'
-import { mapsLink } from './labels'
+import { CompareLink } from '@/components/seed-viewer/compare-link'
 
-/** "Copy code" and "Open on Mapsnotincluded". */
+/** "View seed" in the app, "Copy code", and a quiet link to compare on Mapsnotincluded. */
 export function ResultActions({
   coordinate,
   size = 'sm',
@@ -22,17 +23,13 @@ export function ResultActions({
     }
   }
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button variant="secondary" size={size} onClick={copy}>
+    <div className="flex flex-wrap items-center gap-2">
+      <ViewSeedButton coordinate={coordinate} variant="secondary" size={size} />
+      <Button variant="outline" size={size} onClick={copy}>
         {copied ? <Check /> : <Copy />}
         {copied ? 'Copied' : 'Copy code'}
       </Button>
-      <Button variant="outline" size={size} asChild>
-        <a href={mapsLink(coordinate)} target="_blank" rel="noreferrer">
-          <ExternalLink />
-          Open on Mapsnotincluded
-        </a>
-      </Button>
+      <CompareLink coordinate={coordinate} />
     </div>
   )
 }

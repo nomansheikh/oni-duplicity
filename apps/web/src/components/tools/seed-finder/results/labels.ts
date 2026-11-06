@@ -37,7 +37,3 @@ export function ruleLabel(rule: SeedRule): string {
       return `Contains ${asteroidLabel(rule.asteroid)}`
   }
 }
-
-export function mapsLink(coordinate: string): string {
-  return `https://mapsnotincluded.org/map-explorer/${encodeURIComponent(coordinate)}`
-}
