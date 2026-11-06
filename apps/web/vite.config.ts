@@ -21,7 +21,7 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(version),
     __APP_COMMIT__: JSON.stringify(commit),
   },
-  // Relative asset paths so the build works under a GitHub Pages subpath.
+  // Relative asset paths, so the build works at any path (the site root, or a copy in a subfolder).
   base: './',
   plugins: lazyPlugins(() => [react(), tailwindcss()]),
   resolve: {
