@@ -26,7 +26,7 @@ const activeCount = (levels: MixingLevels) => Object.values(levels).filter((v) =
 
 /**
  * DLC mixing for the chosen cluster, offering only what the game offers for it. The levels go
- * into the coordinate's mixing code, so Copy code and the Mapsnotincluded link get the same map.
+ * into the coordinate's mixing code, so Copy code and the seed viewer get the same map.
  */
 export function MixingPicker({
   cluster,

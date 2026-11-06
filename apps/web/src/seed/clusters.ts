@@ -27,8 +27,8 @@ export interface SeedCluster {
 }
 
 /**
- * The prefixes of clusters verified to generate with the bundled worldgen and to match
- * Mapsnotincluded. Everything else about a cluster comes from the extracted game data. Left out:
+ * The prefixes of clusters verified to generate with the bundled worldgen. Everything else about
+ * a cluster comes from the extracted game data. Left out:
  * the Skewed Asteroid event clusters (`KF23-*`) and the developer test clusters.
  */
 const GENERATABLE = new Set([
