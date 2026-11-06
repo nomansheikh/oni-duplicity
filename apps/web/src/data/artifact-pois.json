@@ -1,0 +1,84 @@
+[
+  {
+    "id": "GravitasSpaceStation1",
+    "name": "Destroyed Satellite",
+    "recharge": {
+      "min": 30000,
+      "max": 60000
+    },
+    "destroyOnHarvest": false
+  },
+  {
+    "id": "GravitasSpaceStation2",
+    "name": "Demolished Rocket",
+    "recharge": {
+      "min": 30000,
+      "max": 60000
+    },
+    "destroyOnHarvest": false
+  },
+  {
+    "id": "GravitasSpaceStation3",
+    "name": "Ruined Rocket",
+    "recharge": {
+      "min": 30000,
+      "max": 60000
+    },
+    "destroyOnHarvest": false
+  },
+  {
+    "id": "GravitasSpaceStation4",
+    "name": "Retired Planetary Excursion Module",
+    "recharge": {
+      "min": 30000,
+      "max": 60000
+    },
+    "destroyOnHarvest": false
+  },
+  {
+    "id": "GravitasSpaceStation5",
+    "name": "Destroyed Satellite",
+    "recharge": {
+      "min": 30000,
+      "max": 60000
+    },
+    "destroyOnHarvest": false
+  },
+  {
+    "id": "GravitasSpaceStation6",
+    "name": "Annihilated Satellite",
+    "recharge": {
+      "min": 30000,
+      "max": 60000
+    },
+    "destroyOnHarvest": false
+  },
+  {
+    "id": "GravitasSpaceStation7",
+    "name": "Wrecked Space Shuttle",
+    "recharge": {
+      "min": 30000,
+      "max": 60000
+    },
+    "destroyOnHarvest": false
+  },
+  {
+    "id": "GravitasSpaceStation8",
+    "name": "Obsolete Space Station Module",
+    "recharge": {
+      "min": 30000,
+      "max": 60000
+    },
+    "destroyOnHarvest": false
+  },
+  {
+    "id": "RussellsTeapot",
+    "name": "Russell's Teapot",
+    "recharge": {
+      "min": 30000,
+      "max": 60000
+    },
+    "artifact": "artifact_TeaPot",
+    "destroyOnHarvest": true
+  }
+]

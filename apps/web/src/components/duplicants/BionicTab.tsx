@@ -12,6 +12,7 @@ import {
 import { fmt, humanize } from '@/lib/format'
 import { saveClient } from '@/lib/save-client'
 import type { BionicOverview } from '@/worker/bionic'
+import { Charge } from './BionicCharge'
 import { Nothing, Panel } from './tabs'
 
 // Mirrors `Electrobank.capacity` and `RemoteWorkerCapacitor.CAPACITY_J` (see worker/bionic.ts).
@@ -22,24 +23,6 @@ const boosterName = (prefab: string) => humanize(prefab.replace(/^Booster_/, '')
 
 const bankState = (prefab: string) =>
   prefab === 'EmptyElectrobank' ? 'Empty' : prefab === 'GarbageElectrobank' ? 'Spent' : 'Charged'
-
-function Charge({ joules, capacity }: { joules: number; capacity: number }) {
-  return (
-    <div className="flex items-center gap-3">
-      <Progress
-        variant="gauge"
-        tone="good"
-        value={joules}
-        max={capacity}
-        overflow={Math.max(0, joules - capacity)}
-        className="w-40"
-      />
-      <span className="type-small tabular-nums">
-        {capacity >= 1000 ? `${fmt(joules / 1000, 1)} kJ` : `${fmt(joules, 1)} J`}
-      </span>
-    </div>
-  )
-}
 
 export function BionicTab({ dupeId }: { dupeId: string }) {
   const [overview, setOverview] = useState<BionicOverview | null>(null)
@@ -78,10 +61,7 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
                   <TableCell className="tabular-nums">{slot}</TableCell>
                   <TableCell>
                     {booster ? (
-                      <span className="flex items-center gap-2">
-                        {boosterName(booster.prefab)}
-                        <Badge variant="secondary">{booster.prefab}</Badge>
-                      </span>
+                      boosterName(booster.prefab)
                     ) : (
                       <span className="text-muted-foreground">{locked ? 'Locked' : 'Empty'}</span>
                     )}
@@ -124,7 +104,6 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-20">Place</TableHead>
-                <TableHead>Bank</TableHead>
                 <TableHead>State</TableHead>
                 <TableHead>Charge</TableHead>
               </TableRow>
@@ -137,10 +116,13 @@ export function BionicTab({ dupeId }: { dupeId: string }) {
                   return (
                     <TableRow key={i}>
                       <TableCell className="type-body tabular-nums">{i + 1}</TableCell>
-                      <TableCell className="type-small">
-                        {bank?.prefab ?? <span className="text-muted-foreground">Empty place</span>}
+                      <TableCell>
+                        {bank ? (
+                          bankState(bank.prefab)
+                        ) : (
+                          <span className="text-muted-foreground">Empty place</span>
+                        )}
                       </TableCell>
-                      <TableCell>{bank ? bankState(bank.prefab) : ''}</TableCell>
                       <TableCell>
                         {!bank || bank.charge === null ? (
                           <span className="text-muted-foreground">{bank ? 'None' : ''}</span>
