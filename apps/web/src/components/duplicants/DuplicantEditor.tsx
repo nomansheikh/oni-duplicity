@@ -93,6 +93,10 @@ export function DuplicantEditor({
           />
           <div className="min-w-0 space-y-1">
             <CardTitle className="type-h1">{dupe.name}</CardTitle>
+            <CardDescription className="type-small">
+              Age {dupe.age} {dupe.age === 1 ? 'cycle' : 'cycles'} · arrived in cycle{' '}
+              {Math.round(dupe.arrivalTime) + 1}
+            </CardDescription>
             <CardDescription className="type-small line-clamp-2">
               {dupe.personality.name}
               {dupe.personality.desc && ` · ${dupe.personality.desc}`}

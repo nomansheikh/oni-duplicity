@@ -193,7 +193,12 @@ export function DuplicantsPage({
                         />
                       </ItemMedia>
                       <ItemContent className="gap-2">
-                        <ItemTitle className="type-h3 normal-case">{d.name}</ItemTitle>
+                        <ItemTitle className="type-h3 normal-case">
+                          {d.name}
+                          <span className="type-caption text-muted-foreground">
+                            {d.age} {d.age === 1 ? 'cycle' : 'cycles'}
+                          </span>
+                        </ItemTitle>
                         <ItemDescription className="grid grid-cols-[3.5rem_1fr] items-center gap-x-2 gap-y-1 type-caption">
                           Health
                           <Progress
