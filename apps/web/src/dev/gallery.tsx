@@ -1,5 +1,6 @@
 import { BasicsSections } from './gallery-basics'
 import { FormSections } from './gallery-forms'
+import { SeedResultsSection } from './gallery-seed-results'
 import { OverlaySections } from './gallery-overlays'
 
 export default function Gallery() {
@@ -10,6 +11,7 @@ export default function Gallery() {
       <BasicsSections />
       <FormSections />
       <OverlaySections />
+      <SeedResultsSection />
     </div>
   )
 }
