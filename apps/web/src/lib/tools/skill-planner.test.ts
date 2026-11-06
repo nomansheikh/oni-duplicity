@@ -5,10 +5,10 @@ import {
   cleanPlan,
   nodeState,
   removeFromPlan,
-  skillsFor,
   summarizePlan,
 } from './skill-planner'
-import { skillConstants } from './skill-tree-data'
+import { skillsFor } from './skill-data'
+import { experienceForPoints, pointsForExperience } from './skill-math'
 
 const base = skillsFor({ model: 'Minion', dlcIds: [] })
 const spaced = skillsFor({ model: 'Minion', dlcIds: ['EXPANSION1_ID'] })
@@ -73,7 +73,6 @@ describe('plan editing', () => {
 })
 
 describe('summarizePlan', () => {
-  const K = skillConstants
   const run = (plan: string[], mastered: string[], interests: string[], experience: number) =>
     summarizePlan({
       skills: base,
@@ -106,13 +105,13 @@ describe('summarizePlan', () => {
   it('needs the experience that earns the points', () => {
     const s = run(['Mining2'], ['Mining1'], [], 0)
     expect(s.pointsAfter).toBe(2)
-    expect(s.experienceNeeded).toBe(K.experienceForPoints(2))
+    expect(s.experienceNeeded).toBe(experienceForPoints(2))
     expect(s.experienceMissing).toBe(s.experienceNeeded)
     expect(run(['Mining2'], ['Mining1'], [], 1e9).experienceMissing).toBe(0)
   })
 
   it('reports points to spend now', () => {
-    const xp = K.experienceForPoints(4)
-    expect(run([], ['Mining1'], [], xp).pointsAvailableNow).toBe(K.pointsForExperience(xp) - 1)
+    const xp = experienceForPoints(4)
+    expect(run([], ['Mining1'], [], xp).pointsAvailableNow).toBe(pointsForExperience(xp) - 1)
   })
 })

@@ -32,12 +32,7 @@ export default defineConfig({
     overrides: [
       {
         // Over the limit before the rule existed. Remove each entry as its file is split; never add one.
-        files: [
-          'apps/web/src/components/tools/skill-planner-page.tsx',
-          'apps/web/src/lib/tools/skill-planner.ts',
-          'apps/web/src/lib/tools/skill-tree-data.ts',
-          'apps/web/src/worker/model.ts',
-        ],
+        files: ['apps/web/src/worker/model.ts'],
         rules: { 'max-lines': 'off' },
       },
       {

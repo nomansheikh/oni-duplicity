@@ -12,6 +12,7 @@
  */
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { readSkillTree } from './skills/index.ts'
 import { extractRanching } from './ranching/extract-ranching.ts'
 import { readAssemblyLiterals } from './extract/assembly.ts'
 import { clean, collect, sdbmLower } from './extract/collect.ts'
@@ -57,6 +58,7 @@ const data = {
   techs: collect(strings, literals, 'STRINGS.RESEARCH.TECHS.'),
   gameSettings: readGameSettings(strings, literals),
   ranching,
+  ...readSkillTree(strings),
 }
 
 const out = new URL('../src/generated/game-data.json', import.meta.url)

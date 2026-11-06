@@ -74,7 +74,7 @@ Generated, never hand-typed. `vp run extract-game-data` reads a local game insta
 | `Managed/Assembly-CSharp.dll`                  | Exact IDs (for example `BingeEater`), read from the assembly's UTF-16 string literals |
 | `StreamingAssets/elements/*.yaml`              | Elements and their SimHashes                                                          |
 
-Coverage: traits, attributes, skill groups, amounts, effects, personalities, geysers, elements, critters, techs and game settings. Geyser types and their ranges (output, eruption and activity timing) are floats in code, which the extractor cannot read, so `src/geyser-types.ts` transcribes them from `GeyserGenericConfig`; a test checks them against every geyser in the fixtures. Skills come from [konove/oni-save-parser](https://github.com/konove/oni-save-parser) (MIT, attributed in `src/skills.ts`). The assembly is only read locally; decompiled code is never committed.
+Coverage: traits, attributes, skill groups, amounts, effects, personalities, geysers, elements, critters, techs and game settings. Geyser types and their ranges (output, eruption and activity timing) are floats in code, which the extractor cannot read, so `src/geyser-types.ts` transcribes them from `GeyserGenericConfig`; a test checks them against every geyser in the fixtures. The skill tree (skills, tiers, prerequisites, perks, DLC variants, experience and morale tuning) is read from the decompiled `Database/Skills.cs`, `SkillPerks.cs`, `SkillGroups.cs` and `TUNING` by `scripts/skills/`; set `ONI_DECOMP` to the decompile's `Assembly-CSharp` folder when regenerating, and `src/skills.ts` derives the skill id list from it. The assembly is only read locally; decompiled code is never committed.
 
 ## `apps/web`
 

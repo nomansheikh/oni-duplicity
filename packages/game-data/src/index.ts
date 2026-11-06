@@ -18,6 +18,16 @@ export {
 } from './ranching.ts'
 export { MinionSkills, type MinionSkill } from './skills.ts'
 export {
+  skillTree,
+  type ConditionalPerk,
+  type SkillCond,
+  type SkillDef,
+  type SkillGroupData,
+  type SkillPerk,
+  type SkillTreeData,
+  type SkillTuning,
+} from './skill-tree.ts'
+export {
   geyserTypes,
   resample,
   unresample,
