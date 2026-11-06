@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { AppFooter } from '@/components/app-footer'
 import { AppTabs } from '@/components/app-sidebar'
 import { LoadError, LoadingSave, OpenSave } from '@/components/load-states'
 import { SaveDialog } from '@/components/save-dialog'
@@ -35,7 +36,6 @@ export default function App() {
   const dirty = useDirtyPages(editStatus.edits, revision)
   const fileInput = useRef<HTMLInputElement>(null)
   const [allowUnverified, setAllowUnverified] = useAllowUnverified()
-
   const refresh = useCallback(async () => {
     const { summary, views } = await fetchViews()
     setState({ status: 'loaded', summary })
@@ -170,6 +170,7 @@ export default function App() {
               </Body>
             </div>
           </main>
+          <AppFooter />
         </AppTabs>
         {loaded && (
           <SaveDialog
