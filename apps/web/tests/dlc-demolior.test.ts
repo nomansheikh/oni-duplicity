@@ -33,7 +33,9 @@ describe.skipIf(!konove)('Demolior (Konove, Spaced Out)', () => {
     expect(view.minImpactCycle).toBeCloseTo(view.currentCycle + MIN_CYCLES_BEFORE_IMPACT, 6)
   })
 
-  test('postponing changes only eventStartTime, ArrivalTime and Speed', () => {
+  // Parses the save twice, writes and re-reads it, then compares the whole tree: 1.5 s on a laptop,
+  // 4.3 s on the CI runner, which is too close to the 5 s default.
+  test('postponing changes only eventStartTime, ArrivalTime and Speed', { timeout: 60_000 }, () => {
     const before = save()
     const after = save()
     const view = readDemolior(before)!
