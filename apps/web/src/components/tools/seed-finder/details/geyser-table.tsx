@@ -14,6 +14,14 @@ import { geyserStats } from '@/seed/details/geyser-stats'
 import type { DetailGeyser } from '@/seed/details/types'
 import { fmtRate } from './format-rate'
 
+// Cells wrap instead of running off the edge of a narrow dialog.
+const CELL = 'whitespace-normal align-top'
+const HEAD = 'whitespace-normal align-bottom'
+
+function Sub({ children }: { children: React.ReactNode }) {
+  return <div className="type-caption text-muted-foreground">{children}</div>
+}
+
 /** The geysers of an asteroid with what their rolls give. Oil reservoirs are not geysers. */
 export function GeyserTable({ geysers }: { geysers: DetailGeyser[] }) {
   const rows = geysers
@@ -28,55 +36,50 @@ export function GeyserTable({ geysers }: { geysers: DetailGeyser[] }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Geyser</TableHead>
-              <TableHead>Emits</TableHead>
-              <TableHead className="text-right">Output while erupting</TableHead>
-              <TableHead className="text-right">Average output</TableHead>
-              <TableHead>Eruption</TableHead>
-              <TableHead>Active</TableHead>
-              <TableHead className="text-right">Cell</TableHead>
+              <TableHead className={HEAD}>Geyser</TableHead>
+              <TableHead className={HEAD}>Emits</TableHead>
+              <TableHead className={`${HEAD} text-right`}>Erupting</TableHead>
+              <TableHead className={`${HEAD} text-right`}>Average</TableHead>
+              <TableHead className={HEAD}>Eruption</TableHead>
+              <TableHead className={HEAD}>Active</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.map(({ geyser, stats }, i) => (
               <TableRow key={i}>
-                <TableCell>{geyserName(geyser.type)}</TableCell>
+                <TableCell className={CELL}>
+                  {geyserName(geyser.type)}
+                  <Sub>
+                    Cell {geyser.x}, {geyser.y}
+                  </Sub>
+                </TableCell>
                 {stats ? (
                   <>
-                    <TableCell>
+                    <TableCell className={CELL}>
                       {findElement(stats.element)?.name ?? stats.element}
-                      <span className="text-muted-foreground">
-                        {' '}
-                        at {fmt(toCelsius(stats.outputTemperatureK), 0)} °C
-                      </span>
+                      <Sub>at {fmt(toCelsius(stats.outputTemperatureK), 0)} °C</Sub>
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className={`${CELL} text-right`}>
                       {fmtRate(stats.peakKgPerSecond)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums">
+                    <TableCell className={`${CELL} text-right`}>
                       {fmtRate(stats.averageKgPerSecond)}
-                      <span className="text-muted-foreground">
-                        {' '}
-                        · {fmt(stats.averageKgPerCycle, 0)} kg/cycle
-                      </span>
+                      <Sub>{fmt(stats.averageKgPerCycle, 0)} kg/cycle</Sub>
                     </TableCell>
-                    <TableCell className="tabular-nums">
-                      {fmt(stats.eruptionSeconds, 0)} s of every{' '}
-                      {fmt(stats.eruptionPeriodSeconds, 0)} s
+                    <TableCell className={CELL}>
+                      {fmt(stats.eruptionSeconds, 0)} s
+                      <Sub>of every {fmt(stats.eruptionPeriodSeconds, 0)} s</Sub>
                     </TableCell>
-                    <TableCell className="tabular-nums">
-                      {fmt(stats.activeCycles, 1)} cycles, then {fmt(stats.dormantCycles, 1)}{' '}
-                      dormant
+                    <TableCell className={CELL}>
+                      {fmt(stats.activeCycles, 1)} cycles
+                      <Sub>then {fmt(stats.dormantCycles, 1)} dormant</Sub>
                     </TableCell>
                   </>
                 ) : (
-                  <TableCell colSpan={5} className="text-muted-foreground">
+                  <TableCell colSpan={5} className={`${CELL} text-muted-foreground`}>
                     The generator rolled no stats for this geyser.
                   </TableCell>
                 )}
-                <TableCell className="text-right text-muted-foreground tabular-nums">
-                  {geyser.x}, {geyser.y}
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>

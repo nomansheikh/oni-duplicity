@@ -1,18 +1,12 @@
+import { Maximize, Minus, Plus } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
+import { fmt } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { SpacedOutStarmap } from '@/seed/details/types'
-import { asteroidLabel } from '../../results/labels'
-import { poiKind, poiName } from '../labels'
-import { hexCentre, hexDisc, hexPoints, ringsFor } from './hex-geometry'
-import { wrapLabel } from './wrap-label'
-
-const SIZE = 34
-const FILL = {
-  asteroid: 'fill-primary/30 stroke-primary',
-  start: 'fill-gold/30 stroke-gold',
-  harvestable: 'fill-inset stroke-ink',
-  artifact: 'fill-warn/20 stroke-warn',
-  other: 'fill-destructive/20 stroke-destructive',
-} as const
+import { HexSvg } from './hex-svg'
+import { FILL, starmapSize } from './starmap-tiles'
 
 const KEY: { style: keyof typeof FILL; label: string }[] = [
   { style: 'start', label: 'Start asteroid' },
@@ -22,14 +16,13 @@ const KEY: { style: keyof typeof FILL; label: string }[] = [
   { style: 'other', label: 'Other POI' },
 ]
 
-interface Tile {
-  q: number
-  r: number
-  name: string
-  style: keyof typeof FILL
-}
+const MIN_ZOOM = 0.3
+const MAX_ZOOM = 2.5
 
-/** The Spaced Out starmap: every asteroid and space POI on its hex, labelled by game name. */
+/**
+ * The Spaced Out starmap at a size where the labels read. It scrolls and drags inside its own
+ * box, zooms with the buttons or the wheel, and refits on request.
+ */
 export function HexStarmap({
   starmap,
   startId,
@@ -37,59 +30,93 @@ export function HexStarmap({
   starmap: SpacedOutStarmap
   startId: string | undefined
 }) {
-  const tiles: Tile[] = [
-    ...starmap.asteroids.map((a): Tile => ({
-      q: a.q,
-      r: a.r,
-      name: asteroidLabel(a.id),
-      style: a.id === startId ? 'start' : 'asteroid',
-    })),
-    ...starmap.pois.map((p): Tile => ({
-      q: p.q,
-      r: p.r,
-      name: poiName(p.type),
-      style: poiKind(p.type),
-    })),
-  ]
-  const rings = ringsFor(tiles)
-  const half = hexCentre({ q: 0, r: rings }, SIZE).x + SIZE * 2
-  const high = rings * SIZE * 1.5 + SIZE * 2
+  const box = useRef<HTMLDivElement>(null)
+  const drag = useRef<{ x: number; y: number }>(undefined)
+  const [zoom, setZoom] = useState(1)
+  const [dragging, setDragging] = useState(false)
+  const size = starmapSize(starmap)
+
+  // Open on the middle of the map, where the start asteroid is.
+  useEffect(() => {
+    const el = box.current
+    if (!el) return
+    el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2
+    el.scrollTop = (el.scrollHeight - el.clientHeight) / 2
+  }, [])
+
+  const change = (factor: number) =>
+    setZoom((z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z * factor)))
+  const fit = () => {
+    const el = box.current
+    if (!el) return
+    setZoom(
+      Math.min(
+        MAX_ZOOM,
+        Math.max(MIN_ZOOM, Math.min(el.clientWidth / size.width, el.clientHeight / size.height)),
+      ),
+    )
+  }
+
   return (
     <div className="flex flex-col gap-2">
-      <svg
-        role="img"
-        aria-label="Starmap"
-        viewBox={`${-half} ${-high} ${half * 2} ${high * 2}`}
-        className="max-h-[70vh] w-full border border-ink bg-inset"
-      >
-        {hexDisc(rings).map((hex) => (
-          <polygon
-            key={`${hex.q},${hex.r}`}
-            points={hexPoints(hexCentre(hex, SIZE), SIZE - 1)}
-            className="fill-none stroke-ink/40"
-          />
-        ))}
-        {tiles.map((tile, i) => {
-          const c = hexCentre(tile, SIZE)
-          const lines = wrapLabel(tile.name, 10)
-          return (
-            <g key={i}>
-              <title>{tile.name}</title>
-              <polygon
-                points={hexPoints(c, SIZE - 1)}
-                className={cn('stroke-2', FILL[tile.style])}
-              />
-              <text textAnchor="middle" className="fill-foreground text-[10px]">
-                {lines.map((line, j) => (
-                  <tspan key={j} x={c.x} y={c.y + (j - (lines.length - 1) / 2) * 11 + 3}>
-                    {line}
-                  </tspan>
-                ))}
-              </text>
-            </g>
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="type-small text-muted-foreground">Drag to pan. Hover a hex for its name.</p>
+        <ButtonGroup className="ml-auto">
+          <Button
+            variant="outline"
+            size="icon-sm"
+            aria-label="Zoom out"
+            onClick={() => change(1 / 1.25)}
+          >
+            <Minus />
+          </Button>
+          <Button variant="outline" size="sm" className="w-14 tabular-nums" disabled>
+            {fmt(zoom, 1)}×
+          </Button>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            aria-label="Zoom in"
+            onClick={() => change(1.25)}
+          >
+            <Plus />
+          </Button>
+          <Button variant="outline" size="icon-sm" aria-label="Fit the starmap" onClick={fit}>
+            <Maximize />
+          </Button>
+        </ButtonGroup>
+      </div>
+      <div
+        ref={box}
+        className={cn(
+          'h-[min(70vh,44rem)] touch-none overflow-auto border border-ink bg-inset select-none',
+          dragging ? 'cursor-grabbing' : 'cursor-grab',
+        )}
+        onPointerDown={(event) => {
+          if (event.button !== 0) return
+          event.currentTarget.setPointerCapture(event.pointerId)
+          drag.current = { x: event.clientX, y: event.clientY }
+          setDragging(true)
+        }}
+        onPointerMove={(event) => {
+          if (!drag.current) return
+          event.currentTarget.scrollBy(
+            drag.current.x - event.clientX,
+            drag.current.y - event.clientY,
           )
-        })}
-      </svg>
+          drag.current = { x: event.clientX, y: event.clientY }
+        }}
+        onPointerUp={() => {
+          drag.current = undefined
+          setDragging(false)
+        }}
+        onPointerCancel={() => {
+          drag.current = undefined
+          setDragging(false)
+        }}
+      >
+        <HexSvg starmap={starmap} startId={startId} zoom={zoom} />
+      </div>
       <ul className="flex flex-wrap gap-x-4 gap-y-1">
         {KEY.map(({ style, label }) => (
           <li key={style} className="flex items-center gap-1.5 type-caption text-muted-foreground">

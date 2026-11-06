@@ -35,7 +35,7 @@ export function SeedDetails({
     return (
       <div className="flex flex-col items-start gap-2" role="alert">
         <p className="type-small text-destructive">{state.message}</p>
-        {!state.unsupported && (
+        {!state.permanent && (
           <Button variant="secondary" size="sm" onClick={retry}>
             Try again
           </Button>

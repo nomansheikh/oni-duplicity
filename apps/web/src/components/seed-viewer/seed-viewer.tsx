@@ -19,9 +19,11 @@ export function SeedViewer() {
           <>
             <DialogHeader>
               <DialogTitle>Seed viewer</DialogTitle>
-              <DialogDescription className="flex flex-wrap items-center gap-x-3 font-mono">
-                {coordinate}
-                <DetailsActions coordinate={coordinate} />
+              <DialogDescription asChild>
+                <div className="flex flex-wrap items-center gap-x-3 font-mono">
+                  {coordinate}
+                  <DetailsActions coordinate={coordinate} />
+                </div>
               </DialogDescription>
             </DialogHeader>
             <div className="overflow-y-auto bg-panel p-4">

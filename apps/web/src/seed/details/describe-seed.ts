@@ -8,8 +8,8 @@ export const RECYCLE_AFTER = 30
 export const IDLE_MS = 60_000
 const KEEP = 2
 
-/** The coordinate is malformed or outside what the bundled generator makes. */
-export class SeedUnsupportedError extends Error {}
+/** This seed cannot be previewed, and trying again will not change that. */
+export class SeedUnavailableError extends Error {}
 
 interface Pending {
   resolve: (detail: SeedDetail) => void
@@ -38,7 +38,10 @@ function onReply(event: MessageEvent<DescribeReply>): void {
   if (pending.size === 0) idleTimer = setTimeout(stop, IDLE_MS)
   if (!waiting) return
   if (reply.type === 'detail') waiting.resolve(reply.detail)
-  else waiting.reject(new Error(reply.message))
+  else
+    waiting.reject(
+      reply.permanent ? new SeedUnavailableError(reply.message) : new Error(reply.message),
+    )
 }
 
 function spawn(): Worker {
@@ -61,7 +64,7 @@ function spawn(): Worker {
  */
 export function describeSeed(coordinate: string): Promise<SeedDetail> {
   const check = checkCoordinate(coordinate)
-  if (!check.ok) return Promise.reject(new SeedUnsupportedError(check.message))
+  if (!check.ok) return Promise.reject(new SeedUnavailableError(check.message))
   coordinate = check.parsed.coordinate
   const cached = recent.get(coordinate)
   if (cached) return Promise.resolve(cached)

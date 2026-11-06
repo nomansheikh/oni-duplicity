@@ -9,4 +9,5 @@ export interface DescribeMessage {
 
 export type DescribeReply =
   | { type: 'detail'; id: number; detail: SeedDetail }
-  | { type: 'error'; id: number; message: string }
+  /** `permanent`: the seed itself cannot be built, so a retry cannot help. */
+  | { type: 'error'; id: number; message: string; permanent: boolean }

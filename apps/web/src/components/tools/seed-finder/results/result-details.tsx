@@ -28,9 +28,11 @@ export function ResultDetails({ rank, result, rules, onClose }: Props) {
               <DialogTitle>
                 #{rank} · {result.score} / {result.maxScore}
               </DialogTitle>
-              <DialogDescription className="flex flex-wrap items-center gap-x-3 font-mono">
-                {result.coordinate}
-                <DetailsActions coordinate={result.coordinate} />
+              <DialogDescription asChild>
+                <div className="flex flex-wrap items-center gap-x-3 font-mono">
+                  {result.coordinate}
+                  <DetailsActions coordinate={result.coordinate} />
+                </div>
               </DialogDescription>
             </DialogHeader>
             <div className="overflow-y-auto bg-panel p-4">
