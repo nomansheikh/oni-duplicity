@@ -61,7 +61,13 @@ The pre-commit hook runs `vp check --fix` on staged files.
 
 ## Releases
 
-release-please keeps a release PR open on `main`. Merging it tags a release, which deploys the app to GitHub Pages.
+A maintainer opens or updates the release PR with the release-please CLI, since GitHub Actions may not open pull requests in this repository:
+
+```sh
+pnpm dlx release-please release-pr --token="$(gh auth token)" --repo-url=nomansheikh/oni-duplicity --config-file=release-please-config.json --manifest-file=.release-please-manifest.json
+```
+
+Merging that PR tags a release, which deploys the app to GitHub Pages.
 
 ## Conduct
 

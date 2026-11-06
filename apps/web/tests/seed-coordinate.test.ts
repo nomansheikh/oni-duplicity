@@ -1,15 +1,13 @@
 import { readFileSync } from 'node:fs'
-import { describe, expect, test } from 'vite-plus/test'
+import { afterEach, beforeAll, describe, expect, test } from 'vite-plus/test'
 import { parseSave, type SaveGame } from '@oni-duplicity/save-parser'
 import { seedCoordinate } from '../src/worker/coordinate/coordinate.ts'
 import { CLUSTER_PREFIXES } from '../src/worker/coordinate/cluster-prefixes.ts'
 import { setQualityLevel } from '../src/worker/game-settings.ts'
 import { fixtures } from './helpers.ts'
 
-const load = (name: string): SaveGame | null => {
-  const path = fixtures.find((p) => p.endsWith(name))
-  return path ? parseSave(readFileSync(path)) : null
-}
+const path = (name: string) => fixtures.find((p) => p.endsWith(name))
+const MID = 'mithro-04-advanced-cycle-1434.sav'
 
 // Expected values are worked out by hand from the decompile: `GetSettingsCoordinate` joins
 // prefix, seed and three codes; each code is a mixed-radix number written in base 36, least
@@ -31,14 +29,37 @@ const CASES: [string, string][] = [
 ]
 
 describe('seed coordinate', () => {
+  // Each fixture is parsed once, here: the 30 and 40 MB saves take seconds each, and a shared
+  // runner is several times slower than a laptop. Only the one save the tests below change stays
+  // in memory; the others are dropped as soon as their coordinate is read.
+  const found = new Map<string, string | undefined>()
+  let mid: SaveGame | null = null
+  let midSettings: unknown
+  beforeAll(() => {
+    for (const [file] of CASES) {
+      const p = path(file)
+      if (!p) continue
+      const save = parseSave(readFileSync(p))
+      found.set(file, seedCoordinate(save)?.coordinate)
+      if (file === MID) {
+        mid = save
+        midSettings = structuredClone(save.gameData.customGameSettings)
+      }
+    }
+  }, 180_000)
+  // The tests below edit the shared save's settings; each one starts from the parsed values.
+  afterEach(() => {
+    if (mid) mid.gameData.customGameSettings = structuredClone(midSettings) as never
+  })
+
   for (const [file, coordinate] of CASES) {
-    test.skipIf(!fixtures.some((p) => p.endsWith(file)))(`${file} is ${coordinate}`, () => {
-      expect(seedCoordinate(load(file)!)?.coordinate).toBe(coordinate)
+    test.skipIf(!path(file))(`${file} is ${coordinate}`, () => {
+      expect(found.get(file)).toBe(coordinate)
     })
   }
 
-  test.skipIf(!load('mithro-04-advanced-cycle-1434.sav'))('splits into the game parts', () => {
-    expect(seedCoordinate(load('mithro-04-advanced-cycle-1434.sav')!)).toEqual({
+  test.skipIf(!path(MID))('splits into the game parts', () => {
+    expect(seedCoordinate(mid!)).toEqual({
       coordinate: 'SNDST-C-817651642-CTY70D-0-0',
       clusterId: 'expansion1::clusters/SandstoneStartCluster',
       prefix: 'SNDST-C',
@@ -50,8 +71,8 @@ describe('seed coordinate', () => {
     })
   })
 
-  test.skipIf(!load('mithro-04-advanced-cycle-1434.sav'))('follows the saved difficulty', () => {
-    const save = load('mithro-04-advanced-cycle-1434.sav')!
+  test.skipIf(!path(MID))('follows the saved difficulty', () => {
+    const save = mid!
     setQualityLevel(save, 'CalorieBurn', 'Default')
     expect(seedCoordinate(save)?.settingsCode).toBe('0')
     setQualityLevel(save, 'CalorieBurn', 'VeryHard')
@@ -61,8 +82,8 @@ describe('seed coordinate', () => {
     expect(seedCoordinate(save)?.settingsCode).toBe('0')
   })
 
-  test.skipIf(!load('mithro-04-advanced-cycle-1434.sav'))('gives nothing it cannot derive', () => {
-    const save = load('mithro-04-advanced-cycle-1434.sav')!
+  test.skipIf(!path(MID))('gives nothing it cannot derive', () => {
+    const save = mid!
     const levels = (
       save.gameData.customGameSettings as { CurrentQualityLevelsBySetting: [string, string][] }
     ).CurrentQualityLevelsBySetting
