@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test'
+import { SEED_CLUSTERS } from '../clusters.ts'
 import { checkCoordinate, hashFor, parseCoordinate, seedFromHash } from './coordinate.ts'
 
 describe('parseCoordinate', () => {
@@ -30,6 +31,14 @@ describe('checkCoordinate', () => {
   it('accepts a prefix the search can generate', () => {
     const check = checkCoordinate('SNDST-A-5-0-0-0')
     expect(check.ok && check.cluster.prefix).toBe('SNDST-A')
+  })
+
+  it('opens the Skewed Asteroid clusters, which the search leaves out', () => {
+    for (const prefix of ['KF23-A', 'KF23-C']) {
+      const check = checkCoordinate(`${prefix}-7-0-0-0`)
+      expect(check.ok && check.cluster.label).toBe('Skewed Asteroid')
+      expect(SEED_CLUSTERS.some((cluster) => cluster.prefix === prefix)).toBe(false)
+    }
   })
 
   it('says plainly when the cluster is outside the generator', () => {
