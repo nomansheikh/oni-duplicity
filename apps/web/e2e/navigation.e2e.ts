@@ -30,18 +30,21 @@ test('filters geysers by asteroid', async ({ page }) => {
   await openSave(page)
   await goTo(page, 'Geysers')
   const cards = page.getByRole('row')
+  // count() does not wait, so let the table render first.
+  await expect(cards.first()).toBeVisible()
   const total = await cards.count()
   expect(total).toBeGreaterThan(0)
   const filter = page.getByRole('combobox', { name: 'Asteroid' })
   await filter.click()
-  const options = await page.getByRole('option').count()
+  const names = await page.getByRole('option').allTextContents()
   await page.keyboard.press('Escape')
 
   // Every geyser is on exactly one asteroid, so the per-asteroid counts add up to the total.
   let sum = 0
-  for (let i = 1; i < options; i++) {
+  for (const name of names.slice(1)) {
     await filter.click()
-    await page.getByRole('option').nth(i).click()
+    await page.getByRole('option', { name, exact: true }).click()
+    await expect(filter).toHaveText(name)
     sum += await cards.count()
   }
   expect(sum).toBe(total)

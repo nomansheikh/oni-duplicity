@@ -28,7 +28,8 @@ test.describe('traits', () => {
 
     const added = page.locator('[data-trait="Twinkletoes"]')
     await expect(added).toBeVisible()
-    await expect(added.locator('[data-category="positive"]')).toHaveText('Positive')
+    // On the card a positive trait is its green name badge, with no separate category label.
+    await expect(added.locator('[data-slot=badge][data-variant=good]')).toHaveText('Twinkletoes')
 
     const { save } = await downloadSave(page)
     const before = traitIds(GALAXY, 'Minion', 1)

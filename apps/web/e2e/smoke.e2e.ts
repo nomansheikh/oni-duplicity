@@ -27,7 +27,10 @@ test('a seed search with a 100-seed limit ends with results', async ({ page }) =
   await openSeedFinder(page)
   await page.getByRole('combobox', { name: 'Preset' }).click()
   await page.getByRole('option', { name: /Easy start/ }).click()
-  await page.getByRole('group', { name: 'Seed limit quick picks' }).getByText('100').click()
+  await page
+    .getByRole('radiogroup', { name: 'Seed limit quick picks' })
+    .getByRole('radio', { name: '100', exact: true })
+    .click()
   await page.getByRole('button', { name: 'Find' }).click()
   await expect(page.getByRole('status').filter({ hasText: /^Done: tried 100 seeds/ })).toBeVisible({
     timeout: 90_000,
