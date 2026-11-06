@@ -43,6 +43,7 @@ catalog:
   vaul: ^1.1.2
   vite: npm:@voidzero-dev/vite-plus-core@1.4.0
   vite-plus: 1.4.0
+  wrangler: 4.151.3
   zod: ^4.6.7
 overrides:
   vite@*: 'catalog:'
@@ -54,3 +55,7 @@ peerDependencyRules:
 allowBuilds:
   # Its postinstall only prints a donation message.
   jss: false
+  # Wrangler's: both only check for or fetch their platform binary, which the optional
+  # per-platform packages already install, and an assets-only deploy runs neither.
+  esbuild: false
+  workerd: false

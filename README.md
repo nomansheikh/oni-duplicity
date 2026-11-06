@@ -4,7 +4,7 @@ A browser-based save editor for [Oxygen Not Included](https://www.klei.com/games
 
 It is a from-scratch successor to [RoboPhred/oni-duplicity](https://github.com/RoboPhred/oni-duplicity), which is no longer maintained.
 
-**Use it:** [nomansheikh.github.io/oni-duplicity](https://nomansheikh.github.io/oni-duplicity/) (live from the first release).
+**Use it:** [oni.noman.codes](https://oni.noman.codes) (live from the first release).
 
 > **Status:** early development. Always keep a backup of your save before replacing it with an edited one. No edit has been confirmed in the game yet; see [verified in game](docs/verified-in-game.md).
 
