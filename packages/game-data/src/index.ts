@@ -36,6 +36,7 @@ export {
   type Range,
 } from './geyser-types.ts'
 export { stories, storyQuests, type StoryEntry, type StoryQuestEntry } from './stories.ts'
+export { findDestinationName, findPrefabName } from './names.ts'
 import { geyserTypes } from './geyser-types.ts'
 import { buildEffectIndex, type EffectDetailRow, type EffectInfo } from './effect-info.ts'
 import { extraTraits, traitIdFixes } from './trait-info.ts'

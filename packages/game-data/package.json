@@ -25,7 +25,8 @@
     "build": "vp pack",
     "dev": "vp pack --watch",
     "test": "vp test",
-    "extract-game-data": "node scripts/extract-game-data.ts"
+    "extract-game-data": "node scripts/extract-game-data.ts",
+    "extract-names": "node scripts/extract-names.ts"
   },
   "devDependencies": {
     "@types/node": "catalog:",
