@@ -5837,6 +5837,116 @@
       "desc": "A highly pressurized geyser that periodically erupts with hot Water."
     }
   ],
+  "geyserDlcs": [
+    {
+      "id": "steam",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "hot_steam",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "hot_water",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "slush_water",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "filthy_water",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "slush_salt_water",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "salt_water",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "small_volcano",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "big_volcano",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "liquid_co2",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "hot_co2",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "hot_hydrogen",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "hot_po2",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "slimy_po2",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "chlorine_gas",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "chlorine_gas_cool",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "methane",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "molten_copper",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "molten_iron",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "molten_gold",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "molten_aluminum",
+      "requiredDlcIds": ["EXPANSION1_ID"]
+    },
+    {
+      "id": "molten_tungsten",
+      "requiredDlcIds": ["EXPANSION1_ID"]
+    },
+    {
+      "id": "molten_niobium",
+      "requiredDlcIds": ["EXPANSION1_ID"]
+    },
+    {
+      "id": "molten_cobalt",
+      "requiredDlcIds": ["EXPANSION1_ID"]
+    },
+    {
+      "id": "oil_drip",
+      "requiredDlcIds": []
+    },
+    {
+      "id": "liquid_sulfur",
+      "requiredDlcIds": ["EXPANSION1_ID"]
+    },
+    {
+      "id": "murky_brine",
+      "requiredDlcIds": ["DLC5_ID"]
+    }
+  ],
   "elements": [
     {
       "id": "Katairite",
@@ -17660,12 +17770,14 @@
         "name": "Skewed Asteroid",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 0,
         "worlds": [
           {
             "world": "worlds/StrangeAsteroidKleiFest2023",
             "id": "StrangeAsteroidKleiFest2023",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -17675,47 +17787,56 @@
         "name": "Skewed Asteroid",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 0,
         "worlds": [
           {
             "world": "expansion1::worlds/StrangeAsteroidKleiFest2023Cluster",
             "id": "StrangeAsteroidKleiFest2023Cluster",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumRadioactiveVanillaWarpPlanet",
             "id": "MediumRadioactiveVanillaWarpPlanet",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -17725,12 +17846,14 @@
         "name": "Terra",
         "requiredDlcIds": [],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 0,
         "worlds": [
           {
             "world": "worlds/SandstoneDefault",
             "id": "SandstoneDefault",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -17740,52 +17863,62 @@
         "name": "Terrania Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 0,
         "worlds": [
           {
             "world": "expansion1::worlds/TerraMoonlet",
             "id": "TerraMoonlet",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/IdealLandingSite",
             "id": "IdealLandingSite",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/WarpOilySwamp",
             "id": "WarpOilySwamp",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -17795,47 +17928,56 @@
         "name": "Terra Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 0,
         "worlds": [
           {
             "world": "expansion1::worlds/VanillaSandstoneDefault",
             "id": "VanillaSandstoneDefault",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumRadioactiveVanillaWarpPlanet",
             "id": "MediumRadioactiveVanillaWarpPlanet",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -17845,12 +17987,14 @@
         "name": "Marinea",
         "requiredDlcIds": ["DLC5_ID"],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": ["AquaticCluster", "MinnowRecruitedAchievement"],
         "menuOrder": 7,
         "worlds": [
           {
             "world": "dlc5::worlds/AquaticBaseGameAsteroid",
             "id": "AquaticBaseGameAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -17860,52 +18004,62 @@
         "name": "Marinea Minor Cluster",
         "requiredDlcIds": ["EXPANSION1_ID", "DLC5_ID"],
         "forbiddenDlcIds": [],
+        "tags": ["AquaticCluster", "MinnowRecruitedAchievement"],
         "menuOrder": 7,
         "worlds": [
           {
             "world": "dlc5::worlds/AquaticSpacedOutAsteroid",
             "id": "AquaticSpacedOutAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/IdealLandingSite",
             "id": "IdealLandingSite",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/WarpOilySandySwamp",
             "id": "WarpOilySandySwamp",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -17915,47 +18069,56 @@
         "name": "Marinea Cluster",
         "requiredDlcIds": ["EXPANSION1_ID", "DLC5_ID"],
         "forbiddenDlcIds": [],
+        "tags": ["AquaticCluster", "MinnowRecruitedAchievement"],
         "menuOrder": 7,
         "worlds": [
           {
             "world": "dlc5::worlds/AquaticClassicAsteroid",
             "id": "AquaticClassicAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumSwampy",
             "id": "MediumSwampy",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -17965,12 +18128,14 @@
         "name": "Relica",
         "requiredDlcIds": ["DLC4_ID"],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": ["PrehistoricCluster", "DemoliorImperative"],
         "menuOrder": 8,
         "worlds": [
           {
             "world": "dlc4::worlds/PrehistoricBaseGameAsteroid",
             "id": "PrehistoricBaseGameAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -17980,52 +18145,62 @@
         "name": "Relica Minor Cluster",
         "requiredDlcIds": ["EXPANSION1_ID", "DLC4_ID"],
         "forbiddenDlcIds": [],
+        "tags": ["PrehistoricCluster", "DemoliorImperative"],
         "menuOrder": 8,
         "worlds": [
           {
             "world": "dlc4::worlds/PrehistoricSpacedOutAsteroid",
             "id": "PrehistoricSpacedOutAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/IdealLandingSite",
             "id": "IdealLandingSite",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/WarpOilySandySwamp",
             "id": "WarpOilySandySwamp",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18035,47 +18210,56 @@
         "name": "Relica Cluster",
         "requiredDlcIds": ["EXPANSION1_ID", "DLC4_ID"],
         "forbiddenDlcIds": [],
+        "tags": ["PrehistoricCluster", "DemoliorImperative"],
         "menuOrder": 8,
         "worlds": [
           {
             "world": "dlc4::worlds/PrehistoricClassicAsteroid",
             "id": "PrehistoricClassicAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumSwampy",
             "id": "MediumSwampy",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18085,12 +18269,14 @@
         "name": "Ceres",
         "requiredDlcIds": ["DLC2_ID"],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": ["CeresCluster", "GeothermalImperative"],
         "menuOrder": 9,
         "worlds": [
           {
             "world": "dlc2::worlds/CeresBaseGameAsteroid",
             "id": "CeresBaseGameAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -18100,52 +18286,62 @@
         "name": "Ceres Minor Cluster",
         "requiredDlcIds": ["EXPANSION1_ID", "DLC2_ID"],
         "forbiddenDlcIds": [],
+        "tags": ["CeresCluster", "GeothermalImperative"],
         "menuOrder": 9,
         "worlds": [
           {
             "world": "dlc2::worlds/CeresSpacedOutAsteroid",
             "id": "CeresSpacedOutAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/SwampyLandingSite",
             "id": "SwampyLandingSite",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/OilRichWarpTarget",
             "id": "OilRichWarpTarget",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18155,12 +18351,14 @@
         "name": "RelicAAAAAAAGHH",
         "requiredDlcIds": ["DLC4_ID"],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": ["PrehistoricCluster", "DemoliorSurivedAchievement", "DemoliorImminentImpact"],
         "menuOrder": 9,
         "worlds": [
           {
             "world": "dlc4::worlds/PrehistoricShatteredBaseGameAsteroid",
             "id": "PrehistoricShatteredBaseGameAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -18170,47 +18368,56 @@
         "name": "Ceres Cluster",
         "requiredDlcIds": ["EXPANSION1_ID", "DLC2_ID"],
         "forbiddenDlcIds": [],
+        "tags": ["CeresCluster", "GeothermalImperative"],
         "menuOrder": 9,
         "worlds": [
           {
             "world": "dlc2::worlds/CeresClassicAsteroid",
             "id": "CeresClassicAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumSwampy",
             "id": "MediumSwampy",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18220,47 +18427,56 @@
         "name": "RelicAAAAAAAGHH Cluster",
         "requiredDlcIds": ["EXPANSION1_ID", "DLC4_ID"],
         "forbiddenDlcIds": [],
+        "tags": ["PrehistoricCluster", "DemoliorSurivedAchievement", "DemoliorImminentImpact"],
         "menuOrder": 9,
         "worlds": [
           {
             "world": "dlc4::worlds/PrehistoricShatteredClassicAsteroid",
             "id": "PrehistoricShatteredClassicAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumSwampy",
             "id": "MediumSwampy",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18270,12 +18486,14 @@
         "name": "Blasted Ceres",
         "requiredDlcIds": ["DLC2_ID"],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": ["CeresCluster", "GeothermalImperative"],
         "menuOrder": 10,
         "worlds": [
           {
             "world": "dlc2::worlds/CeresBaseGameShatteredAsteroid",
             "id": "CeresBaseGameShatteredAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -18285,12 +18503,14 @@
         "name": "Oceania",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 10,
         "worlds": [
           {
             "world": "worlds/Oceania",
             "id": "Oceania",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -18300,47 +18520,56 @@
         "name": "Blasted Ceres Cluster",
         "requiredDlcIds": ["EXPANSION1_ID", "DLC2_ID"],
         "forbiddenDlcIds": [],
+        "tags": ["CeresCluster", "GeothermalImperative"],
         "menuOrder": 10,
         "worlds": [
           {
             "world": "dlc2::worlds/CeresClassicShatteredAsteroid",
             "id": "CeresClassicShatteredAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumSwampy",
             "id": "MediumSwampy",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18350,52 +18579,62 @@
         "name": "Folia Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 20,
         "worlds": [
           {
             "world": "expansion1::worlds/ForestMoonlet",
             "id": "ForestMoonlet",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/SwampyLandingSite",
             "id": "SwampyLandingSite",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/OilRichWarpTarget",
             "id": "OilRichWarpTarget",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18405,12 +18644,14 @@
         "name": "Rime",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 20,
         "worlds": [
           {
             "world": "worlds/SandstoneFrozen",
             "id": "SandstoneFrozen",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -18420,52 +18661,62 @@
         "name": "Quagmiris Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 20,
         "worlds": [
           {
             "world": "expansion1::worlds/SwampMoonlet",
             "id": "SwampMoonlet",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MetalHeavyLandingSite",
             "id": "MetalHeavyLandingSite",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/OilRichWarpTarget",
             "id": "OilRichWarpTarget",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18475,47 +18726,56 @@
         "name": "Oceania Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 20,
         "worlds": [
           {
             "world": "expansion1::worlds/VanillaOceania",
             "id": "VanillaOceania",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumForestyWasteland",
             "id": "MediumForestyWasteland",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18525,62 +18785,74 @@
         "name": "Moonlet Cluster - Metallic Swampy",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 30,
         "worlds": [
           {
             "world": "expansion1::worlds/MiniBadlands",
             "id": "MiniBadlands",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniMetallicSwampyStart",
             "id": "MiniMetallicSwampyStart",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniForestFrozenWarp",
             "id": "MiniForestFrozenWarp",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniFlipped",
             "id": "MiniFlipped",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniRadioactiveOcean",
             "id": "MiniRadioactiveOcean",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18590,47 +18862,56 @@
         "name": "Squelchy Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 30,
         "worlds": [
           {
             "world": "expansion1::worlds/VanillaSwampDefault",
             "id": "VanillaSwampDefault",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumForestyRadioactiveVanillaWarpPlanet",
             "id": "MediumForestyRadioactiveVanillaWarpPlanet",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18640,12 +18921,14 @@
         "name": "Verdante",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 40,
         "worlds": [
           {
             "world": "worlds/ForestLush",
             "id": "ForestLush",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -18655,62 +18938,74 @@
         "name": "Moonlet Cluster - The Desolands",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 40,
         "worlds": [
           {
             "world": "expansion1::worlds/MiniBadlandsStart",
             "id": "MiniBadlandsStart",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniRadioactiveOceanWarp",
             "id": "MiniRadioactiveOceanWarp",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniMetallicSwampy",
             "id": "MiniMetallicSwampy",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniForestFrozen",
             "id": "MiniForestFrozen",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniFlipped",
             "id": "MiniFlipped",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18720,47 +19015,56 @@
         "name": "Rime Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 40,
         "worlds": [
           {
             "world": "expansion1::worlds/VanillaSandstoneFrozen",
             "id": "VanillaSandstoneFrozen",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumSwampy",
             "id": "MediumSwampy",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18770,12 +19074,14 @@
         "name": "Arboria",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 50,
         "worlds": [
           {
             "world": "worlds/ForestDefault",
             "id": "ForestDefault",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -18785,62 +19091,74 @@
         "name": "Moonlet Cluster - Frozen Forest",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 50,
         "worlds": [
           {
             "world": "expansion1::worlds/MiniBadlandsWarp",
             "id": "MiniBadlandsWarp",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniForestFrozenStart",
             "id": "MiniForestFrozenStart",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniMetallicSwampy",
             "id": "MiniMetallicSwampy",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniFlipped",
             "id": "MiniFlipped",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniRadioactiveOcean",
             "id": "MiniRadioactiveOcean",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18850,47 +19168,56 @@
         "name": "Verdante Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 50,
         "worlds": [
           {
             "world": "expansion1::worlds/VanillaForestDefault",
             "id": "VanillaForestDefault",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumSandyRadioactiveVanillaWarpPlanet",
             "id": "MediumSandyRadioactiveVanillaWarpPlanet",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18900,62 +19227,74 @@
         "name": "Moonlet Cluster - Flipped",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 60,
         "worlds": [
           {
             "world": "expansion1::worlds/MiniBadlandsWarp",
             "id": "MiniBadlandsWarp",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniFlippedStart",
             "id": "MiniFlippedStart",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniMetallicSwampy",
             "id": "MiniMetallicSwampy",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniForestFrozen",
             "id": "MiniForestFrozen",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniRadioactiveOcean",
             "id": "MiniRadioactiveOcean",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -18965,47 +19304,56 @@
         "name": "Arboria Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 60,
         "worlds": [
           {
             "world": "expansion1::worlds/VanillaArboria",
             "id": "VanillaArboria",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumSandyRadioactiveVanillaWarpPlanet",
             "id": "MediumSandyRadioactiveVanillaWarpPlanet",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -19015,12 +19363,14 @@
         "name": "Volcanea",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 60,
         "worlds": [
           {
             "world": "worlds/Volcanic",
             "id": "Volcanic",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -19030,12 +19380,14 @@
         "name": "The Badlands",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 70,
         "worlds": [
           {
             "world": "worlds/Badlands",
             "id": "Badlands",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -19045,62 +19397,74 @@
         "name": "Moonlet Cluster - Radioactive Ocean",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 70,
         "worlds": [
           {
             "world": "expansion1::worlds/MiniBadlands",
             "id": "MiniBadlands",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniRadioactiveOceanStart",
             "id": "MiniRadioactiveOceanStart",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniFlippedWarp",
             "id": "MiniFlippedWarp",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniMetallicSwampy",
             "id": "MiniMetallicSwampy",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MiniForestFrozen",
             "id": "MiniForestFrozen",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -19110,47 +19474,56 @@
         "name": "Volcanea Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 70,
         "worlds": [
           {
             "world": "expansion1::worlds/VanillaVolcanic",
             "id": "VanillaVolcanic",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumRadioactiveVanillaWarpPlanet",
             "id": "MediumRadioactiveVanillaWarpPlanet",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -19160,12 +19533,14 @@
         "name": "Aridio",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 80,
         "worlds": [
           {
             "world": "worlds/ForestHot",
             "id": "ForestHot",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -19175,57 +19550,68 @@
         "name": "Mini Cluster - Ceres Mantle",
         "requiredDlcIds": ["EXPANSION1_ID", "DLC2_ID"],
         "forbiddenDlcIds": [],
+        "tags": ["CeresCluster", "GeothermalImperative"],
         "menuOrder": 80,
         "worlds": [
           {
             "world": "dlc2::worlds/MiniShatteredStartAsteroid",
             "id": "MiniShatteredStartAsteroid",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "dlc2::worlds/MiniShatteredWarpAsteroid",
             "id": "MiniShatteredWarpAsteroid",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "dlc2::worlds/MiniShatteredGeoAsteroid",
             "id": "MiniShatteredGeoAsteroid",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/SwampyLandingSite",
             "id": "SwampyLandingSite",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/RegolithMoonlet",
             "id": "RegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -19235,47 +19621,56 @@
         "name": "The Badlands Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 80,
         "worlds": [
           {
             "world": "expansion1::worlds/VanillaBadlands",
             "id": "VanillaBadlands",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumRadioactiveVanillaWarpPlanet",
             "id": "MediumRadioactiveVanillaWarpPlanet",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -19285,12 +19680,14 @@
         "name": "Oasisse",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 90,
         "worlds": [
           {
             "world": "worlds/Oasis",
             "id": "Oasis",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -19300,47 +19697,56 @@
         "name": "Aridio Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 90,
         "worlds": [
           {
             "world": "expansion1::worlds/VanillaAridio",
             "id": "VanillaAridio",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumSandySwamp",
             "id": "MediumSandySwamp",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -19350,12 +19756,14 @@
         "name": "Tiny Empty FOR DEVS",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 100,
         "worlds": [
           {
             "world": "worlds/TinyEmpty",
             "id": "TinyEmpty",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -19365,12 +19773,14 @@
         "name": "Tiny Empty FOR DEVS",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 100,
         "worlds": [
           {
             "world": "expansion1::worlds/TinyEmpty",
             "id": "TinyEmpty",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -19380,47 +19790,56 @@
         "name": "Oasisse Cluster",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 100,
         "worlds": [
           {
             "world": "expansion1::worlds/VanillaOasis",
             "id": "VanillaOasis",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/MediumRadioactiveVanillaWarpPlanet",
             "id": "MediumRadioactiveVanillaWarpPlanet",
-            "start": false
+            "start": false,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TundraMoonlet",
             "id": "TundraMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MarshyMoonlet",
             "id": "MarshyMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/NiobiumMoonlet",
             "id": "NiobiumMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MooMoonlet",
             "id": "MooMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/WaterMoonlet",
             "id": "WaterMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           },
           {
             "world": "expansion1::worlds/MiniRegolithMoonlet",
             "id": "MiniRegolithMoonlet",
-            "start": false
+            "start": false,
+            "mixing": true
           }
         ]
       },
@@ -19430,12 +19849,14 @@
         "name": "Big Empty FOR DEVS",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 101,
         "worlds": [
           {
             "world": "worlds/BigEmpty",
             "id": "BigEmpty",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -19445,12 +19866,14 @@
         "name": "Big Empty FOR DEVS",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 101,
         "worlds": [
           {
             "world": "worlds/BigEmpty",
             "id": "BigEmpty",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -19460,12 +19883,14 @@
         "name": "Tiny Surface FOR DEVS",
         "requiredDlcIds": [],
         "forbiddenDlcIds": ["EXPANSION1_ID"],
+        "tags": [],
         "menuOrder": 103,
         "worlds": [
           {
             "world": "worlds/TinySurface",
             "id": "TinySurface",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -19475,17 +19900,20 @@
         "name": "Tiny Surface FOR DEVS",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 103,
         "worlds": [
           {
             "world": "worlds/TinySurface",
             "id": "TinySurface",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "worlds/TinySurface",
             "id": "TinySurface",
-            "start": false
+            "start": false,
+            "mixing": false
           }
         ]
       },
@@ -19495,12 +19923,14 @@
         "name": "Tiny Start FOR DEVS",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 104,
         "worlds": [
           {
             "world": "expansion1::worlds/TinyStart",
             "id": "TinyStart",
-            "start": true
+            "start": true,
+            "mixing": false
           }
         ]
       },
@@ -19510,17 +19940,20 @@
         "name": "Two Small Worlds",
         "requiredDlcIds": ["EXPANSION1_ID"],
         "forbiddenDlcIds": [],
+        "tags": [],
         "menuOrder": 104,
         "worlds": [
           {
             "world": "expansion1::worlds/TinyStart",
             "id": "TinyStart",
-            "start": true
+            "start": true,
+            "mixing": false
           },
           {
             "world": "expansion1::worlds/TinyStart",
             "id": "TinyStart",
-            "start": false
+            "start": false,
+            "mixing": false
           }
         ]
       }
@@ -19529,604 +19962,1248 @@
       {
         "path": "worlds/Badlands",
         "id": "Badlands",
-        "name": "The Badlands"
+        "name": "The Badlands",
+        "subworldMixingSlots": 6
       },
       {
         "path": "worlds/BigEmpty",
         "id": "BigEmpty",
-        "name": "Big Empty FOR DEVS"
+        "name": "Big Empty FOR DEVS",
+        "subworldMixingSlots": 0
       },
       {
         "path": "worlds/ForestDefault",
         "id": "ForestDefault",
-        "name": "Arboria"
+        "name": "Arboria",
+        "subworldMixingSlots": 6
       },
       {
         "path": "worlds/ForestHot",
         "id": "ForestHot",
-        "name": "Aridio"
+        "name": "Aridio",
+        "subworldMixingSlots": 6
       },
       {
         "path": "worlds/ForestLush",
         "id": "ForestLush",
-        "name": "Verdante"
+        "name": "Verdante",
+        "subworldMixingSlots": 6
       },
       {
         "path": "worlds/Helicona",
         "id": "Helicona",
-        "name": "Helicona"
+        "name": "Helicona",
+        "subworldMixingSlots": 0
       },
       {
         "path": "worlds/Oasis",
         "id": "Oasis",
-        "name": "Oasisse"
+        "name": "Oasisse",
+        "subworldMixingSlots": 6
       },
       {
         "path": "worlds/Oceania",
         "id": "Oceania",
-        "name": "Oceania"
+        "name": "Oceania",
+        "subworldMixingSlots": 6
       },
       {
         "path": "worlds/SandstoneDefault",
         "id": "SandstoneDefault",
-        "name": "Terra"
+        "name": "Terra",
+        "subworldMixingSlots": 6
       },
       {
         "path": "worlds/SandstoneFrozen",
         "id": "SandstoneFrozen",
-        "name": "Rime"
+        "name": "Rime",
+        "subworldMixingSlots": 6
       },
       {
         "path": "worlds/StrangeAsteroidKleiFest2023",
         "id": "StrangeAsteroidKleiFest2023",
-        "name": "Skewed Asteroid"
+        "name": "Skewed Asteroid",
+        "subworldMixingSlots": 0
       },
       {
         "path": "worlds/TheRock",
         "id": "TheRock",
-        "name": "The Rock"
+        "name": "The Rock",
+        "subworldMixingSlots": 0
       },
       {
         "path": "worlds/TinyEmpty",
         "id": "TinyEmpty",
-        "name": "Tiny Empty FOR DEVS"
+        "name": "Tiny Empty FOR DEVS",
+        "subworldMixingSlots": 0
       },
       {
         "path": "worlds/TinySurface",
         "id": "TinySurface",
-        "name": "Tiny Surface FOR DEVS"
+        "name": "Tiny Surface FOR DEVS",
+        "subworldMixingSlots": 0
       },
       {
         "path": "worlds/Volcanic",
         "id": "Volcanic",
-        "name": "Volcanea"
+        "name": "Volcanea",
+        "subworldMixingSlots": 6
       },
       {
         "path": "dlc2::worlds/CeresBaseGameAsteroid",
         "id": "CeresBaseGameAsteroid",
-        "name": "Ceres"
+        "name": "Ceres",
+        "subworldMixingSlots": 6
       },
       {
         "path": "dlc2::worlds/CeresBaseGameShatteredAsteroid",
         "id": "CeresBaseGameShatteredAsteroid",
-        "name": "Blasted Ceres"
+        "name": "Blasted Ceres",
+        "subworldMixingSlots": 6
       },
       {
         "path": "dlc2::worlds/CeresClassicAsteroid",
         "id": "CeresClassicAsteroid",
-        "name": "Ceres Asteroid"
+        "name": "Ceres Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "dlc2::worlds/CeresClassicShatteredAsteroid",
         "id": "CeresClassicShatteredAsteroid",
-        "name": "Blasted Ceres"
+        "name": "Blasted Ceres",
+        "subworldMixingSlots": 6
       },
       {
         "path": "dlc2::worlds/CeresSpacedOutAsteroid",
         "id": "CeresSpacedOutAsteroid",
-        "name": "Ceres Minor"
+        "name": "Ceres Minor",
+        "subworldMixingSlots": 3
       },
       {
         "path": "dlc2::worlds/MiniShatteredGeoAsteroid",
         "id": "MiniShatteredGeoAsteroid",
-        "name": "Ceres Core Asteroid"
+        "name": "Ceres Core Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "dlc2::worlds/MiniShatteredStartAsteroid",
         "id": "MiniShatteredStartAsteroid",
-        "name": "Ceres Mantle Asteroid"
+        "name": "Ceres Mantle Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "dlc2::worlds/MiniShatteredWarpAsteroid",
         "id": "MiniShatteredWarpAsteroid",
-        "name": "Sweet Ceres Asteroid"
+        "name": "Sweet Ceres Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "dlc2::worlds/MixingCeresAsteroid",
         "id": "MixingCeresAsteroid",
-        "name": "Ceres Fragment"
+        "name": "Ceres Fragment",
+        "subworldMixingSlots": 1
       },
       {
         "path": "dlc4::worlds/MixingPrehistoricAsteroid",
         "id": "MixingPrehistoricAsteroid",
-        "name": "Relica Fragment"
+        "name": "Relica Fragment",
+        "subworldMixingSlots": 1
       },
       {
         "path": "dlc4::worlds/PrehistoricBaseGameAsteroid",
         "id": "PrehistoricBaseGameAsteroid",
-        "name": "Relica"
+        "name": "Relica",
+        "subworldMixingSlots": 6
       },
       {
         "path": "dlc4::worlds/PrehistoricClassicAsteroid",
         "id": "PrehistoricClassicAsteroid",
-        "name": "Relica Asteroid"
+        "name": "Relica Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "dlc4::worlds/PrehistoricShatteredBaseGameAsteroid",
         "id": "PrehistoricShatteredBaseGameAsteroid",
-        "name": "RelicAAAAAAAGHH"
+        "name": "RelicAAAAAAAGHH",
+        "subworldMixingSlots": 6
       },
       {
         "path": "dlc4::worlds/PrehistoricShatteredClassicAsteroid",
         "id": "PrehistoricShatteredClassicAsteroid",
-        "name": "RelicAAAAAAAGHH"
+        "name": "RelicAAAAAAAGHH",
+        "subworldMixingSlots": 6
       },
       {
         "path": "dlc4::worlds/PrehistoricSpacedOutAsteroid",
         "id": "PrehistoricSpacedOutAsteroid",
-        "name": "Relica Minor"
+        "name": "Relica Minor",
+        "subworldMixingSlots": 3
       },
       {
         "path": "dlc5::worlds/AquaticBaseGameAsteroid",
         "id": "AquaticBaseGameAsteroid",
-        "name": "Marinea"
+        "name": "Marinea",
+        "subworldMixingSlots": 6
       },
       {
         "path": "dlc5::worlds/AquaticClassicAsteroid",
         "id": "AquaticClassicAsteroid",
-        "name": "Marinea Asteroid"
+        "name": "Marinea Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "dlc5::worlds/AquaticSpacedOutAsteroid",
         "id": "AquaticSpacedOutAsteroid",
-        "name": "Marinea Minor"
+        "name": "Marinea Minor",
+        "subworldMixingSlots": 3
       },
       {
         "path": "dlc5::worlds/MixingAquaticAsteroid",
         "id": "MixingAquaticAsteroid",
-        "name": "Marinea Fragment"
+        "name": "Marinea Fragment",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/ForestMoonlet",
         "id": "ForestMoonlet",
-        "name": "Folia Asteroid"
+        "name": "Folia Asteroid",
+        "subworldMixingSlots": 3
       },
       {
         "path": "expansion1::worlds/IdealLandingSite",
         "id": "IdealLandingSite",
-        "name": "Irradiated Forest Asteroid"
+        "name": "Irradiated Forest Asteroid",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/MarshyMoonlet",
         "id": "MarshyMoonlet",
-        "name": "Marshy Asteroid"
+        "name": "Marshy Asteroid",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/MediumForestyRadioactiveVanillaWarpPlanet",
         "id": "MediumForestyRadioactiveVanillaWarpPlanet",
-        "name": "Radioactive Forest Asteroid"
+        "name": "Radioactive Forest Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MediumForestyWasteland",
         "id": "MediumForestyWasteland",
-        "name": "Glowood Wasteland Asteroid"
+        "name": "Glowood Wasteland Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MediumRadioactiveVanillaWarpPlanet",
         "id": "MediumRadioactiveVanillaWarpPlanet",
-        "name": "Radioactive Swamp Asteroid"
+        "name": "Radioactive Swamp Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MediumSandyRadioactiveVanillaWarpPlanet",
         "id": "MediumSandyRadioactiveVanillaWarpPlanet",
-        "name": "Radioactive Terra Asteroid"
+        "name": "Radioactive Terra Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MediumSandySwamp",
         "id": "MediumSandySwamp",
-        "name": "Radioactive Terrabog Asteroid"
+        "name": "Radioactive Terrabog Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MediumSwampy",
         "id": "MediumSwampy",
-        "name": "Stinko Swamp Asteroid"
+        "name": "Stinko Swamp Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MetalHeavyLandingSite",
         "id": "MetalHeavyLandingSite",
-        "name": "Irradiated Marsh Asteroid"
+        "name": "Irradiated Marsh Asteroid",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/MiniBadlands",
         "id": "MiniBadlands",
-        "name": "The Desolands Asteroid"
+        "name": "The Desolands Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniBadlandsStart",
         "id": "MiniBadlandsStart",
-        "name": "The Desolands Asteroid"
+        "name": "The Desolands Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniBadlandsWarp",
         "id": "MiniBadlandsWarp",
-        "name": "The Desolands Asteroid"
+        "name": "The Desolands Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniFlipped",
         "id": "MiniFlipped",
-        "name": "Flipped Asteroid"
+        "name": "Flipped Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniFlippedStart",
         "id": "MiniFlippedStart",
-        "name": "Flipped Asteroid"
+        "name": "Flipped Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniFlippedWarp",
         "id": "MiniFlippedWarp",
-        "name": "Flipped Asteroid"
+        "name": "Flipped Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniForestFrozen",
         "id": "MiniForestFrozen",
-        "name": "Frozen Forest Asteroid"
+        "name": "Frozen Forest Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniForestFrozenStart",
         "id": "MiniForestFrozenStart",
-        "name": "Frozen Forest Asteroid"
+        "name": "Frozen Forest Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniForestFrozenWarp",
         "id": "MiniForestFrozenWarp",
-        "name": "Frozen Forest Asteroid"
+        "name": "Frozen Forest Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniMetallicSwampy",
         "id": "MiniMetallicSwampy",
-        "name": "Metallic Swampy Asteroid"
+        "name": "Metallic Swampy Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniMetallicSwampyStart",
         "id": "MiniMetallicSwampyStart",
-        "name": "Metallic Swampy Asteroid"
+        "name": "Metallic Swampy Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniMetallicSwampyWarp",
         "id": "MiniMetallicSwampyWarp",
-        "name": "Metallic Swampy Asteroid"
+        "name": "Metallic Swampy Asteroid",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/MiniRadioactiveOcean",
         "id": "MiniRadioactiveOcean",
-        "name": "Radioactive Ocean Asteroid"
+        "name": "Radioactive Ocean Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniRadioactiveOceanStart",
         "id": "MiniRadioactiveOceanStart",
-        "name": "Radioactive Ocean Asteroid"
+        "name": "Radioactive Ocean Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniRadioactiveOceanWarp",
         "id": "MiniRadioactiveOceanWarp",
-        "name": "Radioactive Ocean Asteroid"
+        "name": "Radioactive Ocean Asteroid",
+        "subworldMixingSlots": 2
       },
       {
         "path": "expansion1::worlds/MiniRegolithMoonlet",
         "id": "MiniRegolithMoonlet",
-        "name": "Regolith Asteroid"
+        "name": "Regolith Asteroid",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/MooMoonlet",
         "id": "MooMoonlet",
-        "name": "Moo Asteroid"
+        "name": "Moo Asteroid",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/Moon_Barren",
         "id": "Moon_Barren",
-        "name": "Barren Moon"
+        "name": "Barren Moon",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/NiobiumMoonlet",
         "id": "NiobiumMoonlet",
-        "name": "Superconductive Asteroid"
+        "name": "Superconductive Asteroid",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/OilRichWarpTarget",
         "id": "OilRichWarpTarget",
-        "name": "Rusty Oil Asteroid"
+        "name": "Rusty Oil Asteroid",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/OilyMoonlet",
         "id": "OilyMoonlet",
-        "name": "Viscosia Asteroid"
+        "name": "Viscosia Asteroid",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/RegolithMoonlet",
         "id": "RegolithMoonlet",
-        "name": "Regolith Asteroid"
+        "name": "Regolith Asteroid",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/SmallRadioactiveLandingSite",
         "id": "SmallRadioactiveLandingSite",
-        "name": "Irradiated Forest Asteroid"
+        "name": "Irradiated Forest Asteroid",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/SmallWarpOilySwamp",
         "id": "SmallWarpOilySwamp",
-        "name": "Oily Swamp Asteroid"
+        "name": "Oily Swamp Asteroid",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/SpaceshipInterior",
         "id": "SpaceshipInterior",
-        "name": "SpaceshipInterior"
+        "name": "SpaceshipInterior",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/StrangeAsteroidKleiFest2023Cluster",
         "id": "StrangeAsteroidKleiFest2023Cluster",
-        "name": "Skewed Asteroid"
+        "name": "Skewed Asteroid",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/SulfurMoonlet",
         "id": "SulfurMoonlet",
-        "name": "Brimstonia Asteroid"
+        "name": "Brimstonia Asteroid",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/SwampMoonlet",
         "id": "SwampMoonlet",
-        "name": "Quagmiris Asteroid"
+        "name": "Quagmiris Asteroid",
+        "subworldMixingSlots": 3
       },
       {
         "path": "expansion1::worlds/SwampyLandingSite",
         "id": "SwampyLandingSite",
-        "name": "Irradiated Swampy Asteroid"
+        "name": "Irradiated Swampy Asteroid",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/TerraMoonlet",
         "id": "TerraMoonlet",
-        "name": "Terrania Asteroid"
+        "name": "Terrania Asteroid",
+        "subworldMixingSlots": 3
       },
       {
         "path": "expansion1::worlds/TinyEmpty",
         "id": "TinyEmpty",
-        "name": "Tiny Empty FOR DEVS"
+        "name": "Tiny Empty FOR DEVS",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/TinyForest",
         "id": "TinyForest",
-        "name": "Tiny Forest FOR DEVS"
+        "name": "Tiny Forest FOR DEVS",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/TinyIce",
         "id": "TinyIce",
-        "name": "Tiny Ice FOR DEVS"
+        "name": "Tiny Ice FOR DEVS",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/TinyMagma",
         "id": "TinyMagma",
-        "name": "Tiny Magma FOR DEVS"
+        "name": "Tiny Magma FOR DEVS",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/TinyStart",
         "id": "TinyStart",
-        "name": "Tiny Start FOR DEVS"
+        "name": "Tiny Start FOR DEVS",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/TundraMoonlet",
         "id": "TundraMoonlet",
-        "name": "Tundra Asteroid"
+        "name": "Tundra Asteroid",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/TwinMoonlet",
         "id": "TwinMoonlet",
-        "name": "Tiny Twin Asteroid FOR DEVS"
+        "name": "Tiny Twin Asteroid FOR DEVS",
+        "subworldMixingSlots": 0
       },
       {
         "path": "expansion1::worlds/VanillaArboria",
         "id": "VanillaArboria",
-        "name": "Arboria Asteroid"
+        "name": "Arboria Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "expansion1::worlds/VanillaAridio",
         "id": "VanillaAridio",
-        "name": "Aridio Asteroid"
+        "name": "Aridio Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "expansion1::worlds/VanillaBadlands",
         "id": "VanillaBadlands",
-        "name": "The Badlands Asteroid"
+        "name": "The Badlands Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "expansion1::worlds/VanillaForestDefault",
         "id": "VanillaForestDefault",
-        "name": "Verdante Asteroid"
+        "name": "Verdante Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "expansion1::worlds/VanillaOasis",
         "id": "VanillaOasis",
-        "name": "Oasisse Asteroid"
+        "name": "Oasisse Asteroid",
+        "subworldMixingSlots": 4
       },
       {
         "path": "expansion1::worlds/VanillaOceania",
         "id": "VanillaOceania",
-        "name": "Oceania Asteroid"
+        "name": "Oceania Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "expansion1::worlds/VanillaSandstoneDefault",
         "id": "VanillaSandstoneDefault",
-        "name": "Terra Asteroid"
+        "name": "Terra Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "expansion1::worlds/VanillaSandstoneFrozen",
         "id": "VanillaSandstoneFrozen",
-        "name": "Rime Asteroid"
+        "name": "Rime Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "expansion1::worlds/VanillaSwampDefault",
         "id": "VanillaSwampDefault",
-        "name": "Squelchy Asteroid"
+        "name": "Squelchy Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "expansion1::worlds/VanillaVolcanic",
         "id": "VanillaVolcanic",
-        "name": "Volcanea Asteroid"
+        "name": "Volcanea Asteroid",
+        "subworldMixingSlots": 6
       },
       {
         "path": "expansion1::worlds/WarpOilySandySwamp",
         "id": "WarpOilySandySwamp",
-        "name": "Oily Sandy Swamp Asteroid"
+        "name": "Oily Sandy Swamp Asteroid",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/WarpOilySwamp",
         "id": "WarpOilySwamp",
-        "name": "Oily Swamp Asteroid"
+        "name": "Oily Swamp Asteroid",
+        "subworldMixingSlots": 1
       },
       {
         "path": "expansion1::worlds/WaterMoonlet",
         "id": "WaterMoonlet",
-        "name": "Water Asteroid"
+        "name": "Water Asteroid",
+        "subworldMixingSlots": 2
       }
     ],
     "traits": [
       {
         "id": "traits/BouldersLarge",
         "name": "Large Boulders",
-        "desc": "Huge boulders make digging through this world more difficult"
+        "desc": "Huge boulders make digging through this world more difficult",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/BouldersMedium",
         "name": "Medium Boulders",
-        "desc": "Mid-sized boulders make digging through this world more difficult"
+        "desc": "Mid-sized boulders make digging through this world more difficult",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/BouldersMixed",
         "name": "Mixed Boulders",
-        "desc": "Boulders of various sizes make digging through this world more difficult"
+        "desc": "Boulders of various sizes make digging through this world more difficult",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/BouldersSmall",
         "name": "Small Boulders",
-        "desc": "Tiny boulders make digging through this world more difficult"
+        "desc": "Tiny boulders make digging through this world more difficult",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/DeepOil",
         "name": "Trapped Oil",
-        "desc": "Most of the Oil in this world will need to be extracted with Oil Wells"
+        "desc": "Most of the Oil in this world will need to be extracted with Oil Wells",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/FrozenCore",
         "name": "Frozen Core",
-        "desc": "This world has a chilly core of solid Ice"
+        "desc": "This world has a chilly core of solid Ice",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/GeoActive",
         "name": "Geoactive",
-        "desc": "This world has more Geysers and Vents than usual"
+        "desc": "This world has more Geysers and Vents than usual",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/GeoDormant",
         "name": "Geodormant",
-        "desc": "This world has fewer Geysers and Vents than usual"
+        "desc": "This world has fewer Geysers and Vents than usual",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/Geodes",
         "name": "Geodes",
-        "desc": "Large geodes containing rare material caches are deposited across this world"
+        "desc": "Large geodes containing rare material caches are deposited across this world",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/GlaciersLarge",
         "name": "Large Glaciers",
-        "desc": "Huge chunks of primordial Ice are scattered across this world"
+        "desc": "Huge chunks of primordial Ice are scattered across this world",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/IrregularOil",
         "name": "Irregular Oil",
-        "desc": "The Oil on this asteroid is anything but regular!"
+        "desc": "The Oil on this asteroid is anything but regular!",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/MagmaVents",
         "name": "Magma Channels",
-        "desc": "The Magma from this world's core has leaked into the mantle and crust"
+        "desc": "The Magma from this world's core has leaked into the mantle and crust",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/MetalPoor",
         "name": "Metal Poor",
-        "desc": "There is a reduced amount of Metal Ore on this world, proceed with caution!"
+        "desc": "There is a reduced amount of Metal Ore on this world, proceed with caution!",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/MetalRich",
         "name": "Metal Rich",
-        "desc": "This asteroid is an abundant source of Metal Ore"
+        "desc": "This asteroid is an abundant source of Metal Ore",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/MisalignedStart",
         "name": "Alternate Pod Location",
-        "desc": "The Printing Pod didn't end up in the asteroid's exact center this time... but it's still nowhere near the surface"
+        "desc": "The Printing Pod didn't end up in the asteroid's exact center this time... but it's still nowhere near the surface",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/SlimeSplats",
         "name": "Slime Molds",
-        "desc": "Sickly Slime growths have crept all over this world"
+        "desc": "Sickly Slime growths have crept all over this world",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/SubsurfaceOcean",
         "name": "Subsurface Ocean",
-        "desc": "Below the crust of this world is a Salt Water sea"
+        "desc": "Below the crust of this world is a Salt Water sea",
+        "requiredDlcIds": []
       },
       {
         "id": "traits/Volcanoes",
         "name": "Volcanic Activity",
-        "desc": "Several active Volcanoes have been detected in this world"
+        "desc": "Several active Volcanoes have been detected in this world",
+        "requiredDlcIds": []
       },
       {
         "id": "expansion1::traits/CrashedSatellites",
         "name": "Crashed Satellites",
-        "desc": "This world contains crashed radioactive satellites"
+        "desc": "This world contains crashed radioactive satellites",
+        "requiredDlcIds": ["EXPANSION1_ID"]
       },
       {
         "id": "expansion1::traits/DistressSignal",
         "name": "Frozen Friend",
-        "desc": "This world contains a frozen friend from a long time ago"
+        "desc": "This world contains a frozen friend from a long time ago",
+        "requiredDlcIds": ["EXPANSION1_ID"]
       },
       {
         "id": "expansion1::traits/IrregularOil",
         "name": "Irregular Oil",
-        "desc": "The Oil on this asteroid is anything but regular!"
+        "desc": "The Oil on this asteroid is anything but regular!",
+        "requiredDlcIds": ["EXPANSION1_ID"]
       },
       {
         "id": "expansion1::traits/LushCore",
         "name": "Lush Core",
-        "desc": "This world has a lush forest core"
+        "desc": "This world has a lush forest core",
+        "requiredDlcIds": ["EXPANSION1_ID"]
       },
       {
         "id": "expansion1::traits/MetalCaves",
         "name": "Metallic Caves",
-        "desc": "This world has caves of metal ore"
+        "desc": "This world has caves of metal ore",
+        "requiredDlcIds": ["EXPANSION1_ID"]
       },
       {
         "id": "expansion1::traits/RadioactiveCrust",
         "name": "Radioactive Crust",
-        "desc": "Deposits of Uranium Ore are found in this world's crust"
+        "desc": "Deposits of Uranium Ore are found in this world's crust",
+        "requiredDlcIds": ["EXPANSION1_ID"]
       },
       {
         "id": "expansion1::traits/SubsurfaceOcean",
         "name": "Subsurface Ocean",
-        "desc": "Below the crust of this world is a Salt Water sea"
+        "desc": "Below the crust of this world is a Salt Water sea",
+        "requiredDlcIds": ["EXPANSION1_ID"]
       },
       {
         "id": "expansion1::traits/Volcanoes",
         "name": "Volcanic Activity",
-        "desc": "Several active Volcanoes have been detected in this world"
+        "desc": "Several active Volcanoes have been detected in this world",
+        "requiredDlcIds": ["EXPANSION1_ID"]
+      }
+    ],
+    "baseGame": "Base Game",
+    "dlcs": [
+      {
+        "id": "EXPANSION1_ID",
+        "name": "Spaced Out!",
+        "color": "#ffcb01",
+        "directory": "expansion1"
+      },
+      {
+        "id": "DLC2_ID",
+        "name": "The Frosty Planet Pack",
+        "color": "#01bbff",
+        "directory": "dlc2"
+      },
+      {
+        "id": "DLC3_ID",
+        "name": "The Bionic Booster Pack",
+        "color": "#cb63f4",
+        "directory": "dlc3"
+      },
+      {
+        "id": "DLC4_ID",
+        "name": "The Prehistoric Planet Pack",
+        "color": "#50ac51",
+        "directory": "dlc4"
+      },
+      {
+        "id": "DLC5_ID",
+        "name": "The Aquatic Planet Pack",
+        "color": "#19a294",
+        "directory": "dlc5"
+      }
+    ],
+    "mixing": [
+      {
+        "id": "DLC2_ID",
+        "kind": "dlc",
+        "name": "The Frosty Planet Pack",
+        "desc": "The Frosty Planet Pack features frozen biomes and elements useful in thermal regulation",
+        "requiredDlcIds": ["DLC2_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "Content from this DLC is currently disabled",
+            "value": 0
+          },
+          {
+            "id": "Enabled",
+            "name": "Enabled",
+            "desc": "Content from this DLC is currently enabled\n\nThis includes Care Packages, buildings, and space POIs",
+            "value": 1
+          }
+        ],
+        "forbiddenClusterTags": []
+      },
+      {
+        "id": "IceCavesMixing",
+        "kind": "subworld",
+        "name": "Ice Cave Biome",
+        "desc": "The Ice Cave Biome's extremely low temperatures make thermal regulation the top priority.",
+        "requiredDlcIds": ["DLC2_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This biome will not be mixed into any world",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This biome is very likely to be mixed into a world",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This biome will be mixed into a world, even if it causes a worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["CeresCluster"]
+      },
+      {
+        "id": "CarrotQuarryMixing",
+        "kind": "subworld",
+        "name": "Cool Pool Biome",
+        "desc": "The Cool Pool Biome's chilly landscape features plentiful Ethanol lakes, making it an excellent destination for a colony eager to gather fuel resources.",
+        "requiredDlcIds": ["DLC2_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This biome will not be mixed into any world",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This biome is very likely to be mixed into a world",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This biome will be mixed into a world, even if it causes a worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["CeresCluster"]
+      },
+      {
+        "id": "SugarWoodsMixing",
+        "kind": "subworld",
+        "name": "Nectar Biome",
+        "desc": "The snow-laden Nectar Biome is home to the massive Bonbon Tree. This complex plant produces Nectar, which can be refined into Sucrose and Steam.",
+        "requiredDlcIds": ["DLC2_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This biome will not be mixed into any world",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This biome is very likely to be mixed into a world",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This biome will be mixed into a world, even if it causes a worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["CeresCluster"]
+      },
+      {
+        "id": "CeresAsteroidMixing",
+        "kind": "world",
+        "name": "Ceres Fragment",
+        "desc": "A fragment of a frosty starting world with sub-zero temperatures throughout.\n\nDuplicants who work in sub-zero temperatures will need to wear or build warming equipment. Abundant natural fuel sources could lead to a well-powered colony.",
+        "requiredDlcIds": ["DLC2_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This asteroid will not be mixed in",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This asteroid is very likely to be mixed in",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This asteroid will be mixed in, even if it causes worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["CeresCluster"],
+        "world": "dlc2::worlds/MixingCeresAsteroid"
+      },
+      {
+        "id": "DLC3_ID",
+        "kind": "dlc",
+        "name": "The Bionic Booster Pack",
+        "desc": "The Bionic Booster Pack features portable power storage, bionic Duplicants, and remote building operation",
+        "requiredDlcIds": ["DLC3_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "Content from this DLC is currently disabled",
+            "value": 0
+          },
+          {
+            "id": "Enabled",
+            "name": "Enabled",
+            "desc": "Content from this DLC is currently enabled\n\nThis includes Care Packages, buildings, and space POIs",
+            "value": 1
+          }
+        ],
+        "forbiddenClusterTags": []
+      },
+      {
+        "id": "DLC4_ID",
+        "kind": "dlc",
+        "name": "The Prehistoric Planet Pack",
+        "desc": "The Prehistoric Planet Pack features carnivorous flora and fauna, biodiesel, and a focus on time-sensitive surface defense",
+        "requiredDlcIds": ["DLC4_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "Content from this DLC is currently disabled",
+            "value": 0
+          },
+          {
+            "id": "Enabled",
+            "name": "Enabled",
+            "desc": "Content from this DLC is currently enabled\n\nThis includes Care Packages, buildings, and space POIs",
+            "value": 1
+          }
+        ],
+        "forbiddenClusterTags": []
+      },
+      {
+        "id": "GardenMixing",
+        "kind": "subworld",
+        "name": "Garden Biome",
+        "desc": "The Garden biome is a temperate environment with beneficial critters and plants well-suited for Farming.",
+        "requiredDlcIds": ["DLC4_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This biome will not be mixed into any world",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This biome is very likely to be mixed into a world",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This biome will be mixed into a world, even if it causes a worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["PrehistoricCluster"]
+      },
+      {
+        "id": "RaptorMixing",
+        "kind": "subworld",
+        "name": "Feather Biome",
+        "desc": "The chilly Feather biome is home to huge, flightless Rhexes that can be shorn for Textile Production.",
+        "requiredDlcIds": ["DLC4_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This biome will not be mixed into any world",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This biome is very likely to be mixed into a world",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This biome will be mixed into a world, even if it causes a worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["PrehistoricCluster"]
+      },
+      {
+        "id": "WetlandsMixing",
+        "kind": "subworld",
+        "name": "Wetlands Biome",
+        "desc": "This hot, sticky biome features plentiful pools of Polluted Water, as well as raw ingredients useful in establishing industrial systems.",
+        "requiredDlcIds": ["DLC4_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This biome will not be mixed into any world",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This biome is very likely to be mixed into a world",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This biome will be mixed into a world, even if it causes a worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["PrehistoricCluster"]
+      },
+      {
+        "id": "PrehistoricAsteroidMixing",
+        "kind": "world",
+        "name": "Relica Fragment",
+        "desc": "A fragment of a prehistoric starting world.\n\nIts biodiversity makes reliable food production more attainable for new colonies. Construction materials and fuels are also ample.",
+        "requiredDlcIds": ["DLC4_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This asteroid will not be mixed in",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This asteroid is very likely to be mixed in",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This asteroid will be mixed in, even if it causes worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["PrehistoricCluster"],
+        "world": "dlc4::worlds/MixingPrehistoricAsteroid"
+      },
+      {
+        "id": "DLC5_ID",
+        "kind": "dlc",
+        "name": "The Aquatic Planet Pack",
+        "desc": "The Aquatic Planet Pack features underwater flora and fauna, diving deep for resources, and a splashy new survivor",
+        "requiredDlcIds": ["DLC5_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "Content from this DLC is currently disabled",
+            "value": 0
+          },
+          {
+            "id": "Enabled",
+            "name": "Enabled",
+            "desc": "Content from this DLC is currently enabled\n\nThis includes Care Packages, buildings, and space POIs",
+            "value": 1
+          }
+        ],
+        "forbiddenClusterTags": []
+      },
+      {
+        "id": "BeachMixing",
+        "kind": "subworld",
+        "name": "Beach Biome",
+        "desc": "Layers of Coquina, Salt, Sandstone, and Siltstone imply that this area may once have been an ocean floor. Now, its warm climate and abundant life-sustaining resources make it a welcoming place for new colonies.",
+        "requiredDlcIds": ["DLC5_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This biome will not be mixed into any world",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This biome is very likely to be mixed into a world",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This biome will be mixed into a world, even if it causes a worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["AquaticCluster"]
+      },
+      {
+        "id": "ReefMixing",
+        "kind": "subworld",
+        "name": "Reef Biome",
+        "desc": "This tropical biome is filled with vast Salt Water stores and fascinating wildlife. Dry land is almost non-existent, so Swimming will be an important skill for my Duplicants to acquire.",
+        "requiredDlcIds": ["DLC5_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This biome will not be mixed into any world",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This biome is very likely to be mixed into a world",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This biome will be mixed into a world, even if it causes a worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["AquaticCluster"]
+      },
+      {
+        "id": "KelpForestMixing",
+        "kind": "subworld",
+        "name": "Kelp Forest Biome",
+        "desc": "The temperate Kelp Forest biome contains plentiful natural resources, with enough breathable gas to sustain my Duplicants as they build the infrastructure for longer-term solutions.",
+        "requiredDlcIds": ["DLC5_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This biome will not be mixed into any world",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This biome is very likely to be mixed into a world",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This biome will be mixed into a world, even if it causes a worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["AquaticCluster"]
+      },
+      {
+        "id": "AbyssMixing",
+        "kind": "subworld",
+        "name": "Abyss Biome",
+        "desc": "This aquatic environment is marked by gloomy shafts flooded with Polluted Brine and renewable natural resources ideal for colony industrialization. Training my Duplicants to Swim should be a priority.",
+        "requiredDlcIds": ["DLC5_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This biome will not be mixed into any world",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This biome is very likely to be mixed into a world",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This biome will be mixed into a world, even if it causes a worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["AquaticCluster"]
+      },
+      {
+        "id": "AquaticAsteroidMixing",
+        "kind": "world",
+        "name": "Marinea Fragment",
+        "desc": "A fragment of an aquatic starting world. It has abundant food resources.\n\nMarinea's biodiversity makes reliable food production more attainable for new colonies, provided they can navigate its many liquid pools. Construction materials are a bit limited.",
+        "requiredDlcIds": ["DLC5_ID"],
+        "range": 5,
+        "levels": [
+          {
+            "id": "Disabled",
+            "name": "Disabled",
+            "desc": "This asteroid will not be mixed in",
+            "value": 0
+          },
+          {
+            "id": "TryMixing",
+            "name": "Likely",
+            "desc": "This asteroid is very likely to be mixed in",
+            "value": 1
+          },
+          {
+            "id": "GuranteeMixing",
+            "name": "Guaranteed",
+            "desc": "This asteroid will be mixed in, even if it causes worldgen failure",
+            "value": 2
+          }
+        ],
+        "forbiddenClusterTags": ["AquaticCluster"],
+        "world": "dlc5::worlds/MixingAquaticAsteroid"
+      }
+    ],
+    "mixingSections": [
+      {
+        "kind": "dlc",
+        "title": "DLC Content",
+        "desc": "DLC content includes buildings, Care Packages, space POIs, critters, etc\n\nEnabling DLC content allows asteroid and biome remixes from that DLC to be customized in the sections below"
+      },
+      {
+        "kind": "world",
+        "title": "Asteroid Remix",
+        "desc": "Asteroid remixing modifies which asteroids appear on the Starmap\n\nRemixed asteroids will retain key features of the outer asteroids that they replace"
+      },
+      {
+        "kind": "subworld",
+        "title": "Biome Remix",
+        "desc": "Biome remixing modifies which biomes will be included across multiple asteroids"
       }
     ]
   },

@@ -38,7 +38,7 @@ export default function SeedSearchTest() {
         <select value={prefix} onChange={(e) => setPrefix(e.target.value)} data-testid="cluster">
           {SEED_CLUSTERS.map((c) => (
             <option key={c.prefix} value={c.prefix}>
-              {c.prefix} ({c.edition})
+              {c.prefix} ({c.requiredDlcIds.join(', ') || 'base'})
             </option>
           ))}
         </select>

@@ -1,6 +1,7 @@
 import { PageHeader } from '@/components/page-header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { blocker, runnableRules } from '@/lib/tools/seed-builder'
+import { mixingBlocker } from '@/seed/mixing'
 import { RuleList } from './builder/rule-list'
 import { SearchControls } from './builder/search-controls'
 import { SetupBar } from './builder/setup-bar'
@@ -14,8 +15,9 @@ import { SeedLookup } from './seed-lookup'
  * generator only loads when Find is clicked.
  */
 export function SeedFinderPage() {
-  const { state, setState, cluster, selectCluster, selectPreset } = useSeedBuilder()
-  const { search, progress, summary, running, find, stop } = useSeedSearch()
+  const builder = useSeedBuilder()
+  const { state, setState, cluster, selectCluster, setMixing, selectPreset, setMaxSeeds } = builder
+  const { search, progress, summary, limit, running, find, stop } = useSeedSearch()
   const rules = runnableRules(state)
   return (
     <div className="flex flex-col gap-4">
@@ -29,14 +31,25 @@ export function SeedFinderPage() {
           <CardTitle>Rules</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <SetupBar cluster={cluster.prefix} onCluster={selectCluster} onPreset={selectPreset} />
+          <SetupBar
+            state={state}
+            cluster={cluster}
+            onCluster={selectCluster}
+            onMixing={setMixing}
+            onPreset={selectPreset}
+          />
           <RuleList state={state} cluster={cluster} onChange={setState} />
           <SearchControls
             running={running}
-            blocker={blocker(state)}
+            blocker={blocker(state) ?? mixingBlocker(cluster, state.mixing)}
             progress={progress}
             summary={summary}
-            onFind={() => void find(cluster, rules)}
+            maxSeeds={state.maxSeeds}
+            runLimit={limit}
+            onMaxSeeds={setMaxSeeds}
+            onFind={() =>
+              void find({ cluster, rules, mixing: state.mixing, maxSeeds: state.maxSeeds })
+            }
             onStop={stop}
           />
         </CardContent>
