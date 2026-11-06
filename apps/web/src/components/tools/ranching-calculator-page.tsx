@@ -1,13 +1,8 @@
 import { useMemo, useState } from 'react'
 import { ranching } from '@oni-duplicity/game-data'
 import { PageHeader } from '@/components/page-header'
-import {
-  defaultFeed,
-  findSpecies,
-  herdsFromSave,
-  planRanch,
-  type FeedChoice,
-} from '@/lib/tools/ranching-calc'
+import { defaultFeed, findSpecies, planRanch, type FeedChoice } from '@/lib/tools/ranching-calc'
+import { herdsFromSave } from '@/lib/tools/ranching-herds'
 import type { CritterView } from '@/worker/model'
 import { RanchFlow, type RanchControls } from './ranching-flow'
 
