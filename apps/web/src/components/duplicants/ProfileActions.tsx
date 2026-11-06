@@ -1,25 +1,7 @@
 import { useRef, useState } from 'react'
-import {
-  ClipboardCopy,
-  ClipboardPaste,
-  Download,
-  EllipsisVertical,
-  TriangleAlert,
-  Upload,
-} from 'lucide-react'
+import { ClipboardCopy, ClipboardPaste, Download, EllipsisVertical, Upload } from 'lucide-react'
 import { toast } from 'sonner'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,27 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { toProfile } from '@/lib/format'
-import { blockedSections, modelLabel, profileModel } from '@/lib/profile'
 import type { DuplicantProfile, DuplicantView, ProfileSection } from '@/worker/model'
-
-const SECTIONS: { id: ProfileSection; label: string }[] = [
-  { id: 'traits', label: 'Traits' },
-  { id: 'interests', label: 'Interests' },
-  { id: 'attributes', label: 'Attributes' },
-  { id: 'skills', label: 'Skills and experience' },
-  { id: 'appearance', label: 'Appearance' },
-  { id: 'name', label: 'Name and gender' },
-]
-
-const DEFAULT_SECTIONS: ProfileSection[] = [
-  'traits',
-  'interests',
-  'attributes',
-  'skills',
-  'appearance',
-]
+import { ApplyProfileDialog } from './ApplyProfileDialog'
 
 function isProfile(value: unknown): value is DuplicantProfile {
   return (
@@ -69,11 +33,7 @@ export function ProfileActions({
   onApply: (profile: DuplicantProfile, sections: ProfileSection[]) => void
 }) {
   const [pending, setPending] = useState<DuplicantProfile | null>(null)
-  const [sections, setSections] = useState<ProfileSection[]>(DEFAULT_SECTIONS)
   const importInput = useRef<HTMLInputElement>(null)
-  // Traits, interests, skills and appearance differ between standard and bionic duplicants.
-  const blocked = pending ? blockedSections(pending, dupe.model) : []
-  const chosen = sections.filter((s) => !blocked.includes(s))
 
   const copy = async () => {
     const profile = toProfile(dupe)
@@ -146,65 +106,12 @@ export function ProfileActions({
           e.target.value = ''
         }}
       />
-      <Dialog open={pending !== null} onOpenChange={(open) => !open && setPending(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Apply {pending?.name} to {dupe.name}?
-            </DialogTitle>
-            <DialogDescription>
-              Choose what to copy over. You can undo this afterwards.
-            </DialogDescription>
-          </DialogHeader>
-          {pending && blocked.length > 0 && (
-            <Alert variant="warning" data-testid="model-mismatch">
-              <TriangleAlert />
-              <AlertTitle>
-                {pending.name} is a {modelLabel(profileModel(pending))} duplicant
-              </AlertTitle>
-              <AlertDescription>
-                <p>
-                  {dupe.name} is {modelLabel(dupe.model)}, so traits, interests, skills and
-                  appearance are not copied. Name and attributes still can be.
-                </p>
-              </AlertDescription>
-            </Alert>
-          )}
-          <FieldGroup className="gap-3">
-            {SECTIONS.map((section) => (
-              <Field key={section.id} orientation="horizontal">
-                <Checkbox
-                  id={`section-${section.id}`}
-                  disabled={blocked.includes(section.id)}
-                  checked={chosen.includes(section.id)}
-                  onCheckedChange={(checked) =>
-                    setSections((current) =>
-                      checked ? [...current, section.id] : current.filter((s) => s !== section.id),
-                    )
-                  }
-                />
-                <FieldLabel htmlFor={`section-${section.id}`} className="type-body">
-                  {section.label}
-                </FieldLabel>
-              </Field>
-            ))}
-          </FieldGroup>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button
-              disabled={chosen.length === 0}
-              onClick={() => {
-                if (pending) onApply(pending, chosen)
-                setPending(null)
-              }}
-            >
-              Apply
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ApplyProfileDialog
+        dupe={dupe}
+        pending={pending}
+        onClose={() => setPending(null)}
+        onApply={onApply}
+      />
     </>
   )
 }

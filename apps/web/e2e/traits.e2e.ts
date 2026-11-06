@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import {
   behavior,
   downloadSave,
@@ -7,32 +7,10 @@ import {
   GALAXY,
   goTo,
   group,
-  hasFixture,
   openSave,
   original,
 } from './helpers.ts'
-
-const MITHRO = 'mithro-06-maximum-cycle-4770.sav'
-
-const traitIds = (file: string, prefab: string, index: number) =>
-  behavior(group(original(file), prefab)[index]!, 'Klei.AI.Traits')!.templateData!
-    .TraitIds as string[]
-
-async function pick(page: Page, name: string): Promise<void> {
-  await page
-    .locator('button')
-    .filter({ has: page.getByText(name, { exact: true }) })
-    .click()
-  await expect(page.getByLabel('Name', { exact: true })).toHaveValue(name)
-}
-
-/** The names in the duplicant list, top to bottom; assert on it with `toHaveText`. */
-const listed = (page: Page) => page.locator('button[data-slot="item"] [data-slot="item-title"]')
-
-async function openTraitPicker(page: Page, search: string): Promise<void> {
-  await page.getByRole('button', { name: 'Add trait' }).click()
-  await page.locator('[cmdk-input]').fill(search)
-}
+import { listed, openTraitPicker, pick, traitIds } from './traits-helpers.ts'
 
 test.describe('traits', () => {
   test.beforeEach(async ({ page }) => {
@@ -166,58 +144,5 @@ test.describe('traits', () => {
     await sortBy('Save order')
     await expect(page.getByRole('button', { name: 'Ascending order' })).toBeVisible()
     await expect(names).toHaveText(saveOrder)
-  })
-})
-
-test.describe('traits on a bionic duplicant', () => {
-  test('offers bionic traits and hides standard ones', async ({ page }) => {
-    expect(hasFixture(MITHRO), `${MITHRO} is missing from the full-tier fixtures`).toBe(true)
-    await openSave(page, MITHRO)
-    await goTo(page, 'Duplicants')
-    await pick(page, 'Sonyar')
-    await expect(page.locator('[data-trait="BionicBug7"] [data-category="bionic"]')).toHaveText(
-      'Bionic',
-    )
-
-    await openTraitPicker(page, 'Anemic')
-    await expect(page.getByText('No such trait')).toBeVisible()
-
-    await page.locator('[cmdk-input]').fill('BionicBug1')
-    const option = page.getByRole('option').first()
-    await expect(option).toContainText('Bionic')
-    await option.click()
-
-    const { save } = await downloadSave(page)
-    const before = traitIds(MITHRO, 'BionicMinion', 0)
-    const traits = behavior(group(save, 'BionicMinion')[0]!, 'Klei.AI.Traits')!.templateData!
-    expect(traits.TraitIds).toEqual([...before, 'BionicBug1'])
-    expectOnlyChanged(original(MITHRO), save, [
-      new RegExp(
-        `^objects/BionicMinion/0/Klei\\.AI\\.Traits/templateData/TraitIds/(length|${before.length})$`,
-      ),
-    ])
-  })
-
-  test('refuses to paste a standard duplicant onto a bionic one', async ({ page }) => {
-    expect(hasFixture(MITHRO), `${MITHRO} is missing from the full-tier fixtures`).toBe(true)
-    await openSave(page, MITHRO)
-    await goTo(page, 'Duplicants')
-    // Copy a standard duplicant, then open the paste dialog on a bionic one.
-    await page.getByLabel('Search duplicants').fill('3B')
-    await page.locator('button[data-slot="item"]').first().click()
-    await page.getByRole('button', { name: 'Duplicant actions' }).click()
-    await page.getByRole('menuitem', { name: 'Copy profile' }).click()
-    await page.getByLabel('Search duplicants').fill('Sonyar')
-    await page.locator('button[data-slot="item"]').first().click()
-    await page.getByRole('button', { name: 'Duplicant actions' }).click()
-    await page.getByRole('menuitem', { name: /^Paste from/ }).click()
-
-    await expect(page.getByTestId('model-mismatch')).toContainText('is a standard duplicant')
-    for (const section of ['Traits', 'Interests', 'Skills and experience', 'Appearance']) {
-      await expect(page.getByRole('checkbox', { name: section })).toBeDisabled()
-    }
-    await expect(page.getByRole('checkbox', { name: 'Attributes' })).toBeEnabled()
-    // Apply stays enabled for what can be copied; no edit is made until it is clicked.
-    expect(await editCount(page)).toBe(0)
   })
 })
