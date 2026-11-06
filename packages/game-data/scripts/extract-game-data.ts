@@ -9,7 +9,8 @@
  *   https://github.com/Kupie/ONI_Decomp to .cache/ONI_Decomp or set ONI_DECOMP to its folder.
  *
  * - the worldgen catalog (clusters, worlds, world traits) read from the game's
- *   StreamingAssets/worldgen YAMLs (base and per-DLC) and named from the strings.
+ *   StreamingAssets/worldgen YAMLs (base and per-DLC) and named from the strings, with the DLCs
+ *   (DlcManager) and the world mixing settings (CustomMixingSettingsConfigs) from the decompile.
  *
  * Usage: vp run extract-game-data   (set ONI_PATH to the game folder if it isn't the Steam default)
  */
@@ -20,10 +21,13 @@ import { extractRanching } from './ranching/extract-ranching.ts'
 import { readAssemblyLiterals } from './extract/assembly.ts'
 import { clean, collect, sdbmLower } from './extract/collect.ts'
 import { readCritters } from './extract/critters.ts'
+import { baseGameName, readDlcs } from './extract/dlcs.ts'
 import { readEffectDetails } from './extract/effects.ts'
 import { readElements } from './extract/elements.ts'
+import { readGeyserDlcs } from './extract/geyser-dlcs.ts'
 import { dataDir, decompDir } from './extract/paths.ts'
 import { readPot } from './extract/pot.ts'
+import { readMixing, readMixingSections } from './extract/mixing.ts'
 import { readGameSettings } from './extract/settings.ts'
 import { readWorldgen } from './extract/worldgen.ts'
 
@@ -32,6 +36,7 @@ const strings = readPot(join(dir, 'StreamingAssets/strings/strings_template.pot'
 const literals = readAssemblyLiterals(join(dir, 'Managed/Assembly-CSharp.dll'))
 
 const elementsList = readElements(dir, strings)
+const dlcs = readDlcs(decompDir(), strings)
 const ranching = extractRanching({
   decompDir: decompDir(),
   gameDataDir: dir,
@@ -57,12 +62,19 @@ const data = {
   effectDetails: readEffectDetails(join(dir, 'resources.assets')),
   personalities: collect(strings, literals, 'STRINGS.DUPLICANTS.PERSONALITIES.', { exactId: true }),
   geysers: collect(strings, literals, 'STRINGS.CREATURES.SPECIES.GEYSER.', { exactId: true }),
+  geyserDlcs: readGeyserDlcs(decompDir()),
   elements: elementsList,
   critters: readCritters(strings),
   techs: collect(strings, literals, 'STRINGS.RESEARCH.TECHS.'),
   gameSettings: readGameSettings(strings, literals),
   ranching,
-  worldgen: readWorldgen(dir, strings),
+  worldgen: {
+    ...readWorldgen(dir, strings, dlcs),
+    baseGame: baseGameName(strings),
+    dlcs,
+    mixing: readMixing(decompDir(), dir, strings),
+    mixingSections: readMixingSections(strings),
+  },
   ...readSkillTree(strings),
 }
 

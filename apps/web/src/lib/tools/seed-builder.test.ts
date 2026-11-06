@@ -8,7 +8,7 @@ import {
   changeKind,
   clampWeight,
   emptyState,
-  fitToEdition,
+  fitToDlcs,
   nextRuleId,
   parseState,
   patchRule,
@@ -115,6 +115,12 @@ describe('parseState', () => {
     expect(parseState(JSON.parse(JSON.stringify(state)))).toEqual(state)
   })
 
+  it('keeps only whole positive mixing levels', () => {
+    const stored = { cluster: 'X', rules: [], mixing: { DLC2_ID: 1, A: 0, B: -1, C: 1.5, D: 'x' } }
+    expect(parseState(stored)?.mixing).toEqual({ DLC2_ID: 1 })
+    expect(parseState({ cluster: 'X', rules: [] })?.mixing).toEqual({})
+  })
+
   it('rejects malformed data', () => {
     expect(parseState(null)).toBeNull()
     expect(parseState({ cluster: 1, rules: [] })).toBeNull()
@@ -124,13 +130,13 @@ describe('parseState', () => {
   })
 })
 
-describe('fitToEdition', () => {
+describe('fitToDlcs', () => {
   const base = {
     traits: new Set(['traits/MetalRich', 'traits/Volcanoes']),
     geysers: new Set(['hot_water']),
   }
 
-  it('swaps a trait for its twin and drops rules the edition lacks', () => {
+  it('swaps a trait for its twin and drops rules the DLCs lack', () => {
     const state = {
       ...emptyState('SNDST-A'),
       rules: [
@@ -140,7 +146,7 @@ describe('fitToEdition', () => {
         preset.rules[0]!,
       ],
     }
-    const fit = fitToEdition(state, base)
+    const fit = fitToDlcs(state, base)
     expect(fit.rules.map((r) => r.id)).toEqual(['b', 'a'])
     expect(fit.rules[0]).toMatchObject({ trait: 'traits/Volcanoes' })
   })

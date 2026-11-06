@@ -8,6 +8,8 @@ export interface ClusterWorld {
   id: string
   /** The cluster's start asteroid. */
   start: boolean
+  /** The placement has a `worldMixing` block, so an asteroid remix can replace its world. */
+  mixing: boolean
 }
 
 export interface WorldgenCluster {
@@ -19,6 +21,8 @@ export interface WorldgenCluster {
   name: string
   requiredDlcIds: string[]
   forbiddenDlcIds: string[]
+  /** `clusterTags`, e.g. `CeresCluster`; mixing settings forbid some of them. */
+  tags: string[]
   menuOrder: number
   worlds: ClusterWorld[]
 }
@@ -27,6 +31,8 @@ export interface WorldgenWorld {
   path: string
   id: string
   name: string
+  /** How many `subworldMixingRules` the world has: the biome remix slots it offers. */
+  subworldMixingSlots: number
 }
 
 export interface WorldgenTrait {
@@ -34,11 +40,72 @@ export interface WorldgenTrait {
   id: string
   name: string
   desc?: string
+  /** The DLC whose worldgen folder holds the trait; empty for a base-game trait. */
+  requiredDlcIds: string[]
+}
+
+/** A content DLC, from `DlcManager`. */
+export interface WorldgenDlc {
+  /** `EXPANSION1_ID`, `DLC2_ID`, ...: the ids clusters, geysers and mixing settings use. */
+  id: string
+  /** The game's name, e.g. `The Frosty Planet Pack`. */
+  name: string
+  /** The banner colour the game draws the name in, `#rrggbb`. */
+  color: string
+  /** Its folder under `StreamingAssets/dlc`. */
+  directory: string
+}
+
+export type MixingKind = 'dlc' | 'world' | 'subworld'
+
+export interface MixingLevel {
+  /** The id the game stores, e.g. `GuranteeMixing` (sic). */
+  id: string
+  name: string
+  /** The game's tooltip for the level. */
+  desc?: string
+  /** The digit the level adds to the coordinate's mixing code. */
+  value: number
+}
+
+/** A section of the Mixing tab, with the game's header and the tooltip on it. */
+export interface MixingSection {
+  kind: MixingKind
+  title: string
+  desc: string
+}
+
+/**
+ * One setting of the new-game Mixing tab: a DLC content toggle (`dlc`), an asteroid remix
+ * (`world`) or a biome remix (`subworld`), from `CustomMixingSettingsConfigs`.
+ */
+export interface MixingSetting {
+  id: string
+  kind: MixingKind
+  name: string
+  /** The game's description: the DLC's mixing tooltip, or the remix's description. */
+  desc?: string
+  /** DLCs that must be in play (toggled on, or needed by the cluster) for the setting. */
+  requiredDlcIds: string[]
+  /** The setting's radix in the mixing code (`coordinate_range`). */
+  range: number
+  levels: MixingLevel[]
+  /** A cluster with any of these tags cannot use the setting. */
+  forbiddenClusterTags: string[]
+  /** Asteroid remix only: the world it swaps in. */
+  world?: string
 }
 
 export const worldgenClusters: WorldgenCluster[] = data.worldgen.clusters
 export const worldgenWorlds: WorldgenWorld[] = data.worldgen.worlds
 export const worldgenTraits: WorldgenTrait[] = data.worldgen.traits
+/** The base game's name (`STRINGS.UI.VANILLA.NAME`). */
+export const baseGameName: string = data.worldgen.baseGame
+export const worldgenDlcs: WorldgenDlc[] = data.worldgen.dlcs
+/** Mixing settings in the order the mixing code packs them (`GetMixingSettingsCode`). */
+export const mixingSettings = data.worldgen.mixing as MixingSetting[]
+/** The Mixing tab's sections in the game's order: DLC content, asteroid remix, biome remix. */
+export const mixingSections = data.worldgen.mixingSections as MixingSection[]
 
 export const findWorldgenCluster = (prefix: string): WorldgenCluster | undefined =>
   worldgenClusters.find((cluster) => cluster.prefix === prefix)

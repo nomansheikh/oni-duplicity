@@ -168,14 +168,23 @@ const geyserTypesByHash = new Map(geyserTypes.map((t) => [hashString(t.id), t]))
 /** Geyser type by `configuration.typeId` hash. */
 export const findGeyserTypeByHash = (hash: number) => geyserTypesByHash.get(hash)
 export {
+  baseGameName,
   findWorldgenCluster,
   findWorldgenTrait,
   findWorldgenWorld,
+  mixingSections,
+  mixingSettings,
   worldgenClusters,
+  worldgenDlcs,
   worldgenTraits,
   worldgenWorlds,
   type ClusterWorld,
+  type MixingKind,
+  type MixingLevel,
+  type MixingSection,
+  type MixingSetting,
   type WorldgenCluster,
+  type WorldgenDlc,
   type WorldgenTrait,
   type WorldgenWorld,
 } from './worldgen.ts'

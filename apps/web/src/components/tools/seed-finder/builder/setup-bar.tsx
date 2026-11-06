@@ -1,53 +1,43 @@
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { SEED_CLUSTERS } from '@/seed/clusters'
+import type { SeedCluster } from '@/seed/clusters'
+import type { MixingLevels } from '@/seed/mixing'
 import { SEED_PRESETS } from '@/seed/presets'
 import type { SeedPreset } from '@/seed/rules'
+import { ClusterPicker } from './cluster-picker'
+import { MixingPicker } from './mixing-picker'
 
-const GROUPS = [
-  { edition: 'base', title: 'Base game' },
-  { edition: 'spaced-out', title: 'Spaced Out' },
-] as const
-
-/** Cluster and preset pickers. A preset fills the rows; they stay editable afterwards. */
+/**
+ * Cluster, mixing and preset pickers. A preset fills the rows; they stay editable afterwards.
+ */
 export function SetupBar({
   cluster,
+  mixing,
   onCluster,
+  onMixing,
   onPreset,
 }: {
-  cluster: string
+  cluster: SeedCluster
+  mixing: MixingLevels
   onCluster: (prefix: string) => void
+  onMixing: (id: string, level: number) => void
   onPreset: (preset: SeedPreset) => void
 }) {
   return (
     <div className="flex flex-wrap items-end gap-4">
       <label className="flex flex-col gap-1 type-label">
         Cluster
-        <Select value={cluster} onValueChange={onCluster}>
-          <SelectTrigger className="w-64" aria-label="Cluster">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {GROUPS.map((group) => (
-              <SelectGroup key={group.edition}>
-                <SelectLabel>{group.title}</SelectLabel>
-                {SEED_CLUSTERS.filter((c) => c.edition === group.edition).map((c) => (
-                  <SelectItem key={c.prefix} value={c.prefix}>
-                    {c.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            ))}
-          </SelectContent>
-        </Select>
+        <ClusterPicker value={cluster.prefix} onChange={onCluster} />
       </label>
+      <div className="flex flex-col gap-1 type-label">
+        Mixing
+        <MixingPicker cluster={cluster} levels={mixing} onChange={onMixing} />
+      </div>
       <label className="flex flex-col gap-1 type-label">
         Preset
         <Select

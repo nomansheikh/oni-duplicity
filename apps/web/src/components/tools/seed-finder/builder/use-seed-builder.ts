@@ -3,12 +3,13 @@ import {
   applyPreset,
   changeCluster,
   emptyState,
-  fitToEdition,
+  fitToDlcs,
   parseState,
   type BuilderState,
 } from '@/lib/tools/seed-builder'
 import { asteroidOptions, availableIds } from '@/lib/tools/seed-catalog'
-import { SEED_CLUSTERS } from '@/seed/clusters'
+import { SEED_CLUSTERS, type SeedCluster } from '@/seed/clusters'
+import { dlcsInPlay, fitMixing, type MixingLevels } from '@/seed/mixing'
 import type { SeedPreset } from '@/seed/rules'
 
 const KEY = 'duplicity:seed-finder:builder'
@@ -17,11 +18,24 @@ const find = (prefix: string) => SEED_CLUSTERS.find((c) => c.prefix === prefix)
 function load(): BuilderState {
   try {
     const stored = parseState(JSON.parse(localStorage.getItem(KEY) ?? 'null'))
-    if (stored && find(stored.cluster)) return stored
+    const cluster = stored && find(stored.cluster)
+    if (stored && cluster) return { ...stored, mixing: fitMixing(cluster, stored.mixing) }
   } catch {
     // Storage can be blocked or hold something else: start fresh.
   }
   return emptyState(SEED_CLUSTERS[0]!.prefix)
+}
+
+/**
+ * Moves the state to a cluster and mixing the game allows: invalid mixing levels go, rules that
+ * name an asteroid the cluster lacks fall back to anywhere, and rules on geysers or traits the
+ * DLCs in play cannot generate are dropped.
+ */
+function settle(state: BuilderState, cluster: SeedCluster, mixing: MixingLevels): BuilderState {
+  const fitted = fitMixing(cluster, mixing)
+  const asteroids = asteroidOptions(cluster.prefix, fitted).map((a) => a.id)
+  const moved = { ...changeCluster(state, cluster.prefix, asteroids), mixing: fitted }
+  return fitToDlcs(moved, availableIds(dlcsInPlay(cluster, fitted)))
 }
 
 /** The builder's state, kept in this browser so a search survives a reload. */
@@ -38,14 +52,19 @@ export function useSeedBuilder() {
   const cluster = useMemo(() => find(state.cluster) ?? SEED_CLUSTERS[0]!, [state.cluster])
   const selectCluster = useCallback((prefix: string) => {
     const next = find(prefix)
-    if (!next) return
-    const asteroids = asteroidOptions(prefix).map((a) => a.id)
-    setState((s) => fitToEdition(changeCluster(s, prefix, asteroids), availableIds(next.edition)))
+    if (next) setState((s) => settle(s, next, s.mixing))
   }, [])
+  const setMixing = useCallback(
+    (id: string, level: number) =>
+      setState((s) => settle(s, cluster, { ...s.mixing, [id]: level })),
+    [cluster],
+  )
   const selectPreset = useCallback(
     (preset: SeedPreset) =>
-      setState((s) => fitToEdition(applyPreset(s, preset), availableIds(cluster.edition))),
-    [cluster.edition],
+      setState((s) =>
+        fitToDlcs(applyPreset(s, preset), availableIds(dlcsInPlay(cluster, s.mixing))),
+      ),
+    [cluster],
   )
-  return { state, setState, cluster, selectCluster, selectPreset }
+  return { state, setState, cluster, selectCluster, setMixing, selectPreset }
 }

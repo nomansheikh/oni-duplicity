@@ -6,11 +6,19 @@ import type {
   SeedRule,
   TraitRule,
 } from '@/seed/rules'
+import type { MixingLevels } from '@/seed/mixing'
 
-/** What the rule builder edits: the cluster and the rule list. Plain data, kept in the browser. */
+export { parseState } from './seed-builder-parse'
+
+/**
+ * What the rule builder edits: the cluster, its mixing and the rule list. Plain data, kept in the
+ * browser.
+ */
 export interface BuilderState {
   /** Coordinate prefix of the chosen cluster, e.g. `SNDST-A`. */
   cluster: string
+  /** The Mixing tab: DLC content toggles and asteroid and biome remixes. */
+  mixing: MixingLevels
   /** The preset the rows started from, shown in the picker until the user stops matching it. */
   presetId: string | null
   rules: SeedRule[]
@@ -21,7 +29,7 @@ export type RuleKind = SeedRule['kind']
 export const DEFAULT_WEIGHT = 1
 
 export function emptyState(cluster: string): BuilderState {
-  return { cluster, presetId: null, rules: [] }
+  return { cluster, mixing: {}, presetId: null, rules: [] }
 }
 
 export function nextRuleId(rules: SeedRule[]): string {
@@ -143,40 +151,15 @@ export function blocker(state: BuilderState): string | null {
   return null
 }
 
-/** Reads stored state back. Anything that is not a well-formed state gives null. */
-export function parseState(value: unknown): BuilderState | null {
-  if (typeof value !== 'object' || value === null) return null
-  const { cluster, presetId, rules } = value as Record<string, unknown>
-  if (typeof cluster !== 'string' || !Array.isArray(rules)) return null
-  const clean = rules.filter(isRuleLike)
-  const ids = new Set(clean.map((rule) => rule.id))
-  if (ids.size !== clean.length) return null
-  return { cluster, presetId: typeof presetId === 'string' ? presetId : null, rules: clean }
-}
-
-function isRuleLike(value: unknown): value is SeedRule {
-  if (typeof value !== 'object' || value === null) return false
-  const rule = value as Record<string, unknown>
-  const kinds = ['geyser', 'trait', 'asteroid']
-  return (
-    typeof rule.id === 'string' &&
-    kinds.includes(rule.kind as string) &&
-    (rule.mode === 'must' || rule.mode === 'nice') &&
-    typeof rule.weight === 'number' &&
-    (rule.kind === 'asteroid' || typeof rule.scope === 'object')
-  )
-}
-
-/** The other edition's id for a trait: `traits/Volcanoes` and `expansion1::traits/Volcanoes`. */
-function swapEdition(id: string): string {
-  return id.startsWith('expansion1::') ? id.slice(12) : `expansion1::${id}`
-}
+/** A trait id without its DLC folder: `expansion1::traits/Volcanoes` gives `traits/Volcanoes`. */
+const traitPath = (id: string) => id.replace(/^\w+::/, '')
 
 /**
- * Makes the rules fit an edition: a trait id the edition does not report is swapped for its other
- * edition's twin when that exists, and a rule on a geyser or trait the edition lacks is dropped.
+ * Makes the rules fit the DLCs in play: a trait id they do not report is swapped for its twin from
+ * another DLC folder (`traits/Volcanoes`, `expansion1::traits/Volcanoes`) when that exists, and a
+ * rule on a geyser or trait they lack is dropped.
  */
-export function fitToEdition(
+export function fitToDlcs(
   state: BuilderState,
   available: { traits: ReadonlySet<string>; geysers: ReadonlySet<string> },
 ): BuilderState {
@@ -185,9 +168,10 @@ export function fitToEdition(
     if (rule.kind === 'geyser') {
       if (rule.geyser === '' || available.geysers.has(rule.geyser)) rules.push(rule)
     } else if (rule.kind === 'trait') {
-      const id = [rule.trait, swapEdition(rule.trait)].find(
-        (candidate) => candidate === '' || available.traits.has(candidate),
-      )
+      const id =
+        rule.trait === '' || available.traits.has(rule.trait)
+          ? rule.trait
+          : [...available.traits].find((trait) => traitPath(trait) === traitPath(rule.trait))
       if (id !== undefined) rules.push({ ...rule, trait: id })
     } else {
       rules.push(rule)

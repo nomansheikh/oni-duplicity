@@ -4,8 +4,10 @@
  * Transcribed from the `GeyserType` constructor calls in `GeyserGenericConfig` and
  * `NiobiumGeyserConfig` (Assembly-CSharp). The numbers are floats in code, not string
  * literals, so the extractor cannot read them; `tests/geyser-types.test.ts` checks them
- * against every geyser in the test saves.
+ * against every geyser in the test saves. The DLCs each type needs are extracted.
  */
+
+import data from './generated/game-data.json' with { type: 'json' }
 
 export interface Range {
   min: number
@@ -65,13 +67,12 @@ const VOLCANO: Timing = {
   ...YEAR,
 }
 
-const E1 = ['EXPANSION1_ID']
-const AQUATIC = ['DLC5_ID']
+/** The DLCs a type needs, as `GeyserGenericConfig` lists them. */
+const dlcsOf = (id: string) => data.geyserDlcs.find((g) => g.id === id)?.requiredDlcIds ?? []
 
 interface Extra {
   /** Defaults to 372.15, the constructor's default. */
   geyserTemperature?: number
-  requiredDlcIds?: string[]
   disease?: { id: string; count: number }
 }
 
@@ -89,7 +90,7 @@ const type = (
   element,
   outputTemperature,
   geyserTemperature: extra.geyserTemperature ?? 372.15,
-  requiredDlcIds: extra.requiredDlcIds ?? [],
+  requiredDlcIds: dlcsOf(id),
   ...(extra.disease ? { disease: extra.disease } : {}),
   rate,
   ...timing,
@@ -126,30 +127,18 @@ export const geyserTypes: GeyserTypeEntry[] = [
   type('molten_copper', 'molten', 'MoltenCopper', 2500, r(200, 400), METAL),
   type('molten_iron', 'molten', 'MoltenIron', 2800, r(200, 400), METAL),
   type('molten_gold', 'molten', 'MoltenGold', 2900, r(200, 400), METAL),
-  type('molten_aluminum', 'molten', 'MoltenAluminum', 2000, r(200, 400), METAL, {
-    requiredDlcIds: E1,
-  }),
-  type('molten_tungsten', 'molten', 'MoltenTungsten', 4000, r(200, 400), METAL, {
-    requiredDlcIds: E1,
-  }),
-  type('molten_niobium', 'molten', 'MoltenNiobium', 3500, r(800, 1600), VOLCANO, {
-    requiredDlcIds: E1,
-  }),
-  type('molten_cobalt', 'molten', 'MoltenCobalt', 2500, r(200, 400), METAL, {
-    requiredDlcIds: E1,
-  }),
+  type('molten_aluminum', 'molten', 'MoltenAluminum', 2000, r(200, 400), METAL),
+  type('molten_tungsten', 'molten', 'MoltenTungsten', 4000, r(200, 400), METAL),
+  type('molten_niobium', 'molten', 'MoltenNiobium', 3500, r(800, 1600), VOLCANO),
+  type('molten_cobalt', 'molten', 'MoltenCobalt', 2500, r(200, 400), METAL),
   type('oil_drip', 'liquid', 'CrudeOil', 600, r(1, 250), {
     iterationLength: r(600, 600),
     iterationPercent: r(1, 1),
     yearLength: r(100, 500),
     yearPercent: r(0.4, 0.8),
   }),
-  type('liquid_sulfur', 'liquid', 'LiquidSulfur', 438.35, r(1000, 2000), VENT, {
-    requiredDlcIds: E1,
-  }),
-  type('murky_brine', 'liquid', 'MurkyBrine', 368.15, r(2000, 4000), VENT, {
-    requiredDlcIds: AQUATIC,
-  }),
+  type('liquid_sulfur', 'liquid', 'LiquidSulfur', 438.35, r(1000, 2000), VENT),
+  type('murky_brine', 'liquid', 'MurkyBrine', 368.15, r(2000, 4000), VENT),
 ]
 
 const SPREAD = 6
