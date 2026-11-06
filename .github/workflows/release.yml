@@ -24,11 +24,14 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
+      # Actions may not open pull requests in this repo, so the release PR is opened by hand with
+      # the release-please CLI (`release-pr`). Merging it lets this step tag the release and deploy.
       - id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+          skip-github-pull-request: true
 
   # Only a published release deploys; a manual run redeploys the latest main.
   deploy:
