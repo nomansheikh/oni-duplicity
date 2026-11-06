@@ -1,4 +1,3 @@
-import { spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { cpus, totalmem } from 'node:os'
@@ -12,15 +11,14 @@ import {
   missingPlatformExitCode,
   missingPlatformMessage,
   platformKey,
-  PHASE_LABELS,
-  PHASES,
   REGRESSION_THRESHOLD,
   summarize,
   type Baseline,
-  type BaselineEntry,
-  type FixtureRun,
   type PlatformBaseline,
 } from './bench/compare.ts'
+import { mb, ms, roundEntry } from './bench/format.ts'
+import { printPhaseTable } from './bench/report.ts'
+import { runFixture } from './bench/run-fixture.ts'
 
 // The two largest saves: the one the acceptance budget is written against, and a mid-size one.
 const FIXTURES = ['mithro-06-maximum-cycle-4770.sav', 'mithro-03-late-game-cycle-1160.sav']
@@ -30,10 +28,6 @@ const fetchedDir = join(root, 'test-data/fetched')
 const baselinePath = join(root, 'test-data/bench-baseline.json')
 
 const args = parseBenchArgs(process.argv.slice(2))
-
-const mb = (bytes: number) => `${(bytes / 1e6).toFixed(1)} MB`
-const ms = (value: number) => `${Math.round(value).toLocaleString('en-US')} ms`
-const percent = (change: number) => `${change >= 0 ? '+' : ''}${(change * 100).toFixed(0)}%`
 
 function skip(message: string): never {
   if (args.require) {
@@ -61,37 +55,6 @@ if (baseline && baseline.version !== 2) {
 // Without a baseline for this platform the run still measures and prints, but compares nothing.
 const platformBaseline = baseline?.platforms[key]
 
-const WORKER_TIMEOUT_MS = 10 * 60 * 1000
-
-function runFixture(file: string): FixtureRun {
-  const result = spawnSync(
-    process.execPath,
-    [
-      '--expose-gc',
-      join(import.meta.dirname, 'bench/worker.ts'),
-      join(fetchedDir, file),
-      String(args.iterations),
-    ],
-    {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'inherit'],
-      maxBuffer: 1 << 20,
-      timeout: WORKER_TIMEOUT_MS,
-    },
-  )
-  if (result.error) {
-    const timedOut = (result.error as NodeJS.ErrnoException).code === 'ETIMEDOUT'
-    throw new Error(
-      timedOut
-        ? `Measuring ${file} took longer than ${WORKER_TIMEOUT_MS / 60000} minutes and was stopped`
-        : `Measuring ${file} could not run: ${result.error.message}`,
-    )
-  }
-  if (result.signal) throw new Error(`Measuring ${file} was killed by ${result.signal}`)
-  if (result.status !== 0) throw new Error(`Measuring ${file} failed (exit ${result.status})`)
-  return JSON.parse(result.stdout.trim().split('\n').at(-1)!)
-}
-
 const cpu = cpus()[0]?.model.trim() ?? 'unknown CPU'
 console.log(
   `${cpu}, ${cpus().length} cores, ${(totalmem() / 2 ** 30).toFixed(0)} GB, Node ${process.version}, ${process.platform} ${process.arch}`,
@@ -104,7 +67,7 @@ let regressions = 0
 const entries: PlatformBaseline['fixtures'] = {}
 
 for (const file of FIXTURES) {
-  let run = runFixture(file)
+  let run = runFixture(file, fetchedDir, args.iterations)
   let current = summarize(run)
   const base = platformBaseline?.fixtures[file]
   const stale = base !== undefined && isStale(current, base)
@@ -120,7 +83,7 @@ for (const file of FIXTURES) {
   if (comparing && comparison!.some((row) => row.regressed)) {
     // Re-measure once; only a phase that regresses both times fails.
     console.log(`${file}: possible regression, measuring again to rule out noise...`)
-    const again = runFixture(file)
+    const again = runFixture(file, fetchedDir, args.iterations)
     const againComparison = compare(summarize(again), base)
     confirmed = confirmedRegressions(comparison!, againComparison)
     // Report the run that is closer to the baseline: the other one was likely disturbed.
@@ -137,44 +100,12 @@ for (const file of FIXTURES) {
   regressions += confirmed.length
 
   console.log(`${file}  (${mb(run.fileBytes)} file, ${mb(run.bodyBytes)} body)`)
-  const rows: string[][] = [['phase', 'median', 'min', 'max', 'vs baseline']]
-  for (const phase of PHASES) {
-    const samples = run.phasesMs[phase]
-    const row = comparison?.find((c) => c.phase === phase)
-    rows.push([
-      PHASE_LABELS[phase],
-      ms(current.phasesMs[phase]),
-      ms(Math.min(...samples)),
-      ms(Math.max(...samples)),
-      row ? `${percent(row.change)}${confirmed.includes(phase) ? '  REGRESSION' : ''}` : '-',
-    ])
-  }
-  const total = (pick: (samples: number[]) => number) =>
-    PHASES.reduce((sum, phase) => sum + pick(run.phasesMs[phase]), 0)
-  rows.push([
-    'total',
-    ms(PHASES.reduce((sum, phase) => sum + current.phasesMs[phase], 0)),
-    ms(total((s) => Math.min(...s))),
-    ms(total((s) => Math.max(...s))),
-    '',
-  ])
-  printTable(rows)
+  printPhaseTable(run, current, comparison, confirmed)
   console.log(
     `  peak RSS ${mb(run.peakRssBytes)}, heap after parse ${mb(run.heapAfterParseBytes)}, calibration ${ms(median(run.calibrationMs))}`,
   )
   if (stale) console.log('  baseline was recorded for a different file size; not compared')
   console.log()
-}
-
-function printTable(rows: string[][]) {
-  const widths = rows[0]!.map((_, col) => Math.max(...rows.map((row) => row[col]!.length)))
-  for (const [i, row] of rows.entries()) {
-    const cells = row.map((cell, col) =>
-      col === 0 ? cell.padEnd(widths[col]!) : cell.padStart(widths[col]!),
-    )
-    console.log(`  ${cells.join('  ')}`)
-    if (i === 0) console.log(`  ${widths.map((w) => '-'.repeat(w)).join('  ')}`)
-  }
 }
 
 const recorded = { date: new Date().toISOString().slice(0, 10), cpu, node: process.version }
@@ -207,14 +138,4 @@ if (args.update) {
   console.log(
     `bench: no phase slower than the baseline by more than ${REGRESSION_THRESHOLD * 100}% (calibrated).`,
   )
-}
-
-function roundEntry(entry: BaselineEntry): BaselineEntry {
-  return {
-    fileBytes: entry.fileBytes,
-    calibrationMs: Math.round(entry.calibrationMs * 10) / 10,
-    phasesMs: Object.fromEntries(
-      Object.entries(entry.phasesMs).map(([phase, value]) => [phase, Math.round(value * 10) / 10]),
-    ) as typeof entry.phasesMs,
-  }
 }
