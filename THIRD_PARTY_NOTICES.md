@@ -21,7 +21,6 @@ Oxygen Not Included, its names, descriptions and art are the property of Klei En
 | radix-ui                                          | MIT        |
 | cmdk                                              | MIT        |
 | sonner                                            | MIT        |
-| next-themes                                       | MIT        |
 | @tanstack/react-virtual                           | MIT        |
 | cn, tw-animate-css                                | MIT        |
 | class-variance-authority                          | Apache-2.0 |

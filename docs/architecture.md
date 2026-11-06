@@ -78,7 +78,7 @@ Coverage: traits, attributes, skill groups, amounts, effects, personalities, gey
 
 ## `apps/web`
 
-**Stack.** React 19, TypeScript strict, Tailwind CSS v4, shadcn/ui (radix-nova), Comlink, TanStack Virtual, next-themes, sonner. Fonts are bundled with Fontsource.
+**Stack.** React 19, TypeScript strict, Tailwind CSS v4, shadcn/ui (radix-nova), Comlink, TanStack Virtual, sonner. Fonts are bundled with Fontsource.
 
 **Worker.** One module worker owns the parsed save, the game data and the undo stack; the main thread never holds the save. The file's buffer is transferred in and the written bytes are transferred back.
 
