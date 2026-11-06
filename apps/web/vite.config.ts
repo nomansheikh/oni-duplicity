@@ -28,4 +28,6 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   worker: { format: 'es' },
+  // The generator finds its .wasm with `new URL(..., import.meta.url)`, which pre-bundling breaks.
+  optimizeDeps: { exclude: ['@onimaxxing/worldgen'] },
 })

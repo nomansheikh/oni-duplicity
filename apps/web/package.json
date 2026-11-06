@@ -15,6 +15,7 @@
     "@fontsource/rajdhani": "catalog:",
     "@oni-duplicity/game-data": "catalog:",
     "@oni-duplicity/save-parser": "catalog:",
+    "@onimaxxing/worldgen": "catalog:",
     "@tanstack/react-virtual": "catalog:",
     "class-variance-authority": "catalog:",
     "cmdk": "catalog:",
