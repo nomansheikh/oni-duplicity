@@ -522,6 +522,17 @@
   background-blend-mode: soft-light, soft-light, normal;
 }
 
+/*
+ * Radix menus, selects and dialogs lock page scroll by hiding the body's scrollbar and adding a
+ * right margin, which shifts the whole layout. Keep the scrollbar and drop the margin: the lock
+ * still blocks wheel and touch scrolling outside the open layer. Unlayered and more specific than
+ * the injected `body[data-scroll-locked]` rule so it wins.
+ */
+html body[data-scroll-locked] {
+  overflow: visible !important;
+  margin-right: 0 !important;
+}
+
 /* ---- base -------------------------------------------------------------------------------- */
 
 @layer base {
