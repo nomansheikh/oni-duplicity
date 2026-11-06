@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { AppFooter } from './components/app-footer'
 import { Download, FolderOpen, Redo2, Undo2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { AppTabs } from '@/components/app-sidebar'
@@ -549,6 +550,7 @@ export default function App() {
               </Body>
             </div>
           </main>
+          <AppFooter />
         </AppTabs>
         {loaded && (
           <SaveDialog
