@@ -167,3 +167,15 @@ export function humanize(id: string): string {
 const geyserTypesByHash = new Map(geyserTypes.map((t) => [hashString(t.id), t]))
 /** Geyser type by `configuration.typeId` hash. */
 export const findGeyserTypeByHash = (hash: number) => geyserTypesByHash.get(hash)
+export {
+  findWorldgenCluster,
+  findWorldgenTrait,
+  findWorldgenWorld,
+  worldgenClusters,
+  worldgenTraits,
+  worldgenWorlds,
+  type ClusterWorld,
+  type WorldgenCluster,
+  type WorldgenTrait,
+  type WorldgenWorld,
+} from './worldgen.ts'

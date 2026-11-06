@@ -1,16 +1,15 @@
-import { findGeyser } from '@oni-duplicity/game-data'
+import { findWorldgenTrait, findWorldgenWorld } from '@oni-duplicity/game-data'
 import { geyserName } from '@/lib/seed-draw/geyser-marks'
 import type { SeedRule, RuleScope } from '@/seed/rules'
 
-/** `expansion1::traits/GeoActive` becomes `Geo Active`. */
+/** The game's name for a trait id such as `expansion1::traits/GeoActive`. */
 export function traitName(id: string): string {
-  const last = id.split('/').pop() ?? id
-  return last.replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+  return findWorldgenTrait(id)?.name ?? id
 }
 
-/** `expansion1::worlds/WaterMoonlet` or `WaterMoonlet` becomes `Water Moonlet`. */
+/** The game's name for a world path (`expansion1::worlds/WaterMoonlet`) or bare id. */
 export function asteroidLabel(id: string): string {
-  return traitName(id.split('::').pop() ?? id)
+  return findWorldgenWorld(id)?.name ?? id
 }
 
 function scopeLabel(scope: RuleScope): string {
@@ -23,7 +22,7 @@ function scopeLabel(scope: RuleScope): string {
 export function ruleLabel(rule: SeedRule): string {
   switch (rule.kind) {
     case 'geyser': {
-      const name = findGeyser(rule.geyser)?.name ?? geyserName(rule.geyser)
+      const name = geyserName(rule.geyser)
       const count =
         rule.max === undefined
           ? `${rule.min}+`

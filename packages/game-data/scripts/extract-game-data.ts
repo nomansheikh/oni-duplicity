@@ -8,6 +8,9 @@
  *   run through a small C# interpreter (scripts/csharp). Needs the decompile: clone
  *   https://github.com/Kupie/ONI_Decomp to .cache/ONI_Decomp or set ONI_DECOMP to its folder.
  *
+ * - the worldgen catalog (clusters, worlds, world traits) read from the game's
+ *   StreamingAssets/worldgen YAMLs (base and per-DLC) and named from the strings.
+ *
  * Usage: vp run extract-game-data   (set ONI_PATH to the game folder if it isn't the Steam default)
  */
 import { writeFileSync } from 'node:fs'
@@ -22,6 +25,7 @@ import { readElements } from './extract/elements.ts'
 import { dataDir, decompDir } from './extract/paths.ts'
 import { readPot } from './extract/pot.ts'
 import { readGameSettings } from './extract/settings.ts'
+import { readWorldgen } from './extract/worldgen.ts'
 
 const dir = dataDir()
 const strings = readPot(join(dir, 'StreamingAssets/strings/strings_template.pot'))
@@ -58,6 +62,7 @@ const data = {
   techs: collect(strings, literals, 'STRINGS.RESEARCH.TECHS.'),
   gameSettings: readGameSettings(strings, literals),
   ranching,
+  worldgen: readWorldgen(dir, strings),
   ...readSkillTree(strings),
 }
 
