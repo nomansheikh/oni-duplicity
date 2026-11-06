@@ -15,6 +15,7 @@ export type Page =
   | 'geyser-calculator'
   | 'ranching-calculator'
   | 'skill-planner'
+  | 'seed-finder'
 
 export type GroupId = 'overview' | 'colony' | 'world' | 'progress' | 'space' | 'game' | 'tools'
 
@@ -84,12 +85,30 @@ export const GROUPS: NavGroup[] = [
     title: 'Tools',
     color: 'var(--cat-metal)',
     pages: [
+      { id: 'seed-finder', title: 'Seed finder' },
       { id: 'geyser-calculator', title: 'Geyser calculator' },
       { id: 'ranching-calculator', title: 'Ranching calculator' },
       { id: 'skill-planner', title: 'Skill planner' },
     ],
   },
 ]
+
+/** Pages that work without a save, so they open from the start screen. */
+export const SAVELESS_PAGES: ReadonlySet<Page> = new Set<Page>(['seed-finder'])
+
+/** Groups whose tab stays enabled with no save open: Overview (the start screen) and Tools. */
+export const SAVELESS_GROUPS: ReadonlySet<GroupId> = new Set<GroupId>(['overview', 'tools'])
+
+/** The page the tabs show: a page that needs a save only counts once one is open. */
+export function shownPage(page: Page, saveOpen: boolean): Page | null {
+  return saveOpen || SAVELESS_PAGES.has(page) ? page : null
+}
+
+/** Where a group opens: its last page, or with no save open, its first page that needs none. */
+export function entryPage(group: GroupId, last: Page, saveOpen: boolean): Page {
+  if (shownPage(last, saveOpen)) return last
+  return GROUPS.find((g) => g.id === group)?.pages.find((p) => SAVELESS_PAGES.has(p.id))?.id ?? last
+}
 
 export function groupOf(page: Page): NavGroup {
   return GROUPS.find((g) => g.pages.some((p) => p.id === page))!

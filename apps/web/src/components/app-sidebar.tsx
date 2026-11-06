@@ -11,7 +11,14 @@ import {
 } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
-import { GROUPS, groupOf, type GroupId, type Page } from '@/lib/nav'
+import {
+  GROUPS,
+  SAVELESS_GROUPS,
+  SAVELESS_PAGES,
+  groupOf,
+  type GroupId,
+  type Page,
+} from '@/lib/nav'
 
 export type { Page } from '@/lib/nav'
 
@@ -47,6 +54,7 @@ function DirtyDot({ className }: { className?: string }) {
  */
 export function AppTabs({
   page,
+  saveOpen,
   onNavigate,
   onSelectGroup,
   counts,
@@ -54,6 +62,8 @@ export function AppTabs({
   children,
 }: {
   page: Page | null
+  /** False while no save is open: only the groups and pages that need none are usable. */
+  saveOpen: boolean
   /** Open a page directly (a sub-tab). */
   onNavigate: (page: Page) => void
   /** Open a group, on the sub-tab it was last left on. */
@@ -65,6 +75,7 @@ export function AppTabs({
   const list = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState({ start: false, end: false })
   const group = page ? groupOf(page) : null
+  const subPages = group?.pages.filter((p) => saveOpen || SAVELESS_PAGES.has(p.id)) ?? []
 
   useEffect(() => {
     const el = list.current
@@ -108,7 +119,7 @@ export function AppTabs({
                 <TabsTrigger
                   key={item.id}
                   value={item.id}
-                  disabled={page === null}
+                  disabled={!saveOpen && !SAVELESS_GROUPS.has(item.id)}
                   className="relative"
                   // The group tabs switch the sub-tab panel below; they have no panel of their own.
                   aria-controls={undefined}
@@ -126,14 +137,14 @@ export function AppTabs({
         <Fade side="start" show={edges.start} />
         <Fade side="end" show={edges.end} />
       </nav>
-      {group && group.pages.length > 1 && (
+      {group && subPages.length > 1 && (
         <div className="border-b border-ink bg-field px-3 py-1.5">
           <TabsList
             variant="line"
             aria-label={`${group.title} pages`}
             className="w-full gap-1 overflow-x-auto [scrollbar-width:thin]"
           >
-            {group.pages.map((item) => (
+            {subPages.map((item) => (
               <TabsTrigger
                 key={item.id}
                 value={item.id}
