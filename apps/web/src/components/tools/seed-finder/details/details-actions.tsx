@@ -1,9 +1,8 @@
 import { Check, Copy } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { CompareLink } from '@/components/seed-viewer/compare-link'
 
-/** "Copy code" and a quieter link to compare the seed on Mapsnotincluded. */
+/** "Copy code" for the seed shown. */
 export function DetailsActions({ coordinate }: { coordinate: string }) {
   const [copied, setCopied] = useState(false)
   const copy = async () => {
@@ -21,7 +20,6 @@ export function DetailsActions({ coordinate }: { coordinate: string }) {
         {copied ? <Check /> : <Copy />}
         {copied ? 'Copied' : 'Copy code'}
       </Button>
-      <CompareLink coordinate={coordinate} />
     </div>
   )
 }

@@ -2,7 +2,6 @@ import { Check, Copy } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ViewSeedButton } from '@/components/seed-viewer/view-seed-button'
-import { CompareLink } from '@/components/seed-viewer/compare-link'
 import { Button } from '@/components/ui/button'
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item'
 import type { Summary } from '@/worker/model'
@@ -47,7 +46,6 @@ export function SeedCoordinate({ summary }: { summary: Summary }) {
             {copied ? <Check /> : <Copy />} {copied ? 'Copied' : 'Copy'}
           </Button>
           <ViewSeedButton coordinate={seed.coordinate} variant="secondary" size="sm" />
-          <CompareLink coordinate={seed.coordinate} />
         </ItemActions>
       )}
     </Item>

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { CompareLink } from '@/components/seed-viewer/compare-link'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -36,16 +35,11 @@ export function SeedDetails({
     return (
       <div className="flex flex-col items-start gap-2" role="alert">
         <p className="type-small text-destructive">{state.message}</p>
-        {state.unsupported ? (
-          <p className="type-small text-muted-foreground">
-            The seed can still be looked at on Mapsnotincluded.
-          </p>
-        ) : (
+        {!state.unsupported && (
           <Button variant="secondary" size="sm" onClick={retry}>
             Try again
           </Button>
         )}
-        <CompareLink coordinate={coordinate} />
       </div>
     )
   }

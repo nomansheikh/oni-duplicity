@@ -44,7 +44,7 @@ export function checkCoordinate(text: string): CoordinateCheck {
     return {
       ok: false,
       reason: 'unsupported',
-      message: `The bundled world generator cannot make ${parsed.prefix} worlds, so no map can be shown for this seed.`,
+      message: `This seed can't be previewed yet: the bundled world generator cannot make ${parsed.prefix} worlds. The code can still be copied and used in the game.`,
     }
   }
   return { ok: true, parsed, cluster }
