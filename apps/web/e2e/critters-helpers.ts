@@ -14,11 +14,9 @@ export async function openCritters(page: Page, prefab: string) {
   await page.getByPlaceholder('Search critters').fill(prefab)
 }
 
-/** The table row of the critter shown at this rounded position, e.g. `94, 111`. */
-export function critterRow(page: Page, position: string) {
-  return page
-    .getByRole('row')
-    .filter({ has: page.getByRole('cell', { name: position, exact: true }) })
+/** The table row of a critter, by its prefab and its index in that prefab's group in the save. */
+export function critterRow(page: Page, prefab: string, index: number) {
+  return page.locator(`tr[data-critter="${prefab}:${index}"]`)
 }
 
 export const amounts = (obj: Obj) =>

@@ -15,7 +15,7 @@ test('edits a DLC amount within its maximum and keeps unconfirmed ones read only
   expect(stored(source, 'ScaleGrowth')).not.toBe(42)
 
   await openCritters(page, prefab)
-  await critterRow(page, '39, 99').getByRole('button', { name: 'Edit stats' }).click()
+  await critterRow(page, prefab, index).getByRole('button', { name: 'Edit stats' }).click()
 
   // Hit points have two answers in the game data, so they are shown but locked.
   await expect(page.getByLabel('Health', { exact: true })).toBeDisabled()
