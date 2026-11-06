@@ -1,3 +1,5 @@
+import { Dices, Flame, GraduationCap, Rabbit, type LucideIcon } from 'lucide-react'
+
 export type Page =
   | 'overview'
   | 'duplicants'
@@ -24,7 +26,15 @@ export interface NavGroup {
   title: string
   /** Category colour (design.md section 4), shown on the tab icon. */
   color: string
-  pages: { id: Page; title: string }[]
+  pages: NavPage[]
+}
+
+export interface NavPage {
+  id: Page
+  title: string
+  /** Tools only: shown with the page on the start screen. */
+  icon?: LucideIcon
+  purpose?: string
 }
 
 /** The top tab strip. A group with more than one page gets a row of sub-tabs. */
@@ -85,10 +95,30 @@ export const GROUPS: NavGroup[] = [
     title: 'Tools',
     color: 'var(--cat-metal)',
     pages: [
-      { id: 'seed-finder', title: 'Seed finder' },
-      { id: 'geyser-calculator', title: 'Geyser calculator' },
-      { id: 'ranching-calculator', title: 'Ranching calculator' },
-      { id: 'skill-planner', title: 'Skill planner' },
+      {
+        id: 'seed-finder',
+        title: 'Seed finder',
+        icon: Dices,
+        purpose: 'Generate seeds and rank them by the geysers and traits you want.',
+      },
+      {
+        id: 'geyser-calculator',
+        title: 'Geyser calculator',
+        icon: Flame,
+        purpose: "Average output over each geyser's whole cycle, and what it can supply.",
+      },
+      {
+        id: 'ranching-calculator',
+        title: 'Ranching calculator',
+        icon: Rabbit,
+        purpose: 'What a herd eats and produces, from the herd size to who ranches it.',
+      },
+      {
+        id: 'skill-planner',
+        title: 'Skill planner',
+        icon: GraduationCap,
+        purpose: 'Plan a skill path and see the morale and experience it takes.',
+      },
     ],
   },
 ]
@@ -108,6 +138,12 @@ export function shownPage(page: Page, saveOpen: boolean): Page | null {
 export function entryPage(group: GroupId, last: Page, saveOpen: boolean): Page {
   if (shownPage(last, saveOpen)) return last
   return GROUPS.find((g) => g.id === group)?.pages.find((p) => SAVELESS_PAGES.has(p.id))?.id ?? last
+}
+
+/** The Tools tab's pages for the start screen; `saveless` ones open without a save. */
+export function toolPages(): (NavPage & { saveless: boolean })[] {
+  const tools = GROUPS.find((g) => g.id === 'tools')?.pages ?? []
+  return tools.map((p) => ({ ...p, saveless: SAVELESS_PAGES.has(p.id) }))
 }
 
 export function groupOf(page: Page): NavGroup {

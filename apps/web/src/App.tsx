@@ -16,6 +16,7 @@ import { fetchViews } from '@/app/fetch-views'
 import { HeaderActions } from '@/app/header-actions'
 import { Body } from '@/app/page-body'
 import { PageRouter } from '@/app/page-router'
+import { SaveFileInput } from '@/app/save-file-input'
 import { SaveNotices } from '@/app/save-notices'
 import { StartScreen } from '@/app/start-screen'
 import { NO_EDITS, type EditStatus, type State, type Views } from '@/app/types'
@@ -156,7 +157,9 @@ export default function App() {
           <main className="@container/main flex flex-1 flex-col p-2 sm:p-3">
             <div className="panel flex flex-1 flex-col bg-field p-1">
               <Body page={shown}>
-                {!shown && <StartScreen state={state} onFile={open} onPick={pick} />}
+                {!shown && (
+                  <StartScreen state={state} onFile={open} onPick={pick} onNavigate={navigate} />
+                )}
                 {loaded && <SaveNotices summary={loaded.summary} />}
                 <PageRouter
                   loaded={loaded}
@@ -182,17 +185,7 @@ export default function App() {
             onConfirm={download}
           />
         )}
-        <input
-          ref={fileInput}
-          type="file"
-          accept=".sav"
-          hidden
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) void open(file)
-            e.target.value = ''
-          }}
-        />
+        <SaveFileInput ref={fileInput} onFile={(file) => void open(file)} />
       </div>
     </div>
   )

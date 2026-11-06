@@ -50,6 +50,8 @@ The test saves cover the base game, Spaced Out!, Frosty Planet, Bionic Booster, 
 3. Make your edits, then click **Download save**.
 4. Back up the original, replace it with the downloaded file (same file name), and load it in the game.
 
+No save at hand? Click **Try an example save** to open a shared 89-cycle colony with every DLC.
+
 ## Privacy
 
 Your save file never leaves your browser. Parsing and editing run locally in a web worker, and there is no server or analytics.

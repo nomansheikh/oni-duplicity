@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, ChevronRight, Copy, FileUp, LoaderCircle, TriangleAlert } from 'lucide-react'
+import { Check, ChevronRight, Copy, LoaderCircle, TriangleAlert } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,10 +14,8 @@ import { Progress } from '@/components/ui/progress'
 import { loadErrorReport, type LoadErrorInfo } from '@/lib/load-error'
 import { cn } from '@/lib/utils'
 
-const code = 'bg-inset px-1.5 py-0.5 font-mono type-caption text-foreground border border-ink'
-
 /** The game's panel: mauve title bar over a slate body that holds the load screen states. */
-function LoadPanel({
+export function LoadPanel({
   title,
   tone = 'default',
   children,
@@ -35,59 +33,6 @@ function LoadPanel({
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>
-  )
-}
-
-export function OpenSave({ onFile, onPick }: { onFile: (file: File) => void; onPick: () => void }) {
-  const [over, setOver] = useState(false)
-  return (
-    <LoadPanel title="Load game">
-      <Empty
-        className={cn(
-          'min-h-[45vh] gap-5 border-2 border-dashed border-edge bg-inset p-8 transition-colors',
-          over && 'border-warn bg-well',
-        )}
-        onDragOver={(e) => {
-          e.preventDefault()
-          setOver(true)
-        }}
-        onDragLeave={() => setOver(false)}
-        onDrop={(e) => {
-          e.preventDefault()
-          setOver(false)
-          const file = e.dataTransfer.files[0]
-          if (file) onFile(file)
-        }}
-      >
-        <EmptyHeader>
-          <EmptyMedia
-            variant="icon"
-            className="size-16 bg-well [&_svg:not([class*='size-'])]:size-8"
-          >
-            <FileUp />
-          </EmptyMedia>
-          <div data-slot="empty-title" className="type-h2 uppercase">
-            Open an Oxygen Not Included save
-          </div>
-          <EmptyDescription>
-            Drop a <code className={code}>.sav</code> file here. Saves live in{' '}
-            <code className={code}>Documents/Klei/OxygenNotIncluded</code> on Windows and{' '}
-            <code className={code}>
-              ~/Library/Application Support/unity.Klei.Oxygen Not Included
-            </code>{' '}
-            on macOS.
-          </EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent>
-          <Button size="lg" onClick={onPick}>
-            Choose a save
-          </Button>
-          <EmptyDescription className="type-caption">
-            Everything runs in your browser. Your save is never uploaded.
-          </EmptyDescription>
-        </EmptyContent>
-      </Empty>
-    </LoadPanel>
   )
 }
 
