@@ -1,4 +1,5 @@
 import { expect, test } from 'vite-plus/test'
+import data from '../src/generated/game-data.json' with { type: 'json' }
 import { geyserTypes, resample, unresample } from '../src/index.ts'
 
 test('resample maps rolls 0 and 1 onto the ends of the range', () => {
@@ -20,4 +21,14 @@ test('unresample inverts resample and clamps to the range', () => {
 
 test('type ids are unique', () => {
   expect(new Set(geyserTypes.map((t) => t.id)).size).toBe(geyserTypes.length)
+})
+
+test('every type has DLCs in the extracted GeyserGenericConfig list', () => {
+  const extracted = new Set(data.geyserDlcs.map((g) => g.id))
+  for (const type of geyserTypes) expect(extracted.has(type.id), type.id).toBe(true)
+  expect(geyserTypes.find((t) => t.id === 'molten_aluminum')?.requiredDlcIds).toEqual([
+    'EXPANSION1_ID',
+  ])
+  expect(geyserTypes.find((t) => t.id === 'murky_brine')?.requiredDlcIds).toEqual(['DLC5_ID'])
+  expect(geyserTypes.find((t) => t.id === 'steam')?.requiredDlcIds).toEqual([])
 })

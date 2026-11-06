@@ -8,13 +8,14 @@ import {
   changeKind,
   clampWeight,
   emptyState,
-  fitToEdition,
+  fitToDlcs,
   nextRuleId,
   parseState,
   patchRule,
   removeRule,
   runnableRules,
 } from './seed-builder'
+import { DEFAULT_SEED_LIMIT, MAX_SEED_LIMIT, clampSeedLimit, parseSeedLimit } from './seed-limit'
 
 const preset: SeedPreset = {
   id: 'p',
@@ -115,6 +116,12 @@ describe('parseState', () => {
     expect(parseState(JSON.parse(JSON.stringify(state)))).toEqual(state)
   })
 
+  it('keeps only whole positive mixing levels', () => {
+    const stored = { cluster: 'X', rules: [], mixing: { DLC2_ID: 1, A: 0, B: -1, C: 1.5, D: 'x' } }
+    expect(parseState(stored)?.mixing).toEqual({ DLC2_ID: 1 })
+    expect(parseState({ cluster: 'X', rules: [] })?.mixing).toEqual({})
+  })
+
   it('rejects malformed data', () => {
     expect(parseState(null)).toBeNull()
     expect(parseState({ cluster: 1, rules: [] })).toBeNull()
@@ -124,13 +131,13 @@ describe('parseState', () => {
   })
 })
 
-describe('fitToEdition', () => {
+describe('fitToDlcs', () => {
   const base = {
     traits: new Set(['traits/MetalRich', 'traits/Volcanoes']),
     geysers: new Set(['hot_water']),
   }
 
-  it('swaps a trait for its twin and drops rules the edition lacks', () => {
+  it('swaps a trait for its twin and drops rules the DLCs lack', () => {
     const state = {
       ...emptyState('SNDST-A'),
       rules: [
@@ -140,8 +147,27 @@ describe('fitToEdition', () => {
         preset.rules[0]!,
       ],
     }
-    const fit = fitToEdition(state, base)
+    const fit = fitToDlcs(state, base)
     expect(fit.rules.map((r) => r.id)).toEqual(['b', 'a'])
     expect(fit.rules[0]).toMatchObject({ trait: 'traits/Volcanoes' })
+  })
+})
+
+describe('seed limit', () => {
+  it('starts at the default and parses stored limits', () => {
+    expect(emptyState('SNDST-A').maxSeeds).toBe(DEFAULT_SEED_LIMIT)
+    const stored = (maxSeeds: unknown) => parseState({ cluster: 'X', rules: [], maxSeeds })
+    expect(stored(null)?.maxSeeds).toBeNull()
+    expect(stored(1000)?.maxSeeds).toBe(1000)
+    expect(stored(undefined)?.maxSeeds).toBe(DEFAULT_SEED_LIMIT)
+    expect(stored('lots')?.maxSeeds).toBe(DEFAULT_SEED_LIMIT)
+  })
+
+  it('clamps to whole seeds between 1 and the maximum', () => {
+    expect(clampSeedLimit(0)).toBe(1)
+    expect(clampSeedLimit(250.6)).toBe(251)
+    expect(clampSeedLimit(1e12)).toBe(MAX_SEED_LIMIT)
+    expect(clampSeedLimit(Number.NaN)).toBe(DEFAULT_SEED_LIMIT)
+    expect(parseSeedLimit(-5)).toBe(1)
   })
 })

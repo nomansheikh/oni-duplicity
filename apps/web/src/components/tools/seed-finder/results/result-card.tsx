@@ -1,5 +1,7 @@
 import { memo } from 'react'
+import { DlcBadges } from '@/components/dlc-badge'
 import { Badge } from '@/components/ui/badge'
+import { coordinateDlcs } from '@/seed/mixing'
 import type { SeedResult } from '@/seed/result'
 import type { SeedRule } from '@/seed/rules'
 import { AsteroidSummary } from './asteroid-summary'
@@ -35,6 +37,7 @@ export const ResultCard = memo(function ResultCard({ rank, result, rules, onOpen
           <code className="type-caption min-w-0 truncate font-mono text-muted-foreground">
             {result.coordinate}
           </code>
+          <DlcBadges ids={coordinateDlcs(result.prefix, result.coordinate)} />
         </header>
         <div className="flex flex-col gap-2">
           {result.asteroids.slice(0, 3).map((a) => (

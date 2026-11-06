@@ -9,6 +9,7 @@ import {
 } from '@/lib/tools/seed-builder'
 import { asteroidOptions, geyserOptions, traitOptions } from '@/lib/tools/seed-catalog'
 import type { SeedCluster } from '@/seed/clusters'
+import { dlcsInPlay } from '@/seed/mixing'
 import { RuleRow } from './rule-row'
 
 /** The rule rows and the Add rule button. */
@@ -21,10 +22,11 @@ export function RuleList({
   cluster: SeedCluster
   onChange: (update: (state: BuilderState) => BuilderState) => void
 }) {
+  const dlcs = dlcsInPlay(cluster, state.mixing)
   const options = {
-    geysers: geyserOptions(cluster.edition),
-    traits: traitOptions(cluster.edition),
-    asteroids: asteroidOptions(cluster.prefix),
+    geysers: geyserOptions(dlcs),
+    traits: traitOptions(dlcs),
+    asteroids: asteroidOptions(cluster.prefix, state.mixing),
   }
   return (
     <div className="flex flex-col gap-2">
