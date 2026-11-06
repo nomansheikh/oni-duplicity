@@ -21205,6 +21205,36 @@
         "title": "Biome Remix",
         "desc": "Biome remixing modifies which biomes will be included across multiple asteroids"
       }
+    ],
+    "zoneTypes": [
+      "FrozenWastes",
+      "CrystalCaverns",
+      "BoggyMarsh",
+      "Sandstone",
+      "ToxicJungle",
+      "MagmaCore",
+      "OilField",
+      "Space",
+      "Ocean",
+      "Rust",
+      "Forest",
+      "Radioactive",
+      "Swamp",
+      "Wasteland",
+      "RocketInterior",
+      "Metallic",
+      "Barren",
+      "Moo",
+      "IceCaves",
+      "CarrotQuarry",
+      "SugarWoods",
+      "PrehistoricGarden",
+      "PrehistoricRaptor",
+      "PrehistoricWetlands",
+      "KelpForest",
+      "Reef",
+      "Abyss",
+      "Beach"
     ]
   },
   "skillTree": {

@@ -179,6 +179,7 @@ export {
   worldgenDlcs,
   worldgenTraits,
   worldgenWorlds,
+  zoneTypes,
   type ClusterWorld,
   type MixingKind,
   type MixingLevel,

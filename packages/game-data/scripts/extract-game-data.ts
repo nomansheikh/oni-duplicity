@@ -10,7 +10,8 @@
  *
  * - the worldgen catalog (clusters, worlds, world traits) read from the game's
  *   StreamingAssets/worldgen YAMLs (base and per-DLC) and named from the strings, with the DLCs
- *   (DlcManager) and the world mixing settings (CustomMixingSettingsConfigs) from the decompile.
+ *   (DlcManager), the world mixing settings (CustomMixingSettingsConfigs) and the zone type ids
+ *   (SubWorld.ZoneType) from the decompile.
  *
  * Usage: vp run extract-game-data   (set ONI_PATH to the game folder if it isn't the Steam default)
  */
@@ -30,6 +31,7 @@ import { readPot } from './extract/pot.ts'
 import { readMixing, readMixingSections } from './extract/mixing.ts'
 import { readGameSettings } from './extract/settings.ts'
 import { readWorldgen } from './extract/worldgen.ts'
+import { readZoneTypes } from './extract/zones.ts'
 
 const dir = dataDir()
 const strings = readPot(join(dir, 'StreamingAssets/strings/strings_template.pot'))
@@ -74,6 +76,7 @@ const data = {
     dlcs,
     mixing: readMixing(decompDir(), dir, strings),
     mixingSections: readMixingSections(strings),
+    zoneTypes: readZoneTypes(decompDir(), dir),
   },
   ...readSkillTree(strings),
 }
