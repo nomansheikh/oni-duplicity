@@ -39,8 +39,8 @@ jobs:
       - run: vp install
 
       # PRs fetch the small tier unless they change the manifest; everything else fetches all.
-      # The parser benchmark also runs on PRs that touch the parser or the benchmark itself, and
-      # then fetches just the two saves it measures.
+      # The parser benchmark also runs on PRs that touch the parser, the raw editor's search or the
+      # benchmark itself, and then fetches just the two saves it measures.
       - name: Choose fixture tier
         run: |
           tier=all
@@ -49,7 +49,7 @@ jobs:
             if git diff --quiet HEAD^1 HEAD -- test-data/fixtures.json; then
               tier=small
             fi
-            if ! git diff --quiet HEAD^1 HEAD -- packages/save-parser scripts/bench.ts scripts/bench test-data/bench-baseline.json; then
+            if ! git diff --quiet HEAD^1 HEAD -- packages/save-parser apps/web/src/worker/raw-search.ts scripts/bench.ts scripts/bench test-data/bench-baseline.json; then
               bench=yes
             fi
           else

@@ -1,4 +1,4 @@
-export const PHASES = ['readInflate', 'parse', 'write', 'deflate'] as const
+export const PHASES = ['readInflate', 'parse', 'write', 'deflate', 'rawSearch'] as const
 export type Phase = (typeof PHASES)[number]
 
 export const PHASE_LABELS: Record<Phase, string> = {
@@ -6,6 +6,7 @@ export const PHASE_LABELS: Record<Phase, string> = {
   parse: 'parse body',
   write: 'write body',
   deflate: 'deflate',
+  rawSearch: 'raw search',
 }
 
 /** A phase fails when its calibrated time grows by more than this fraction. */
@@ -30,6 +31,7 @@ export interface FixtureRun {
 export interface BaselineEntry {
   fileBytes: number
   calibrationMs: number
+  /** A baseline recorded before a phase existed lacks that phase; see `unrecordedPhases`. */
   phasesMs: PhaseTimes
 }
 
@@ -75,15 +77,24 @@ export interface PhaseComparison {
   regressed: boolean
 }
 
-/** Compare calibrated phase times, so a slower or faster machine cancels out. */
+/** Phases the baseline has no time for, because it was recorded before they were added. */
+export function unrecordedPhases(baseline: BaselineEntry): Phase[] {
+  return PHASES.filter((phase) => baseline.phasesMs?.[phase] === undefined)
+}
+
+/**
+ * Compare calibrated phase times, so a slower or faster machine cancels out. Phases the baseline
+ * has not recorded are left out; the caller decides whether that fails (see `unrecordedPhases`).
+ */
 export function compare(
   current: BaselineEntry,
   baseline: BaselineEntry,
   threshold = REGRESSION_THRESHOLD,
 ): PhaseComparison[] {
-  assertUsable(current, 'measured')
-  assertUsable(baseline, 'baseline')
-  return PHASES.map((phase) => {
+  const recorded = PHASES.filter((phase) => !unrecordedPhases(baseline).includes(phase))
+  assertUsable(current, 'measured', PHASES)
+  assertUsable(baseline, 'baseline', recorded)
+  return recorded.map((phase) => {
     const ratio = current.phasesMs[phase] / current.calibrationMs
     const baselineRatio = baseline.phasesMs[phase] / baseline.calibrationMs
     const change = ratio / baselineRatio - 1
@@ -93,8 +104,8 @@ export function compare(
 }
 
 /** A zero, negative or missing time would make every ratio meaningless, and the gate pass. */
-function assertUsable(entry: BaselineEntry, what: string) {
-  const values = [entry.calibrationMs, ...PHASES.map((phase) => entry.phasesMs?.[phase])]
+function assertUsable(entry: BaselineEntry, what: string, phases: readonly Phase[]) {
+  const values = [entry.calibrationMs, ...phases.map((phase) => entry.phasesMs?.[phase])]
   if (!values.every((value) => Number.isFinite(value) && value > 0)) {
     throw new Error(`The ${what} timings are missing, zero or not numbers`)
   }

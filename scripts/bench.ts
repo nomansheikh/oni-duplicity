@@ -10,9 +10,11 @@ import {
   median,
   missingPlatformExitCode,
   missingPlatformMessage,
+  PHASE_LABELS,
   platformKey,
   REGRESSION_THRESHOLD,
   summarize,
+  unrecordedPhases,
   type Baseline,
   type PlatformBaseline,
 } from './bench/compare.ts'
@@ -64,6 +66,7 @@ console.log(
 )
 
 let regressions = 0
+const unrecorded: string[] = []
 const entries: PlatformBaseline['fixtures'] = {}
 
 for (const file of FIXTURES) {
@@ -105,6 +108,12 @@ for (const file of FIXTURES) {
     `  peak RSS ${mb(run.peakRssBytes)}, heap after parse ${mb(run.heapAfterParseBytes)}, calibration ${ms(median(run.calibrationMs))}`,
   )
   if (stale) console.log('  baseline was recorded for a different file size; not compared')
+  const notInBaseline = comparing ? unrecordedPhases(base) : []
+  if (notInBaseline.length > 0) {
+    const labels = notInBaseline.map((phase) => PHASE_LABELS[phase]).join(', ')
+    console.log(`  baseline has no ${labels}; not compared`)
+    unrecorded.push(`${file}: ${labels}`)
+  }
   console.log()
 }
 
@@ -138,4 +147,12 @@ if (args.update) {
   console.log(
     `bench: no phase slower than the baseline by more than ${REGRESSION_THRESHOLD * 100}% (calibrated).`,
   )
+}
+
+// A phase the gate cannot judge must not pass silently, as with a missing platform.
+if (unrecorded.length > 0 && args.require) {
+  console.error(
+    `bench: the ${key} baseline has no time for ${unrecorded.join('; ')}. Record it with "vp run bench --update" on this platform.`,
+  )
+  process.exitCode = 1
 }

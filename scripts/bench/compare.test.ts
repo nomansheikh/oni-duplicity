@@ -7,13 +7,14 @@ import {
   missingPlatformExitCode,
   missingPlatformMessage,
   platformKey,
+  unrecordedPhases,
   type BaselineEntry,
 } from './compare.ts'
 
 const baseline: BaselineEntry = {
   fileBytes: 1,
   calibrationMs: 100,
-  phasesMs: { readInflate: 200, parse: 300, write: 400, deflate: 500 },
+  phasesMs: { readInflate: 200, parse: 300, write: 400, deflate: 500, rawSearch: 600 },
 }
 
 function scaled(factor: number, calibrationFactor = 1, only?: keyof BaselineEntry['phasesMs']) {
@@ -91,6 +92,19 @@ test('zero, missing or non-finite timings are errors, not passes', () => {
   const missing = { ...baseline, phasesMs: { readInflate: 1 } } as unknown as BaselineEntry
   expect(() => compare(missing, baseline)).toThrow('missing, zero')
   expect(() => compare(baseline, { ...baseline, calibrationMs: NaN })).toThrow('missing, zero')
+})
+
+test('a baseline recorded before a phase existed compares the other phases only', () => {
+  const { rawSearch: _, ...older } = baseline.phasesMs
+  const old = { ...baseline, phasesMs: older } as BaselineEntry
+  expect(unrecordedPhases(old)).toEqual(['rawSearch'])
+  expect(unrecordedPhases(baseline)).toEqual([])
+  const rows = compare(scaled(1.5, 1, 'rawSearch'), old)
+  expect(rows.map((row) => row.phase)).toEqual(['readInflate', 'parse', 'write', 'deflate'])
+  expect(rows.some((row) => row.regressed)).toBe(false)
+  // A phase that is recorded but zero is still an error, not an unrecorded phase.
+  const zero = { ...baseline, phasesMs: { ...baseline.phasesMs, rawSearch: 0 } }
+  expect(() => compare(baseline, zero)).toThrow('missing, zero')
 })
 
 test('a baseline for a different file size is stale', () => {
