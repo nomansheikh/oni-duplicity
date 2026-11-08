@@ -32,29 +32,31 @@
     },
     "linux-x64": {
       "recorded": {
-        "date": "2026-11-05",
-        "cpu": "AMD EPYC 9V74 80-Core Processor",
+        "date": "2026-11-08",
+        "cpu": "AMD EPYC 7763 64-Core Processor",
         "node": "v24.22.2"
       },
       "fixtures": {
         "mithro-06-maximum-cycle-4770.sav": {
           "fileBytes": 40031915,
-          "calibrationMs": 624,
+          "calibrationMs": 594.1,
           "phasesMs": {
-            "readInflate": 1729.7,
-            "parse": 3320.2,
-            "write": 6602.8,
-            "deflate": 5818
+            "readInflate": 1699,
+            "parse": 3275.5,
+            "write": 6806.1,
+            "deflate": 5673.7,
+            "rawSearch": 753.2
           }
         },
         "mithro-03-late-game-cycle-1160.sav": {
           "fileBytes": 13132873,
-          "calibrationMs": 580.2,
+          "calibrationMs": 585,
           "phasesMs": {
-            "readInflate": 486.7,
-            "parse": 876.3,
-            "write": 1547.3,
-            "deflate": 1627.4
+            "readInflate": 474.2,
+            "parse": 858.4,
+            "write": 1524.1,
+            "deflate": 1523.4,
+            "rawSearch": 331.5
           }
         }
       }
