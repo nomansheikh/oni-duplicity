@@ -61,11 +61,15 @@ export function OptionPicker({
                     setOpen(false)
                   }}
                 >
-                  <span className="truncate">{option.label}</span>
-                  {option.hint && (
-                    <span className="type-caption text-muted-foreground">{option.hint}</span>
-                  )}
-                  {option.id === value && <Check className="ml-auto" />}
+                  {/* Name over hint: side by side, a long geyser name and its element squeezed
+                      each other into an ellipsis and a wrapped hint. */}
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span>{option.label}</span>
+                    {option.hint && (
+                      <span className="type-caption text-muted-foreground">{option.hint}</span>
+                    )}
+                  </span>
+                  {option.id === value && <Check className="shrink-0" />}
                 </CommandItem>
               ))}
             </CommandGroup>
