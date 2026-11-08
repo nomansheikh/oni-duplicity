@@ -20,7 +20,7 @@ export function CritterRow({
 }) {
   const wild = (amount(c, 'Wildness') ?? 0) > 0
   return (
-    <TableRow key={c.id}>
+    <TableRow key={c.id} data-critter={c.id}>
       <TableCell>
         <div className="flex flex-col items-start gap-1">
           <span className="type-h3 flex items-center gap-2 normal-case">

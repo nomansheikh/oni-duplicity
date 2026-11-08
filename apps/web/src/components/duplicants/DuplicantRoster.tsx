@@ -145,7 +145,7 @@ export function DuplicantRoster({
                   </ItemMedia>
                   <ItemContent className="gap-2">
                     <ItemTitle className="type-h3 normal-case">
-                      {d.name}
+                      <span data-slot="duplicant-name">{d.name}</span>
                       <span className="type-caption text-muted-foreground">
                         {d.age} {d.age === 1 ? 'cycle' : 'cycles'}
                       </span>

@@ -17,7 +17,7 @@ export async function pick(page: Page, name: string): Promise<void> {
 
 /** The names in the duplicant list, top to bottom; assert on it with `toHaveText`. */
 export const listed = (page: Page) =>
-  page.locator('button[data-slot="item"] [data-slot="item-title"]')
+  page.locator('button[data-slot="item"] [data-slot="duplicant-name"]')
 
 export async function openTraitPicker(page: Page, search: string): Promise<void> {
   await page.getByRole('button', { name: 'Add trait' }).click()
