@@ -37,3 +37,6 @@ blob-report
 
 # Oracle parser built by `vp run differential`
 .cache/
+
+# Wrangler local state (`wrangler dev`)
+.wrangler/

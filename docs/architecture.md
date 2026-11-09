@@ -114,7 +114,7 @@ save(): Uint8Array
 - Saving always downloads `<baseName>.sav`; the original file is never overwritten.
 - Leaving the page with unsaved edits triggers the browser's unsaved-changes prompt.
 
-**UI.** Desktop-first dashboard layout (sidebar, header with undo/redo and download). Light, dark and system themes, stored in `localStorage`. No router: GitHub Pages has no SPA fallback and the app is a single screen per save.
+**UI.** Desktop-first dashboard layout (sidebar, header with undo/redo and download). Light, dark and system themes, stored in `localStorage`. No router: the app is a single screen per save, so the host needs no SPA fallback.
 
 **i18n.** English only for now.
 
@@ -137,7 +137,7 @@ save(): Uint8Array
 - **Fixtures:** the owner's saves are committed in `test-data/saves/` (CC0-1.0). The konove save and the six mithro saves are mirrored to the `fixtures-v1` prerelease with their licenses; `test-data/fixtures.json` pins every file by SHA-256. `vp run fixtures [--tier small|all]` downloads into the git-ignored `test-data/fetched/` and verifies checksums; CI caches that folder by manifest hash. PRs run the small tier unless they change `fixtures.json`; pushes to `main`, manifest changes and the nightly job run all of them.
 - **Repository rules:** `main` requires a PR and green CI (admin bypass allowed); squash merge only; a CI check requires a conventional PR title.
 - **Dependabot** for npm and GitHub Actions.
-- **Releases:** release-please keeps a release PR and CHANGELOG on `main` (`feat` bumps the minor version below 1.0). Publishing a release builds the tagged commit and deploys `apps/web` to GitHub Pages; merges alone do not deploy. The build uses relative asset paths (`base: './'`), so it works under `/oni-duplicity/`. The release PR is opened with the default `GITHUB_TOKEN`, which does not trigger other workflows, so its required checks never run; merge it with the admin bypass.
+- **Releases:** release-please keeps a release PR and CHANGELOG on `main` (`feat` bumps the minor version below 1.0). Publishing a release builds the tagged commit and deploys `apps/web/dist` as Cloudflare Workers static assets on `oni.noman.codes` (`apps/web/wrangler.jsonc`, no Worker script); merges alone do not deploy. `apps/web/public/_headers` adds security headers and caches the content-hashed `assets/` for a year. The deploy job reads `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` from the `production` environment. The release PR is opened with the default `GITHUB_TOKEN`, which does not trigger other workflows, so its required checks never run; merge it with the admin bypass.
 
 ## Performance
 
