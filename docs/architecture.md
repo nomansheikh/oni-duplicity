@@ -138,7 +138,7 @@ save(): Uint8Array
 - **Repository rules:** `main` requires a PR and green CI (admin bypass allowed); squash merge only; a CI check requires a conventional PR title.
 - **Dependabot** for npm and GitHub Actions.
 - **Releases:** release-please keeps a release PR and CHANGELOG on `main` (`feat` bumps the minor version below 1.0). The release PR is opened with the default `GITHUB_TOKEN`, which does not trigger other workflows, so its required checks never run; merge it with the admin bypass.
-- **Deploys:** Cloudflare Workers Builds, connected to the repository in the Cloudflare dashboard, builds every push to `main` and deploys `apps/web/dist` as Workers static assets on `oni.noman.codes` (`apps/web/wrangler.jsonc`, no Worker script). Its build command is `pnpm exec vp run -r build` and its deploy command `pnpm --filter @oni-duplicity/web exec wrangler deploy`; both live in the dashboard, not the repository. Releases do not deploy. `apps/web/public/_headers` adds security headers and caches the content-hashed `assets/` for a year.
+- **Deploys:** Cloudflare Workers Builds, connected to the repository in the Cloudflare dashboard, builds every push to `main` and deploys `apps/web/dist` as Workers static assets on `duplicity.noman.codes` (`apps/web/wrangler.jsonc`, no Worker script). Its build command is `pnpm exec vp run -r build` and its deploy command `pnpm --filter @oni-duplicity/web exec wrangler deploy`; both live in the dashboard, not the repository. Releases do not deploy. `apps/web/public/_headers` adds security headers and caches the content-hashed `assets/` for a year.
 
 ## Performance
 

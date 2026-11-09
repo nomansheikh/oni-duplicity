@@ -67,7 +67,7 @@ A maintainer opens or updates the release PR with the release-please CLI, since 
 pnpm dlx release-please release-pr --token="$(gh auth token)" --repo-url=nomansheikh/oni-duplicity --config-file=release-please-config.json --manifest-file=.release-please-manifest.json
 ```
 
-Merging that PR tags a release. Deploys are separate: Cloudflare Workers Builds deploys every push to `main` to [oni.noman.codes](https://oni.noman.codes).
+Merging that PR tags a release. Deploys are separate: Cloudflare Workers Builds deploys every push to `main` to [duplicity.noman.codes](https://duplicity.noman.codes).
 
 ## Conduct
 
