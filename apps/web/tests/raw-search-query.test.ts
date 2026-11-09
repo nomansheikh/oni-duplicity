@@ -122,7 +122,8 @@ test.skipIf(!all)(
       { query: 'Temperature', values: true },
     ]) {
       // Correctness only. A wall-clock budget is unreliable in a parallel suite on a shared
-      // runner (one run took 20 s for the same search), so speed is not asserted here.
+      // runner (one run took 20 s for the same search). The "raw search" phase of
+      // `vp run bench` checks the speed instead, calibrated against a baseline.
       const result = await rawSearch(big, options)
       expect(result.scanned).toBeGreaterThan(1_000_000)
     }
