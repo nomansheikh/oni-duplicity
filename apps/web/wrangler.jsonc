@@ -1,5 +1,6 @@
 // Cloudflare Workers static assets: the built app is served as-is, with no Worker script.
-// Deployed by the `deploy` job in .github/workflows/release.yml. By hand, after `vp run -r build`:
+// Cloudflare Workers Builds deploys every push to main (build: `pnpm exec vp run -r build`, deploy:
+// `pnpm --filter @oni-duplicity/web exec wrangler deploy`). By hand, after `vp run -r build`:
 // `vp exec wrangler deploy` from this folder.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",

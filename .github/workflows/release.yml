@@ -3,7 +3,6 @@ name: Release
 on:
   push:
     branches: [main]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,51 +19,12 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       # Actions may not open pull requests in this repo, so the release PR is opened by hand with
-      # the release-please CLI (`release-pr`). Merging it lets this step tag the release and deploy.
+      # the release-please CLI (`release-pr`). Merging it lets this step tag the release.
       - id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           skip-github-pull-request: true
-
-  # Only a published release deploys; a manual run redeploys the latest main.
-  deploy:
-    name: deploy
-    needs: release-please
-    if: needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-    # Holds the CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets.
-    environment:
-      name: production
-      url: https://oni.noman.codes
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ needs.release-please.outputs.tag_name || github.sha }}
-
-      - uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
-        with:
-          node-version: '24'
-          cache: true
-
-      - run: vp install
-
-      - name: Build app and pack libraries
-        run: vp run -r build
-
-      # Uploads apps/web/dist as Workers static assets (apps/web/wrangler.jsonc).
-      - name: Deploy to Cloudflare Workers
-        working-directory: apps/web
-        run: vp exec wrangler deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
