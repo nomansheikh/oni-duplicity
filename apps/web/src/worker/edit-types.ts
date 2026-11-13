@@ -43,6 +43,7 @@ export type Edit =
   | { type: 'rawAdd'; path: RawPath }
   | { type: 'setMaterialTemperature'; elementId: string; kelvin: number }
   | { type: 'scaleMaterialMass'; elementId: string; factor: number }
+  | { type: 'spawnDebris'; elementId: string; mass: number; kelvin: number }
   | { type: 'setDemoliorImpact'; impactCycle: number }
   | SpaceEdit
 

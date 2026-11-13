@@ -154,6 +154,8 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
       return `${findElement(edit.elementId)?.name ?? edit.elementId}: every temperature to ${round(edit.kelvin - 273.15)} °C`
     case 'scaleMaterialMass':
       return `${findElement(edit.elementId)?.name ?? edit.elementId}: every mass × ${round(edit.factor)}`
+    case 'spawnDebris':
+      return `${findElement(edit.elementId)?.name ?? edit.elementId}: spawn ${round(edit.mass)} kg at ${round(edit.kelvin - 273.15)} °C at the printing pod`
   }
 }
 

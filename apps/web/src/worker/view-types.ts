@@ -68,6 +68,8 @@ export interface MaterialView {
   storedCount: number
   /** Mass-weighted average temperature in Kelvin. */
   temperature: number
+  /** Why more of it can't be spawned at the printing pod; absent when it can. */
+  spawnRefusal?: string
 }
 
 export interface MaterialItemView {
