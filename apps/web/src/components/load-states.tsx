@@ -60,6 +60,28 @@ export function LoadingSave({ fileName, progress }: { fileName: string; progress
   )
 }
 
+/**
+ * A spinner over a pane whose content is still being worked out. It sits on top of what the
+ * pane already shows (positioned against the nearest relative parent), so nothing moves when
+ * it appears or goes away.
+ */
+export function LoadingOverlay({ label, className }: { label: string; className?: string }) {
+  return (
+    <div
+      role="status"
+      className={cn(
+        'absolute inset-0 z-10 flex items-center justify-center bg-legend/75 animate-in duration-150 fade-in',
+        className,
+      )}
+    >
+      <div className="well flex items-center gap-3">
+        <LoaderCircle className="size-5 shrink-0 animate-spin" aria-hidden />
+        <span className="type-small">{label}</span>
+      </div>
+    </div>
+  )
+}
+
 export function LoadError({ info, onPick }: { info: LoadErrorInfo; onPick: () => void }) {
   const [showDetails, setShowDetails] = useState(false)
   const [copied, setCopied] = useState(false)

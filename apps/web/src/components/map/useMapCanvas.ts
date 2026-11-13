@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { toCelsius } from '@/lib/format'
 import { elementColor, massColor, temperatureColor, vacuumColor, type Rgb } from '@/lib/map-colors'
 import type { WorldMap } from '@/worker/map'
@@ -6,13 +6,17 @@ import type { RefObject } from 'react'
 
 export type Mode = 'element' | 'temperature' | 'mass'
 
-/** Paints the map's cells into the canvas for the chosen colour mode, dimming all but one element. */
+/**
+ * Paints the map's cells into the canvas for the chosen colour mode, dimming all but one element.
+ * Returns the map the canvas last finished painting, so a page can tell when a new map is on screen.
+ */
 export function useMapCanvas(
   canvasRef: RefObject<HTMLCanvasElement | null>,
   map: WorldMap | null,
   mode: Mode,
   highlight: number | null,
-) {
+): WorldMap | null {
+  const [painted, setPainted] = useState<WorldMap | null>(null)
   useEffect(() => {
     const canvas = canvasRef.current
     if (!map || !canvas) return
@@ -46,5 +50,7 @@ export function useMapCanvas(
       }
     }
     context.putImageData(image, 0, 0)
+    setPainted(map)
   }, [canvasRef, map, mode, highlight])
+  return painted
 }
