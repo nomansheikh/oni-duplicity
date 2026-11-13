@@ -10,6 +10,8 @@ import { itemByRef, materialItems } from '../material-items.ts'
 import { behavior, objectById, primary, saveGameObject } from '../save-helpers.ts'
 import { setTech } from '../research.ts'
 import { applySpaceEdit } from '../space-edits.ts'
+import { spawnDebris } from '../spawn.ts'
+import { MAX_CHUNK_MASS } from '../spawn-limits.ts'
 import { applySetAmount } from './amount.ts'
 import { applyBulk } from './bulk.ts'
 import { applyObjectEdit } from './duplicant.ts'
@@ -52,7 +54,7 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
       setGeyserType(save, edit.id, edit.typeId)
       return
     case 'setItemMass':
-      primary(itemByRef(save, edit.ref)).Units = Math.max(0, edit.mass)
+      primary(itemByRef(save, edit.ref)).Units = Math.min(MAX_CHUNK_MASS, Math.max(0, edit.mass))
       return
     case 'setItemTemperature':
       primary(itemByRef(save, edit.ref))._Temperature = Math.max(0, edit.kelvin)
@@ -100,8 +102,11 @@ export function applyEdit(save: SaveGame, edit: Edit): void {
     case 'scaleMaterialMass':
       for (const item of materialItems(save, edit.elementId)) {
         const pe = primary(item.obj)
-        pe.Units = Math.max(0, Number(pe.Units) * edit.factor)
+        pe.Units = Math.min(MAX_CHUNK_MASS, Math.max(0, Number(pe.Units) * edit.factor))
       }
+      return
+    case 'spawnDebris':
+      spawnDebris(save, edit.elementId, edit.mass, edit.kelvin)
       return
     case 'setDemoliorImpact':
       setDemoliorImpact(save, edit.impactCycle)

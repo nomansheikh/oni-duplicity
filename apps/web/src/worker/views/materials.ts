@@ -3,9 +3,11 @@ import type { SaveGame } from '@oni-duplicity/save-parser'
 import { isMarkedForMove, markedForMoveIds } from '../debris.ts'
 import { allMaterialItems, materialItems } from '../material-items.ts'
 import { instanceId, primary } from '../save-helpers.ts'
+import { hasPrintingPod, spawnRefusalFor } from '../spawn.ts'
 import type { MaterialItemView, MaterialView } from '../view-types.ts'
 
 export function listMaterials(save: SaveGame): MaterialView[] {
+  const hasPod = hasPrintingPod(save)
   const totals = new Map<string, MaterialView & { heat: number }>()
   for (const item of allMaterialItems(save)) {
     const pe = primary(item.obj)
@@ -23,6 +25,8 @@ export function listMaterials(save: SaveGame): MaterialView[] {
       temperature: 0,
       heat: 0,
     }
+    const refusal = spawnRefusalFor(element.state, hasPod)
+    if (refusal) entry.spawnRefusal = refusal
     if (item.loose) {
       entry.looseMass += mass
       entry.looseCount++

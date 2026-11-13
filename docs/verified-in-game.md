@@ -40,3 +40,8 @@ Each step starts from a save you can lose. Keep the original beside it.
 - [ ] Destination analysis, base game:
   1. Pick a destination shown as Hidden, press Discover, download and load it. Expect it to appear on the starmap as a discovered but unanalyzed destination.
   2. Press Analyze on a hidden or discovered destination, download and load it. Expect it fully analyzed, with its resources and research options visible, and no scan still running on it.
+- [ ] Spawn resources at the printing pod (experimental):
+  1. In Resources, open an element the colony holds only in storage (for example Steel), spawn 250,000 kg at 25 °C and download. Expect three loose chunks of about 83.3 t.
+  2. Load it. Expect no load warning, three Steel debris piles on the printing pod's floor at 25 °C, and that duplicants can sweep and store them.
+  3. Repeat with a liquid the colony has (for example Water, 500 kg): expect a loose bottle at the pod that can be mopped or emptied.
+  4. Save and reload once more to see that the chunks keep their mass and temperature.
