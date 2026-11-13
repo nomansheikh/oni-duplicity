@@ -30,14 +30,20 @@ export function ChangesPopover({ count, revision }: { count: number; revision: n
           {count} unsaved {count === 1 ? 'edit' : 'edits'}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-96 p-0">
-        <div className="border-b px-4 py-3">
+      <PopoverContent
+        align="end"
+        collisionPadding={8}
+        className="max-h-[min(36rem,var(--radix-popover-content-available-height))] w-96 gap-0 overflow-hidden p-0"
+      >
+        <div className="shrink-0 border-b px-4 py-3">
           <p className="font-heading font-semibold">Unsaved changes</p>
           <p className="type-small text-muted-foreground">
             Newest first. Undo removes the top one.
           </p>
         </div>
-        <ScrollArea className="max-h-80">
+        {/* The viewport's `size-full` needs a definite height; flexing it lets the list shrink to
+            whatever the header leaves under the popover's cap, and scroll there. */}
+        <ScrollArea className="flex min-h-0 flex-1 flex-col *:data-[slot=scroll-area-viewport]:h-auto *:data-[slot=scroll-area-viewport]:min-h-0 *:data-[slot=scroll-area-viewport]:flex-1">
           {items.length === 0 && (
             <EmptyState
               size="compact"
