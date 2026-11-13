@@ -1,4 +1,5 @@
 import {
+  critterAmountNames,
   findAmount,
   findAttribute,
   findCritter,
@@ -12,6 +13,7 @@ import {
   humanize,
 } from '@oni-duplicity/game-data'
 import type { SaveGame } from '@oni-duplicity/save-parser'
+import { amountValueText } from '../components/duplicants/amount-format.ts'
 import { clampImpact } from './dlc.ts'
 import { listGeysers, objectById, type Edit, type GeyserField } from './model.ts'
 import { harvestableByPrefab } from './pois.ts'
@@ -51,6 +53,11 @@ function nameOf(save: SaveGame, id: string): string {
   return findCritter(prefab)?.name ?? findGeyser(prefab)?.name ?? humanize(prefab)
 }
 
+/** An amount's name as its editor shows it: the game's name, else a humanized id. */
+function amountName(id: string): string {
+  return (findAmount(id) ?? critterAmountNames[id])?.name ?? humanize(id)
+}
+
 /** A short, human line for the unsaved-changes list. Call it before applying the edit. */
 export function describeEdit(save: SaveGame, edit: Edit): string {
   const who = 'id' in edit ? `${nameOf(save, edit.id)}: ` : ''
@@ -82,7 +89,7 @@ export function describeEdit(save: SaveGame, edit: Edit): string {
     case 'setExperience':
       return `${who}experience to ${round(edit.experience)}`
     case 'setAmount':
-      return `${who}${findAmount(edit.amountId)?.name ?? edit.amountId} to ${round(edit.value)}`
+      return `${who}${amountName(edit.amountId)} to ${amountValueText(edit.amountId, edit.value)}`
     case 'addEffect':
       return `${who}add ${findEffect(edit.effectId)?.name ?? edit.effectId}`
     case 'setEffectCycles':

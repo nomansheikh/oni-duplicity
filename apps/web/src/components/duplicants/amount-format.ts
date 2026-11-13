@@ -78,6 +78,14 @@ export function readAmount(amount: AmountView) {
   return { format, scale, offset, shown, cap, over: Math.max(0, shown - cap) }
 }
 
+/** A stored amount value in the editor's units, such as `72.3 °C` for 345.45 kelvin. */
+export function amountValueText(id: string, value: number): string {
+  const { format, shown } = readAmount({ id, name: id, value })
+  const digits = format.digits ?? 0
+  const text = shown.toLocaleString(undefined, { maximumFractionDigits: digits })
+  return format.unit ? `${text} ${format.unit}` : text
+}
+
 /**
  * The game's meter for an amount: blocks for health and stress, a storage gauge for calories,
  * stamina and the bionic tanks, a thin bar for the rest. Over the maximum it shows the cap.
