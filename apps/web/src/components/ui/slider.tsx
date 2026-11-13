@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { cn } from 'cn'
 import { Slider as SliderPrimitive } from 'radix-ui'
+import { shownSliderValues, valueKey, type SliderDraft } from '@/lib/slider-draft'
 
 function Slider({
   className,
@@ -14,15 +15,21 @@ function Slider({
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
   // A controlled slider that only saves on commit still has to follow the pointer while
   // dragging, so hold the in-progress value locally until the new value comes back.
-  const [draft, setDraft] = React.useState<number[] | undefined>(undefined)
-  const dragging = React.useRef(false)
+  const [draft, setDraft] = React.useState<SliderDraft | undefined>(undefined)
+  const [held, setHeld] = React.useState(false)
   const fallback = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const valueKey = value?.join(',')
-  React.useEffect(() => {
-    if (!dragging.current) setDraft(undefined)
-  }, [valueKey])
   React.useEffect(() => () => clearTimeout(fallback.current), [])
-  const shown = draft ?? value
+  // Normally the new value arrives and replaces the draft; if the edit is rejected or clamped
+  // to the old value, fall back to the real value shortly after.
+  const settle = () => {
+    clearTimeout(fallback.current)
+    fallback.current = setTimeout(() => setDraft(undefined), 1000)
+  }
+  const release = () => {
+    setHeld(false)
+    settle()
+  }
+  const shown = shownSliderValues(value, draft, held)
   const _values = React.useMemo(
     () => (Array.isArray(shown) ? shown : Array.isArray(defaultValue) ? defaultValue : [min, max]),
     [shown, defaultValue, min, max],
@@ -40,20 +47,30 @@ function Slider({
         className,
       )}
       {...props}
+      // Radix only commits a drag that changed the value, so the pointer, not the commit,
+      // says when a drag is over.
+      onPointerDown={(event) => {
+        setHeld(true)
+        props.onPointerDown?.(event)
+      }}
+      onPointerUp={(event) => {
+        release()
+        props.onPointerUp?.(event)
+      }}
+      onLostPointerCapture={(event) => {
+        release()
+        props.onLostPointerCapture?.(event)
+      }}
       onValueChange={(next) => {
         if (value) {
-          dragging.current = true
           clearTimeout(fallback.current)
-          setDraft(next)
+          setDraft({ values: next, from: valueKey(value) })
         }
         props.onValueChange?.(next)
       }}
       onValueCommit={(next) => {
-        dragging.current = false
         props.onValueCommit?.(next)
-        // Normally the new value arrives and clears the draft; if the edit is rejected or
-        // clamped to the old value, fall back to the real value shortly after.
-        if (value) fallback.current = setTimeout(() => setDraft(undefined), 1000)
+        if (value) settle()
       }}
     >
       <SliderPrimitive.Track
