@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { saveClient } from '@/lib/save-client'
 import { cn } from '@/lib/utils'
 import type { WorldMap } from '@/worker/map'
 import type { WorldView } from '@/worker/model'
+import { LoadingOverlay } from './load-states'
 import { PageHeader } from './page-header'
 import { MapControls } from './map/MapControls'
 import { ElementLegend } from './map/ElementLegend'
 import { CellInfo, RampLegend, MarkerToggle, type MarkerKind } from './map/MapPanels'
 import { useMapCanvas, type Mode } from './map/useMapCanvas'
+import { useWorldMap } from './map/useWorldMap'
 
 const ZOOMS = [1, 2, 3, 4, 6, 8, 12]
 
@@ -25,41 +25,16 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
     [worlds],
   )
   const [worldId, setWorldId] = useState(ordered[0]?.id ?? '')
-  const [map, setMap] = useState<WorldMap | null>(null)
-  const [error, setError] = useState<{ worldId: string; message: string } | null>(null)
-  // Which world `map` shows; it lags `worldId` until the new map arrives.
-  const [mapWorld, setMapWorld] = useState<string | null>(null)
+  const { map, mapWorld, error, fetching } = useWorldMap(worldId, revision)
   const [mode, setMode] = useState<Mode>('element')
   const [zoom, setZoom] = useState(1)
-  const [highlight, setHighlight] = useState<number | null>(null)
+  // The element picked in the legend, for the map it was picked on (indexes differ per map).
+  const [picked, setPicked] = useState<{ map: WorldMap; index: number } | null>(null)
+  const highlight = picked && picked.map === map ? picked.index : null
   const [shown, setShown] = useState<MarkerKind[]>(['duplicant', 'geyser'])
   const [hover, setHover] = useState<{ x: number; y: number } | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    saveClient
-      .worldMap(worldId)
-      .then((next) => {
-        if (cancelled) return
-        setMap(next)
-        setMapWorld(worldId)
-        setError(null)
-        setHighlight(null)
-      })
-      .catch((e: unknown) => {
-        if (cancelled) return
-        setMap(null)
-        setError({
-          worldId,
-          message: e instanceof Error ? e.message : 'Could not read this map',
-        })
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [worldId, revision])
 
   // The zoom that fits the whole map in the pane. It is the lowest zoom, so the map can never
   // shrink into an empty pane, and it follows the pane when the window resizes.
@@ -89,7 +64,10 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
     return () => observer.disconnect()
   }, [map, mapWorld])
 
-  useMapCanvas(canvasRef, map, mode, highlight)
+  const painted = useMapCanvas(canvasRef, map, mode, highlight)
+  // From the request until the canvas holds the new map: while the worker reads the world, and
+  // the paint after it. The previous map, if any, stays underneath so the pane never jumps.
+  const loading = fetching || (map !== null && painted !== map)
 
   const onMove = (e: MouseEvent<HTMLCanvasElement>) => {
     if (!map) return
@@ -108,6 +86,8 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
     })
 
   const world = ordered.find((w) => w.id === worldId)
+  // The legend names the world it describes, which lags `world` while the next map loads.
+  const shownWorld = ordered.find((w) => w.id === mapWorld)
   const totalCells = map ? map.width * map.height : 0
   const legend = map
     ? map.elements.map((e, index) => ({ ...e, index })).sort((a, b) => b.cells - a.cells)
@@ -133,43 +113,49 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
       />
       <Card className="gap-4">
         <CardContent className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <div
-            ref={scrollRef}
-            className="flex h-[calc(100svh-15rem)] min-h-96 overflow-auto border border-ink bg-legend"
-          >
-            {map ? (
-              <div
-                className="relative m-auto shrink-0"
-                style={{ width: map.width * zoom, height: map.height * zoom }}
-              >
-                <canvas
-                  ref={canvasRef}
-                  className="block cursor-crosshair"
-                  style={{
-                    width: map.width * zoom,
-                    height: map.height * zoom,
-                    imageRendering: 'pixelated',
-                  }}
-                  onMouseMove={onMove}
-                  onMouseLeave={() => setHover(null)}
-                />
-                {map.markers
-                  .filter((m) => shown.includes(m.kind))
-                  .map((m, i) => (
-                    <span
-                      key={i}
-                      className={cn(
-                        'pointer-events-none absolute -translate-1/2',
-                        MARKER_STYLES[m.kind],
-                      )}
-                      style={{ left: (m.x + 0.5) * zoom, top: (map.height - m.y - 0.5) * zoom }}
-                    />
-                  ))}
-              </div>
-            ) : error?.worldId === worldId ? (
-              <p className="p-4 type-small text-destructive">{error.message}</p>
-            ) : (
-              <Skeleton className="size-full" />
+          <div className="relative min-w-0" aria-busy={loading}>
+            <div
+              ref={scrollRef}
+              className="flex h-[calc(100svh-15rem)] min-h-96 overflow-auto border border-ink bg-legend"
+            >
+              {map ? (
+                <div
+                  className="relative m-auto shrink-0"
+                  style={{ width: map.width * zoom, height: map.height * zoom }}
+                >
+                  <canvas
+                    ref={canvasRef}
+                    className="block cursor-crosshair"
+                    style={{
+                      width: map.width * zoom,
+                      height: map.height * zoom,
+                      imageRendering: 'pixelated',
+                    }}
+                    onMouseMove={onMove}
+                    onMouseLeave={() => setHover(null)}
+                  />
+                  {map.markers
+                    .filter((m) => shown.includes(m.kind))
+                    .map((m, i) => (
+                      <span
+                        key={i}
+                        className={cn(
+                          'pointer-events-none absolute -translate-1/2',
+                          MARKER_STYLES[m.kind],
+                        )}
+                        style={{ left: (m.x + 0.5) * zoom, top: (map.height - m.y - 0.5) * zoom }}
+                      />
+                    ))}
+                </div>
+              ) : error ? (
+                <p className="p-4 type-small text-destructive">{error}</p>
+              ) : null}
+            </div>
+            {loading && (
+              <LoadingOverlay
+                className="border border-ink"
+                label={`Drawing ${world?.name ?? 'the map'}…`}
+              />
             )}
           </div>
           <div className="flex min-w-0 flex-col gap-4">
@@ -177,11 +163,11 @@ export function MapPage({ worlds, revision }: { worlds: WorldView[]; revision: n
             <MarkerToggle shown={shown} onChange={setShown} />
             {mode === 'element' ? (
               <ElementLegend
-                worldName={world?.name ?? 'World'}
+                worldName={(shownWorld ?? world)?.name ?? 'World'}
                 legend={legend}
                 totalCells={totalCells}
                 highlight={highlight}
-                onHighlight={setHighlight}
+                onHighlight={(index) => setPicked(map && index !== null ? { map, index } : null)}
               />
             ) : (
               <RampLegend mode={mode} />
