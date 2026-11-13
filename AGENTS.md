@@ -169,7 +169,7 @@ This is the riskiest work in the repo: a wrong edit silently corrupts someone's 
 - **Stack:** React 19, Tailwind CSS v4, shadcn/ui (`radix-nova` style, `apps/web/components.json`, aliases `@/components`, `@/components/ui`, `@/lib`, `@/hooks`), Radix, lucide-react icons, sonner toasts, TanStack Virtual for long lists, `@tanstack/react-table`, recharts, cmdk, vaul. Fonts are bundled with Fontsource (Rajdhani headings, Noto Sans body, JetBrains Mono for the raw tree).
 - **Design direction is [docs/design.md](docs/design.md).** It is dark only, flat and square (`--radius: 0px`), with a mauve title bar per panel, slate everywhere else, and colours measured from game screenshots. Tokens live in `apps/web/src/index.css`.
 - **Reuse before you build.** Use `components/ui/*` (restyled shadcn), shared pieces in `components/common*.tsx` (`CommitInput`, `NumberField`, `Hint`, `SearchPicker` and others), `page-header.tsx`, `empty-state.tsx` and `load-states.tsx`. Add a shadcn component with the shadcn CLI and then restyle it to the recipes.
-- **Per-PR UI checklist** (design.md §10): no hard-coded Tailwind palette colours (`text-red-500` and the like), no `rounded-*` outside the cycle badge and avatars, `tabular-nums` for numbers, an `Empty` and a `Skeleton` state, and screenshots at 1920 and 1440 for visual changes.
+- **Per-PR UI checklist** (design.md §10): no hard-coded Tailwind palette colours (`text-red-500` and the like), no `rounded-*` outside the cycle badge and avatars, `tabular-nums` for numbers, an `Empty` and a `Skeleton` state, and before and after screenshots at 1920 and 1440 for visual changes, in the PR's `## Screenshots` section (see [Screenshots in PR descriptions](#screenshots-in-pr-descriptions)).
 - Desktop-first. English only (no i18n library yet).
 - `src/dev/` has a component gallery for checking components in isolation.
 
@@ -219,9 +219,27 @@ Actions are pinned to commit SHAs with the version in a comment. Keep that style
 - **No co-author tags** (`Co-Authored-By`) in commits.
 - **Never mention Claude, Claude Code, AI or any coding agent** in commits, branch names, PR titles, PR descriptions, review comments or issues.
 - **PR descriptions use What / Why / How** (`.github/pull_request_template.md`). **No "Test plan" section.**
+- **UI changes need before and after screenshots** under a `## Screenshots` heading in the PR description. Non-UI PRs leave the heading out. See below for how to host them.
 - Keep PRs focused on one thing. Touch only the files your change needs, especially while other PRs are open.
 - Don't push to someone else's branch, and don't force-push shared branches.
 - Be critical, not agreeable. Point out flaws, risks and wrong assumptions, including the owner's. Report results faithfully: failing tests, skipped steps and unverified claims are stated as such.
+
+### Screenshots in PR descriptions
+
+- **Capture:** "before" from `main` and "after" from your branch, each in the dev server (`vp dev`) with the same fixture save from `test-data/saves/` loaded and the same viewport. Use a browser by hand or your agent's browser tool, not Playwright (see Testing).
+- **Host:** push the images to an **orphan branch named `pr-assets/<topic>`**, one commit with no history. Existing examples: `pr-assets/page-content-width` and the older `*-screenshots` branches. These branches are the one exception to the `type/description` naming rule.
+- **Never commit images to the feature branch.**
+- **Link** them with `https://raw.githubusercontent.com/nomansheikh/oni-duplicity/pr-assets/<topic>/<file>.png`.
+- **Never delete `pr-assets/*` or `*-screenshots` branches.** Old PR descriptions point at them.
+
+To build the branch without switching branches in a shared checkout:
+
+```bash
+git worktree add --orphan -b pr-assets/<topic> ../pr-assets-<topic>
+cp before.png after.png ../pr-assets-<topic>/
+cd ../pr-assets-<topic> && git add . && git commit -m "chore: pr screenshots" && git push -u origin HEAD
+cd - && git worktree remove ../pr-assets-<topic>
+```
 
 ## Releases
 

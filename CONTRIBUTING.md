@@ -50,6 +50,8 @@ The pre-commit hook runs `vp check --fix` on staged files.
 
 - Keep PRs focused on one thing.
 - PR titles follow [Conventional Commits](https://www.conventionalcommits.org) (`feat(web): …`, `fix(parser): …`); a check enforces it, and the title becomes the squash commit and the changelog entry.
+- PR descriptions follow the template: What, Why and How, with no "Test plan" section.
+- A PR that changes the UI must show before and after screenshots under a "Screenshots" heading; other PRs leave it out. Take "before" from `main` and "after" from your branch in `vp dev`, with the same save from `test-data/saves/` loaded. Push the images to an orphan branch named `pr-assets/<topic>` (see `pr-assets/page-content-width`) and link their `raw.githubusercontent.com` URLs. Never commit images to the feature branch, and never delete an asset branch: old PR descriptions point at it. [AGENTS.md](AGENTS.md#screenshots-in-pr-descriptions) has the commands.
 - Code style is whatever `vp check --fix` produces: no semicolons, single quotes.
 - Parser changes must keep the round-trip test passing on every fixture (the last command above).
 - New editors go through `worker/model.ts`: add a view model, an `Edit` variant and its `applyEdit` case, and make sure undo restores it.

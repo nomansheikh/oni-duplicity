@@ -9,3 +9,7 @@
 ## How
 
 <!-- The approach and any decisions a reviewer should know about. -->
+
+## Screenshots
+
+<!-- Required for UI changes: before (main) and after (this branch), hosted on a pr-assets/<topic> branch. Delete this section otherwise. -->
