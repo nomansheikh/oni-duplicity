@@ -17,13 +17,13 @@ catalog:
   '@fontsource/rajdhani': ^5.2.0
   '@oni-duplicity/game-data': workspace:*
   '@oni-duplicity/save-parser': workspace:*
-  '@onimaxxing/worldgen': 0.33.4
-  '@playwright/test': ^1.65.0
-  '@tailwindcss/vite': ^4.3.4
+  '@onimaxxing/worldgen': 0.33.6
+  '@playwright/test': ^1.65.1
+  '@tailwindcss/vite': ^4.3.5
   '@tanstack/react-table': ^9.2.4
   '@tanstack/react-virtual': ^3.14.25
   '@testing-library/react': ^16.3.3
-  '@testing-library/user-event': ^14.6.8
+  '@testing-library/user-event': ^14.6.13
   '@types/node': ^26
   class-variance-authority: ^0.7.1
   cmdk: ^1.1.1
@@ -31,10 +31,10 @@ catalog:
   comlink: ^4.4.2
   fflate: ^0.8.3
   happy-dom: ^21.0.4
-  lucide-react: ^1.70.0
+  lucide-react: ^1.76.0
   radix-ui: ^1.8.1
   react-oni-duplicant: 0.1.3
-  recharts: 3.10.1
+  recharts: 3.11.0
   shadcn: ^4.23.0
   sonner: ^2.0.8
   tailwindcss: ^4.3.3
@@ -42,8 +42,8 @@ catalog:
   typescript: ^7.0.2
   vaul: ^1.1.2
   vite: npm:@voidzero-dev/vite-plus-core@1.5.0
-  vite-plus: 1.5.0
-  wrangler: 4.158.0
+  vite-plus: 1.7.0
+  wrangler: 4.165.0
   zod: ^4.6.7
 overrides:
   vite@*: 'catalog:'
