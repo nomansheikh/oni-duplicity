@@ -149,13 +149,19 @@ test('mass edits stop at the most the game keeps per chunk', () => {
   }
 })
 
-test.each(fixtures)('every spawnable material in %s spawns and re-reads', (path) => {
-  const save = load(path)
-  const spawnable = listMaterials(save).filter((m) => !m.spawnRefusal)
-  expect(spawnable.length).toBeGreaterThan(0)
-  const before = new Map(spawnable.map((m) => [m.id, totalMass(save, m.id)]))
-  for (const m of spawnable)
-    applyEdit(save, { type: 'spawnDebris', elementId: m.id, mass: 100, kelvin: 300 })
-  const reread = roundTrip(save)
-  for (const m of spawnable) expect(totalMass(reread, m.id)).toBeCloseTo(before.get(m.id)! + 100, 1)
-})
+// The full-tier saves are up to 40 MB: parsing, writing and re-reading one takes about a minute on CI.
+test.each(fixtures)(
+  'every spawnable material in %s spawns and re-reads',
+  { timeout: 180_000 },
+  (path) => {
+    const save = load(path)
+    const spawnable = listMaterials(save).filter((m) => !m.spawnRefusal)
+    expect(spawnable.length).toBeGreaterThan(0)
+    const before = new Map(spawnable.map((m) => [m.id, totalMass(save, m.id)]))
+    for (const m of spawnable)
+      applyEdit(save, { type: 'spawnDebris', elementId: m.id, mass: 100, kelvin: 300 })
+    const reread = roundTrip(save)
+    for (const m of spawnable)
+      expect(totalMass(reread, m.id)).toBeCloseTo(before.get(m.id)! + 100, 1)
+  },
+)
