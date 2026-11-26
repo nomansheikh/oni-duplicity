@@ -13,6 +13,7 @@ import { fmt, fmtMass, toCelsius } from '@/lib/format'
 import type { Edit, MaterialView } from '@/worker/model'
 import { BulkEdit } from './bulk-edit'
 import { DeleteDialog } from './delete-dialog'
+import { SpawnPanel } from './spawn-panel'
 import { ItemsTable } from './items-table'
 import { StateBadge } from './state-badge'
 import { useMaterialItems } from './use-material-items'
@@ -70,6 +71,7 @@ export function MaterialSheet({
                 factor={factor}
                 setFactor={setFactor}
               />
+              <SpawnPanel key={material.id} material={material} onEdit={onEdit} />
               <FieldDescription>
                 Stored items keep their container; loose debris can be deleted.
               </FieldDescription>

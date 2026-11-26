@@ -39,6 +39,7 @@ export function editTarget(edit: Edit): ChangeTarget {
       return { category: 'research', key: '*' }
     case 'setMaterialTemperature':
     case 'scaleMaterialMass':
+    case 'spawnDebris':
       return { category: 'material', key: edit.elementId }
     case 'rawSet':
     case 'rawRemove':

@@ -39,12 +39,14 @@ export function snapshot(save: SaveGame, edit: Edit): () => void {
     edit.type === 'deleteObject' ||
     edit.type === 'deleteDebris' ||
     edit.type === 'cloneObject' ||
-    edit.type === 'cloneDuplicant'
+    edit.type === 'cloneDuplicant' ||
+    edit.type === 'spawnDebris'
   const groups = structural ? save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] })) : []
   const settings = structural ? cloneValue(save.settings) : null
-  // Changing a geyser's type moves it between groups, and may add or drop a group.
+  // Changing a geyser's type moves it between groups, and may add or drop a group; spawning
+  // may add the element's loose group.
   const layout =
-    edit.type === 'setGeyserType'
+    edit.type === 'setGeyserType' || edit.type === 'spawnDebris'
       ? {
           all: [...save.gameObjects],
           lists: save.gameObjects.map((g) => ({ g, list: [...g.gameObjects] })),

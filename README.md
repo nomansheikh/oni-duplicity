@@ -20,7 +20,7 @@ It is a from-scratch successor to [RoboPhred/oni-duplicity](https://github.com/R
   - for everyone at once: relieve stress, heal and fill needs, master every skill, set every attribute.
 - **Critters:** tame or make wild, set age, fertility and calories, clone or delete.
 - **Geysers, vents and volcanoes:** rename, and change output, eruption and activity timing within what the game can roll for each type, with the resulting rates shown live.
-- **Materials:** totals per element across debris and storage; set every temperature, multiply every mass, edit or delete single items.
+- **Materials:** totals per element across debris and storage; set every temperature, multiply every mass, edit or delete single items, and spawn more of any solid or liquid the colony already has at the printing pod (experimental).
 - **Research:** mark techs as researched, or research everything.
 - **Space:** rename asteroids and mark them discovered; list starmap destinations.
 - **Game settings:** difficulty and custom game settings.
